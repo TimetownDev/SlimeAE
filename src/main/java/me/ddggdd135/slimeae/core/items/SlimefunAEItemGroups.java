@@ -9,7 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 public class SlimefunAEItemGroups {
-    public static final ItemStack MAIN_ITEM_GROUP_CURSOR = new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}能源与运用");
+    public static final ItemStack MAIN_ITEM_GROUP_CURSOR = new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}能源与应用");
     public static final ItemStack MACHINE_CURSOR = new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器");
     public static final MainItemGroup MAIN_ITEM_GROUP = new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_CURSOR);
     public static final DummyItemGroup MACHINE = new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), MACHINE_CURSOR);

@@ -19,7 +19,7 @@ public class NetworkData {
         }
         return null;
     }
-    public NetworkInfo refreshNetwork(Location controller) {;
+    public NetworkInfo refreshNetwork(Location controller) {
         BlockDataController blockDataController = Slimefun.getDatabaseManager().getBlockDataController();
         SlimefunBlockData controllerBlockData = blockDataController.getBlockData(controller);
         if (!(controllerBlockData != null && SlimefunItem.getById(controllerBlockData.getSfId()) instanceof IMEController<?>)) return null;
@@ -40,6 +40,7 @@ public class NetworkData {
         }
         else {
             info = new NetworkInfo(controller, children);
+            AllNetworkData.add(info);
         }
         return info;
     }

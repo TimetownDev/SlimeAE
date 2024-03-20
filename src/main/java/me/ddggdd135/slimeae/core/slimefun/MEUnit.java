@@ -68,7 +68,11 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, In
                 BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                 if (inv == null) return;
                 for (ItemStack itemStack : itemStacks) {
-                    inv.pushItem(itemStack, Slots);
+                    ItemStack result = inv.pushItem(itemStack, Slots);
+                    if (result != null && !result.getType().isAir())
+                        itemStack.setAmount(result.getAmount());
+                    else
+                        itemStack.setAmount(0);
                 }
             }
 
@@ -92,13 +96,20 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, In
                         if (item == null || item.getType().isAir()) continue;
                         if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                             if (item.getAmount() > amounts.get(itemStack)) {
-                                int rest =item.getAmount() - amounts.get(itemStack);
-                                item.setAmount(rest);
                                 found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
+                                int rest = item.getAmount() - amounts.get(itemStack);
+                                item.setAmount(rest);
                                 break;
                             } else {
-                                inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                 found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
+                                inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
+                                int rest = amounts.get(itemStack) - item.getAmount();
+                                if (rest != 0)
+                                    amounts.put(itemStack, rest);
+                                else {
+                                    amounts.remove(itemStack);
+                                    break;
+                                }
                             }
                         }
                     }
