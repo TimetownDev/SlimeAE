@@ -73,9 +73,7 @@ public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>,
                             ItemStack toPush = itemStack.clone();
                             toPush.setAmount(amount - setting.getAmount());
                             networkStorage.pushItem(toPush);
-                            if (toPush.getAmount() != 0) {
-                                itemStack.setAmount(setting.getAmount() + toPush.getAmount());
-                            }
+                            itemStack.setAmount(setting.getAmount() + toPush.getAmount());
                             continue;
                         }
 
