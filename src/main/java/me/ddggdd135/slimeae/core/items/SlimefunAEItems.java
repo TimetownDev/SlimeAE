@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.core.items;
 
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -69,10 +70,79 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(Material.SEA_LANTERN),
             "&f合成监视器"
     );
+    public static final SlimefunItemStack ENERGY_CELL = new SlimefunItemStack(
+            "ENERGY_CELL",
+            new AdvancedCustomItemStack(Material.AMETHYST_BLOCK),
+            "&f能源元件"
+    );
+    public static final SlimefunItemStack INSCRIBER = new SlimefunItemStack(
+            "INSCRIBER",
+            new AdvancedCustomItemStack(Material.ANVIL),
+            "&f压印机"
+    );
+    public static final SlimefunItemStack CHARGER = new SlimefunItemStack(
+            "CHARGER",
+            new AdvancedCustomItemStack(Material.LECTERN),
+            "&f充能器"
+    );
+    public static final SlimefunItemStack ME_IMPORT_BUS = new SlimefunItemStack(
+            "ME_IMPORT_BUS",
+            new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS),
+            "&fME输入总线"
+    );
+    public static final SlimefunItemStack ME_EXPORT_BUS = new SlimefunItemStack(
+            "ME_EXPORT_BUS",
+            new AdvancedCustomItemStack(Material.RED_STAINED_GLASS),
+            "&fME输出总线"
+    );
+    public static final SlimefunItemStack ME_STORAGE_BUS = new SlimefunItemStack(
+            "ME_STORAGE_BUS",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS),
+            "&fME存储总线"
+    );
+    public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
+            "ME_CRAFTING_TERMINAL",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS),
+            "&fME合成终端"
+    );
+    public static final SlimefunItemStack ME_PATTERN_TERMINAL = new SlimefunItemStack(
+            "ME_PATTERN_TERMINAL",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS),
+            "&fME样板终端"
+    );
+    public static final SlimefunItemStack ME_TERMINAL = new SlimefunItemStack(
+            "ME_TERMINAL",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS),
+            "&fME终端"
+    );
+    public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
+            "ENERGY_ACCEPTOR",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS),
+            "&f能源接收器"
+    );
 
     public static void onSetup(SlimeAEPlugin plugin) {
         new MEController(SlimefunAEItemGroups.MACHINE, ME_CONTROLLER, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new MEUnit(SlimefunAEItemGroups.MACHINE, ME_UNIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new MEInterface(SlimefunAEItemGroups.MACHINE, ME_INTERFACE, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_DRIVER, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, MOLECULAR_ASSEMBLER, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ONE_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, FOUR_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, SIXSTEEN_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, SIXTY_FOUR_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, CRAFTING_CO_PROCESSING_UNIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, CRAFTING_UNIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, CRAFTING_MONITOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ENERGY_CELL, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, INSCRIBER, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, CHARGER, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_IMPORT_BUS, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_EXPORT_BUS, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_STORAGE_BUS, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_CRAFTING_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_PATTERN_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ENERGY_ACCEPTOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
     }
 }
