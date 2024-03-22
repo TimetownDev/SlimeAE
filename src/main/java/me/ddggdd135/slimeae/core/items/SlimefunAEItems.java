@@ -8,6 +8,7 @@ import me.ddggdd135.slimeae.core.slimefun.MEController;
 import me.ddggdd135.slimeae.core.slimefun.MEInterface;
 import me.ddggdd135.slimeae.core.slimefun.MEUnit;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
+import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,12 +27,12 @@ public class SlimefunAEItems {
                     "{#Vanilla_Ice}ME接口"));
     public static final SlimefunItemStack ME_DRIVER = new SlimefunItemStack(
             "ME_DRIVE",
-            new AdvancedCustomItemStack(Material.CHISELED_BOOKSHELF),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.CHISELED_BOOKSHELF : Material.BOOKSHELF),
             "&fME驱动器"
     );
     public static final SlimefunItemStack MOLECULAR_ASSEMBLER = new SlimefunItemStack(
             "MOLECULAR_ASSEMBLER",
-            new AdvancedCustomItemStack(Material.TINTED_GLASS),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TINTED_GLASS : Material.GLASS),
             "&f分子装配室"
     );
     public static final SlimefunItemStack ONE_K_CRAFTING_STORAGE = new SlimefunItemStack(

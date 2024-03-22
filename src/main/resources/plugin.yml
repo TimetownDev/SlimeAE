@@ -1,6 +1,6 @@
 name: SlimeAEPlugin
 version: '${project.version}'
 main: me.ddggdd135.slimeae.SlimeAEPlugin
-api-version: '1.18'
+api-version: '1.16'
 authors: [Ddggdd135]
 depend: [Slimefun, CMILib]
