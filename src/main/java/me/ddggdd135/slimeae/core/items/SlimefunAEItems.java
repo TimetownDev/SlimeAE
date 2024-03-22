@@ -160,17 +160,17 @@ public class SlimefunAEItems {
     );
     public static final SlimefunItemStack LOGIC_PROCESSOR = new SlimefunItemStack(
             "LOGIC_PROCESSOR",
-            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
             "{#Sky_Blue}逻辑处理器"
     );
     public static final SlimefunItemStack CALCULATION_PROCESSOR = new SlimefunItemStack(
             "CALCULATION_PROCESSOR",
-            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
             "{#Sky_Blue}运算处理器"
     );
     public static final SlimefunItemStack ENGINEERING_PROCESSOR = new SlimefunItemStack(
             "ENGINEERING_PROCESSOR",
-            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
             "{#Sky_Blue}工程处理器"
     );
     public static final SlimefunItemStack PRINTED_LOGIC_CIRCUIT = new SlimefunItemStack(
@@ -190,7 +190,7 @@ public class SlimefunAEItems {
     );
     public static final SlimefunItemStack ME_STORAGE_HOUSING = new SlimefunItemStack(
             "ME_STORAGE_HOUSING",
-            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
             "{#Bright_Gray}ME存储外壳"
     );
 
