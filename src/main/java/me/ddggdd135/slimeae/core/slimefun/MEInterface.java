@@ -31,9 +31,10 @@ import org.bukkit.inventory.ItemStack;
 import javax.annotation.Nonnull;
 
 public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>, InventoryBlock {
-    public static final int[] Boarder_Slots = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 27, 28, 29, 30, 31, 32, 33, 34, 35, 45, 46, 47, 48, 49, 50, 51, 52, 53};
-    public static final int[] Setting_Slots = new int[] {9, 10, 11, 12, 13, 14, 15, 16, 17};
-    public static final int[] Item_Slots = new int[] {18, 19, 20, 21, 22, 23, 24, 25, 26};
+    public static final int[] Boarder_Slots = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 27, 28, 29, 30, 31, 32, 33, 34, 35, 45, 46, 47, 48, 49, 50, 51, 52, 53};
+    public static final int[] Setting_Slots = new int[]{9, 10, 11, 12, 13, 14, 15, 16, 17};
+    public static final int[] Item_Slots = new int[]{18, 19, 20, 21, 22, 23, 24, 25, 26};
+
     public MEInterface(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this, this.getItem().getItemMeta().getDisplayName(), this::constructMenu);
@@ -91,7 +92,8 @@ public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>,
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
+    }
 
     @Nonnull
     private BlockBreakHandler onBlockBreak() {
@@ -122,12 +124,10 @@ public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>,
                         if (itemStack != null && !itemStack.getType().isAir()) {
                             inventory.setItem(slot, itemStack);
                         }
-                    }
-                    else {
+                    } else {
                         if (itemStack == null || itemStack.getType().isAir()) {
                             inventory.setItem(slot, MenuItems.Setting);
-                        }
-                        else {
+                        } else {
                             inventory.setItem(slot, itemStack);
                         }
                     }

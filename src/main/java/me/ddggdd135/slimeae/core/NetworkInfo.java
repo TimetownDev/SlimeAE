@@ -5,8 +5,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.StorageCollection;
-import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
+import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import org.bukkit.Location;
 
@@ -20,9 +20,11 @@ public class NetworkInfo implements IDisposable {
     public Location getController() {
         return controller;
     }
+
     public Set<Location> getChildren() {
         return children;
     }
+
     public NetworkInfo(Location controller) {
         this.controller = controller;
     }

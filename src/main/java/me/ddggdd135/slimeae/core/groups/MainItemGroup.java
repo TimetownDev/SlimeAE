@@ -27,6 +27,7 @@ public class MainItemGroup extends FlexItemGroup {
             45, 46, 47, 48, 49, 50, 51, 52, 53
     };
     private static final int GUIDE_BACK = 1;
+
     public MainItemGroup(NamespacedKey key, ItemStack item) {
         super(key, item);
     }
@@ -83,6 +84,7 @@ public class MainItemGroup extends FlexItemGroup {
             nextSlot++;
         }
     }
+
     @ParametersAreNonnullByDefault
     public boolean openPage(PlayerProfile profile, ItemGroup itemGroup, SlimefunGuideMode mode, int page) {
         profile.getGuideHistory().add(this, 1);

@@ -17,6 +17,7 @@ public class SlimefunAEItemGroups {
             "{#Sky_Blue}机器");
     public static final MainItemGroup MAIN_ITEM_GROUP = new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_CURSOR);
     public static final DummyItemGroup MACHINE = new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), MACHINE_CURSOR);
+
     public static void onSetup(SlimeAEPlugin plugin) {
         MAIN_ITEM_GROUP.register(plugin);
         MACHINE.register(plugin);

@@ -13,16 +13,19 @@ import java.util.Set;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
+
     public NetworkInfo getNetworkInfo(Location location) {
         for (NetworkInfo info : AllNetworkData) {
             if (info.getChildren().contains(location)) return info;
         }
         return null;
     }
+
     public NetworkInfo refreshNetwork(Location controller) {
         BlockDataController blockDataController = Slimefun.getDatabaseManager().getBlockDataController();
         SlimefunBlockData controllerBlockData = blockDataController.getBlockData(controller);
-        if (!(controllerBlockData != null && SlimefunItem.getById(controllerBlockData.getSfId()) instanceof IMEController<?>)) return null;
+        if (!(controllerBlockData != null && SlimefunItem.getById(controllerBlockData.getSfId()) instanceof IMEController<?>))
+            return null;
         NetworkInfo info = getNetworkInfo(controller);
         Set<Location> children = NetworkUtils.scan(controller.getBlock());
         for (Location location : children) {
@@ -37,8 +40,7 @@ public class NetworkData {
         if (info != null) {
             info.getChildren().clear();
             info.getChildren().addAll(children);
-        }
-        else {
+        } else {
             info = new NetworkInfo(controller, children);
             AllNetworkData.add(info);
         }

@@ -2,7 +2,6 @@ package me.ddggdd135.slimeae.utils;
 
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.ddggdd135.slimeae.api.ItemRequest;
-import me.ddggdd135.slimeae.api.ItemStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,6 +18,7 @@ public class ItemUtils {
         itemStack.setAmount(1);
         return itemStack;
     }
+
     @Nonnull
     public static ItemStack[] createItems(@Nonnull ItemStack template, int amount) {
         List<ItemStack> itemStacks = new ArrayList<>();
@@ -29,8 +29,7 @@ public class ItemUtils {
                 itemStack.setAmount(rest);
                 itemStacks.add(itemStack);
                 break;
-            }
-            else {
+            } else {
                 rest -= template.getMaxStackSize();
                 ItemStack itemStack = template.clone();
                 itemStack.setAmount(template.getMaxStackSize());
@@ -39,6 +38,7 @@ public class ItemUtils {
         }
         return itemStacks.toArray(new ItemStack[0]);
     }
+
     @Nonnull
     public static ItemStack[] createItems(@Nonnull Map<ItemStack, Integer> storage) {
         List<ItemStack> itemStacks = new ArrayList<>();
@@ -56,6 +56,7 @@ public class ItemUtils {
         }
         return itemStacks.toArray(new ItemStack[0]);
     }
+
     @Nonnull
     public static ItemStack[] trimItems(@Nonnull ItemStack[] itemStacks) {
         List<ItemStack> itemStackList = new ArrayList<>();
@@ -66,13 +67,15 @@ public class ItemUtils {
         }
         return itemStackList.toArray(new ItemStack[0]);
     }
-    public static boolean contains(@Nonnull Map<ItemStack, Integer> storage,@Nonnull ItemRequest[] requests) {
+
+    public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
             ItemStack template = ItemUtils.createTemplateItem(request.getItemStack());
             if (!storage.containsKey(template) || storage.get(template) < request.getAmount()) return false;
         }
         return true;
     }
+
     @Nonnull
     public static ItemRequest[] createRequests(@Nonnull Map<ItemStack, Integer> itemStacks) {
         List<ItemRequest> requests = new ArrayList<>();
@@ -81,6 +84,7 @@ public class ItemUtils {
         }
         return requests.toArray(new ItemRequest[0]);
     }
+
     @Nonnull
     public static Map<ItemStack, Integer> getAmounts(@Nonnull ItemStack[] itemStacks) {
         Map<ItemStack, Integer> storage = new HashMap<>();
@@ -88,21 +92,20 @@ public class ItemUtils {
             ItemStack template = ItemUtils.createTemplateItem(itemStack);
             if (storage.containsKey(template)) {
                 storage.put(template, storage.get(template) + itemStack.getAmount());
-            }
-            else {
+            } else {
                 storage.put(template, itemStack.getAmount());
             }
         }
         return storage;
     }
+
     @Nonnull
     public static Map<ItemStack, Integer> takeItems(@Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
         Map<ItemStack, Integer> storage = new HashMap<>(source);
         for (ItemStack itemStack : toTake.keySet()) {
             if (storage.containsKey(itemStack)) {
                 storage.put(itemStack, storage.get(itemStack) - toTake.get(itemStack));
-            }
-            else {
+            } else {
                 storage.put(itemStack, -toTake.get(itemStack));
             }
         }
@@ -115,18 +118,19 @@ public class ItemUtils {
         for (ItemStack itemStack : toAdd.keySet()) {
             if (storage.containsKey(itemStack)) {
                 storage.put(itemStack, storage.get(itemStack) + toAdd.get(itemStack));
-            }
-            else {
+            } else {
                 storage.put(itemStack, toAdd.get(itemStack));
             }
         }
         return storage;
     }
+
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
         for (ItemStack itemStack : storage.keySet()) {
             if (storage.get(itemStack) <= 0) storage.remove(itemStack);
         }
     }
+
     public static boolean contains(BlockMenu inv, int[] slots, ItemStack[] itemStacks) {
         Map<ItemStack, Integer> toTake = getAmounts(itemStacks);
 

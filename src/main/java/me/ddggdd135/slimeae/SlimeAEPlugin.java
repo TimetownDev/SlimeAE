@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
     private NetworkData networkData = new NetworkData();
+
     @Override
     public void onEnable() {
         // Plugin startup logic

@@ -35,13 +35,14 @@ public class MEController extends SlimefunItem implements IMEController<MEContro
             public boolean isSynchronized() {
                 return false;
             }
+
             @Override
             public void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
                 if (info != null) {
                     info.getChildren().forEach(x -> {
                         SlimefunBlockData blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(x);
-                        ((IMEObject<?>)SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
+                        ((IMEObject<?>) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
                     });
                 }
             }

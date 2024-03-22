@@ -11,15 +11,19 @@ import java.util.Map;
 
 public class StorageCollection implements IStorage {
     private List<IStorage> storages = new ArrayList<>();
+
     public StorageCollection(IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));
     }
+
     public void addStorage(IStorage storage) {
         storages.add(storage);
     }
+
     public boolean removeStorage(IStorage storage) {
         return storages.remove(storage);
     }
+
     @Override
     public void pushItem(ItemStack[] itemStacks) {
         for (IStorage storage : storages) {
@@ -42,8 +46,7 @@ public class StorageCollection implements IStorage {
         for (ItemRequest request : requests) {
             if (rest.containsKey(request.getItemStack())) {
                 rest.put(request.getItemStack(), rest.get(request.getItemStack()) + request.getAmount());
-            }
-            else {
+            } else {
                 rest.put(request.getItemStack(), request.getAmount());
             }
         }
@@ -65,8 +68,7 @@ public class StorageCollection implements IStorage {
             for (ItemStack itemStack : tmp.keySet()) {
                 if (result.containsKey(itemStack)) {
                     result.put(itemStack, result.get(itemStack) + tmp.get(itemStack));
-                }
-                else {
+                } else {
                     result.put(itemStack, tmp.get(itemStack));
                 }
             }
