@@ -23,7 +23,7 @@ public class SlimefunAEItems {
                     "{#Starship}ME单元"));
     public static final SlimefunItemStack ME_INTERFACE = new SlimefunItemStack(
             "ME_INTERFACE",
-            new AdvancedCustomItemStack(Material.TARGET,
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TARGET : Material.CHISELED_STONE_BRICKS,
                     "{#Vanilla_Ice}ME接口"));
     public static final SlimefunItemStack ME_DRIVER = new SlimefunItemStack(
             "ME_DRIVE",
@@ -121,6 +121,80 @@ public class SlimefunAEItems {
             "&f能源接收器"
     );
 
+
+    //MATERIAL
+    public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
+            "CRYSTAL_CERTUS_QUARTZ",
+            new AdvancedCustomItemStack(Material.QUARTZ),
+            "{#Zumthor}赛特斯石英水晶"
+    );
+    public static final SlimefunItemStack CHARGED_CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
+            "CHARGED_CRYSTAL_CERTUS_QUARTZ",
+            new AdvancedCustomItemStack(Material.QUARTZ),
+            "{#Zumthor}充能赛特斯石英水晶"
+    );
+    public static final SlimefunItemStack CRYSTAL_FLUIX = new SlimefunItemStack(
+            "CRYSTAL_FLUIX",
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ),
+            "{#Fuchsia_Pink}福鲁伊克斯水晶"
+    );
+    public static final SlimefunItemStack CERTUS_QUARTZ_DUST = new SlimefunItemStack(
+            "CERTUS_QUARTZ_DUST",
+            new AdvancedCustomItemStack(Material.GLOWSTONE_DUST),
+            "{#Zumthor}赛特斯石英粉"
+    );
+    public static final SlimefunItemStack FLUIX_DUST = new SlimefunItemStack(
+            "FLUIX_DUST",
+            new AdvancedCustomItemStack(Material.BLAZE_POWDER),
+            "{#Fuchsia_Pink}福鲁伊克斯粉"
+    );
+    public static final SlimefunItemStack QUARTZ_DUST = new SlimefunItemStack(
+            "QUARTZ_DUST",
+            new AdvancedCustomItemStack(Material.SUGAR),
+            "{#ffffff}下界石英粉"
+    );
+    public static final SlimefunItemStack SKY_STONE_DUST = new SlimefunItemStack(
+            "SKY_STONE_DUST",
+            new AdvancedCustomItemStack(Material.GUNPOWDER),
+            "{#Bright_Gray}陨石粉"
+    );
+    public static final SlimefunItemStack LOGIC_PROCESSOR = new SlimefunItemStack(
+            "LOGIC_PROCESSOR",
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            "{#Sky_Blue}逻辑处理器"
+    );
+    public static final SlimefunItemStack CALCULATION_PROCESSOR = new SlimefunItemStack(
+            "CALCULATION_PROCESSOR",
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            "{#Sky_Blue}运算处理器"
+    );
+    public static final SlimefunItemStack ENGINEERING_PROCESSOR = new SlimefunItemStack(
+            "ENGINEERING_PROCESSOR",
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            "{#Sky_Blue}工程处理器"
+    );
+    public static final SlimefunItemStack PRINTED_LOGIC_CIRCUIT = new SlimefunItemStack(
+            "PRINTED_LOGIC_CIRCUIT",
+            new AdvancedCustomItemStack(Material.ORANGE_DYE),
+            "{#Sky_Blue}逻辑电路板"
+    );
+    public static final SlimefunItemStack PRINTED_CALCULATION_CIRCUIT = new SlimefunItemStack(
+            "PRINTED_CALCULATION_CIRCUIT",
+            new AdvancedCustomItemStack(Material.LIGHT_BLUE_DYE),
+            "{#Sky_Blue}运算电路板"
+    );
+    public static final SlimefunItemStack PRINTED_ENGINEERING_CIRCUIT = new SlimefunItemStack(
+            "PRINTED_ENGINEERING_CIRCUIT",
+            new AdvancedCustomItemStack(Material.BLUE_DYE),
+            "{#Sky_Blue}工程电路板"
+    );
+    public static final SlimefunItemStack ME_STORAGE_HOUSING = new SlimefunItemStack(
+            "ME_STORAGE_HOUSING",
+            new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_19_R3) ? Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL),
+            "{#Bright_Gray}ME存储外壳"
+    );
+
+
     public static void onSetup(SlimeAEPlugin plugin) {
         new MEController(SlimefunAEItemGroups.MACHINE, ME_CONTROLLER, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new MEUnit(SlimefunAEItemGroups.MACHINE, ME_UNIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
@@ -144,5 +218,21 @@ public class SlimefunAEItems {
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_PATTERN_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ENERGY_ACCEPTOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_DUST, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FLUIX_DUST, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, QUARTZ_DUST, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, SKY_STONE_DUST, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, LOGIC_PROCESSOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CALCULATION_PROCESSOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ENGINEERING_PROCESSOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_LOGIC_CIRCUIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_CALCULATION_CIRCUIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_ENGINEERING_CIRCUIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_STORAGE_HOUSING, RecipeType.NULL, new ItemStack[0]).register(plugin);
+
     }
 }
