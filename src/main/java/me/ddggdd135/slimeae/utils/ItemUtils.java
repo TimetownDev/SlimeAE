@@ -127,7 +127,7 @@ public class ItemUtils {
 
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
         for (ItemStack itemStack : storage.keySet()) {
-            if (storage.get(itemStack) <= 0) storage.remove(itemStack);
+            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0) storage.remove(itemStack);
         }
     }
 

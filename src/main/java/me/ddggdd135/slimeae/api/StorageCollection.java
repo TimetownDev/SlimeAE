@@ -54,7 +54,11 @@ public class StorageCollection implements IStorage {
         for (IStorage storage : storages) {
             ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
             rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
+            ItemUtils.trim(rest);
             found.addItem(itemStacks);
+            if (rest.keySet().isEmpty()) {
+                break;
+            }
         }
 
         return found.toItemStacks();
