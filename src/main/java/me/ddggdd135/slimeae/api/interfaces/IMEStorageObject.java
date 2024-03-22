@@ -4,8 +4,9 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import org.bukkit.block.Block;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IMEStorageObject<TSelf extends SlimefunItem> extends IMEObject<TSelf> {
-    @Nonnull
+    @Nullable
     IStorage getStorage(Block block);
 }

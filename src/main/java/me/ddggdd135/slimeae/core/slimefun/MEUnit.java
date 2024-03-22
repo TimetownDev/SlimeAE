@@ -22,6 +22,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, In
     }
 
     @Override
-    @Nonnull
+    @Nullable
     public IStorage getStorage(Block block) {
         return new IStorage() {
             @Override

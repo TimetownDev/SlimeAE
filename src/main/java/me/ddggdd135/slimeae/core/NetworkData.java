@@ -4,7 +4,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataControlle
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
+import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
+import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 
@@ -44,6 +47,19 @@ public class NetworkData {
             info = new NetworkInfo(controller, children);
             AllNetworkData.add(info);
         }
+
+        StorageCollection networkStorage = new StorageCollection();
+        for (Location location : children) {
+            SlimefunBlockData blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
+            SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
+            if (slimefunItem instanceof IMEStorageObject<?> IMEStorageObject) {
+                IStorage storage = IMEStorageObject.getStorage(location.getBlock());
+                if (storage != null)
+                    networkStorage.addStorage(storage);
+            }
+        }
+        info.setStorage(networkStorage);
+
         return info;
     }
 }

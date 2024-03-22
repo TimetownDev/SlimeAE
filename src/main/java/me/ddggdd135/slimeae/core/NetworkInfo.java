@@ -17,6 +17,8 @@ public class NetworkInfo implements IDisposable {
     private Location controller;
     private Set<Location> children = new HashSet<>();
 
+    private IStorage storage = new StorageCollection();
+
     public Location getController() {
         return controller;
     }
@@ -35,15 +37,11 @@ public class NetworkInfo implements IDisposable {
     }
 
     public IStorage getStorage() {
-        StorageCollection storageCollection = new StorageCollection();
-        for (Location location : children) {
-            SlimefunBlockData blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
-            SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-            if (slimefunItem instanceof IMEStorageObject<?> IMEStorageObject) {
-                storageCollection.addStorage(IMEStorageObject.getStorage(location.getBlock()));
-            }
-        }
-        return storageCollection;
+        return storage;
+    }
+
+    public void setStorage(IStorage storage) {
+        this.storage = storage;
     }
 
     @Override
