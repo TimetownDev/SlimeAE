@@ -1,7 +1,14 @@
 package me.ddggdd135.slimeae.utils;
 
+import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
+import de.tr7zw.changeme.nbtapi.NBTContainer;
+import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.ddggdd135.slimeae.api.ItemRequest;
+import me.ddggdd135.slimeae.api.ItemStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.inventory.ItemStack;
 
@@ -127,7 +134,8 @@ public class ItemUtils {
 
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
         for (ItemStack itemStack : storage.keySet()) {
-            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0) storage.remove(itemStack);
+            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0)
+                storage.remove(itemStack);
         }
     }
 
@@ -154,4 +162,27 @@ public class ItemUtils {
         return founded;
     }
 
+    @Nonnull
+    public static Map<ItemStack, Integer> toStorage(NBTCompoundList nbt) {
+        Map<ItemStack, Integer> result = new HashMap<>();
+        for (ReadWriteNBT compound : nbt) {
+            ItemStack itemStack = compound.getItemStack("item");
+            int amount = compound.getInteger("amount");
+            result.put(itemStack, amount);
+        }
+        return result;
+    }
+
+
+    @Nonnull
+    public static NBTCompoundList toNBT(@Nonnull Map<ItemStack, Integer> storage) {
+        NBTContainer container = new NBTContainer();
+        NBTCompoundList list = container.getCompoundList("items");
+        for (ItemStack itemStack : storage.keySet()) {
+            ReadWriteNBT compound = list.addCompound();
+            compound.setItemStack("item", itemStack);
+            compound.setInteger("amount", storage.get(itemStack));
+        }
+        return list;
+    }
 }
