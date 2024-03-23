@@ -17,6 +17,8 @@
     </properties>
 
     <build>
+        <!-- The default goal for compiling is "clean package" -->
+        <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
