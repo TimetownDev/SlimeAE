@@ -1,7 +1,9 @@
 package me.ddggdd135.slimeae.api;
 
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -21,6 +23,10 @@ public class ItemStorage implements IStorage {
 
     public ItemStorage() {
 
+    }
+
+    public ItemStorage(NBTCompoundList nbt) {
+        storage = ItemUtils.toStorage(nbt);
     }
 
     public ItemStorage(ItemStack... itemStacks) {
@@ -105,5 +111,10 @@ public class ItemStorage implements IStorage {
     @Nonnull
     public ItemStack[] toItemStacks() {
         return ItemUtils.createItems(storage);
+    }
+
+    @Nonnull
+    public NBTCompoundList serialize() {
+        return ItemUtils.toNBT(storage);
     }
 }
