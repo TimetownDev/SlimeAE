@@ -50,6 +50,7 @@ public class StorageCollection implements IStorage {
                 rest.put(request.getItemStack(), request.getAmount());
             }
         }
+        ItemUtils.trim(rest);
 
         for (IStorage storage : storages) {
             ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
