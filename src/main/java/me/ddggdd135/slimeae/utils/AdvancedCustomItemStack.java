@@ -1,14 +1,13 @@
 package me.ddggdd135.slimeae.utils;
 
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
+import java.util.List;
+import java.util.function.Consumer;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.List;
-import java.util.function.Consumer;
 
 public class AdvancedCustomItemStack extends CustomItemStack {
     public AdvancedCustomItemStack(ItemStack item) {

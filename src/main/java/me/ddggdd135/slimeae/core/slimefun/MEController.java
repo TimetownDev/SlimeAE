@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.List;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -16,15 +17,14 @@ import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
-
 public class MEController extends SlimefunItem implements IMEController<MEController> {
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler(new BlockBreakHandler(true, true) {
             @Override
             public void onPlayerBreak(BlockBreakEvent blockBreakEvent, ItemStack itemStack, List<ItemStack> list) {
-                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(blockBreakEvent.getBlock().getLocation());
+                NetworkInfo info = SlimeAEPlugin.getNetworkData()
+                        .getNetworkInfo(blockBreakEvent.getBlock().getLocation());
                 if (info != null) {
                     info.dispose();
                 }
@@ -41,7 +41,9 @@ public class MEController extends SlimefunItem implements IMEController<MEContro
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
                 if (info != null) {
                     info.getChildren().forEach(x -> {
-                        SlimefunBlockData blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(x);
+                        SlimefunBlockData blockData = Slimefun.getDatabaseManager()
+                                .getBlockDataController()
+                                .getBlockData(x);
                         ((IMEObject<?>) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
                     });
                 }
@@ -50,7 +52,5 @@ public class MEController extends SlimefunItem implements IMEController<MEContro
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 }

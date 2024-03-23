@@ -7,6 +7,9 @@ import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuide;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -14,18 +17,10 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainItemGroup extends FlexItemGroup {
     public final List<DummyItemGroup> itemGroups = new ArrayList<>();
-    private static final int[] HEADER = new int[]{
-            0, 1, 2, 3, 4, 5, 6, 7, 8
-    };
-    private static final int[] FOOTER = new int[]{
-            45, 46, 47, 48, 49, 50, 51, 52, 53
-    };
+    private static final int[] HEADER = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    private static final int[] FOOTER = new int[] {45, 46, 47, 48, 49, 50, 51, 52, 53};
     private static final int GUIDE_BACK = 1;
 
     public MainItemGroup(NamespacedKey key, ItemStack item) {
@@ -71,9 +66,7 @@ public class MainItemGroup extends FlexItemGroup {
                 ChestMenuUtils.getBackButton(
                         player,
                         "",
-                        ChatColor.GRAY + Slimefun.getLocalization().getMessage(player, "guide.back.guide")
-                )
-        );
+                        ChatColor.GRAY + Slimefun.getLocalization().getMessage(player, "guide.back.guide")));
         menu.addMenuClickHandler(GUIDE_BACK, (player1, slot, itemStack, clickAction) -> {
             SlimefunGuide.openMainMenu(profile, mode, 1);
             return false;
@@ -96,10 +89,14 @@ public class MainItemGroup extends FlexItemGroup {
         itemGroups.add(itemGroup);
     }
 
-    public void createCursor(ChestMenu menu, ItemGroup itemGroup, Player player, PlayerProfile profile, SlimefunGuideMode mode, int slot) {
+    public void createCursor(
+            ChestMenu menu,
+            ItemGroup itemGroup,
+            Player player,
+            PlayerProfile profile,
+            SlimefunGuideMode mode,
+            int slot) {
         menu.replaceExistingItem(slot, itemGroup.getItem(player));
-        menu.addMenuClickHandler(slot, (player1, i1, itemStack1, clickAction) ->
-                openPage(profile, itemGroup, mode, 1)
-        );
+        menu.addMenuClickHandler(slot, (player1, i1, itemStack1, clickAction) -> openPage(profile, itemGroup, mode, 1));
     }
 }

@@ -1,19 +1,17 @@
 package me.ddggdd135.slimeae.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class StorageCollection implements IStorage {
-    @NonNull
-    private List<IStorage> storages;
+    @NonNull private List<IStorage> storages;
 
     public StorageCollection(@NonNull IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));
@@ -45,7 +43,7 @@ public class StorageCollection implements IStorage {
     public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
         Map<ItemStack, Integer> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
-        //init rest
+        // init rest
         for (ItemRequest request : requests) {
             if (rest.containsKey(request.getItemStack())) {
                 rest.put(request.getItemStack(), rest.get(request.getItemStack()) + request.getAmount());

@@ -1,9 +1,8 @@
 package me.ddggdd135.slimeae.utils;
 
-import net.Zrips.CMILib.Colors.CMIChatColor;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.Zrips.CMILib.Colors.CMIChatColor;
 
 public class ColorUtils {
     public static String[] translateAll(String... strings) {

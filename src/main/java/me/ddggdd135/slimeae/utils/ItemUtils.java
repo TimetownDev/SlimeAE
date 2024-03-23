@@ -5,16 +5,15 @@ import de.tr7zw.changeme.nbtapi.NBTContainer;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import me.ddggdd135.slimeae.api.ItemRequest;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import net.Zrips.CMILib.Items.CMIItemStack;
-import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import me.ddggdd135.slimeae.api.ItemRequest;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import net.Zrips.CMILib.Items.CMIItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public class ItemUtils {
     @Nonnull
@@ -105,7 +104,8 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static Map<ItemStack, Integer> takeItems(@Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
+    public static Map<ItemStack, Integer> takeItems(
+            @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
         Map<ItemStack, Integer> storage = new HashMap<>(source);
         for (ItemStack itemStack : toTake.keySet()) {
             if (storage.containsKey(itemStack)) {
@@ -118,7 +118,8 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static Map<ItemStack, Integer> addItems(@Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toAdd) {
+    public static Map<ItemStack, Integer> addItems(
+            @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toAdd) {
         Map<ItemStack, Integer> storage = new HashMap<>(source);
         for (ItemStack itemStack : toAdd.keySet()) {
             if (storage.containsKey(itemStack)) {

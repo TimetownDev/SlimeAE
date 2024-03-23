@@ -1,19 +1,17 @@
 package me.ddggdd135.slimeae.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class ItemStorage implements IStorage {
-    @NonNull
-    private Map<ItemStack, Integer> storage = new HashMap<>();
+    @NonNull private Map<ItemStack, Integer> storage = new HashMap<>();
 
     private void trim(@NonNull ItemStack template) {
         if (storage.containsKey(template) && storage.get(template) == 0) {
@@ -21,9 +19,7 @@ public class ItemStorage implements IStorage {
         }
     }
 
-    public ItemStorage() {
-
-    }
+    public ItemStorage() {}
 
     public ItemStorage(@NonNull ItemStack... itemStacks) {
         storage = ItemUtils.getAmounts(itemStacks);
@@ -69,8 +65,7 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    @NonNull
-    public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
+    @NonNull public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storage.containsKey(request.getItemStack())) {
@@ -91,8 +86,7 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    @NonNull
-    public Map<ItemStack, Integer> getStorage() {
+    @NonNull public Map<ItemStack, Integer> getStorage() {
         return new HashMap<>(storage);
     }
 

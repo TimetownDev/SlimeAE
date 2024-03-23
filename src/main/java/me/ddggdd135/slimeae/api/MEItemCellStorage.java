@@ -4,21 +4,22 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class MEItemCellStorage implements IStorage {
     @Nonnull
     private final NBTCompound nbt;
+
     @Nonnull
     private final ItemStack itemStack;
+
     private final int size;
     private int storaged;
 
@@ -57,7 +58,6 @@ public class MEItemCellStorage implements IStorage {
             compound.setItemStack("item", template);
             compound.setInteger("amount", amount);
         }
-
     }
 
     public MEItemCellStorage(@Nonnull ItemStack itemStack) {

@@ -1,14 +1,13 @@
 package me.ddggdd135.slimeae;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.annotation.Nonnull;
 
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
@@ -27,14 +26,12 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         // Plugin shutdown logic
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public JavaPlugin getJavaPlugin() {
         return instance;
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public String getBugTrackerURL() {
         return null;
     }
