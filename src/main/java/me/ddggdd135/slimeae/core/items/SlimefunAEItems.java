@@ -4,9 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.core.slimefun.MEController;
-import me.ddggdd135.slimeae.core.slimefun.MEInterface;
-import me.ddggdd135.slimeae.core.slimefun.MEUnit;
+import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
@@ -25,7 +23,7 @@ public class SlimefunAEItems {
             "ME_INTERFACE",
             new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TARGET : Material.CHISELED_STONE_BRICKS,
                     "{#Vanilla_Ice}ME接口"));
-    public static final SlimefunItemStack ME_DRIVER = new SlimefunItemStack(
+    public static final SlimefunItemStack ME_DRIVE = new SlimefunItemStack(
             "ME_DRIVE",
             new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.CHISELED_BOOKSHELF : Material.BOOKSHELF,
                     "&fME驱动器")
@@ -193,13 +191,55 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE : Material.SHULKER_SHELL,
                     "{#Bright_Gray}ME存储外壳")
     );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_1K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_1K",
+            new AdvancedCustomItemStack(Material.SLIME_BALL,
+                    "{#3366ff}1k-ME存储组件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_4K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_4K",
+            new AdvancedCustomItemStack(Material.FIREWORK_STAR,
+                    "{#3388fb}4k-ME存储组件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_16K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_16K",
+            new AdvancedCustomItemStack(Material.FIRE_CHARGE,
+                    "{#33aaf7}16k-ME存储组件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_64K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_64K",
+            new AdvancedCustomItemStack(Material.POPPED_CHORUS_FRUIT,
+                    "{#33ccf3}64k-ME存储组件")
+    );
 
+    //CELL
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_1K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_1K",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_13,
+                    "{#3366ff}1k-ME存储元件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_4K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_4K",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_CAT,
+                    "{#3388fb}4k-ME存储元件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_16K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_16K",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_BLOCKS,
+                    "{#33aaf7}16k-ME存储元件")
+    );
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_64K = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_64K",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_CHIRP,
+                    "{#33ccf3}64k-ME存储元件")
+    );
 
     public static void onSetup(SlimeAEPlugin plugin) {
+        //Machines
         new MEController(SlimefunAEItemGroups.MACHINE, ME_CONTROLLER, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new MEUnit(SlimefunAEItemGroups.MACHINE, ME_UNIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new MEInterface(SlimefunAEItemGroups.MACHINE, ME_INTERFACE, RecipeType.NULL, new ItemStack[0]).register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_DRIVER, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new MEDrive(SlimefunAEItemGroups.MACHINE, ME_DRIVE, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, MOLECULAR_ASSEMBLER, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ONE_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, FOUR_K_CRAFTING_STORAGE, RecipeType.NULL, new ItemStack[0]).register(plugin);
@@ -218,6 +258,7 @@ public class SlimefunAEItems {
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_PATTERN_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ME_TERMINAL, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MACHINE, ENERGY_ACCEPTOR, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        //Materials
 
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0]).register(plugin);
@@ -233,6 +274,16 @@ public class SlimefunAEItems {
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_CALCULATION_CIRCUIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_ENGINEERING_CIRCUIT, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_STORAGE_HOUSING, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_1K, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_4K, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_16K, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_64K, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        //Cells
+
+        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_1K, RecipeType.NULL, new ItemStack[0], 1024).register(plugin);
+        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_4K, RecipeType.NULL, new ItemStack[0], 4 * 1024).register(plugin);
+        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_16K, RecipeType.NULL, new ItemStack[0], 16 * 1024).register(plugin);
+        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_64K, RecipeType.NULL, new ItemStack[0], 64 * 1024).register(plugin);
 
     }
 }

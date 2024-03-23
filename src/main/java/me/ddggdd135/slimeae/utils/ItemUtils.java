@@ -1,15 +1,13 @@
 package me.ddggdd135.slimeae.utils;
 
-import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTContainer;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
-import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.ddggdd135.slimeae.api.ItemRequest;
-import me.ddggdd135.slimeae.api.ItemStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import net.Zrips.CMILib.Items.CMIItemStack;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -163,9 +161,10 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static Map<ItemStack, Integer> toStorage(NBTCompoundList nbt) {
+    public static Map<ItemStack, Integer> toStorage(@Nonnull NBTCompound nbt) {
         Map<ItemStack, Integer> result = new HashMap<>();
-        for (ReadWriteNBT compound : nbt) {
+        for (String key : nbt.getKeys()) {
+            ReadWriteNBT compound = nbt.getCompound(key);
             ItemStack itemStack = compound.getItemStack("item");
             int amount = compound.getInteger("amount");
             result.put(itemStack, amount);
@@ -173,16 +172,20 @@ public class ItemUtils {
         return result;
     }
 
-
     @Nonnull
-    public static NBTCompoundList toNBT(@Nonnull Map<ItemStack, Integer> storage) {
+    public static NBTCompound toNBT(@Nonnull Map<ItemStack, Integer> storage) {
         NBTContainer container = new NBTContainer();
-        NBTCompoundList list = container.getCompoundList("items");
         for (ItemStack itemStack : storage.keySet()) {
-            ReadWriteNBT compound = list.addCompound();
+            ReadWriteNBT compound = container.getOrCreateCompound(String.valueOf(itemStack.hashCode()));
             compound.setItemStack("item", itemStack);
             compound.setInteger("amount", storage.get(itemStack));
         }
-        return list;
+        return container;
+    }
+
+    public static String getName(@Nonnull ItemStack itemStack) {
+        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
+        if (slimefunItem == null) return new CMIItemStack(itemStack).getRealName();
+        return slimefunItem.getItemName();
     }
 }

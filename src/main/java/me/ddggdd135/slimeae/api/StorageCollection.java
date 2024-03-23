@@ -3,6 +3,8 @@ package me.ddggdd135.slimeae.api;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,22 +12,23 @@ import java.util.List;
 import java.util.Map;
 
 public class StorageCollection implements IStorage {
-    private List<IStorage> storages = new ArrayList<>();
+    @NonNull
+    private List<IStorage> storages;
 
-    public StorageCollection(IStorage... storages) {
+    public StorageCollection(@NonNull IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));
     }
 
-    public void addStorage(IStorage storage) {
+    public void addStorage(@NonNull IStorage storage) {
         storages.add(storage);
     }
 
-    public boolean removeStorage(IStorage storage) {
+    public boolean removeStorage(@NonNull IStorage storage) {
         return storages.remove(storage);
     }
 
     @Override
-    public void pushItem(ItemStack[] itemStacks) {
+    public void pushItem(@NonNull ItemStack[] itemStacks) {
         for (IStorage storage : storages) {
             storage.pushItem(itemStacks);
             itemStacks = ItemUtils.trimItems(itemStacks);
@@ -34,12 +37,12 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public boolean contains(ItemRequest[] requests) {
+    public boolean contains(@NonNull ItemRequest[] requests) {
         return ItemUtils.contains(getStorage(), requests);
     }
 
     @Override
-    public ItemStack[] tryTakeItem(ItemRequest[] requests) {
+    public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
         Map<ItemStack, Integer> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
         //init rest
@@ -66,7 +69,7 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public Map<ItemStack, Integer> getStorage() {
+    public @NotNull Map<ItemStack, Integer> getStorage() {
         Map<ItemStack, Integer> result = new HashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Integer> tmp = storage.getStorage();

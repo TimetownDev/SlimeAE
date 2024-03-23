@@ -20,6 +20,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -121,7 +122,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, In
             }
 
             @Override
-            public Map<ItemStack, Integer> getStorage() {
+            public @NotNull Map<ItemStack, Integer> getStorage() {
                 BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                 if (inv == null) return new HashMap<>();
                 return ItemUtils.getAmounts(inv.getContents());

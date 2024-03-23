@@ -2,27 +2,31 @@ package me.ddggdd135.slimeae.api.interfaces;
 
 import me.ddggdd135.slimeae.api.ItemRequest;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
 
 public interface IStorage {
-    void pushItem(ItemStack[] itemStacks);
+    void pushItem(@NonNull ItemStack[] itemStacks);
 
-    default void pushItem(ItemStack itemStack) {
+    default void pushItem(@NonNull ItemStack itemStack) {
         pushItem(new ItemStack[]{itemStack});
     }
 
-    boolean contains(ItemRequest[] requests);
+    boolean contains(@NonNull ItemRequest[] requests);
 
     /**
      * 能拿多少拿多少
      */
-    ItemStack[] tryTakeItem(ItemRequest[] requests);
+    @NonNull
+    ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests);
 
-    default ItemStack[] tryTakeItem(ItemRequest request) {
+    @NonNull
+    default ItemStack[] tryTakeItem(@NonNull ItemRequest request) {
         return tryTakeItem(new ItemRequest[]{request});
     }
 
+    @NonNull
     Map<ItemStack, Integer> getStorage();
 
     /**
