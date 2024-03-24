@@ -47,7 +47,7 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
     private final int DOWN_SLOT = 33;
 
     private final int[] backgroundSlots = new int[] {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 21, 31, 32, 34,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34,
         35, 36, 37, 38, 39, 40, 41, 42, 43, 44
     };
 
@@ -78,7 +78,7 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
                 new BlockTicker() {
                     @Override
                     public boolean isSynchronized() {
-                        return true;
+                        return false;
                     }
 
                     @Override
