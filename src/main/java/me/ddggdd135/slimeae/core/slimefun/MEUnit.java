@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 ME单元 相当于AE版本的原版大箱子
 测试使用
  */
-public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, InventoryBlock {
+public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryBlock {
     private static final int[] Slots = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
         30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53
@@ -60,7 +61,8 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject<MEUnit>, In
         };
     }
 
-    private void constructMenu(BlockMenuPreset preset) {
+    @OverridingMethodsMustInvokeSuper
+    protected void constructMenu(BlockMenuPreset preset) {
         preset.setSize(6 * 9);
     }
 

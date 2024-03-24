@@ -17,7 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class MEController extends SlimefunItem implements IMEController<MEController> {
+public class MEController extends SlimefunItem implements IMEController {
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler(new BlockBreakHandler(true, true) {
@@ -33,7 +33,7 @@ public class MEController extends SlimefunItem implements IMEController<MEContro
         addItemHandler(new BlockTicker() {
             @Override
             public boolean isSynchronized() {
-                return false;
+                return true;
             }
 
             @Override
@@ -44,7 +44,7 @@ public class MEController extends SlimefunItem implements IMEController<MEContro
                         SlimefunBlockData blockData = Slimefun.getDatabaseManager()
                                 .getBlockDataController()
                                 .getBlockData(x);
-                        ((IMEObject<?>) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
+                        ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
                     });
                 }
             }

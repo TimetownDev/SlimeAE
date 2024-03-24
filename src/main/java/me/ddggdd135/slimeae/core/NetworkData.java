@@ -27,13 +27,13 @@ public class NetworkData {
         BlockDataController blockDataController = Slimefun.getDatabaseManager().getBlockDataController();
         SlimefunBlockData controllerBlockData = blockDataController.getBlockData(controller);
         if (!(controllerBlockData != null
-                && SlimefunItem.getById(controllerBlockData.getSfId()) instanceof IMEController<?>)) return null;
+                && SlimefunItem.getById(controllerBlockData.getSfId()) instanceof IMEController)) return null;
         NetworkInfo info = getNetworkInfo(controller);
         Set<Location> children = NetworkUtils.scan(controller.getBlock());
         for (Location location : children) {
             SlimefunBlockData blockData = blockDataController.getBlockData(location);
             if (blockData != null
-                    && SlimefunItem.getById(blockData.getSfId()) instanceof IMEController<?>
+                    && SlimefunItem.getById(blockData.getSfId()) instanceof IMEController
                     && !location.equals(controller)) {
                 if (info != null) {
                     info.dispose();
@@ -54,7 +54,7 @@ public class NetworkData {
             SlimefunBlockData blockData =
                     Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
             SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-            if (slimefunItem instanceof IMEStorageObject<?> IMEStorageObject) {
+            if (slimefunItem instanceof IMEStorageObject IMEStorageObject) {
                 IStorage storage = IMEStorageObject.getStorage(location.getBlock());
                 if (storage != null) networkStorage.addStorage(storage);
             }

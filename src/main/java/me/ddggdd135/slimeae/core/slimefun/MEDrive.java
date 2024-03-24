@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.api.MEItemCellStorage;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
@@ -21,7 +22,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class MEDrive extends SlimefunItem implements IMEStorageObject<MEDrive>, InventoryBlock {
+public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
     public static final int[] Boarder_Slots = new int[] {
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 33, 34, 35, 36, 37, 38,
         42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53
@@ -52,7 +53,8 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject<MEDrive>, 
         };
     }
 
-    private void constructMenu(BlockMenuPreset preset) {
+    @OverridingMethodsMustInvokeSuper
+    protected void constructMenu(BlockMenuPreset preset) {
         for (int slot : Boarder_Slots) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }

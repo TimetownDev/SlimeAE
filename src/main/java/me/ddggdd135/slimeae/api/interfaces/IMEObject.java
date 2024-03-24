@@ -1,12 +1,11 @@
 package me.ddggdd135.slimeae.api.interfaces;
 
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.Set;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
-public interface IMEObject<TSelf extends SlimefunItem> {
+public interface IMEObject {
     Set<BlockFace> Valid_Faces = Set.of(
             BlockFace.NORTH,
             BlockFace.SOUTH,

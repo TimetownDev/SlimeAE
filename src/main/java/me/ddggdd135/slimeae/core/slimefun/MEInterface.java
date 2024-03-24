@@ -8,7 +8,6 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -29,7 +28,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>, InventoryBlock {
+public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlock {
     public static final int[] Boarder_Slots =
             new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 27, 28, 29, 30, 31, 32, 33, 34, 35, 45, 46, 47, 48, 49, 50, 51, 52, 53
             };
@@ -43,7 +42,7 @@ public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>,
         addItemHandler(new BlockTicker() {
             @Override
             public boolean isSynchronized() {
-                return false;
+                return true;
             }
 
             @Override
@@ -109,10 +108,8 @@ public class MEInterface extends SlimefunItem implements IMEObject<MEInterface>,
         };
     }
 
-    private void constructMenu(BlockMenuPreset preset) {
-        for (int slot : Boarder_Slots) {
-            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-        }
+    protected void constructMenu(BlockMenuPreset preset) {
+        preset.drawBackground(Boarder_Slots);
         for (int slot : Setting_Slots) {
             preset.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
                 @Override

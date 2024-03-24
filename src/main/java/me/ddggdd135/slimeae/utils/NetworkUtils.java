@@ -21,7 +21,7 @@ public class NetworkUtils {
             if (blocks.contains(testLocation)) continue;
             SlimefunBlockData blockData = controller.getBlockData(testLocation);
             if (blockData != null
-                    && SlimefunItem.getById(blockData.getSfId()) instanceof IMEObject<?>
+                    && SlimefunItem.getById(blockData.getSfId()) instanceof IMEObject
                     && !testLocation.getBlock().getType().isAir()) {
                 blocks.add(testLocation);
                 scan(testLocation.getBlock(), blocks);

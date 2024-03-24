@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.api.interfaces;
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -15,9 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -35,10 +35,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("deprecation")
-public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, InventoryBlock {
+public abstract class MEBus extends SlimefunItem implements IMEObject {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
     private final int NORTH_SLOT = 12;
@@ -87,9 +85,6 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
                     public void tick(Block block, SlimefunItem slimefunItem, SlimefunBlockData data) {
                         MEBus.this.tick(data);
                     }
-
-                    @Override
-                    public void uniqueTick() {}
                 });
     }
 
@@ -189,6 +184,10 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
         };
     }
 
+    public abstract int[] getInputSlots();
+
+    public abstract int[] getOutputSlots();
+
     private boolean directionClick(Player player, ClickAction action, BlockMenu blockMenu, BlockFace blockFace) {
         if (action.isShiftClicked()) {
             openDirection(player, blockMenu, blockFace);
@@ -210,8 +209,8 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         itemMeta.setLore(List.of(
-                CMIChatColor.colorize("{#e4ed32}左键点击: &8设置朝向"),
-                CMIChatColor.colorize("{#e4ed32}Shift+左键点击: &8打开目标方块")));
+                CMIChatColor.translate("{#e4ed32}左键点击: &8设置朝向"),
+                CMIChatColor.translate("{#e4ed32}Shift+左键点击: &8打开目标方块")));
         displayStack.setItemMeta(itemMeta);
         return displayStack;
     }
@@ -228,8 +227,8 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
                 itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             itemMeta.setLore(List.of(
-                    CMIChatColor.colorize("{#e4ed32}左键点击: &8设置朝向"),
-                    CMIChatColor.colorize("{#e4ed32}Shift+左键点击: &8打开目标方块")));
+                    CMIChatColor.translate("{#e4ed32}左键点击: &8设置朝向"),
+                    CMIChatColor.translate("{#e4ed32}Shift+左键点击: &8打开目标方块")));
             displayStack.setItemMeta(itemMeta);
             return displayStack;
         } else {
@@ -242,6 +241,15 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
     public void setDirection(BlockMenu blockMenu, BlockFace blockFace) {
         SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), blockFace);
         StorageCacheUtils.setData(blockMenu.getBlock().getLocation(), dataKey, blockFace.name());
+    }
+
+    @ParametersAreNonnullByDefault
+    public BlockFace getDirection(BlockMenu blockMenu) {
+        if (SELECTED_DIRECTION_MAP.containsKey(blockMenu.getLocation()))
+            return SELECTED_DIRECTION_MAP.get(blockMenu.getLocation());
+        String blockFace = StorageCacheUtils.getData(blockMenu.getLocation(), dataKey);
+        if (blockFace == null) return BlockFace.SELF;
+        return BlockFace.valueOf(blockFace);
     }
 
     private void openDirection(Player player, BlockMenu blockMenu, BlockFace blockFace) {
@@ -313,7 +321,7 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
         }
     }
 
-    protected int @Nullable [] getOtherBackgroundSlots() {
+    protected @Nullable int[] getOtherBackgroundSlots() {
         return null;
     }
 
@@ -324,6 +332,6 @@ public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, In
     @OverridingMethodsMustInvokeSuper
     protected void tick(SlimefunBlockData data) {
         // TODO
-        updateGui(data);
+        if (data.getBlockMenu().hasViewer()) updateGui(data);
     }
 }
