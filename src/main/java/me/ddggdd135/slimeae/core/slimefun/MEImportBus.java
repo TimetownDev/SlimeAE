@@ -8,7 +8,7 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class MEImportBus extends MEBus<MEImportBus> {
+public class MEImportBus extends MEBus {
 
     public MEImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);

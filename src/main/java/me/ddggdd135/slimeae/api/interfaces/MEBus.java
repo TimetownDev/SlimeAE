@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("deprecation")
-public abstract class MEBus<TSelf extends SlimefunItem> extends SlimefunItem implements IMEObject<TSelf>, InventoryBlock {
+public abstract class MEBus extends SlimefunItem implements IMEObject<MEBus>, InventoryBlock {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
     private final int NORTH_SLOT = 12;
