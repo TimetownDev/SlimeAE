@@ -15,8 +15,7 @@ public class MEImportBus extends MEBus {
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Override
     public int[] getInputSlots() {

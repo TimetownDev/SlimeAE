@@ -9,15 +9,14 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
-    private final int[] boarder = new int[]{0,1,2,3,4,5,6,7,8,9};
+    private final int[] boarder = new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     public MEExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Override
     public int[] getInputSlots() {
