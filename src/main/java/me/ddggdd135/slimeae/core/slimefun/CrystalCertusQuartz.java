@@ -13,7 +13,7 @@ public class CrystalCertusQuartz implements GEOResource {
     private final ItemStack item;
 
     public CrystalCertusQuartz(Plugin plugin, ItemStack item) {
-        this.key = new NamespacedKey(plugin, "certus_quartz");
+        this.key = new NamespacedKey(plugin, "crystal_certus_quartz");
         this.item = item;
     }
 
