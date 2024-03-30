@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -207,14 +206,13 @@ public class ItemUtils {
         return slimefunItem.getItemName();
     }
 
-    @Nullable
-    public static IStorage getStorage(@Nonnull Block block) {
+    @Nullable public static IStorage getStorage(@Nonnull Block block) {
         return getStorage(block, true);
     }
 
-    @Nullable
-    public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork) {
-        SlimefunBlockData slimefunBlockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(block.getLocation());
+    @Nullable public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork) {
+        SlimefunBlockData slimefunBlockData =
+                Slimefun.getDatabaseManager().getBlockDataController().getBlockData(block.getLocation());
         if (checkNetwork && slimefunBlockData != null) {
             if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) return null;
         }
@@ -223,8 +221,7 @@ public class ItemUtils {
         if (inv != null) {
             return new IStorage() {
                 @Override
-                public void pushItem(@NotNull @NonNull ItemStack[] itemStacks) {
-                }
+                public void pushItem(@NotNull @NonNull ItemStack[] itemStacks) {}
 
                 @Override
                 public boolean contains(ItemRequest[] requests) {
@@ -241,7 +238,8 @@ public class ItemUtils {
                     ItemStorage found = new ItemStorage();
 
                     for (ItemStack itemStack : amounts.keySet()) {
-                        int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, itemStack);
+                        int[] outputSlots = inv.getPreset()
+                                .getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, itemStack);
                         if (outputSlots == null) continue;
                         for (int slot : outputSlots) {
                             ItemStack item = inv.getItemInSlot(slot);
@@ -272,13 +270,13 @@ public class ItemUtils {
                 public @NotNull Map<ItemStack, Integer> getStorage() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return new HashMap<>();
-                    int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
+                    int[] outputSlots =
+                            inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
                     if (outputSlots == null) return new HashMap<>();
                     ItemStorage storage = new ItemStorage();
                     for (int slot : outputSlots) {
                         ItemStack itemStack = inv.getItemInSlot(slot);
-                        if (itemStack != null && !itemStack.getType().isAir())
-                            storage.addItem(itemStack);
+                        if (itemStack != null && !itemStack.getType().isAir()) storage.addItem(itemStack);
                     }
                     return storage.getStorage();
                 }
@@ -310,8 +308,7 @@ public class ItemUtils {
                         if (InvUtils.fitAll(
                                 inventory,
                                 itemStacks,
-                                IntStream.range(0, inventory.getSize())
-                                        .toArray())) {
+                                IntStream.range(0, inventory.getSize()).toArray())) {
                             inventory.addItem(itemStacks);
                         }
                     }
@@ -367,10 +364,9 @@ public class ItemUtils {
 
                 @Override
                 public int getEmptySlots() {
-                    if (!canHasEmptySlots())
-                        return 0;
+                    if (!canHasEmptySlots()) return 0;
                     else {
-                        Inventory inventory = ((Chest)block.getState()).getBlockInventory();
+                        Inventory inventory = ((Chest) block.getState()).getBlockInventory();
                         int slots = 0;
                         for (int i = 0; i < 27; i++) {
                             ItemStack itemStack = inventory.getItem(i);
@@ -389,8 +385,7 @@ public class ItemUtils {
         return null;
     }
 
-    @NotNull
-    private static ItemStack[] getVanillaItemStacks(Block block) {
+    @NotNull private static ItemStack[] getVanillaItemStacks(Block block) {
         Container container = (Container) block.getState();
         ItemStack[] items = new ItemStack[0];
         if (container instanceof Furnace furnace) {

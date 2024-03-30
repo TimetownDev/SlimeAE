@@ -60,7 +60,7 @@ public class ItemStorage implements IStorage {
     }
 
     public void addItem(@Nonnull ItemStack itemStack) {
-        addItem(new ItemStack[]{itemStack});
+        addItem(new ItemStack[] {itemStack});
     }
 
     @Override

@@ -3,10 +3,9 @@ package me.ddggdd135.slimeae.core.recipes;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.recipes.MinecraftRecipe;
+import java.util.function.BiConsumer;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.function.BiConsumer;
 
 public class BlockDestroyRecipeType extends RecipeType {
     public BlockDestroyRecipeType(ItemStack item, String machine) {
@@ -17,11 +16,17 @@ public class BlockDestroyRecipeType extends RecipeType {
         super(key, slimefunItem, lore);
     }
 
-    public BlockDestroyRecipeType(NamespacedKey key, ItemStack item, BiConsumer<ItemStack[], ItemStack> callback, String... lore) {
+    public BlockDestroyRecipeType(
+            NamespacedKey key, ItemStack item, BiConsumer<ItemStack[], ItemStack> callback, String... lore) {
         super(key, item, callback, lore);
     }
 
-    public BlockDestroyRecipeType(NamespacedKey key, ItemStack item, BiConsumer<ItemStack[], ItemStack> registerCallback, BiConsumer<ItemStack[], ItemStack> unregisterCallback, String... lore) {
+    public BlockDestroyRecipeType(
+            NamespacedKey key,
+            ItemStack item,
+            BiConsumer<ItemStack[], ItemStack> registerCallback,
+            BiConsumer<ItemStack[], ItemStack> unregisterCallback,
+            String... lore) {
         super(key, item, registerCallback, unregisterCallback, lore);
     }
 
