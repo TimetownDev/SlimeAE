@@ -70,8 +70,11 @@ public class SlimefunAEItems {
             "ENERGY_ACCEPTOR", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器"));
 
     // MATERIAL
-    public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
+    static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
             "CRYSTAL_CERTUS_QUARTZ", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}赛特斯石英水晶"));
+
+    public static final SlimefunItemStack CERTUS_QUARTZ_ORE = new SlimefunItemStack(
+            "CERTUS_QUARTZ_ORE", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}赛特斯石英矿石"));
     public static final SlimefunItemStack CHARGED_CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
             "CHARGED_CRYSTAL_CERTUS_QUARTZ", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}充能赛特斯石英水晶"));
     public static final SlimefunItemStack CRYSTAL_FLUIX = new SlimefunItemStack(
@@ -204,17 +207,22 @@ public class SlimefunAEItems {
                 .register(plugin);
         // Materials
 
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.GEO_MINER, new ItemStack[9]
+        ).register(plugin);
+        CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
+        crystalCertusQuartz.register();
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_DUST, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_ORE, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FLUIX_DUST, RecipeType.NULL, new ItemStack[0]).register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, QUARTZ_DUST, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
+                CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null, null}).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FLUIX_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
+                CRYSTAL_FLUIX, null, null, null, null, null, null, null, null}).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, QUARTZ_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
+                new ItemStack(Material.QUARTZ), null, null, null, null, null, null, null, null}).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, SKY_STONE_DUST, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, LOGIC_PROCESSOR, RecipeType.NULL, new ItemStack[0])
