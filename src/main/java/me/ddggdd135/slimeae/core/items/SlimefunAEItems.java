@@ -145,26 +145,49 @@ public class SlimefunAEItems {
             "ME_ITEM_STORAGE_CELL_16K", new AdvancedCustomItemStack(Material.MUSIC_DISC_BLOCKS, "{#33aaf7}16k-ME存储元件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_64K = new SlimefunItemStack(
             "ME_ITEM_STORAGE_CELL_64K", new AdvancedCustomItemStack(Material.MUSIC_DISC_CHIRP, "{#33ccf3}64k-ME存储元件"));
-    public static final SlimefunItemStack FORMATION_CORE  = new SlimefunItemStack(
-            "FORMATION_CORE", new AdvancedCustomItemStack(Material.GOLD_NUGGET, "{#33ccf3}成型核心"));
-    public static final SlimefunItemStack ANNIHILATION_CORE  = new SlimefunItemStack(
+    public static final SlimefunItemStack FORMATION_CORE =
+            new SlimefunItemStack("FORMATION_CORE", new AdvancedCustomItemStack(Material.GOLD_NUGGET, "{#33ccf3}成型核心"));
+    public static final SlimefunItemStack ANNIHILATION_CORE = new SlimefunItemStack(
             "ANNIHILATION_CORE", new AdvancedCustomItemStack(Material.IRON_NUGGET, "{#33ccf3}破坏核心"));
     // card
-    public static final SlimefunItemStack BASIC_CARD  = new SlimefunItemStack(
-            "BASIC_CARD", new AdvancedCustomItemStack(Material.MINER_POTTERY_SHERD, "{#33ccf3}基础卡"));
-    public static final SlimefunItemStack ADVANCED_CARD  = new SlimefunItemStack(
-            "ADVANCED_CARD", new AdvancedCustomItemStack(Material.BLADE_POTTERY_SHERD, "{#33ccf3}高级卡"));
-    public static final SlimefunItemStack ACCELERATION_CARD  = new SlimefunItemStack(
-            "ACCELERATION_CARD", new AdvancedCustomItemStack(Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, "{#33ccf3}加速卡"));
-    public static final SlimefunItemStack CAPACITY_CARD  = new SlimefunItemStack(
-            "CAPACITY_CARD", new AdvancedCustomItemStack(Material.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, "{#33ccf3}容量卡"));
+    public static final SlimefunItemStack BASIC_CARD = new SlimefunItemStack(
+            "BASIC_CARD",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.MINER_POTTERY_SHERD
+                            : Material.PAPER,
+                    "{#33ccf3}基础卡"));
+    public static final SlimefunItemStack ADVANCED_CARD = new SlimefunItemStack(
+            "ADVANCED_CARD",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.BLADE_POTTERY_SHERD
+                            : Material.PAPER,
+                    "{#33ccf3}高级卡"));
+    public static final SlimefunItemStack ACCELERATION_CARD = new SlimefunItemStack(
+            "ACCELERATION_CARD",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE
+                            : Material.SHULKER_SHELL,
+                    "{#33ccf3}加速卡"));
+    public static final SlimefunItemStack CAPACITY_CARD = new SlimefunItemStack(
+            "CAPACITY_CARD",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE
+                            : Material.SHULKER_SHELL,
+                    "{#33ccf3}容量卡"));
 
-    public static final SlimefunItemStack QUARTZ_GLASS  = new SlimefunItemStack(
-            "QUARTZ_GLASS", new AdvancedCustomItemStack(Material.GLASS, "{#33ccf3}石英玻璃"));
-    public static final SlimefunItemStack BLANK_PATTERN  = new SlimefunItemStack(
-            "BLANK_PATTERN", new AdvancedCustomItemStack(Material.PAPER, "{#33ccf3}空白样板"));
-    public static final SlimefunItemStack ENCODED_PATTERN  = new SlimefunItemStack(
-            "ENCODED_PATTERN", new AdvancedCustomItemStack(Material.PRISMARINE_SHARD, "{#33ccf3}编码样板"));
+    public static final SlimefunItemStack QUARTZ_GLASS =
+            new SlimefunItemStack("QUARTZ_GLASS", new AdvancedCustomItemStack(Material.GLASS, "{#33ccf3}石英玻璃"));
+    public static final SlimefunItemStack BLANK_PATTERN =
+            new SlimefunItemStack("BLANK_PATTERN", new AdvancedCustomItemStack(Material.PAPER, "{#33ccf3}空白样板"));
+    public static final SlimefunItemStack ENCODED_PATTERN = new SlimefunItemStack(
+            "ENCODED_PATTERN",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.PRISMARINE_SHARD : Material.PAPER,
+                    "{#33ccf3}编码样板"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Machines
@@ -207,22 +230,29 @@ public class SlimefunAEItems {
                 .register(plugin);
         // Materials
 
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.GEO_MINER, new ItemStack[9]
-        ).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.GEO_MINER, new ItemStack[9])
+                .register(plugin);
         CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
         crystalCertusQuartz.register();
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_ORE, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
-                CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null, null}).register(plugin);
+                    CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null, null
+                })
+                .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FLUIX_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
-                CRYSTAL_FLUIX, null, null, null, null, null, null, null, null}).register(plugin);
+                    CRYSTAL_FLUIX, null, null, null, null, null, null, null, null
+                })
+                .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, QUARTZ_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
-                new ItemStack(Material.QUARTZ), null, null, null, null, null, null, null, null}).register(plugin);
+                    new ItemStack(Material.QUARTZ), null, null, null, null, null, null, null, null
+                })
+                .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, SKY_STONE_DUST, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, LOGIC_PROCESSOR, RecipeType.NULL, new ItemStack[0])
@@ -243,16 +273,17 @@ public class SlimefunAEItems {
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_4K, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_16K, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_16K, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_64K, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL, ME_ITEM_STORAGE_COMPONENT_64K, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FORMATION_CORE, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ANNIHILATION_CORE, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BASIC_CARD, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BASIC_CARD, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ADVANCED_CARD, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ACCELERATION_CARD, RecipeType.NULL, new ItemStack[0])
@@ -267,15 +298,25 @@ public class SlimefunAEItems {
                 .register(plugin);
         // Cells
 
-        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_1K, RecipeType.NULL, new ItemStack[0],
-                1024)
+        new MEItemStorageCell(
+                        SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_1K, RecipeType.NULL, new ItemStack[0], 1024)
                 .register(plugin);
-        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_4K, RecipeType.NULL, new ItemStack[0],
-                4 * 1024)
+        new MEItemStorageCell(
+                        SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_4K, RecipeType.NULL, new ItemStack[0], 4 * 1024)
                 .register(plugin);
-        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_16K, RecipeType.NULL, new ItemStack[0],
-                16 * 1024).register(plugin);
-        new MEItemStorageCell(SlimefunAEItemGroups.CELL, ME_ITEM_STORAGE_CELL_64K, RecipeType.NULL, new ItemStack[0],
-                64 * 1024).register(plugin);
+        new MEItemStorageCell(
+                        SlimefunAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_16K,
+                        RecipeType.NULL,
+                        new ItemStack[0],
+                        16 * 1024)
+                .register(plugin);
+        new MEItemStorageCell(
+                        SlimefunAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_64K,
+                        RecipeType.NULL,
+                        new ItemStack[0],
+                        64 * 1024)
+                .register(plugin);
     }
 }

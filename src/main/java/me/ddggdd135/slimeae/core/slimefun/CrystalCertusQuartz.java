@@ -42,8 +42,7 @@ public class CrystalCertusQuartz implements GEOResource {
 
         if (environment == World.Environment.NORMAL) {
             return 5;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -52,5 +51,4 @@ public class CrystalCertusQuartz implements GEOResource {
     public int getMaxDeviation() {
         return 3;
     }
-
 }

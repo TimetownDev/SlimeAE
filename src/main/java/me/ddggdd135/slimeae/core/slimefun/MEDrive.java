@@ -77,11 +77,11 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
 
     @Override
     public int[] getInputSlots() {
-        return MEItemStorageCell_Slots;
+        return new int[0];
     }
 
     @Override
     public int[] getOutputSlots() {
-        return MEItemStorageCell_Slots;
+        return new int[0];
     }
 }

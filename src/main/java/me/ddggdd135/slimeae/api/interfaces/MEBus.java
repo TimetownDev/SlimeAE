@@ -11,6 +11,12 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -30,13 +36,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public abstract class MEBus extends SlimefunItem implements IMEObject {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
@@ -48,8 +47,8 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
     private final int DOWN_SLOT = 33;
 
     private final int[] backgroundSlots = new int[] {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34,
-        35, 36, 37, 38, 39, 40, 41, 42, 43, 44
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34, 35,
+        36, 37, 38, 39, 40, 41, 42, 43, 44
     };
 
     private final BlockFace[] FACES = {
@@ -79,7 +78,7 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
                 new BlockTicker() {
                     @Override
                     public boolean isSynchronized() {
-                        return false;
+                        return true;
                     }
 
                     @Override
