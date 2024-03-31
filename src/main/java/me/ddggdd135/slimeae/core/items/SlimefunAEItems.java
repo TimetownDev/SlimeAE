@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import net.Zrips.CMILib.Version.Version;
@@ -74,7 +75,7 @@ public class SlimefunAEItems {
             "CRYSTAL_CERTUS_QUARTZ", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}赛特斯石英水晶"));
 
     public static final SlimefunItemStack CERTUS_QUARTZ_ORE = new SlimefunItemStack(
-            "CERTUS_QUARTZ_ORE", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}赛特斯石英矿石"));
+            "CERTUS_QUARTZ_ORE", new AdvancedCustomItemStack(Material.NETHER_QUARTZ_ORE, "{#Zumthor}赛特斯石英矿石"));
     public static final SlimefunItemStack CHARGED_CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
             "CHARGED_CRYSTAL_CERTUS_QUARTZ", new AdvancedCustomItemStack(Material.QUARTZ, "{#Zumthor}充能赛特斯石英水晶"));
     public static final SlimefunItemStack CRYSTAL_FLUIX = new SlimefunItemStack(
@@ -230,7 +231,11 @@ public class SlimefunAEItems {
                 .register(plugin);
         // Materials
 
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_CERTUS_QUARTZ, RecipeType.GEO_MINER, new ItemStack[9])
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        CRYSTAL_CERTUS_QUARTZ,
+                        SlimefunAERecipeTypes.BLOCK_DESTROY,
+                        new ItemStack[] {null, null, null, null, CERTUS_QUARTZ_ORE})
                 .register(plugin);
         CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
         crystalCertusQuartz.register();
@@ -239,7 +244,11 @@ public class SlimefunAEItems {
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_ORE, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        CERTUS_QUARTZ_ORE,
+                        SlimefunAERecipeTypes.WORLD_GENERATING,
+                        new ItemStack[0])
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CERTUS_QUARTZ_DUST, RecipeType.ORE_CRUSHER, new ItemStack[] {
                     CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null, null
