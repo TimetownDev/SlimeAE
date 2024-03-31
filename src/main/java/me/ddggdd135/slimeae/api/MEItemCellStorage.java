@@ -13,6 +13,7 @@ import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public class MEItemCellStorage implements IStorage {
     @Nonnull
     private final NBTCompound nbt;

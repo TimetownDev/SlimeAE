@@ -2,6 +2,8 @@ package me.ddggdd135.slimeae;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import javax.annotation.Nonnull;
+
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
     private NetworkData networkData = new NetworkData();
+    private int slimefunTickCount;
 
     @Override
     public void onEnable() {
@@ -28,6 +31,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
+
+        Bukkit.getScheduler().runTaskTimer(this, () -> slimefunTickCount++, 1, Slimefun.getTickerTask().getTickRate());
     }
 
     @Override
@@ -53,5 +58,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkData getNetworkData() {
         return getInstance().networkData;
+    }
+
+    public static int getSlimefunTickCount() {
+        return getInstance().slimefunTickCount;
     }
 }

@@ -11,7 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.MEItemCellStorage;
+import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.inventory.ItemStack;
@@ -37,15 +41,27 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     @Nonnull
-    public static MEItemCellStorage getStorage(@Nonnull ItemStack itemStack) {
-        updateStorage(itemStack);
-        return new MEItemCellStorage(itemStack);
+    public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+        if (SlimeAEPlugin.getSlimefunTickCount() % 60 == 0 || SlimeAEPlugin.getSlimefunTickCount() <= 16) {
+            saveStorage(itemStack);
+            updateStorage(itemStack);
+            updateLore(itemStack);
+        }
+        return MEStorageCellCache.getMEStorageCellCache(itemStack);
+    }
+
+    public static void saveStorage(@Nonnull ItemStack itemStack) {
+        NBTItem nbtItem = new NBTItem(itemStack, true);
+        if (nbtItem.hasTag("item_storage"))
+            nbtItem.removeKey("item_storage");
+        NBTCompound data = ItemUtils.toNBT(MEStorageCellCache.getMEStorageCellCache(itemStack).getStorage());
+        nbtItem.getOrCreateCompound("item_storage").mergeCompound(data);
     }
 
     public static void updateLore(@Nonnull ItemStack itemStack) {
-        MEItemCellStorage meItemCellStorage = getStorage(itemStack);
+        MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
         List<String> lores = new ArrayList<>();
-        Map<ItemStack, Integer> storage = meItemCellStorage.getStorage();
+        Map<ItemStack, Integer> storage = meStorageCellCache.getStorage();
         for (ItemStack key : storage.keySet()) {
             lores.add(CMIChatColor.translate(
                     "{#Bright_Sun>}" + ItemUtils.getName(key) + " - " + storage.get(key) + "{#Carrot_Orange<}"));
@@ -57,7 +73,8 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         NBTItem nbtItem = new NBTItem(itemStack, true);
         NBTCompound nbt = nbtItem.getOrCreateCompound("item_storage");
         Map<ItemStack, Integer> storage = ItemUtils.toStorage(nbt);
-        nbtItem.removeKey("item_storage");
+        if (nbtItem.hasTag("item_storage"))
+            nbtItem.removeKey("item_storage");
         nbtItem.getOrCreateCompound("item_storage").mergeCompound(ItemUtils.toNBT(storage));
     }
 }

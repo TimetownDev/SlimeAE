@@ -11,6 +11,7 @@ import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.api.MEItemCellStorage;
+import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -69,7 +70,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             if (itemStack != null
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                storageCollection.addStorage(new MEItemCellStorage(itemStack));
+                storageCollection.addStorage(MEItemStorageCell.getStorage(itemStack));
             }
         }
         return storageCollection;

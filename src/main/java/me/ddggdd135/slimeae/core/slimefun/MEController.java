@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -41,9 +42,7 @@ public class MEController extends SlimefunItem implements IMEController {
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
                 if (info != null) {
                     info.getChildren().forEach(x -> {
-                        SlimefunBlockData blockData = Slimefun.getDatabaseManager()
-                                .getBlockDataController()
-                                .getBlockData(x);
+                        SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
                         ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
                     });
                 }
