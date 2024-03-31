@@ -6,6 +6,7 @@ import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,6 +23,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         instance = this;
         SlimefunAEItemGroups.onSetup(this);
         SlimefunAEItems.onSetup(this);
+        Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
 
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
