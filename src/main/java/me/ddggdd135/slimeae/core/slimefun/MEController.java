@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import java.util.List;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -22,7 +23,10 @@ public class MEController extends SlimefunItem implements IMEController {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler(new BlockBreakHandler(true, true) {
             @Override
-            public void onPlayerBreak(BlockBreakEvent blockBreakEvent, ItemStack itemStack, List<ItemStack> list) {
+            public void onPlayerBreak(
+                    @Nonnull BlockBreakEvent blockBreakEvent,
+                    @Nonnull ItemStack itemStack,
+                    @Nonnull List<ItemStack> list) {
                 NetworkInfo info = SlimeAEPlugin.getNetworkData()
                         .getNetworkInfo(blockBreakEvent.getBlock().getLocation());
                 if (info != null) {

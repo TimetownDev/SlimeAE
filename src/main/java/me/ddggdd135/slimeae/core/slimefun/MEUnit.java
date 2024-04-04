@@ -51,7 +51,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
         return new SimpleBlockBreakHandler() {
 
             @Override
-            public void onBlockBreak(Block b) {
+            public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (inv != null) {

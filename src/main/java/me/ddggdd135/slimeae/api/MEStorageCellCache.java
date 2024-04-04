@@ -16,7 +16,7 @@ public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new HashMap<>();
     private static final Map<UUID, ItemStack> instances = new HashMap<>();
     private final Map<ItemStack, Integer> storages;
-    private int storaged;
+    private int stored;
     private int size;
     private UUID uuid;
 
@@ -27,7 +27,7 @@ public class MEStorageCellCache implements IStorage {
         size = MEItemStorageCell.getSize(itemStack);
         storages = ItemUtils.toStorage(nbt);
         for (ItemStack key : storages.keySet()) {
-            storaged += storages.get(key);
+            stored += storages.get(key);
         }
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
             nbtItem.setUUID(MEItemStorageCell.UUID_KEY, UUID.randomUUID());
@@ -56,8 +56,8 @@ public class MEStorageCellCache implements IStorage {
         return size;
     }
 
-    public int getStoraged() {
-        return storaged;
+    public int getStored() {
+        return stored;
     }
 
     private void trim(@Nonnull ItemStack template) {
@@ -73,9 +73,9 @@ public class MEStorageCellCache implements IStorage {
             if (SlimefunItem.getByItem(template) instanceof MEItemStorageCell) continue;
             int amount = storages.getOrDefault(template, 0);
             int toAdd;
-            if (storaged + itemStack.getAmount() > size) toAdd = size - storaged;
+            if (stored + itemStack.getAmount() > size) toAdd = size - stored;
             else toAdd = itemStack.getAmount();
-            storaged += toAdd;
+            stored += toAdd;
             storages.put(template, amount + toAdd);
             itemStack.setAmount(itemStack.getAmount() - toAdd);
             trim(template);

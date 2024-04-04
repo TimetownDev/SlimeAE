@@ -39,17 +39,36 @@ import org.bukkit.inventory.meta.ItemMeta;
 public abstract class MEBus extends SlimefunItem implements IMEObject {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
-    private final int NORTH_SLOT = 12;
-    private final int SOUTH_SLOT = 30;
-    private final int EAST_SLOT = 22;
-    private final int WEST_SLOT = 20;
-    private final int UP_SLOT = 15;
-    private final int DOWN_SLOT = 33;
+    public int getNorthSlot() {
+        return 12;
+    }
 
-    private final int[] backgroundSlots = new int[] {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34, 35,
-        36, 37, 38, 39, 40, 41, 42, 43, 44
-    };
+    public int getSouthSlot() {
+        return 30;
+    }
+
+    public int getEastSlot() {
+        return 22;
+    }
+
+    public int getWestSlot() {
+        return 20;
+    }
+
+    public int getUpSlot() {
+        return 15;
+    }
+
+    public int getDownSlot() {
+        return 33;
+    }
+
+    public int[] getBackgroundSlots() {
+        return new int[] {
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34,
+            35, 36, 37, 38, 39, 40, 41, 42, 43, 44
+        };
+    }
 
     private final BlockFace[] FACES = {
         BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
@@ -94,34 +113,34 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
 
             @Override
             public void init() {
-                drawBackground(backgroundSlots);
+                drawBackground(getBackgroundSlots());
 
                 if (getOtherBackgroundSlots() != null && getOtherBackgroundStack() != null) {
                     drawBackground(getOtherBackgroundStack(), getOtherBackgroundSlots());
                 }
 
                 addItem(
-                        NORTH_SLOT,
+                        getNorthSlot(),
                         getDirectionalSlotPane(BlockFace.NORTH, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
                 addItem(
-                        SOUTH_SLOT,
+                        getSouthSlot(),
                         getDirectionalSlotPane(BlockFace.SOUTH, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
                 addItem(
-                        EAST_SLOT,
+                        getEastSlot(),
                         getDirectionalSlotPane(BlockFace.EAST, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
                 addItem(
-                        WEST_SLOT,
+                        getWestSlot(),
                         getDirectionalSlotPane(BlockFace.WEST, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
                 addItem(
-                        UP_SLOT,
+                        getUpSlot(),
                         getDirectionalSlotPane(BlockFace.UP, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
                 addItem(
-                        DOWN_SLOT,
+                        getDownSlot(),
                         getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
                         (player, i, itemStack, clickAction) -> false);
             }
@@ -141,27 +160,27 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
                 SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), direction);
 
                 blockMenu.addMenuClickHandler(
-                        NORTH_SLOT,
+                        getNorthSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.NORTH));
                 blockMenu.addMenuClickHandler(
-                        SOUTH_SLOT,
+                        getSouthSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.SOUTH));
                 blockMenu.addMenuClickHandler(
-                        EAST_SLOT,
+                        getEastSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.EAST));
                 blockMenu.addMenuClickHandler(
-                        WEST_SLOT,
+                        getWestSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.WEST));
                 blockMenu.addMenuClickHandler(
-                        UP_SLOT,
+                        getUpSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.UP));
                 blockMenu.addMenuClickHandler(
-                        DOWN_SLOT,
+                        getDownSlot(),
                         (player, i, itemStack, clickAction) ->
                                 directionClick(player, clickAction, blockMenu, BlockFace.DOWN));
             }
@@ -287,34 +306,34 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
             if (slimefunItem != null) {
                 switch (blockFace) {
                     case NORTH -> blockMenu.replaceExistingItem(
-                            NORTH_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getNorthSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     case SOUTH -> blockMenu.replaceExistingItem(
-                            SOUTH_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getSouthSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     case EAST -> blockMenu.replaceExistingItem(
-                            EAST_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getEastSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     case WEST -> blockMenu.replaceExistingItem(
-                            WEST_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getWestSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     case UP -> blockMenu.replaceExistingItem(
-                            UP_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getUpSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     case DOWN -> blockMenu.replaceExistingItem(
-                            DOWN_SLOT, getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
+                            getDownSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
                     default -> throw new IllegalStateException("Unexpected value: " + blockFace);
                 }
             } else {
                 final Material material = block.getType();
                 switch (blockFace) {
                     case NORTH -> blockMenu.replaceExistingItem(
-                            NORTH_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getNorthSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     case SOUTH -> blockMenu.replaceExistingItem(
-                            SOUTH_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getSouthSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     case EAST -> blockMenu.replaceExistingItem(
-                            EAST_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getEastSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     case WEST -> blockMenu.replaceExistingItem(
-                            WEST_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getWestSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     case UP -> blockMenu.replaceExistingItem(
-                            UP_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getUpSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     case DOWN -> blockMenu.replaceExistingItem(
-                            DOWN_SLOT, getDirectionalSlotPane(blockFace, material, blockFace == direction));
+                            getDownSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
                     default -> throw new IllegalStateException("Unexpected value: " + blockFace);
                 }
             }

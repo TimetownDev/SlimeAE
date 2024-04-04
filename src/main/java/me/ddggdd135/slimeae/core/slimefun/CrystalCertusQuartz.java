@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
 import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
+import javax.annotation.Nonnull;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -18,16 +19,19 @@ public class CrystalCertusQuartz implements GEOResource {
     }
 
     @Override
+    @Nonnull
     public NamespacedKey getKey() {
         return key;
     }
 
     @Override
+    @Nonnull
     public ItemStack getItem() {
         return item.clone();
     }
 
     @Override
+    @Nonnull
     public String getName() {
         return "赛特斯石英水晶";
     }
@@ -38,7 +42,7 @@ public class CrystalCertusQuartz implements GEOResource {
     }
 
     @Override
-    public int getDefaultSupply(World.Environment environment, Biome biome) {
+    public int getDefaultSupply(@Nonnull World.Environment environment, @Nonnull Biome biome) {
 
         if (environment == World.Environment.NORMAL) {
             return 5;

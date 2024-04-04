@@ -57,9 +57,9 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack CHARGER =
             new SlimefunItemStack("CHARGER", new AdvancedCustomItemStack(Material.LECTERN, "&f充能器"));
     public static final SlimefunItemStack ME_IMPORT_BUS = new SlimefunItemStack(
-            "ME_IMPORT_BUS", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS, "{#Bright_Green}ME输入总线"));
-    public static final SlimefunItemStack ME_EXPORT_BUS =
-            new SlimefunItemStack("ME_EXPORT_BUS", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS, "&fME输出总线"));
+            "ME_IMPORT_BUS", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS, "{#Bright_Green}&lME输入总线"));
+    public static final SlimefunItemStack ME_EXPORT_BUS = new SlimefunItemStack(
+            "ME_EXPORT_BUS", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS, "{#Bright_Red}&lME输出总线"));
     public static final SlimefunItemStack ME_STORAGE_BUS = new SlimefunItemStack(
             "ME_STORAGE_BUS", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME存储总线"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(

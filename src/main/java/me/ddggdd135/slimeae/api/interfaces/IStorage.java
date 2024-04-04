@@ -14,6 +14,10 @@ public interface IStorage {
 
     boolean contains(@NonNull ItemRequest[] requests);
 
+    default boolean contains(@NonNull ItemRequest request) {
+        return contains(new ItemRequest[] {request});
+    }
+
     /**
      * 能拿多少拿多少
      */

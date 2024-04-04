@@ -19,14 +19,20 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.Zrips.CMILib.Items.CMIItemStack;
 import org.bukkit.Material;
 import org.bukkit.block.*;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
@@ -215,6 +221,10 @@ public class ItemUtils {
     }
 
     @Nullable public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork) {
+        return getStorage(block, checkNetwork, true);
+    }
+
+    @Nullable public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork, boolean isReadOnly) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (checkNetwork
                 && slimefunBlockData != null
@@ -226,7 +236,19 @@ public class ItemUtils {
         if (inv != null) {
             return new IStorage() {
                 @Override
-                public void pushItem(@NotNull @NonNull ItemStack[] itemStacks) {}
+                public void pushItem(@NonNull ItemStack[] itemStacks) {
+                    if (isReadOnly) return;
+                    BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+                    if (inv == null) return;
+                    for (ItemStack itemStack : itemStacks) {
+                        if (itemStack.getType().isAir()) continue;
+                        int[] inputSlots = inv.getPreset()
+                                .getSlotsAccessedByItemTransport(inv, ItemTransportFlow.INSERT, itemStack);
+                        if (inputSlots == null) continue;
+                        ItemStack rest = inv.pushItem(itemStack, inputSlots);
+                        if (rest != null) itemStack.setAmount(rest.getAmount());
+                    }
+                }
 
                 @Override
                 public boolean contains(ItemRequest[] requests) {
@@ -295,16 +317,7 @@ public class ItemUtils {
                     Container container = (Container) block.getState();
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
-                        ItemStack smelting = furnaceInventory.getSmelting();
-                        boolean sameType = smelting == null || smelting.isSimilar(itemStacks[0]);
-                        if (sameType) {
-                            boolean stackable =
-                                    smelting.getAmount() + itemStacks[0].getAmount() <= smelting.getMaxStackSize();
-                            if (stackable) {
-                                furnaceInventory.addItem(itemStacks[0]);
-                                container.update();
-                            }
-                        }
+                        furnaceInventory.addItem(itemStacks);
                     } else if (container instanceof Chest chest) {
                         Inventory inventory = chest.getBlockInventory();
                         if (InvUtils.fitAll(
@@ -425,5 +438,53 @@ public class ItemUtils {
             items = inventory.getContents();
         }
         return items;
+    }
+
+    public static void setSettingItem(@Nonnull Inventory inv, int slot, @Nonnull ItemStack itemStack) {
+        ItemStack item = itemStack.clone();
+        item.getItemMeta().getPersistentDataContainer().set(MenuItems.MENU_ITEM, PersistentDataType.BOOLEAN, true);
+        inv.setItem(slot, item);
+    }
+
+    @Nullable public static ItemStack getSettingItem(@Nonnull Inventory inv, int slot) {
+        ItemStack itemStack = inv.getItem(slot);
+        if (itemStack == null || itemStack.getType().isAir()) return null;
+        ItemStack item = itemStack.clone();
+        item.getItemMeta().getPersistentDataContainer().remove(MenuItems.MENU_ITEM);
+        return item;
+    }
+
+    @Nonnull
+    public static ChestMenu.MenuClickHandler getSettingSlotClickHandler() {
+        return new ChestMenu.AdvancedMenuClickHandler() {
+            @Override
+            public boolean onClick(
+                    InventoryClickEvent inventoryClickEvent,
+                    Player player,
+                    int i,
+                    ItemStack itemStack,
+                    ClickAction clickAction) {
+                Inventory inventory = inventoryClickEvent.getClickedInventory();
+                ItemStack current = getSettingItem(inventory, i);
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, false, false)) {
+                    if (itemStack != null && !itemStack.getType().isAir()) {
+                        setSettingItem(inventory, i, itemStack);
+                    }
+                } else {
+                    if (itemStack == null || itemStack.getType().isAir()) {
+                        inventory.setItem(i, MenuItems.Setting);
+                    } else {
+                        setSettingItem(inventory, i, itemStack);
+                    }
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
+                return false;
+            }
+        };
     }
 }

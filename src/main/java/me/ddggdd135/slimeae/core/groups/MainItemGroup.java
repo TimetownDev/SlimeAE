@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import net.md_5.bungee.api.ChatColor;
@@ -28,7 +29,10 @@ public class MainItemGroup extends FlexItemGroup {
     }
 
     @Override
-    public boolean isVisible(Player player, PlayerProfile playerProfile, SlimefunGuideMode slimefunGuideMode) {
+    public boolean isVisible(
+            @Nonnull Player player,
+            @Nonnull PlayerProfile playerProfile,
+            @Nonnull SlimefunGuideMode slimefunGuideMode) {
         return true;
     }
 

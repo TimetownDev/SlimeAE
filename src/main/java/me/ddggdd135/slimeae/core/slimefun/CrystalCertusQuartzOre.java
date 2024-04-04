@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
 import java.util.List;
+import javax.annotation.Nonnull;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,10 @@ public class CrystalCertusQuartzOre extends SimpleSlimefunItem<BlockBreakHandler
     public BlockBreakHandler getItemHandler() {
         return new BlockBreakHandler(true, true) {
             @Override
-            public void onPlayerBreak(BlockBreakEvent blockBreakEvent, ItemStack itemStack, List<ItemStack> list) {}
+            public void onPlayerBreak(
+                    @Nonnull BlockBreakEvent blockBreakEvent,
+                    @Nonnull ItemStack itemStack,
+                    @Nonnull List<ItemStack> list) {}
         };
     }
 }
