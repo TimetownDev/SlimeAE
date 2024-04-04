@@ -24,7 +24,7 @@ public class OreGenerator extends BlockPopulator {
     public void populate(@NotNull World world, @NotNull Random random, @NotNull Chunk source) {
         int chunkX = source.getX();
         int chunkZ = source.getZ();
-        for (int i = 0; i < 10; i++) { // 生成10个矿脉
+        for (int i = 0; i < 5; i++) { // 生成5个矿脉
             int centerX = (chunkX << 4) + random.nextInt(16);
             int centerY = random.nextInt(height);
             int centerZ = (chunkZ << 4) + random.nextInt(16);
