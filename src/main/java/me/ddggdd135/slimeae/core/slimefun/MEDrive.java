@@ -10,8 +10,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.slimeae.api.MEItemCellStorage;
-import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -37,14 +36,28 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
+        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+        if (inv == null) return;
+        for (int slot : MEItemStorageCell_Slots) {
+            ItemStack itemStack = inv.getItemInSlot(slot);
+            if (itemStack != null
+                    && !itemStack.getType().isAir()
+                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
+                MEItemStorageCell.updateLore(itemStack);
+                if (SlimeAEPlugin.getSlimefunTickCount() % 60 == 0) {
+                    MEItemStorageCell.saveStorage(itemStack);
+                }
+            }
+        }
+    }
 
     @Nonnull
     private BlockBreakHandler onBlockBreak() {
         return new SimpleBlockBreakHandler() {
 
             @Override
-            public void onBlockBreak(Block b) {
+            public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (inv != null) {
@@ -59,11 +72,25 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         for (int slot : Boarder_Slots) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
+
+        for (int slot : MEItemStorageCell_Slots) {
+            preset.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
+                ItemStack itemStack = preset.getItemInSlot(i);
+                if (itemStack != null
+                        && !itemStack.getType().isAir()
+                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
+                    MEItemStorageCell.updateLore(itemStack);
+                    MEItemStorageCell.saveStorage(itemStack);
+                }
+                return true;
+            });
+        }
     }
 
     @Nullable @Override
     public IStorage getStorage(Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+        if (inv == null) return null;
         StorageCollection storageCollection = new StorageCollection();
         for (int slot : MEItemStorageCell_Slots) {
             ItemStack itemStack = inv.getItemInSlot(slot);

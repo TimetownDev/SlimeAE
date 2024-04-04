@@ -4,11 +4,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataControlle
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Random;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.generator.BlockPopulator;
-import org.bukkit.generator.LimitedRegion;
-import org.bukkit.generator.WorldInfo;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,22 +21,19 @@ public class OreGenerator extends BlockPopulator {
     }
 
     @Override
-    public void populate(
-            @NotNull WorldInfo worldInfo,
-            @NotNull Random random,
-            int chunkX,
-            int chunkZ,
-            @NotNull LimitedRegion limitedRegion) {
+    public void populate(@NotNull World world, @NotNull Random random, @NotNull Chunk source) {
+        int chunkX = source.getX();
+        int chunkZ = source.getZ();
         for (int i = 0; i < 10; i++) { // 生成10个矿脉
             int centerX = (chunkX << 4) + random.nextInt(16);
             int centerY = random.nextInt(height);
             int centerZ = (chunkZ << 4) + random.nextInt(16);
 
-            generateVein(limitedRegion, random, centerX, centerY, centerZ);
+            generateVein(world, random, centerX, centerY, centerZ, source);
         }
     }
 
-    private void generateVein(LimitedRegion limitedRegion, Random random, int centerX, int centerY, int centerZ) {
+    private void generateVein(World world, Random random, int centerX, int centerY, int centerZ, Chunk chunk) {
         int x = centerX;
         int y = centerY;
         int z = centerZ;
@@ -53,18 +47,27 @@ public class OreGenerator extends BlockPopulator {
             } else if (r == 2) {
                 z++;
             }
-            generateBlock(limitedRegion, x, y, z);
+            int chunkX = chunk.getX() << 4; // 将Chunk的坐标左移4位，相当于乘以16
+            int chunkZ = chunk.getZ() << 4; // 将Chunk的坐标左移4位，相当于乘以16
+            Location location = new Location(world, x, y, z);
+            if (location.getBlockX() >= chunkX
+                    && location.getBlockX() < chunkX + 16
+                    && location.getBlockZ() >= chunkZ
+                    && location.getBlockZ() < chunkZ + 16) {
+                // Location在指定的Chunk里
+                generateBlock(world, x, y, z);
+            }
         }
     }
 
-    private void generateBlock(LimitedRegion limitedRegion, int x, int y, int z) {
-        if (!(limitedRegion.getType(new Location(limitedRegion.getWorld(), x, y, z)) == Material.STONE)) return;
-        ;
+    private void generateBlock(World world, int x, int y, int z) {
+        if (world.getType(x, y, z) != Material.STONE) return;
         SlimefunItem slimefunItem = SlimefunItem.getByItem(item);
         if (slimefunItem != null) {
             BlockDataController controller = Slimefun.getDatabaseManager().getBlockDataController();
-            controller.createBlock(new Location(limitedRegion.getWorld(), x, y, z), slimefunItem.getId());
+            controller.createBlock(new Location(world, x, y, z), slimefunItem.getId());
         }
-        limitedRegion.setType(x, y, z, item.getType());
+        ;
+        world.setType(x, y, z, item.getType());
     }
 }

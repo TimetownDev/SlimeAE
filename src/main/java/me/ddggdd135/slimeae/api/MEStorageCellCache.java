@@ -1,59 +1,55 @@
 package me.ddggdd135.slimeae.api;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.tr7zw.changeme.nbtapi.NBTType;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import java.util.*;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
-import java.util.*;
-
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new HashMap<>();
-    private final Map<ItemStack, Integer> storages = new HashMap<>();
+    private static final Map<UUID, ItemStack> instances = new HashMap<>();
+    private final Map<ItemStack, Integer> storages;
     private int storaged;
     private int size;
     private UUID uuid;
+
     private MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
         NBTItem nbtItem = new NBTItem(itemStack, true);
-        NBTCompound nbt = nbtItem.getOrCreateCompound("item_storage");
+        NBTCompoundList nbt = nbtItem.getCompoundList(MEItemStorageCell.ITEM_STORAGE_KEY);
         size = MEItemStorageCell.getSize(itemStack);
-        Map<ItemStack, Integer> storage = ItemUtils.toStorage(nbt);
-        for (ItemStack key : storage.keySet()) {
-            storaged += storage.get(key);
+        storages = ItemUtils.toStorage(nbt);
+        for (ItemStack key : storages.keySet()) {
+            storaged += storages.get(key);
         }
-        if (!nbtItem.hasTag("uuid", NBTType.NBTTagIntArray)) nbtItem.setUUID("uuid", UUID.randomUUID());
-        uuid = nbtItem.getUUID("uuid");
-    }
-
-    private MEStorageCellCache(UUID uuid, int size) {
-        this.uuid = uuid;
-        this.size = size;
+        if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
+            nbtItem.setUUID(MEItemStorageCell.UUID_KEY, UUID.randomUUID());
+        uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
+        cache.put(uuid, this);
     }
 
     public static MEStorageCellCache getMEStorageCellCache(ItemStack itemStack) {
         NBTItem nbtItem = new NBTItem(itemStack, true);
-        if (!nbtItem.hasTag("uuid", NBTType.NBTTagIntArray)) {
-            UUID uuid = UUID.randomUUID();
-            nbtItem.setUUID("uuid", uuid);
-            return new MEStorageCellCache(itemStack);
+        UUID uuid = UUID.randomUUID();
+        if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray)) {
+            nbtItem.setUUID(MEItemStorageCell.UUID_KEY, uuid);
         } else {
-            return getMEStorageCellCache(nbtItem.getUUID("uuid"), MEItemStorageCell.getSize(itemStack));
+            uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
+            if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
         }
+        instances.put(uuid, itemStack);
+        return new MEStorageCellCache(itemStack);
     }
 
-    public static MEStorageCellCache getMEStorageCellCache(UUID uuid, int size) {
-        if (cache.containsKey(uuid)) return cache.get(uuid);
-        else {
-            MEStorageCellCache cellCache = new MEStorageCellCache(uuid, size);
-            cache.put(uuid, cellCache);
-            return cellCache;
-        }
+    @Nullable public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {
+        return cache.getOrDefault(uuid, null);
     }
 
     public int getSize() {
@@ -89,8 +85,9 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            ItemStack template = ItemUtils.createTemplateItem(request.getItemStack());
-            if (!storages.containsKey(template) || storages.getOrDefault(template, 0) < request.getAmount()) return false;
+            ItemStack template = ItemUtils.createTemplateItem(request.getTemplate());
+            if (!storages.containsKey(template) || storages.getOrDefault(template, 0) < request.getAmount())
+                return false;
         }
         return true;
     }
@@ -99,18 +96,18 @@ public class MEStorageCellCache implements IStorage {
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
-            if (storages.containsKey(request.getItemStack())) {
-                int amount = storages.getOrDefault(request.getItemStack(), 0);
+            if (storages.containsKey(request.getTemplate())) {
+                int amount = storages.getOrDefault(request.getTemplate(), 0);
                 if (amount >= request.getAmount()) {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getItemStack(), request.getAmount());
+                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
                     itemStacks.addAll(List.of(tmp));
-                    storages.put(request.getItemStack(), amount - request.getAmount());
+                    storages.put(request.getTemplate(), amount - request.getAmount());
                 } else {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getItemStack(), amount);
+                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
-                    storages.put(request.getItemStack(), 0);
+                    storages.put(request.getTemplate(), 0);
                 }
-                trim(request.getItemStack());
+                trim(request.getTemplate());
             }
         }
         return itemStacks.toArray(new ItemStack[0]);
@@ -137,5 +134,10 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public int hashCode() {
         return Objects.hash(uuid);
+    }
+
+    @Nonnull
+    public static Map<UUID, ItemStack> getInstances() {
+        return instances;
     }
 }

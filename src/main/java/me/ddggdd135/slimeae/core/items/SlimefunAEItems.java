@@ -7,6 +7,7 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -56,7 +57,7 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack CHARGER =
             new SlimefunItemStack("CHARGER", new AdvancedCustomItemStack(Material.LECTERN, "&f充能器"));
     public static final SlimefunItemStack ME_IMPORT_BUS = new SlimefunItemStack(
-            "ME_IMPORT_BUS", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS, "&fME输入总线"));
+            "ME_IMPORT_BUS", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS, "{#Bright_Green}ME输入总线"));
     public static final SlimefunItemStack ME_EXPORT_BUS =
             new SlimefunItemStack("ME_EXPORT_BUS", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS, "&fME输出总线"));
     public static final SlimefunItemStack ME_STORAGE_BUS = new SlimefunItemStack(
@@ -231,12 +232,13 @@ public class SlimefunAEItems {
                 .register(plugin);
         // Materials
 
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MATERIAL,
-                        CRYSTAL_CERTUS_QUARTZ,
-                        SlimefunAERecipeTypes.BLOCK_DESTROY,
-                        new ItemStack[] {null, null, null, null, CERTUS_QUARTZ_ORE})
-                .register(plugin);
+        SlimefunItem crystal_certus_quartz = new SlimefunItem(
+                SlimefunAEItemGroups.MATERIAL,
+                CRYSTAL_CERTUS_QUARTZ,
+                SlimefunAERecipeTypes.BLOCK_DESTROY,
+                new ItemStack[] {null, null, null, null, CERTUS_QUARTZ_ORE});
+        crystal_certus_quartz.setRecipeOutput(ItemUtils.createItems(CRYSTAL_CERTUS_QUARTZ, 5)[0]);
+        crystal_certus_quartz.register(plugin);
         CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
         crystalCertusQuartz.register();
         new SlimefunItem(

@@ -27,6 +27,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlock {
     public static final int[] Boarder_Slots =
@@ -51,39 +52,42 @@ public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlo
                 for (int slot : Setting_Slots) {
                     ItemStack setting = inv.getItemInSlot(slot);
                     if (setting == null || setting.getType().isAir()) {
-                        inv.replaceExistingItem(slot, MenuItems.Setting);
+                        setSettingItem(inv.getInventory(), slot, MenuItems.Setting);
                     }
                 }
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-                if (info != null) {
-                    IStorage networkStorage = info.getStorage();
-                    for (int slot : Item_Slots) {
-                        int settingSlot = slot - 9;
-                        ItemStack setting = inv.getItemInSlot(settingSlot);
-                        ItemStack itemStack = inv.getItemInSlot(slot);
-                        if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, false, false)) {
-                            if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
-                            continue;
-                        }
-                        int amount = 0;
-                        if (itemStack != null && !itemStack.getType().isAir()) {
-                            amount = itemStack.getAmount();
-                        }
-                        if (amount > setting.getAmount()) {
-                            ItemStack toPush = itemStack.clone();
-                            toPush.setAmount(amount - setting.getAmount());
-                            networkStorage.pushItem(toPush);
-                            itemStack.setAmount(setting.getAmount() + toPush.getAmount());
-                            continue;
-                        }
+                if (info == null) return;
+                IStorage networkStorage = info.getStorage();
+                for (int slot : Item_Slots) {
+                    int settingSlot = slot - 9;
+                    ItemStack setting = getSettingItem(inv.getInventory(), settingSlot);
+                    ItemStack itemStack = inv.getItemInSlot(slot);
+                    if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, false, false)
+                            || (itemStack != null
+                                    && !itemStack.getType().isAir()
+                                    && !SlimefunUtils.isItemSimilar(setting, itemStack, false, false))) {
+                        if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
+                        continue;
+                    }
 
-                        ItemStack[] recieved =
-                                networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount() - amount));
-                        if (recieved.length != 0) {
-                            if (itemStack != null && !itemStack.getType().isAir())
-                                itemStack.setAmount(amount + recieved[0].getAmount());
-                            else inv.replaceExistingItem(slot, recieved[0]);
-                        }
+                    int amount = 0;
+                    if (itemStack != null && !itemStack.getType().isAir()) {
+                        amount = itemStack.getAmount();
+                    }
+                    if (amount > setting.getAmount()) {
+                        ItemStack toPush = itemStack.clone();
+                        toPush.setAmount(amount - setting.getAmount());
+                        networkStorage.pushItem(toPush);
+                        itemStack.setAmount(setting.getAmount() + toPush.getAmount());
+                        continue;
+                    }
+
+                    ItemStack[] received =
+                            networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount() - amount));
+                    if (received.length != 0) {
+                        if (itemStack != null && !itemStack.getType().isAir())
+                            itemStack.setAmount(amount + received[0].getAmount());
+                        else inv.replaceExistingItem(slot, received[0]);
                     }
                 }
             }
@@ -120,16 +124,16 @@ public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlo
                         ItemStack itemStack,
                         ClickAction clickAction) {
                     Inventory inventory = inventoryClickEvent.getClickedInventory();
-                    ItemStack current = inventory.getItem(slot);
+                    ItemStack current = getSettingItem(inventory, slot);
                     if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, false, false)) {
                         if (itemStack != null && !itemStack.getType().isAir()) {
-                            inventory.setItem(slot, itemStack);
+                            setSettingItem(inventory, slot, itemStack);
                         }
                     } else {
                         if (itemStack == null || itemStack.getType().isAir()) {
                             inventory.setItem(slot, MenuItems.Setting);
                         } else {
-                            inventory.setItem(slot, itemStack);
+                            setSettingItem(inventory, slot, itemStack);
                         }
                     }
 
@@ -152,5 +156,19 @@ public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlo
     @Override
     public int[] getOutputSlots() {
         return Item_Slots;
+    }
+
+    private void setSettingItem(Inventory inv, int slot, ItemStack itemStack) {
+        ItemStack item = itemStack.clone();
+        item.getItemMeta().getPersistentDataContainer().set(MenuItems.MENU_ITEM, PersistentDataType.BOOLEAN, true);
+        inv.setItem(slot, item);
+    }
+
+    private ItemStack getSettingItem(Inventory inv, int slot) {
+        ItemStack itemStack = inv.getItem(slot);
+        if (itemStack == null || itemStack.getType().isAir()) return null;
+        ItemStack item = itemStack.clone();
+        item.getItemMeta().getPersistentDataContainer().remove(MenuItems.MENU_ITEM);
+        return item;
     }
 }

@@ -109,10 +109,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                                 inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                 int rest = amounts.get(itemStack) - item.getAmount();
                                 if (rest != 0) amounts.put(itemStack, rest);
-                                else {
-                                    amounts.remove(itemStack);
-                                    break;
-                                }
+                                else break;
                             }
                         }
                     }

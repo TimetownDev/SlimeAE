@@ -72,18 +72,18 @@ public class ItemStorage implements IStorage {
     @NonNull public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
-            if (storage.containsKey(request.getItemStack())) {
-                int amount = storage.get(request.getItemStack());
+            if (storage.containsKey(request.getTemplate())) {
+                int amount = storage.get(request.getTemplate());
                 if (amount >= request.getAmount()) {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getItemStack(), request.getAmount());
+                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
                     itemStacks.addAll(List.of(tmp));
-                    storage.put(request.getItemStack(), amount - request.getAmount());
+                    storage.put(request.getTemplate(), amount - request.getAmount());
                 } else {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getItemStack(), amount);
+                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
-                    storage.put(request.getItemStack(), 0);
+                    storage.put(request.getTemplate(), 0);
                 }
-                trim(request.getItemStack());
+                trim(request.getTemplate());
             }
         }
         return itemStacks.toArray(new ItemStack[0]);

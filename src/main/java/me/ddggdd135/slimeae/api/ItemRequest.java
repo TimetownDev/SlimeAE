@@ -4,20 +4,20 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemRequest {
-    private ItemStack itemStack;
+    private ItemStack template;
     private int amount;
 
-    public ItemRequest(ItemStack itemStack, int amount) {
-        this.itemStack = ItemUtils.createTemplateItem(itemStack);
+    public ItemRequest(ItemStack template, int amount) {
+        this.template = ItemUtils.createTemplateItem(template);
         this.amount = amount;
     }
 
-    public ItemStack getItemStack() {
-        return itemStack;
+    public ItemStack getTemplate() {
+        return template;
     }
 
-    public void setItemStack(ItemStack itemStack) {
-        this.itemStack = ItemUtils.createTemplateItem(itemStack);
+    public void setTemplate(ItemStack template) {
+        this.template = ItemUtils.createTemplateItem(template);
     }
 
     public int getAmount() {

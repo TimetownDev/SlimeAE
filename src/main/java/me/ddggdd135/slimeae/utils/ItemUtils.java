@@ -2,11 +2,10 @@ package me.ddggdd135.slimeae.utils;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTContainer;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
@@ -34,9 +33,9 @@ import org.jetbrains.annotations.NotNull;
 public class ItemUtils {
     @Nonnull
     public static ItemStack createTemplateItem(ItemStack item) {
-        ItemStack itemStack = item.clone();
-        itemStack.setAmount(1);
-        return itemStack;
+        ItemStack template = item.clone();
+        template.setAmount(1);
+        return template;
     }
 
     @Nonnull
@@ -72,7 +71,7 @@ public class ItemUtils {
     public static ItemStack[] createItems(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
-            itemStacks.addAll(List.of(createItems(request.getItemStack(), request.getAmount())));
+            itemStacks.addAll(List.of(createItems(request.getTemplate(), request.getAmount())));
         }
         return itemStacks.toArray(new ItemStack[0]);
     }
@@ -90,7 +89,7 @@ public class ItemUtils {
 
     public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            ItemStack template = ItemUtils.createTemplateItem(request.getItemStack());
+            ItemStack template = ItemUtils.createTemplateItem(request.getTemplate());
             if (!storage.containsKey(template) || storage.get(template) < request.getAmount()) return false;
         }
         return true;
@@ -148,9 +147,13 @@ public class ItemUtils {
     }
 
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
+        List<ItemStack> toRemove = new ArrayList<>();
         for (ItemStack itemStack : storage.keySet()) {
             if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0)
-                storage.remove(itemStack);
+                toRemove.add(itemStack);
+        }
+        for (ItemStack itemStack : toRemove) {
+            storage.remove(itemStack);
         }
     }
 
@@ -178,10 +181,9 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static Map<ItemStack, Integer> toStorage(@Nonnull NBTCompound nbt) {
+    public static Map<ItemStack, Integer> toStorage(@Nonnull NBTCompoundList nbt) {
         Map<ItemStack, Integer> result = new HashMap<>();
-        for (String key : nbt.getKeys()) {
-            ReadWriteNBT compound = nbt.getCompound(key);
+        for (ReadWriteNBT compound : nbt) {
             ItemStack itemStack = compound.getItemStack("item");
             int amount = compound.getInteger("amount");
             result.put(itemStack, amount);
@@ -190,14 +192,16 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static NBTCompound toNBT(@Nonnull Map<ItemStack, Integer> storage) {
+    public static NBTCompoundList toNBT(@Nonnull Map<ItemStack, Integer> storage) {
         NBTContainer container = new NBTContainer();
+        NBTCompoundList list = container.getCompoundList("item_storage");
         for (ItemStack itemStack : storage.keySet()) {
-            ReadWriteNBT compound = container.getOrCreateCompound(String.valueOf(itemStack.hashCode()));
+            ReadWriteNBT compound = new NBTContainer();
             compound.setItemStack("item", itemStack);
             compound.setInteger("amount", storage.get(itemStack));
+            list.addCompound(compound);
         }
-        return container;
+        return list;
     }
 
     public static String getName(@Nonnull ItemStack itemStack) {
@@ -211,10 +215,11 @@ public class ItemUtils {
     }
 
     @Nullable public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork) {
-        SlimefunBlockData slimefunBlockData =
-                Slimefun.getDatabaseManager().getBlockDataController().getBlockData(block.getLocation());
-        if (checkNetwork && slimefunBlockData != null) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) return null;
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        if (checkNetwork
+                && slimefunBlockData != null
+                && SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) {
+            return null;
         }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return null;
@@ -255,10 +260,7 @@ public class ItemUtils {
                                     inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                     int rest = amounts.get(itemStack) - item.getAmount();
                                     if (rest != 0) amounts.put(itemStack, rest);
-                                    else {
-                                        amounts.remove(itemStack);
-                                        break;
-                                    }
+                                    else break;
                                 }
                             }
                         }
@@ -339,10 +341,7 @@ public class ItemUtils {
                                     int rest = amounts.get(itemStack) - item.getAmount();
                                     item.setAmount(0);
                                     if (rest != 0) amounts.put(itemStack, rest);
-                                    else {
-                                        amounts.remove(itemStack);
-                                        break;
-                                    }
+                                    else break;
                                 }
                             }
                         }
@@ -381,6 +380,36 @@ public class ItemUtils {
                     return block.getState() instanceof Chest;
                 }
             };
+        }
+        return null;
+    }
+
+    @Nullable public static ItemStack getItemStack(@Nonnull Block block) {
+        return getItemStack(block, true);
+    }
+
+    @Nullable public static ItemStack getItemStack(@Nonnull Block block, boolean checkNetwork) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        if (checkNetwork
+                && slimefunBlockData != null
+                && SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) {
+            return null;
+        }
+        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+        if (block.getBlockData().getMaterial().isAir()) return null;
+        if (inv != null) {
+            int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
+            if (outputSlots == null) return null;
+            for (int slot : outputSlots) {
+                ItemStack item = inv.getItemInSlot(slot);
+                if (item == null || item.getType().isAir()) continue;
+                return item;
+            }
+        } else if (block.getState() instanceof Container) {
+            ItemStack[] items = getVanillaItemStacks(block);
+            for (ItemStack itemStack : items) {
+                if (itemStack != null && !itemStack.getType().isAir()) return itemStack;
+            }
         }
         return null;
     }

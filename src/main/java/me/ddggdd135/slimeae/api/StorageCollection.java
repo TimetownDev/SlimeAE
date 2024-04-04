@@ -45,10 +45,10 @@ public class StorageCollection implements IStorage {
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
-            if (rest.containsKey(request.getItemStack())) {
-                rest.put(request.getItemStack(), rest.get(request.getItemStack()) + request.getAmount());
+            if (rest.containsKey(request.getTemplate())) {
+                rest.put(request.getTemplate(), rest.get(request.getTemplate()) + request.getAmount());
             } else {
-                rest.put(request.getItemStack(), request.getAmount());
+                rest.put(request.getTemplate(), request.getAmount());
             }
         }
         ItemUtils.trim(rest);
@@ -58,9 +58,7 @@ public class StorageCollection implements IStorage {
             rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
             ItemUtils.trim(rest);
             found.addItem(itemStacks);
-            if (rest.keySet().isEmpty()) {
-                break;
-            }
+            if (rest.keySet().isEmpty()) break;
         }
 
         return found.toItemStacks();
