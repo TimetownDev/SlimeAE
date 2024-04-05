@@ -11,6 +11,10 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
@@ -28,6 +32,7 @@ import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -35,6 +40,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class METerminal extends SlimefunItem implements IMEObject {
+    public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
+            itemStackIntegerEntry -> {
+                ItemStack itemStack = itemStackIntegerEntry.getKey();
+                SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
+                if (slimefunItem != null) {
+                    return CMIChatColor.stripColor(slimefunItem.getItemName());
+                } else {
+                    return CMIChatColor.stripColor(itemStack.getItemMeta().getDisplayName());
+                }
+            },
+            Collator.getInstance(Locale.CHINA)::compare);
+
+    public static final Comparator<Map.Entry<ItemStack, Integer>> NUMERICAL_SORT = Map.Entry.comparingByValue();
+
     public int[] getBackgroundSlots() {
         return new int[] {17, 26};
     }
@@ -80,13 +99,7 @@ public class METerminal extends SlimefunItem implements IMEObject {
 
             @Override
             public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
-                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
-                if (inv == null) return;
-                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(b.getLocation());
-                if (info == null) return;
-                ItemStack itemStack = inv.getItemInSlot(getInputSlot());
-                if (itemStack != null && !itemStack.getType().isAir())
-                    info.getStorage().pushItem(itemStack);
+                METerminal.this.tick(b);
             }
         });
     }
@@ -114,7 +127,12 @@ public class METerminal extends SlimefunItem implements IMEObject {
                 });
 
                 inv.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
-                inv.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> false);
+                inv.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> {
+                    Comparator<Map.Entry<ItemStack, Integer>> sort = getSort(b);
+                    if (sort == ALPHABETICAL_SORT) setSort(b, 1);
+                    if (sort == NUMERICAL_SORT) setSort(b, 0);
+                    return false;
+                });
 
                 inv.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
                 inv.addMenuClickHandler(getFilter(), (player, i, itemStack, clickAction) -> false);
@@ -206,6 +224,23 @@ public class METerminal extends SlimefunItem implements IMEObject {
         StorageCacheUtils.setData(block.getLocation(), "page", String.valueOf(value));
     }
 
+    public static Comparator<Map.Entry<ItemStack, Integer>> getSort(Block block) {
+        String value = StorageCacheUtils.getData(block.getLocation(), "sort");
+        if (value == null) return ALPHABETICAL_SORT;
+        int id = Integer.parseInt(value);
+        if (id == 0) return ALPHABETICAL_SORT;
+        if (id == 1) return NUMERICAL_SORT;
+        return ALPHABETICAL_SORT;
+    }
+
+    public static void setSort(Block block, int value) {
+        if (value < 0 || value > 1) {
+            StorageCacheUtils.setData(block.getLocation(), "sort", "0");
+            return;
+        }
+        StorageCacheUtils.setData(block.getLocation(), "sort", String.valueOf(value));
+    }
+
     public void updateGui(Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (inv == null) return;
@@ -221,7 +256,10 @@ public class METerminal extends SlimefunItem implements IMEObject {
             page = storage.keySet().size() / getDisplaySlots().length;
             setPage(block, page);
         }
-        ItemStack[] itemStacks = storage.keySet().toArray(new ItemStack[0]);
+        List<Map.Entry<ItemStack, Integer>> items =
+                storage.entrySet().stream().sorted(getSort(block)).toList();
+
+        ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(new ItemStack[0]);
         for (int i = 0; i < getDisplaySlots().length; i++) {
             if (itemStacks.length - 1 < i) break;
             ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
@@ -236,5 +274,13 @@ public class METerminal extends SlimefunItem implements IMEObject {
         updateGui(block);
     }
 
-    public void tick(Block block) {}
+    @OverridingMethodsMustInvokeSuper
+    public void tick(@Nonnull Block block) {
+        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+        if (inv == null) return;
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        if (info == null) return;
+        ItemStack itemStack = inv.getItemInSlot(getInputSlot());
+        if (itemStack != null && !itemStack.getType().isAir()) info.getStorage().pushItem(itemStack);
+    }
 }
