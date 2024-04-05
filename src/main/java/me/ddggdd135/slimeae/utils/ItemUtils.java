@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.utils;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTContainer;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -24,19 +26,25 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIItemStack;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemUtils {
+    public static final NamespacedKey ITEM_STORAGE_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "item_storage");
+
     @Nonnull
     public static ItemStack createTemplateItem(ItemStack item) {
         ItemStack template = item.clone();
@@ -486,5 +494,30 @@ public class ItemUtils {
                 return false;
             }
         };
+    }
+
+    @Nonnull
+    public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount) {
+        ItemStack result = itemStack.clone();
+        result.getItemMeta()
+                .getPersistentDataContainer()
+                .set(
+                        ITEM_STORAGE_KEY,
+                        PersistentDataType.STRING,
+                        DataUtils.itemStack2String(createTemplateItem(itemStack)));
+        result.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+        List<Component> lore = result.getItemMeta().lore();
+        lore.add(Component.text(""));
+        lore.add(Component.text(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}")));
+        result.getItemMeta().lore(lore);
+        return result;
+    }
+
+    @Nullable public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
+        PersistentDataContainer dataContainer = itemStack.getItemMeta().getPersistentDataContainer();
+        if (!dataContainer.has(ITEM_STORAGE_KEY, PersistentDataType.STRING)) return null;
+        String string =
+                itemStack.getItemMeta().getPersistentDataContainer().get(ITEM_STORAGE_KEY, PersistentDataType.STRING);
+        return DataUtils.string2ItemStack(string);
     }
 }
