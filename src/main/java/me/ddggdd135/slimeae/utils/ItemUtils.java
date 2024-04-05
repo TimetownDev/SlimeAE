@@ -28,7 +28,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIItemStack;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.*;
@@ -37,6 +36,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -122,6 +122,7 @@ public class ItemUtils {
     public static Map<ItemStack, Integer> getAmounts(@Nonnull ItemStack[] itemStacks) {
         Map<ItemStack, Integer> storage = new HashMap<>();
         for (ItemStack itemStack : itemStacks) {
+            if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = ItemUtils.createTemplateItem(itemStack);
             if (storage.containsKey(template)) {
                 storage.put(template, storage.get(template) + itemStack.getAmount());
@@ -450,7 +451,9 @@ public class ItemUtils {
 
     public static void setSettingItem(@Nonnull Inventory inv, int slot, @Nonnull ItemStack itemStack) {
         ItemStack item = itemStack.clone();
-        item.getItemMeta().getPersistentDataContainer().set(MenuItems.MENU_ITEM, PersistentDataType.BOOLEAN, true);
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().set(MenuItems.MENU_ITEM, PersistentDataType.BOOLEAN, true);
+        item.setItemMeta(meta);
         inv.setItem(slot, item);
     }
 
@@ -458,7 +461,9 @@ public class ItemUtils {
         ItemStack itemStack = inv.getItem(slot);
         if (itemStack == null || itemStack.getType().isAir()) return null;
         ItemStack item = itemStack.clone();
-        item.getItemMeta().getPersistentDataContainer().remove(MenuItems.MENU_ITEM);
+        ItemMeta meta = item.getItemMeta();
+        meta.getPersistentDataContainer().remove(MenuItems.MENU_ITEM);
+        item.setItemMeta(meta);
         return item;
     }
 
@@ -474,7 +479,7 @@ public class ItemUtils {
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = getSettingItem(inventory, i);
-                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, false, false)) {
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, true, false)) {
                     if (itemStack != null && !itemStack.getType().isAir()) {
                         setSettingItem(inventory, i, itemStack);
                     }
@@ -499,17 +504,19 @@ public class ItemUtils {
     @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount) {
         ItemStack result = itemStack.clone();
-        result.getItemMeta()
-                .getPersistentDataContainer()
+        ItemMeta meta = result.getItemMeta();
+        meta.getPersistentDataContainer()
                 .set(
                         ITEM_STORAGE_KEY,
                         PersistentDataType.STRING,
                         DataUtils.itemStack2String(createTemplateItem(itemStack)));
         result.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
-        List<Component> lore = result.getItemMeta().lore();
-        lore.add(Component.text(""));
-        lore.add(Component.text(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}")));
-        result.getItemMeta().lore(lore);
+        List<String> lore = meta.getLore();
+        if (lore == null) lore = new ArrayList<>();
+        lore.add("");
+        lore.add(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}"));
+        meta.setLore(lore);
+        result.setItemMeta(meta);
         return result;
     }
 

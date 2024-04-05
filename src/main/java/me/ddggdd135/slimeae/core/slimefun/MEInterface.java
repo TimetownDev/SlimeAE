@@ -58,16 +58,17 @@ public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlo
                     int settingSlot = slot - 9;
                     ItemStack setting = ItemUtils.getSettingItem(inv.getInventory(), settingSlot);
                     ItemStack itemStack = inv.getItemInSlot(slot);
-                    if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, false, false)
-                            || (itemStack != null
-                                    && !itemStack.getType().isAir()
-                                    && !SlimefunUtils.isItemSimilar(setting, itemStack, false, false))) {
-                        if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
+                    if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
+                        if (itemStack != null
+                                && !itemStack.getType().isAir()
+                                && !SlimefunUtils.isItemSimilar(setting, itemStack, true, false))
+                            networkStorage.pushItem(itemStack);
                         continue;
                     }
-                    if (itemStack == null || itemStack.getType().isAir()) continue;
 
-                    int amount = itemStack.getAmount();
+                    int amount = 0;
+                    if (itemStack != null && !itemStack.getType().isAir()) amount = itemStack.getAmount();
+                    if (amount == setting.getAmount()) continue; // 节约性能
                     if (amount > setting.getAmount()) {
                         ItemStack toPush = itemStack.clone();
                         toPush.setAmount(amount - setting.getAmount());
@@ -79,7 +80,8 @@ public class MEInterface extends SlimefunItem implements IMEObject, InventoryBlo
                     ItemStack[] received =
                             networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount() - amount));
                     if (received.length != 0) {
-                        if (!itemStack.getType().isAir()) itemStack.setAmount(amount + received[0].getAmount());
+                        if (itemStack != null && !itemStack.getType().isAir())
+                            itemStack.setAmount(amount + received[0].getAmount());
                         else inv.replaceExistingItem(slot, received[0]);
                     }
                 }

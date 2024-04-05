@@ -56,10 +56,10 @@ public class MEExportBus extends MEBus {
         BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
         for (int slot : Setting_Slots) {
             ItemStack setting = ItemUtils.getSettingItem(inv.getInventory(), slot);
-            if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, false, false)) continue;
+            if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) continue;
             ItemRequest request = new ItemRequest(setting, setting.getAmount());
             if (targetInv != null) {
-                if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, false, false)) continue;
+                if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) continue;
                 int[] inputSlots = targetInv
                         .getPreset()
                         .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);

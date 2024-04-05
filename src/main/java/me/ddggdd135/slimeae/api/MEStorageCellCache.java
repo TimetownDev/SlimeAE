@@ -97,14 +97,16 @@ public class MEStorageCellCache implements IStorage {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storages.containsKey(request.getTemplate())) {
-                int amount = storages.getOrDefault(request.getTemplate(), 0);
+                int amount = storages.get(request.getTemplate());
                 if (amount >= request.getAmount()) {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
                     itemStacks.addAll(List.of(tmp));
+                    stored -= request.getAmount();
                     storages.put(request.getTemplate(), amount - request.getAmount());
                 } else {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
+                    stored -= storages.get(request.getTemplate());
                     storages.put(request.getTemplate(), 0);
                 }
                 trim(request.getTemplate());

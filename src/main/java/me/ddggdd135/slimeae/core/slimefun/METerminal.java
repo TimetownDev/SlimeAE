@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -16,12 +17,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
+import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
+import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -31,7 +34,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class METerminal extends SlimefunItem {
+public class METerminal extends SlimefunItem implements IMEObject {
     public int[] getBackgroundSlots() {
         return new int[] {17, 26};
     }
@@ -69,18 +72,56 @@ public class METerminal extends SlimefunItem {
 
     public METerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
+        addItemHandler(new BlockTicker() {
+            @Override
+            public boolean isSynchronized() {
+                return true;
+            }
+
+            @Override
+            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
+                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
+                if (inv == null) return;
+                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(b.getLocation());
+                if (info == null) return;
+                ItemStack itemStack = inv.getItemInSlot(getInputSlot());
+                if (itemStack != null && !itemStack.getType().isAir())
+                    info.getStorage().pushItem(itemStack);
+            }
+        });
     }
 
     @Override
     public void postRegister() {
-        new BlockMenuPreset(this.getId(), this.getItemName()) {
+        constructMenu(new BlockMenuPreset(this.getId(), this.getItemName()) {
             @Override
             public void init() {}
 
             @Override
             public void newInstance(@Nonnull BlockMenu inv, @Nonnull Block b) {
+                inv.replaceExistingItem(getPageNext(), MenuItems.PAGE_NEXT_STACK);
+                inv.addMenuClickHandler(getPageNext(), (player, i, itemStack, clickAction) -> {
+                    setPage(b, getPage(b) + 1);
+                    updateGui(b);
+                    return false;
+                });
+
+                inv.replaceExistingItem(getPagePrevious(), MenuItems.PAGE_PREVIOUS_STACK);
+                inv.addMenuClickHandler(getPagePrevious(), (player, i, itemStack, clickAction) -> {
+                    setPage(b, getPage(b) - 1);
+                    updateGui(b);
+                    return false;
+                });
+
+                inv.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
+                inv.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> false);
+
+                inv.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
+                inv.addMenuClickHandler(getFilter(), (player, i, itemStack, clickAction) -> false);
+
                 for (int slot : getDisplaySlots()) {
-                    inv.addItem(slot, MenuItems.Empty, new ChestMenu.AdvancedMenuClickHandler() {
+                    inv.replaceExistingItem(slot, MenuItems.Empty);
+                    inv.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
                         @Override
                         public boolean onClick(
                                 InventoryClickEvent inventoryClickEvent,
@@ -95,8 +136,8 @@ public class METerminal extends SlimefunItem {
                             ItemStack itemStack = inv.getItemInSlot(i);
                             if (!(itemStack == null
                                     || itemStack.getType().isAir()
-                                    || SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, false, false))) {
-                                ItemStack template = ItemUtils.createTemplateItem(itemStack);
+                                    || SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false))) {
+                                ItemStack template = ItemUtils.createTemplateItem(ItemUtils.getDisplayItem(itemStack));
                                 template.setAmount(template.getMaxStackSize());
                                 if (clickAction.isShiftClicked()
                                         && InvUtils.fits(
@@ -106,11 +147,13 @@ public class METerminal extends SlimefunItem {
                                                         .toArray())) {
                                     playerInventory.addItem(networkStorage.tryTakeItem(
                                             new ItemRequest(template, template.getMaxStackSize())));
-                                } else {
+                                } else if (cursor.getType().isAir()
+                                        || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
+                                                && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
                                     ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(template, 1));
                                     if (gotten.length != 0) {
-                                        ItemStack newCursor = cursor.clone();
-                                        newCursor.add(gotten[0].getAmount());
+                                        ItemStack newCursor = gotten[0];
+                                        newCursor.add(cursor.getAmount());
                                         player.setItemOnCursor(newCursor);
                                     }
                                 }
@@ -138,11 +181,12 @@ public class METerminal extends SlimefunItem {
             public int[] getSlotsAccessedByItemTransport(ItemTransportFlow flow) {
                 return new int[0];
             }
-        };
+        });
     }
 
     @OverridingMethodsMustInvokeSuper
     protected void constructMenu(BlockMenuPreset preset) {
+        preset.setSize(6 * 9);
         for (int slot : getBackgroundSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
@@ -150,11 +194,15 @@ public class METerminal extends SlimefunItem {
 
     public static int getPage(Block block) {
         String value = StorageCacheUtils.getData(block.getLocation(), "page");
-        if (value == null) return 0;
-        return Integer.getInteger(value);
+        if (value == null || Integer.parseInt(value) < 0) return 0;
+        return Integer.parseInt(value);
     }
 
     public static void setPage(Block block, int value) {
+        if (value < 0) {
+            StorageCacheUtils.setData(block.getLocation(), "page", "0");
+            return;
+        }
         StorageCacheUtils.setData(block.getLocation(), "page", String.valueOf(value));
     }
 
@@ -176,10 +224,17 @@ public class METerminal extends SlimefunItem {
         ItemStack[] itemStacks = storage.keySet().toArray(new ItemStack[0]);
         for (int i = 0; i < getDisplaySlots().length; i++) {
             if (itemStacks.length - 1 < i) break;
-            ItemStack itemStack = itemStacks[i];
+            ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
             if (itemStack == null || itemStack.getType().isAir()) continue;
             int slot = getDisplaySlots()[i];
             inv.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, storage.get(itemStack)));
         }
     }
+
+    @Override
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
+        updateGui(block);
+    }
+
+    public void tick(Block block) {}
 }

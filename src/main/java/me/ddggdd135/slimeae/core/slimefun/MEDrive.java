@@ -61,6 +61,15 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (inv != null) {
+                    for (int slot : MEItemStorageCell_Slots) {
+                        ItemStack itemStack = inv.getItemInSlot(slot);
+                        if (itemStack != null
+                                && !itemStack.getType().isAir()
+                                && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
+                            MEItemStorageCell.updateLore(itemStack);
+                            MEItemStorageCell.saveStorage(itemStack);
+                        }
+                    }
                     inv.dropItems(b.getLocation(), MEItemStorageCell_Slots);
                 }
             }
