@@ -151,7 +151,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         IStorage networkStorage = info.getStorage();
         Map<ItemStack, Integer> storage = networkStorage.getStorage();
         int page = getPage(block);
-        if (page > (storage.keySet().size() / getDisplaySlots().length) - 1) {
+        if (page > storage.keySet().size() / getDisplaySlots().length - 1) {
             page = storage.keySet().size() / getDisplaySlots().length - 1;
             setPage(block, page);
         }
