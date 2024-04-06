@@ -253,7 +253,7 @@ public class METerminal extends SlimefunItem implements IMEObject {
         Map<ItemStack, Integer> storage = networkStorage.getStorage();
         int page = getPage(block);
         if (page > (storage.keySet().size() / getDisplaySlots().length) - 1) {
-            page = storage.keySet().size() / getDisplaySlots().length;
+            page = storage.keySet().size() / getDisplaySlots().length - 1;
             setPage(block, page);
         }
         List<Map.Entry<ItemStack, Integer>> items =
