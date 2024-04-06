@@ -527,4 +527,9 @@ public class ItemUtils {
                 itemStack.getItemMeta().getPersistentDataContainer().get(ITEM_STORAGE_KEY, PersistentDataType.STRING);
         return DataUtils.string2ItemStack(string);
     }
+
+    public static <T extends SlimefunItem> T setRecipeOutput(@Nonnull T item, @Nonnull ItemStack output) {
+        item.setRecipeOutput(output);
+        return item;
+    }
 }
