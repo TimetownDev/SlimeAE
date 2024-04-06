@@ -18,10 +18,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
@@ -36,7 +34,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public abstract class MEBus extends SlimefunItem implements IMEObject {
+public abstract class MEBus extends TicingBlock implements IMEObject, InventoryBlock {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
     public int getNorthSlot() {
@@ -79,133 +77,97 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
 
     public MEBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
-
-        addItemHandler(
-                new BlockPlaceHandler(false) {
-                    @Override
-                    public void onPlayerPlace(@Nonnull BlockPlaceEvent event) {
-                        var blockData =
-                                StorageCacheUtils.getBlock(event.getBlock().getLocation());
-                        if (blockData != null) {
-                            blockData.setData(
-                                    dataKeyOwner,
-                                    event.getPlayer().getUniqueId().toString());
-                            blockData.setData(dataKey, BlockFace.SELF.name());
-                        }
-                    }
-                },
-                new BlockTicker() {
-                    @Override
-                    public boolean isSynchronized() {
-                        return true;
-                    }
-
-                    @Override
-                    public void tick(Block block, SlimefunItem slimefunItem, SlimefunBlockData data) {
-                        MEBus.this.tick(data);
-                    }
-                });
+        createPreset(this);
+        addItemHandler(new BlockPlaceHandler(false) {
+            @Override
+            public void onPlayerPlace(@Nonnull BlockPlaceEvent event) {
+                var blockData = StorageCacheUtils.getBlock(event.getBlock().getLocation());
+                if (blockData != null) {
+                    blockData.setData(
+                            dataKeyOwner, event.getPlayer().getUniqueId().toString());
+                    blockData.setData(dataKey, BlockFace.SELF.name());
+                }
+            }
+        });
     }
 
     @Override
-    public void postRegister() {
-        new BlockMenuPreset(this.getId(), this.getItemName()) {
-
-            @Override
-            public void init() {
-                drawBackground(getBackgroundSlots());
-
-                if (getOtherBackgroundSlots() != null && getOtherBackgroundStack() != null) {
-                    drawBackground(getOtherBackgroundStack(), getOtherBackgroundSlots());
-                }
-
-                addItem(
-                        getNorthSlot(),
-                        getDirectionalSlotPane(BlockFace.NORTH, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-                addItem(
-                        getSouthSlot(),
-                        getDirectionalSlotPane(BlockFace.SOUTH, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-                addItem(
-                        getEastSlot(),
-                        getDirectionalSlotPane(BlockFace.EAST, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-                addItem(
-                        getWestSlot(),
-                        getDirectionalSlotPane(BlockFace.WEST, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-                addItem(
-                        getUpSlot(),
-                        getDirectionalSlotPane(BlockFace.UP, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-                addItem(
-                        getDownSlot(),
-                        getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
-                        (player, i, itemStack, clickAction) -> false);
-            }
-
-            @Override
-            public void newInstance(@Nonnull BlockMenu blockMenu, @Nonnull Block b) {
-                final BlockFace direction;
-                final String string = StorageCacheUtils.getData(blockMenu.getLocation(), dataKey);
-
-                if (string == null) {
-                    direction = BlockFace.SELF;
-                    StorageCacheUtils.setData(blockMenu.getLocation(), dataKey, BlockFace.SELF.name());
-                } else {
-                    direction = BlockFace.valueOf(string);
-                }
-
-                SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), direction);
-
-                blockMenu.addMenuClickHandler(
-                        getNorthSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.NORTH));
-                blockMenu.addMenuClickHandler(
-                        getSouthSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.SOUTH));
-                blockMenu.addMenuClickHandler(
-                        getEastSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.EAST));
-                blockMenu.addMenuClickHandler(
-                        getWestSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.WEST));
-                blockMenu.addMenuClickHandler(
-                        getUpSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.UP));
-                blockMenu.addMenuClickHandler(
-                        getDownSlot(),
-                        (player, i, itemStack, clickAction) ->
-                                directionClick(player, clickAction, blockMenu, BlockFace.DOWN));
-            }
-
-            @Override
-            public boolean canOpen(@Nonnull Block block, @Nonnull Player player) {
-                return MEBus.this.canUse(player, false)
-                        && Slimefun.getProtectionManager()
-                                .hasPermission(player, block.getLocation(), Interaction.INTERACT_BLOCK);
-            }
-
-            @Override
-            public int[] getSlotsAccessedByItemTransport(ItemTransportFlow flow) {
-                if (flow == ItemTransportFlow.INSERT) {
-                    return getInputSlots();
-                } else {
-                    return getOutputSlots();
-                }
-            }
-        };
+    public int[] getInputSlots() {
+        return new int[0];
     }
 
-    public abstract int[] getInputSlots();
+    @Override
+    public int[] getOutputSlots() {
+        return new int[0];
+    }
 
-    public abstract int[] getOutputSlots();
+    @Override
+    public void init(@Nonnull BlockMenuPreset preset) {
+        preset.drawBackground(getBackgroundSlots());
+
+        if (getOtherBackgroundSlots() != null && getOtherBackgroundStack() != null) {
+            preset.drawBackground(getOtherBackgroundStack(), getOtherBackgroundSlots());
+        }
+
+        preset.addItem(
+                getNorthSlot(),
+                getDirectionalSlotPane(BlockFace.NORTH, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+        preset.addItem(
+                getSouthSlot(),
+                getDirectionalSlotPane(BlockFace.SOUTH, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+        preset.addItem(
+                getEastSlot(),
+                getDirectionalSlotPane(BlockFace.EAST, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+        preset.addItem(
+                getWestSlot(),
+                getDirectionalSlotPane(BlockFace.WEST, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+        preset.addItem(
+                getUpSlot(),
+                getDirectionalSlotPane(BlockFace.UP, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+        preset.addItem(
+                getDownSlot(),
+                getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
+                (player, i, itemStack, clickAction) -> false);
+    }
+
+    @Override
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
+        final BlockFace direction;
+        final String string = StorageCacheUtils.getData(menu.getLocation(), dataKey);
+
+        if (string == null) {
+            direction = BlockFace.SELF;
+            StorageCacheUtils.setData(menu.getLocation(), dataKey, BlockFace.SELF.name());
+        } else {
+            direction = BlockFace.valueOf(string);
+        }
+
+        SELECTED_DIRECTION_MAP.put(menu.getLocation().clone(), direction);
+
+        menu.addMenuClickHandler(
+                getNorthSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.NORTH));
+        menu.addMenuClickHandler(
+                getSouthSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.SOUTH));
+        menu.addMenuClickHandler(
+                getEastSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.EAST));
+        menu.addMenuClickHandler(
+                getWestSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.WEST));
+        menu.addMenuClickHandler(
+                getUpSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.UP));
+        menu.addMenuClickHandler(
+                getDownSlot(),
+                (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.DOWN));
+    }
 
     private boolean directionClick(Player player, ClickAction action, BlockMenu blockMenu, BlockFace blockFace) {
         if (action.isShiftClicked()) {
@@ -348,9 +310,9 @@ public abstract class MEBus extends SlimefunItem implements IMEObject {
         return null;
     }
 
+    @Override
     @OverridingMethodsMustInvokeSuper
-    protected void tick(SlimefunBlockData data) {
-        // TODO
+    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
         if (data.getBlockMenu().hasViewer()) updateGui(data);
     }
 }

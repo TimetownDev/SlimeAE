@@ -3,13 +3,15 @@ package me.ddggdd135.slimeae.core.slimefun;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -34,16 +36,6 @@ public class MEExportBus extends MEBus {
 
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
-
-    @Override
-    public int[] getInputSlots() {
-        return new int[0];
-    }
-
-    @Override
-    public int[] getOutputSlots() {
-        return new int[0];
-    }
 
     private void onExport(Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
@@ -92,8 +84,14 @@ public class MEExportBus extends MEBus {
     }
 
     @Override
-    public void tick(SlimefunBlockData data) {
-        super.tick(data);
+    public boolean isSynchronized() {
+        return true;
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
+        super.tick(block, item, data);
         BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation().getBlock().getLocation());
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData()
@@ -153,9 +151,9 @@ public class MEExportBus extends MEBus {
     }
 
     @Override
-    public void postRegister() {
-        super.postRegister();
-        BlockMenuPreset preset = Slimefun.getRegistry().getMenuPresets().get(getId());
+    @OverridingMethodsMustInvokeSuper
+    public void init(@Nonnull BlockMenuPreset preset) {
+        super.init(preset);
         for (int slot : Setting_Slots) {
             preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
         }

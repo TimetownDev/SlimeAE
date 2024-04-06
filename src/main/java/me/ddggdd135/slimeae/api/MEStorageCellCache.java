@@ -17,8 +17,8 @@ public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, ItemStack> instances = new HashMap<>();
     private final Map<ItemStack, Integer> storages;
     private int stored;
-    private int size;
-    private UUID uuid;
+    private final int size;
+    private final UUID uuid;
 
     private MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");

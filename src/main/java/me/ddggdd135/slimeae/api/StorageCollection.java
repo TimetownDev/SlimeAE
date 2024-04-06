@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 public class StorageCollection implements IStorage {
-    @NonNull private List<IStorage> storages;
+    @NonNull private final List<IStorage> storages;
 
     public StorageCollection(@NonNull IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));

@@ -17,9 +17,9 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Material;
@@ -27,9 +27,9 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-/*
-ME单元 相当于AE版本的原版大箱子
-测试使用
+/**
+ * ME单元 相当于AE版本的原版大箱子
+ * 测试使用
  */
 public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryBlock {
     private static final int[] Slots = new int[] {
@@ -39,7 +39,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
     public MEUnit(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
-        createPreset(this, this.getItem().getItemMeta().getDisplayName(), this::constructMenu);
+        createPreset(this);
         addItemHandler(onBlockBreak());
     }
 
@@ -59,11 +59,6 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                 }
             }
         };
-    }
-
-    @OverridingMethodsMustInvokeSuper
-    protected void constructMenu(BlockMenuPreset preset) {
-        preset.setSize(6 * 9);
     }
 
     @Override
@@ -152,4 +147,13 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
     public int[] getOutputSlots() {
         return Slots;
     }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void init(@NotNull BlockMenuPreset preset) {
+        preset.setSize(6 * 9);
+    }
+
+    @Override
+    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {}
 }

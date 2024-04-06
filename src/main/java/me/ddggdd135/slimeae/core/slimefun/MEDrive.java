@@ -14,12 +14,13 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
@@ -31,7 +32,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
 
     public MEDrive(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
-        createPreset(this, this.getItem().getItemMeta().getDisplayName(), this::constructMenu);
+        createPreset(this);
         addItemHandler(onBlockBreak());
     }
 
@@ -76,26 +77,6 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         };
     }
 
-    @OverridingMethodsMustInvokeSuper
-    protected void constructMenu(BlockMenuPreset preset) {
-        for (int slot : Boarder_Slots) {
-            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-        }
-
-        for (int slot : MEItemStorageCell_Slots) {
-            preset.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
-                ItemStack itemStack = preset.getItemInSlot(i);
-                if (itemStack != null
-                        && !itemStack.getType().isAir()
-                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                    MEItemStorageCell.updateLore(itemStack);
-                    MEItemStorageCell.saveStorage(itemStack);
-                }
-                return true;
-            });
-        }
-    }
-
     @Nullable @Override
     public IStorage getStorage(Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
@@ -121,4 +102,29 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     public int[] getOutputSlots() {
         return new int[0];
     }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void init(@NotNull BlockMenuPreset preset) {
+        for (int slot : Boarder_Slots) {
+            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        for (int slot : MEItemStorageCell_Slots) {
+            preset.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
+                ItemStack itemStack = preset.getItemInSlot(i);
+                if (itemStack != null
+                        && !itemStack.getType().isAir()
+                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
+                    MEItemStorageCell.updateLore(itemStack);
+                    MEItemStorageCell.saveStorage(itemStack);
+                }
+                return true;
+            });
+        }
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {}
 }

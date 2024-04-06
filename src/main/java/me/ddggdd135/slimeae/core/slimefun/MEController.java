@@ -12,13 +12,29 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.api.interfaces.TicingBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class MEController extends SlimefunItem implements IMEController {
+public class MEController extends TicingBlock implements IMEController {
+    @Override
+    public boolean isSynchronized() {
+        return true;
+    }
+
+    @Override
+    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
+        if (info != null) {
+            info.getChildren().forEach(x -> {
+                SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
+                ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
+            });
+        }
+    }
+
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler(new BlockBreakHandler(true, true) {
@@ -31,23 +47,6 @@ public class MEController extends SlimefunItem implements IMEController {
                         .getNetworkInfo(blockBreakEvent.getBlock().getLocation());
                 if (info != null) {
                     info.dispose();
-                }
-            }
-        });
-        addItemHandler(new BlockTicker() {
-            @Override
-            public boolean isSynchronized() {
-                return true;
-            }
-
-            @Override
-            public void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
-                NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
-                if (info != null) {
-                    info.getChildren().forEach(x -> {
-                        SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
-                        ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
-                    });
                 }
             }
         });

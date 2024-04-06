@@ -6,9 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.text.Collator;
@@ -23,23 +21,24 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.interfaces.InventoryBlock;
+import me.ddggdd135.slimeae.api.interfaces.TicingBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-public class METerminal extends SlimefunItem implements IMEObject {
+public class METerminal extends TicingBlock implements IMEObject, InventoryBlock {
     public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> {
                 ItemStack itemStack = itemStackIntegerEntry.getKey();
@@ -89,125 +88,25 @@ public class METerminal extends SlimefunItem implements IMEObject {
         return 53;
     }
 
-    public METerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
-        super(itemGroup, item, recipeType, recipe);
-        addItemHandler(new BlockTicker() {
-            @Override
-            public boolean isSynchronized() {
-                return true;
-            }
-
-            @Override
-            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
-                METerminal.this.tick(b);
-            }
-        });
+    @Override
+    public boolean isSynchronized() {
+        return true;
     }
 
     @Override
-    public void postRegister() {
-        constructMenu(new BlockMenuPreset(this.getId(), this.getItemName()) {
-            @Override
-            public void init() {}
-
-            @Override
-            public void newInstance(@Nonnull BlockMenu inv, @Nonnull Block b) {
-                inv.replaceExistingItem(getPageNext(), MenuItems.PAGE_NEXT_STACK);
-                inv.addMenuClickHandler(getPageNext(), (player, i, itemStack, clickAction) -> {
-                    setPage(b, getPage(b) + 1);
-                    updateGui(b);
-                    return false;
-                });
-
-                inv.replaceExistingItem(getPagePrevious(), MenuItems.PAGE_PREVIOUS_STACK);
-                inv.addMenuClickHandler(getPagePrevious(), (player, i, itemStack, clickAction) -> {
-                    setPage(b, getPage(b) - 1);
-                    updateGui(b);
-                    return false;
-                });
-
-                inv.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
-                inv.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> {
-                    Comparator<Map.Entry<ItemStack, Integer>> sort = getSort(b);
-                    if (sort == ALPHABETICAL_SORT) setSort(b, 1);
-                    if (sort == NUMERICAL_SORT) setSort(b, 0);
-                    return false;
-                });
-
-                inv.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
-                inv.addMenuClickHandler(getFilter(), (player, i, itemStack, clickAction) -> false);
-
-                for (int slot : getDisplaySlots()) {
-                    inv.replaceExistingItem(slot, MenuItems.Empty);
-                    inv.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
-                        @Override
-                        public boolean onClick(
-                                InventoryClickEvent inventoryClickEvent,
-                                Player player,
-                                int i,
-                                ItemStack cursor,
-                                ClickAction clickAction) {
-                            NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(b.getLocation());
-                            if (info == null) return false;
-                            IStorage networkStorage = info.getStorage();
-                            Inventory playerInventory = player.getInventory();
-                            ItemStack itemStack = inv.getItemInSlot(i);
-                            if (!(itemStack == null
-                                    || itemStack.getType().isAir()
-                                    || SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false))) {
-                                ItemStack template = ItemUtils.createTemplateItem(ItemUtils.getDisplayItem(itemStack));
-                                template.setAmount(template.getMaxStackSize());
-                                if (clickAction.isShiftClicked()
-                                        && InvUtils.fits(
-                                                playerInventory,
-                                                template,
-                                                IntStream.range(0, playerInventory.getSize())
-                                                        .toArray())) {
-                                    playerInventory.addItem(networkStorage.tryTakeItem(
-                                            new ItemRequest(template, template.getMaxStackSize())));
-                                } else if (cursor.getType().isAir()
-                                        || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
-                                                && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
-                                    ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(template, 1));
-                                    if (gotten.length != 0) {
-                                        ItemStack newCursor = gotten[0];
-                                        newCursor.add(cursor.getAmount());
-                                        player.setItemOnCursor(newCursor);
-                                    }
-                                }
-                            }
-                            updateGui(b);
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
-                            return false;
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public boolean canOpen(@Nonnull Block block, @Nonnull Player player) {
-                return METerminal.this.canUse(player, false)
-                        && Slimefun.getProtectionManager()
-                                .hasPermission(player, block.getLocation(), Interaction.INTERACT_BLOCK);
-            }
-
-            @Override
-            public int[] getSlotsAccessedByItemTransport(ItemTransportFlow flow) {
-                return new int[0];
-            }
-        });
+    @OverridingMethodsMustInvokeSuper
+    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
+        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
+        if (inv == null) return;
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        if (info == null) return;
+        ItemStack itemStack = inv.getItemInSlot(getInputSlot());
+        if (itemStack != null && !itemStack.getType().isAir()) info.getStorage().pushItem(itemStack);
     }
 
-    @OverridingMethodsMustInvokeSuper
-    protected void constructMenu(BlockMenuPreset preset) {
-        preset.setSize(6 * 9);
-        for (int slot : getBackgroundSlots()) {
-            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-        }
+    public METerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+        super(itemGroup, item, recipeType, recipe);
+        createPreset(this);
     }
 
     public static int getPage(Block block) {
@@ -274,13 +173,101 @@ public class METerminal extends SlimefunItem implements IMEObject {
         updateGui(block);
     }
 
+    @Override
+    public int[] getInputSlots() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getOutputSlots() {
+        return new int[0];
+    }
+
+    @Override
     @OverridingMethodsMustInvokeSuper
-    public void tick(@Nonnull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (info == null) return;
-        ItemStack itemStack = inv.getItemInSlot(getInputSlot());
-        if (itemStack != null && !itemStack.getType().isAir()) info.getStorage().pushItem(itemStack);
+    public void init(@NotNull BlockMenuPreset preset) {
+        preset.setSize(6 * 9);
+        for (int slot : getBackgroundSlots()) {
+            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+        }
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+        menu.replaceExistingItem(getPageNext(), MenuItems.PAGE_NEXT_STACK);
+        menu.addMenuClickHandler(getPageNext(), (player, i, itemStack, clickAction) -> {
+            setPage(block, getPage(block) + 1);
+            updateGui(block);
+            return false;
+        });
+
+        menu.replaceExistingItem(getPagePrevious(), MenuItems.PAGE_PREVIOUS_STACK);
+        menu.addMenuClickHandler(getPagePrevious(), (player, i, itemStack, clickAction) -> {
+            setPage(block, getPage(block) - 1);
+            updateGui(block);
+            return false;
+        });
+
+        menu.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
+        menu.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> {
+            Comparator<Map.Entry<ItemStack, Integer>> sort = getSort(block);
+            if (sort == ALPHABETICAL_SORT) setSort(block, 1);
+            if (sort == NUMERICAL_SORT) setSort(block, 0);
+            return false;
+        });
+
+        menu.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
+        menu.addMenuClickHandler(getFilter(), (player, i, itemStack, clickAction) -> false);
+
+        for (int slot : getDisplaySlots()) {
+            menu.replaceExistingItem(slot, MenuItems.Empty);
+            menu.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
+                @Override
+                public boolean onClick(
+                        InventoryClickEvent inventoryClickEvent,
+                        Player player,
+                        int i,
+                        ItemStack cursor,
+                        ClickAction clickAction) {
+                    NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+                    if (info == null) return false;
+                    IStorage networkStorage = info.getStorage();
+                    Inventory playerInventory = player.getInventory();
+                    ItemStack itemStack = menu.getItemInSlot(i);
+                    if (!(itemStack == null
+                            || itemStack.getType().isAir()
+                            || SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false))) {
+                        ItemStack template = ItemUtils.createTemplateItem(ItemUtils.getDisplayItem(itemStack));
+                        template.setAmount(template.getMaxStackSize());
+                        if (clickAction.isShiftClicked()
+                                && InvUtils.fits(
+                                        playerInventory,
+                                        template,
+                                        IntStream.range(0, playerInventory.getSize())
+                                                .toArray())) {
+                            playerInventory.addItem(
+                                    networkStorage.tryTakeItem(new ItemRequest(template, template.getMaxStackSize())));
+                        } else if (cursor.getType().isAir()
+                                || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
+                                        && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
+                            ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(template, 1));
+                            if (gotten.length != 0) {
+                                ItemStack newCursor = gotten[0];
+                                newCursor.add(cursor.getAmount());
+                                player.setItemOnCursor(newCursor);
+                            }
+                        }
+                    }
+                    updateGui(block);
+                    return false;
+                }
+
+                @Override
+                public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
+                    return false;
+                }
+            });
+        }
     }
 }

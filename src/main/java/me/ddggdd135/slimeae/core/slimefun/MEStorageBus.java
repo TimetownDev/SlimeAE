@@ -15,6 +15,11 @@ import org.bukkit.block.*;
 import org.bukkit.inventory.ItemStack;
 
 public class MEStorageBus extends MEBus implements IMEStorageObject {
+    @Override
+    public boolean isSynchronized() {
+        return false;
+    }
+
     public MEStorageBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }

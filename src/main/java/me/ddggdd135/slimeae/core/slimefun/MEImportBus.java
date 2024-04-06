@@ -3,8 +3,10 @@ package me.ddggdd135.slimeae.core.slimefun;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.interfaces.MEBus;
@@ -15,6 +17,11 @@ import org.bukkit.block.*;
 import org.bukkit.inventory.ItemStack;
 
 public class MEImportBus extends MEBus {
+
+    @Override
+    public boolean isSynchronized() {
+        return true;
+    }
 
     public MEImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -53,8 +60,9 @@ public class MEImportBus extends MEBus {
     }
 
     @Override
-    public void tick(SlimefunBlockData data) {
-        super.tick(data);
+    @OverridingMethodsMustInvokeSuper
+    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
+        super.tick(block, item, data);
         onImport(data.getLocation().getBlock());
     }
 }

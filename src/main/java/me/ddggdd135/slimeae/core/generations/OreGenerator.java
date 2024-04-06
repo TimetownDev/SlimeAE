@@ -67,7 +67,7 @@ public class OreGenerator extends BlockPopulator {
             BlockDataController controller = Slimefun.getDatabaseManager().getBlockDataController();
             controller.createBlock(new Location(world, x, y, z), slimefunItem.getId());
         }
-        ;
+
         world.setType(x, y, z, item.getType());
     }
 }
