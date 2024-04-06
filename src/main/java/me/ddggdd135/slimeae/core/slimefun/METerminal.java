@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.lang.Math;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
