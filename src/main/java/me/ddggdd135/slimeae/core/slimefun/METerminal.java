@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
-import java.lang.Math;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -101,6 +100,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
+        if (inv.hasViewer()) updateGui(block);
         ItemStack itemStack = inv.getItemInSlot(getInputSlot());
         if (itemStack != null && !itemStack.getType().isAir()) info.getStorage().pushItem(itemStack);
     }
@@ -152,8 +152,8 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         IStorage networkStorage = info.getStorage();
         Map<ItemStack, Integer> storage = networkStorage.getStorage();
         int page = getPage(block);
-        if (page > Math.ceil(storage.keySet().size() / getDisplaySlots().length) - 1) {
-            page = Math.ceil(storage.keySet().size() / getDisplaySlots().length) - 1;
+        if (page > Math.ceil(storage.keySet().size() / (double) getDisplaySlots().length) - 1) {
+            page = (int) (Math.ceil(storage.keySet().size() / (double) getDisplaySlots().length) - 1);
             if (page < 0) page = 0;
             setPage(block, page);
         }
@@ -162,7 +162,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
 
         ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(new ItemStack[0]);
         for (int i = 0; i < getDisplaySlots().length; i++) {
-            if (itemStacks.length - 1 < i) break;
+            if (itemStacks.length - 1 < i + page * getDisplaySlots().length) break;
             ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
             if (itemStack == null || itemStack.getType().isAir()) continue;
             int slot = getDisplaySlots()[i];
@@ -171,9 +171,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-        updateGui(block);
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Override
     public int[] getInputSlots() {
