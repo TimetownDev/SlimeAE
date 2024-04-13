@@ -92,6 +92,7 @@ public class MEStorageCellCache implements IStorage {
         return true;
     }
 
+    @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();

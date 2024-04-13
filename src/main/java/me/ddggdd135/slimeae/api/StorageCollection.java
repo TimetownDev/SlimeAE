@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -26,7 +27,7 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public void pushItem(@NonNull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
         for (IStorage storage : storages) {
             storage.pushItem(itemStacks);
             itemStacks = ItemUtils.trimItems(itemStacks);
@@ -35,12 +36,13 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public boolean contains(@NonNull ItemRequest[] requests) {
+    public boolean contains(@Nonnull @NonNull ItemRequest[] requests) {
         return ItemUtils.contains(getStorage(), requests);
     }
 
+    @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
+    public ItemStack[] tryTakeItem(@Nonnull @NonNull ItemRequest[] requests) {
         Map<ItemStack, Integer> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest

@@ -30,7 +30,7 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@NonNull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = ItemUtils.createTemplateItem(itemStack);
             if (storage.containsKey(template)) {
@@ -64,12 +64,13 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    public boolean contains(@NonNull ItemRequest[] requests) {
+    public boolean contains(@Nonnull @NonNull ItemRequest[] requests) {
         return ItemUtils.contains(storage, requests);
     }
 
+    @Nonnull
     @Override
-    @NonNull public ItemStack[] tryTakeItem(@NonNull ItemRequest[] requests) {
+    @NonNull public ItemStack[] tryTakeItem(@Nonnull @NonNull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storage.containsKey(request.getTemplate())) {

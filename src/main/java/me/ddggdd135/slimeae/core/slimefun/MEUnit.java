@@ -65,7 +65,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
     @Nullable public IStorage getStorage(Block block) {
         return new IStorage() {
             @Override
-            public void pushItem(ItemStack[] itemStacks) {
+            public void pushItem(@Nonnull ItemStack[] itemStacks) {
                 BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                 if (inv == null) return;
                 for (ItemStack itemStack : itemStacks) {
@@ -76,14 +76,15 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
             }
 
             @Override
-            public boolean contains(ItemRequest[] requests) {
+            public boolean contains(@Nonnull ItemRequest[] requests) {
                 BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                 if (inv == null) return false;
                 return ItemUtils.contains(getStorage(), requests);
             }
 
+            @Nonnull
             @Override
-            public ItemStack[] tryTakeItem(ItemRequest[] requests) {
+            public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
                 BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                 if (inv == null) return new ItemStack[0];
                 Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
