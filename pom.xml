@@ -46,7 +46,7 @@
                     <relocations>
                         <relocation>
                             <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                            <shadedPattern>me.ddggdd135.slimefunae.lib.de.tr7zw.changeme.nbtapi</shadedPattern>
+                            <shadedPattern>me.ddggdd135.slimeae.lib.de.tr7zw.changeme.nbtapi</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

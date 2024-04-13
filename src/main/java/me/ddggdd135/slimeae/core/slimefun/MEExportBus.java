@@ -10,7 +10,6 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -70,15 +69,6 @@ public class MEExportBus extends MEBus {
                 }
             }
         }
-    }
-
-    @Nullable public IStorage getStorage(Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        BlockFace blockFace = getDirection(inv);
-        if (blockFace == BlockFace.SELF) return null;
-        Block b = block.getRelative(blockFace);
-        if (b.getBlockData().getMaterial().isAir()) return null;
-        return ItemUtils.getStorage(b);
     }
 
     @Override

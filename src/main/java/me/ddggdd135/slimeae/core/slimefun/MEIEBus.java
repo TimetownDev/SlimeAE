@@ -6,41 +6,26 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.api.interfaces.MEBus;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEImportBus extends MEBus {
-
-    @Override
-    public boolean isSynchronized() {
-        return true;
-    }
-
-    public MEImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+public class MEIEBus extends MEExportBus {
+    public MEIEBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
-
-    @Override
-    public int[] getInputSlots() {
-        return new int[0];
-    }
-
-    @Override
-    public int[] getOutputSlots() {
-        return new int[0];
-    }
-
-    protected void onImport(Block block) {
+    @OverridingMethodsMustInvokeSuper
+    public void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
+        super.tick(block, item, data);
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
@@ -57,12 +42,5 @@ public class MEImportBus extends MEBus {
             networkStorage.pushItem(itemStack);
             if (!(itemStack.getType().isAir())) break;
         }
-    }
-
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
-        super.tick(block, item, data);
-        onImport(data.getLocation().getBlock());
     }
 }
