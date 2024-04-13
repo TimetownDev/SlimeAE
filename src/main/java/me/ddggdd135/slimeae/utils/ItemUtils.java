@@ -6,9 +6,11 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTContainer;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
+import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,8 @@ import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
+import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -240,12 +244,22 @@ public class ItemUtils {
                 && SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) {
             return null;
         }
+        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                return new InfinityBarrelStorage(block);
+            }
+        }
+        if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                return new FluffyBarrelStorage(block);
+            }
+        }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return null;
         if (inv != null) {
             return new IStorage() {
                 @Override
-                public void pushItem(@NonNull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
                     if (isReadOnly) return;
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return;
@@ -260,14 +274,15 @@ public class ItemUtils {
                 }
 
                 @Override
-                public boolean contains(ItemRequest[] requests) {
+                public boolean contains(@Nonnull ItemRequest[] requests) {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return false;
                     return ItemUtils.contains(getStorage(), requests);
                 }
 
+                @Nonnull
                 @Override
-                public ItemStack[] tryTakeItem(ItemRequest[] requests) {
+                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return new ItemStack[0];
                     Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
@@ -322,7 +337,7 @@ public class ItemUtils {
         } else if (block.getState() instanceof Container) {
             return new IStorage() {
                 @Override
-                public void pushItem(@NotNull @NonNull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull @NotNull @NonNull ItemStack[] itemStacks) {
                     Container container = (Container) block.getState();
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
@@ -339,12 +354,13 @@ public class ItemUtils {
                 }
 
                 @Override
-                public boolean contains(ItemRequest[] requests) {
+                public boolean contains(@Nonnull ItemRequest[] requests) {
                     return ItemUtils.contains(getStorage(), requests);
                 }
 
+                @Nonnull
                 @Override
-                public ItemStack[] tryTakeItem(ItemRequest[] requests) {
+                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
                     ItemStack[] items = getVanillaItemStacks(block);
                     Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                     ItemStorage found = new ItemStorage();

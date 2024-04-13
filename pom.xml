@@ -46,7 +46,7 @@
                     <relocations>
                         <relocation>
                             <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                            <shadedPattern>me.ddggdd135.lib.de.tr7zw.changeme.nbtapi</shadedPattern>
+                            <shadedPattern>me.ddggdd135.slimefunae.lib.de.tr7zw.changeme.nbtapi</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>com.github.StarWishsama</groupId>
             <artifactId>Slimefun4</artifactId>
-            <version>54c1294732</version>
+            <version>2024.3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -126,6 +126,19 @@
             <groupId>de.tr7zw</groupId>
             <artifactId>item-nbt-api</artifactId>
             <version>2.12.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mooy1</groupId>
+            <artifactId>InfinityExpansion</artifactId>
+            <version>90e11bc</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.SlimefunGuguProject</groupId>
+            <artifactId>FluffyMachines</artifactId>
+            <version>035fe56381</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/FluffyMachines.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

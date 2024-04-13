@@ -51,24 +51,22 @@ public class MEExportBus extends MEBus {
             if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) continue;
             ItemRequest request = new ItemRequest(setting, setting.getAmount());
             if (targetInv != null) {
-                if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) continue;
                 int[] inputSlots = targetInv
                         .getPreset()
                         .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
                 if (inputSlots == null) continue;
-                if (targetInv.fits(setting, inputSlots) && networkStorage.contains(request)) {
-                    networkStorage.tryTakeItem(request);
-                    targetInv.pushItem(setting.clone(), inputSlots);
+                if (targetInv.fits(setting, inputSlots)) {
+                    ItemStack[] taken = networkStorage.tryTakeItem(request);
+                    if (taken.length != 0) targetInv.pushItem(taken[0], inputSlots);
                 }
             } else if (target.getState() instanceof Container container) {
                 Inventory inventory = container.getInventory();
                 if (InvUtils.fitAll(
-                                inventory,
-                                new ItemStack[] {setting},
-                                IntStream.range(0, inventory.getSize()).toArray())
-                        && networkStorage.contains(request)) {
-                    networkStorage.tryTakeItem(request);
-                    inventory.addItem(setting.clone());
+                        inventory,
+                        new ItemStack[] {setting},
+                        IntStream.range(0, inventory.getSize()).toArray())) {
+                    ItemStack[] taken = networkStorage.tryTakeItem(request);
+                    if (taken.length != 0) inventory.addItem(taken);
                 }
             }
         }

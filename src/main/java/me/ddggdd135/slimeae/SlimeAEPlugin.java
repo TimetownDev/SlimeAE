@@ -11,6 +11,8 @@ import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
+import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
+import me.ddggdd135.slimeae.integrations.InfinityIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +24,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
     private final NetworkData networkData = new NetworkData();
     private int slimefunTickCount;
+    private final InfinityIntegration infinityIntegration = new InfinityIntegration();
+    private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
 
     @Override
     public void onEnable() {
@@ -74,5 +78,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
     public static int getSlimefunTickCount() {
         return getInstance().slimefunTickCount;
+    }
+
+    @Nonnull
+    public static InfinityIntegration getInfinityIntegration() {
+        return getInstance().infinityIntegration;
+    }
+
+    @Nonnull
+    public static FluffyMachinesIntegration getFluffyMachinesIntegration() {
+        return getInstance().fluffyMachinesIntegration;
     }
 }
