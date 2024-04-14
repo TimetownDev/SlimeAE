@@ -16,4 +16,6 @@ public class SlimefunAERecipeTypes {
             new AdvancedCustomItemStack(Material.IRON_ORE, "&e世界自然生成"));
     public static final RecipeType INSCRIBER =
             new RecipeType(new NamespacedKey(SlimeAEPlugin.getInstance(), "inscriber"), SlimefunAEItems.INSCRIBER);
+    public static final RecipeType CHARGER =
+            new RecipeType(new NamespacedKey(SlimeAEPlugin.getInstance(), "charger"), SlimefunAEItems.CHARGER);
 }

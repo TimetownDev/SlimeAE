@@ -10,9 +10,9 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import java.util.List;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.abstracts.TicingBlock;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
-import me.ddggdd135.slimeae.api.interfaces.TicingBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -25,7 +25,7 @@ public class MEController extends TicingBlock implements IMEController {
     }
 
     @Override
-    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
+    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
         if (info != null) {
             info.getChildren().forEach(x -> {

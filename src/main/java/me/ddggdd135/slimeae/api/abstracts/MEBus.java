@@ -1,4 +1,4 @@
-package me.ddggdd135.slimeae.api.interfaces;
+package me.ddggdd135.slimeae.api.abstracts;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
@@ -17,6 +17,8 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.api.interfaces.InventoryBlock;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -312,7 +314,7 @@ public abstract class MEBus extends TicingBlock implements IMEObject, InventoryB
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
+    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         if (data.getBlockMenu().hasViewer()) updateGui(data);
     }
 }

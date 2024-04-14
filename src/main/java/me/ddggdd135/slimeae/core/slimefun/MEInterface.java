@@ -13,10 +13,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
+import me.ddggdd135.slimeae.api.abstracts.TicingBlock;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.interfaces.InventoryBlock;
-import me.ddggdd135.slimeae.api.interfaces.TicingBlock;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -41,7 +41,7 @@ public class MEInterface extends TicingBlock implements IMEObject, InventoryBloc
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void tick(Block block, SlimefunItem item, SlimefunBlockData data) {
+    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         for (int slot : Setting_Slots) {
             ItemStack setting = inv.getItemInSlot(slot);

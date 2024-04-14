@@ -3,28 +3,19 @@ package me.ddggdd135.slimeae.core.slimefun;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetComponent;
-import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nonnull;
-import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.api.abstracts.AbstractMachineBlock;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
-import me.ddggdd135.slimeae.core.listeners.InventoryListener;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
-public class Inscriber extends AContainer implements EnergyNetComponent, RecipeDisplayItem {
+public class Inscriber extends AbstractMachineBlock {
     public Inscriber(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
+    @Nonnull
     @Override
     public ItemStack getProgressBar() {
         return new ItemStack(Material.PISTON);
@@ -36,47 +27,19 @@ public class Inscriber extends AContainer implements EnergyNetComponent, RecipeD
         return "ME_INSCRIBER";
     }
 
+    @Override
     public int getCapacity() {
         return 1024;
     }
 
+    @Override
     public int getEnergyConsumption() {
         return 64;
     }
 
+    @Override
     public int getSpeed() {
         return 1;
-    }
-
-    @Nonnull
-    @Override
-    public List<ItemStack> getDisplayRecipes() {
-        List<ItemStack> displayRecipes = new ArrayList<>(recipes.size() * 2);
-
-        for (int i = 0; i < recipes.size(); i++) {
-            MachineRecipe recipe = recipes.get(i);
-            if (recipe.getInput().length == 2) {
-                ItemStack itemStack = MenuItems.MULTI_INPUT_ITEM.clone();
-                ItemMeta meta = itemStack.getItemMeta();
-                PersistentDataContainer pdc = meta.getPersistentDataContainer();
-                pdc.set(InventoryListener.INDEX_KEY, PersistentDataType.INTEGER, i);
-                displayRecipes.add(itemStack);
-            } else {
-                displayRecipes.add(recipe.getInput()[0]);
-            }
-
-            if (recipe.getOutput().length == 2) {
-                ItemStack itemStack = MenuItems.MULTI_OUTPUT_ITEM.clone();
-                ItemMeta meta = itemStack.getItemMeta();
-                PersistentDataContainer pdc = meta.getPersistentDataContainer();
-                pdc.set(InventoryListener.INDEX_KEY, PersistentDataType.INTEGER, i);
-                displayRecipes.add(itemStack);
-            } else {
-                displayRecipes.add(recipe.getOutput()[0]);
-            }
-        }
-
-        return displayRecipes;
     }
 
     @Override
@@ -99,5 +62,52 @@ public class Inscriber extends AContainer implements EnergyNetComponent, RecipeD
                 10,
                 new ItemStack[] {SlimefunAEItems.PRINTED_SILICON, new ItemStack(Material.DIAMOND)},
                 new ItemStack[] {SlimefunAEItems.PRINTED_ENGINEERING_CIRCUIT});
+
+        registerRecipe(
+                20,
+                new ItemStack[] {
+                    SlimefunAEItems.PRINTED_LOGIC_CIRCUIT,
+                    new ItemStack(Material.REDSTONE),
+                    SlimefunAEItems.PRINTED_SILICON
+                },
+                new ItemStack[] {SlimefunAEItems.LOGIC_PROCESSOR});
+
+        registerRecipe(
+                20,
+                new ItemStack[] {
+                    SlimefunAEItems.PRINTED_CALCULATION_CIRCUIT,
+                    new ItemStack(Material.REDSTONE),
+                    SlimefunAEItems.PRINTED_SILICON
+                },
+                new ItemStack[] {SlimefunAEItems.CALCULATION_PROCESSOR});
+
+        registerRecipe(
+                20,
+                new ItemStack[] {
+                    SlimefunAEItems.PRINTED_ENGINEERING_CIRCUIT,
+                    new ItemStack(Material.REDSTONE),
+                    SlimefunAEItems.PRINTED_SILICON
+                },
+                new ItemStack[] {SlimefunAEItems.ENGINEERING_PROCESSOR});
+    }
+
+    @Override
+    public int[] getBorderIn() {
+        return new int[] {9, 10, 11, 12, 21, 27, 28, 29, 30};
+    }
+
+    @Override
+    public int[] getBorderOut() {
+        return new int[] {14, 15, 16, 17, 23, 32, 33, 34, 35};
+    }
+
+    @Override
+    public int[] getInputSlots() {
+        return new int[] {18, 19, 20};
+    }
+
+    @Override
+    public int[] getOutputSlots() {
+        return new int[] {24, 25, 26};
     }
 }

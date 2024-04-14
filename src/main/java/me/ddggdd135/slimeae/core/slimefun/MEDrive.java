@@ -109,10 +109,14 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         for (int slot : Boarder_Slots) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
+    }
 
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
         for (int slot : MEItemStorageCell_Slots) {
-            preset.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
-                ItemStack itemStack = preset.getItemInSlot(i);
+            menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
+                ItemStack itemStack = menu.getItemInSlot(i);
                 if (itemStack != null
                         && !itemStack.getType().isAir()
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
@@ -123,8 +127,4 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             });
         }
     }
-
-    @Override
-    @OverridingMethodsMustInvokeSuper
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {}
 }
