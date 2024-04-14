@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.recipes.MinecraftRecipe;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,11 +26,14 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.jetbrains.annotations.NotNull;
 
 public class MECraftingTerminal extends METerminal {
@@ -186,7 +190,14 @@ public class MECraftingTerminal extends METerminal {
         ItemStack matched = matchItem(block);
         if (matched == null || matched.getType().isAir()) return;
         IStorage networkStorage = info.getStorage();
-        ItemStack[] recipe = Arrays.copyOf(SlimefunItem.getByItem(matched).getRecipe(), 9);
+        ItemStack[] recipe = null;
+        SlimefunItem slimefunItem = SlimefunItem.getByItem(matched);
+        if (slimefunItem != null) {
+            recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
+        } else {
+            List<Recipe> recipes = Bukkit.getRecipesFor(matched);
+
+        }
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
             if (itemStack == null || itemStack.getType().isAir()) continue;
@@ -219,6 +230,10 @@ public class MECraftingTerminal extends METerminal {
             matched = slimefunItem.getRecipeOutput();
         }
 
+        if (matched == null) {
+            Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
+            if (recipe instanceof CraftingRecipe) matched = recipe.getResult();
+        }
         return matched;
     }
 }
