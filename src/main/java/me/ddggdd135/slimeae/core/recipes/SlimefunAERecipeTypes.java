@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae.core.recipes;
 
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
@@ -15,5 +14,6 @@ public class SlimefunAERecipeTypes {
     public static final BlockDestroyRecipeType WORLD_GENERATING = new BlockDestroyRecipeType(
             new NamespacedKey(SlimeAEPlugin.getInstance(), "world_generating"),
             new AdvancedCustomItemStack(Material.IRON_ORE, "&e世界自然生成"));
-    public static final RecipeType INSCRIBER = new RecipeType(new NamespacedKey(SlimeAEPlugin.getInstance(), "inscriber"), SlimefunAEItems.INSCRIBER);
+    public static final RecipeType INSCRIBER =
+            new RecipeType(new NamespacedKey(SlimeAEPlugin.getInstance(), "inscriber"), SlimefunAEItems.INSCRIBER);
 }

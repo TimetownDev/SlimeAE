@@ -125,8 +125,8 @@ public class SlimefunAEItems {
                             ? Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
                     "{#Sky_Blue}工程处理器"));
-    public static final SlimefunItemStack PRINTED_SILICON = new SlimefunItemStack(
-            "PRINTED_SILICON", new AdvancedCustomItemStack(Material.ORANGE_DYE, "{#Sky_Blue}硅板"));
+    public static final SlimefunItemStack PRINTED_SILICON =
+            new SlimefunItemStack("PRINTED_SILICON", new AdvancedCustomItemStack(Material.ORANGE_DYE, "{#Sky_Blue}硅板"));
     public static final SlimefunItemStack PRINTED_LOGIC_CIRCUIT = new SlimefunItemStack(
             "PRINTED_LOGIC_CIRCUIT", new AdvancedCustomItemStack(Material.ORANGE_DYE, "{#Sky_Blue}逻辑电路板"));
     public static final SlimefunItemStack PRINTED_CALCULATION_CIRCUIT = new SlimefunItemStack(
@@ -150,17 +150,13 @@ public class SlimefunAEItems {
             "ME_ITEM_STORAGE_COMPONENT_64K",
             new AdvancedCustomItemStack(Material.POPPED_CHORUS_FRUIT, "{#33ccf3}64k-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_256K = new SlimefunItemStack(
-            "ME_ITEM_STORAGE_COMPONENT_256K",
-            new AdvancedCustomItemStack(Material.GRAY_DYE, "{#33aaf7}256k-ME存储组件"));
+            "ME_ITEM_STORAGE_COMPONENT_256K", new AdvancedCustomItemStack(Material.GRAY_DYE, "{#33aaf7}256k-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_1M = new SlimefunItemStack(
-            "ME_ITEM_STORAGE_COMPONENT_1M",
-            new AdvancedCustomItemStack(Material.ENDER_PEARL, "{#3388fb}1m-ME存储组件"));
+            "ME_ITEM_STORAGE_COMPONENT_1M", new AdvancedCustomItemStack(Material.ENDER_PEARL, "{#3388fb}1m-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_4M = new SlimefunItemStack(
-            "ME_ITEM_STORAGE_COMPONENT_4M",
-            new AdvancedCustomItemStack(Material.ENDER_EYE, "{#3366ff}4m-ME存储组件"));
+            "ME_ITEM_STORAGE_COMPONENT_4M", new AdvancedCustomItemStack(Material.ENDER_EYE, "{#3366ff}4m-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_16M = new SlimefunItemStack(
-            "ME_ITEM_STORAGE_COMPONENT_16M",
-            new AdvancedCustomItemStack(Material.NETHER_STAR, "{#3388fb}16m-ME存储组件"));
+            "ME_ITEM_STORAGE_COMPONENT_16M", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#3388fb}16m-ME存储组件"));
 
     // CELL
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_1K = new SlimefunItemStack(
@@ -494,21 +490,29 @@ public class SlimefunAEItems {
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ENGINEERING_PROCESSOR, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_SILICON, SlimefunAERecipeTypes.INSCRIBER, new ItemStack[]{
-                SlimefunItems.SILICON
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        PRINTED_SILICON,
+                        SlimefunAERecipeTypes.INSCRIBER,
+                        new ItemStack[] {SlimefunItems.SILICON})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_LOGIC_CIRCUIT, SlimefunAERecipeTypes.INSCRIBER, new ItemStack[] {
-                PRINTED_SILICON, new ItemStack(Material.GOLD_INGOT)
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        PRINTED_LOGIC_CIRCUIT,
+                        SlimefunAERecipeTypes.INSCRIBER,
+                        new ItemStack[] {PRINTED_SILICON, new ItemStack(Material.GOLD_INGOT)})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_CALCULATION_CIRCUIT, SlimefunAERecipeTypes.INSCRIBER, new ItemStack[] {
-                PRINTED_SILICON, CRYSTAL_CERTUS_QUARTZ
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        PRINTED_CALCULATION_CIRCUIT,
+                        SlimefunAERecipeTypes.INSCRIBER,
+                        new ItemStack[] {PRINTED_SILICON, CRYSTAL_CERTUS_QUARTZ})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, PRINTED_ENGINEERING_CIRCUIT, SlimefunAERecipeTypes.INSCRIBER, new ItemStack[] {
-                PRINTED_SILICON, new ItemStack(Material.DIAMOND)
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        PRINTED_ENGINEERING_CIRCUIT,
+                        SlimefunAERecipeTypes.INSCRIBER,
+                        new ItemStack[] {PRINTED_SILICON, new ItemStack(Material.DIAMOND)})
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MATERIAL,

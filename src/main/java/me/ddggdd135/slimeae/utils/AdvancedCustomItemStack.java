@@ -1,8 +1,6 @@
 package me.ddggdd135.slimeae.utils;
 
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;

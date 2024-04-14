@@ -1,10 +1,12 @@
 package me.ddggdd135.slimeae.core.items;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
 
 public class MenuItems {
     public static final SlimefunItemStack Empty = new SlimefunItemStack(
@@ -23,5 +25,9 @@ public class MenuItems {
 
     public static final SlimefunItemStack FILTER_STACK = new SlimefunItemStack(
             "_AE_MN_FILTER_STACK_", new AdvancedCustomItemStack(Material.NAME_TAG, "&e设置过滤器 (右键点击以清除)"));
+    public static final ItemStack MULTI_INPUT_ITEM =
+            new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输入", "", "&7> 单击查看");
+    public static final ItemStack MULTI_OUTPUT_ITEM =
+            new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输出", "", "&7> 单击查看");
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 }
