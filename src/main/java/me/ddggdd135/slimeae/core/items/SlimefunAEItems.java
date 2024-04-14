@@ -420,7 +420,7 @@ public class SlimefunAEItems {
                             ME_INTERFACE, new ItemStack(Material.STICKY_PISTON), new ItemStack(Material.PISTON)
                         })
                 .register(plugin);
-        new SlimefunItem(
+        new MECraftingTerminal(
                         SlimefunAEItemGroups.MACHINE,
                         ME_CRAFTING_TERMINAL,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
@@ -460,9 +460,14 @@ public class SlimefunAEItems {
         CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
         crystalCertusQuartz.register();
         new SlimefunItem(
-                        SlimefunAEItemGroups.MATERIAL, CHARGED_CRYSTAL_CERTUS_QUARTZ, SlimefunAERecipeTypes.CHARGER, new ItemStack[] {CRYSTAL_CERTUS_QUARTZ})
+                        SlimefunAEItemGroups.MATERIAL,
+                        CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                        SlimefunAERecipeTypes.CHARGER,
+                        new ItemStack[] {CRYSTAL_CERTUS_QUARTZ})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, SlimefunAERecipeTypes.CHARGER, new ItemStack[] {CHARGED_CRYSTAL_CERTUS_QUARTZ})
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CRYSTAL_FLUIX, SlimefunAERecipeTypes.CHARGER, new ItemStack[] {
+                    CHARGED_CRYSTAL_CERTUS_QUARTZ
+                })
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MATERIAL,
@@ -482,7 +487,9 @@ public class SlimefunAEItems {
                     new ItemStack(Material.QUARTZ)
                 })
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, SKY_STONE_DUST, SlimefunAERecipeTypes.CHARGER, new ItemStack[]{FLUIX_DUST})
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, SKY_STONE_DUST, SlimefunAERecipeTypes.CHARGER, new ItemStack[] {
+                    FLUIX_DUST
+                })
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MATERIAL,
@@ -668,13 +675,17 @@ public class SlimefunAEItems {
                             new ItemStack(Material.REDSTONE)
                         })
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, FORMATION_CORE, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
-                CRYSTAL_CERTUS_QUARTZ, FLUIX_DUST, LOGIC_PROCESSOR
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        FORMATION_CORE,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {CRYSTAL_CERTUS_QUARTZ, FLUIX_DUST, LOGIC_PROCESSOR})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ANNIHILATION_CORE, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
-                new ItemStack(Material.QUARTZ), FLUIX_DUST, LOGIC_PROCESSOR
-        })
+        new SlimefunItem(
+                        SlimefunAEItemGroups.MATERIAL,
+                        ANNIHILATION_CORE,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {new ItemStack(Material.QUARTZ), FLUIX_DUST, LOGIC_PROCESSOR})
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BASIC_CARD, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ADVANCED_CARD, RecipeType.NULL, new ItemStack[0])

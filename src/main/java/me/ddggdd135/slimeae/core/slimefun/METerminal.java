@@ -141,7 +141,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         StorageCacheUtils.setData(block.getLocation(), "sort", String.valueOf(value));
     }
 
-    public void updateGui(Block block) {
+    public void updateGui(@Nonnull Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (inv == null) return;
         for (int slot : getDisplaySlots()) {
@@ -186,9 +186,9 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
     @Override
     @OverridingMethodsMustInvokeSuper
     public void init(@NotNull BlockMenuPreset preset) {
-        preset.setSize(6 * 9);
         for (int slot : getBackgroundSlots()) {
-            preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+            preset.addItem(slot, ChestMenuUtils.getBackground());
+            preset.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
     }
 
@@ -235,9 +235,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
                     IStorage networkStorage = info.getStorage();
                     Inventory playerInventory = player.getInventory();
                     ItemStack itemStack = menu.getItemInSlot(i);
-                    if (!(itemStack == null
-                            || itemStack.getType().isAir()
-                            || SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false))) {
+                    if (!SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
                         ItemStack template = ItemUtils.createTemplateItem(ItemUtils.getDisplayItem(itemStack));
                         template.setAmount(template.getMaxStackSize());
                         if (clickAction.isShiftClicked()
