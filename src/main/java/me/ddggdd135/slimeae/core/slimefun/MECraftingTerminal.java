@@ -8,7 +8,6 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.recipes.MinecraftRecipe;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -196,7 +195,6 @@ public class MECraftingTerminal extends METerminal {
             recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
         } else {
             List<Recipe> recipes = Bukkit.getRecipesFor(matched);
-
         }
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);

@@ -46,8 +46,9 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
                 MEItemStorageCell.updateLore(itemStack);
-                if (SlimeAEPlugin.getSlimefunTickCount() % 60 == 0) {
+                if (SlimeAEPlugin.getSlimefunTickCount() % 30 == 0) {
                     MEItemStorageCell.saveStorage(itemStack);
+                    inv.markDirty();
                 }
             }
         }

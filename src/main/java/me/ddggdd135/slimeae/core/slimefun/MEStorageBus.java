@@ -43,6 +43,7 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
         if (blockFace == BlockFace.SELF) return null;
         Block b = block.getRelative(blockFace);
         if (b.getBlockData().getMaterial().isAir()) return null;
+        inv.markDirty();
         return ItemUtils.getStorage(b);
     }
 }

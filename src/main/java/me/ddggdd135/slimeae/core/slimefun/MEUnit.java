@@ -73,6 +73,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                     if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
                     else itemStack.setAmount(0);
                 }
+                inv.markDirty();
             }
 
             @Override
@@ -110,6 +111,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                         }
                     }
                 }
+                inv.markDirty();
                 return found.toItemStacks();
             }
 

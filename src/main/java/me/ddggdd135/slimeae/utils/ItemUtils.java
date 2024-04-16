@@ -271,6 +271,7 @@ public class ItemUtils {
                         ItemStack rest = inv.pushItem(itemStack, inputSlots);
                         if (rest != null) itemStack.setAmount(rest.getAmount());
                     }
+                    inv.markDirty();
                 }
 
                 @Override
@@ -311,6 +312,7 @@ public class ItemUtils {
                             }
                         }
                     }
+                    inv.markDirty();
                     return found.toItemStacks();
                 }
 
