@@ -687,16 +687,31 @@ public class SlimefunAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {new ItemStack(Material.QUARTZ), FLUIX_DUST, LOGIC_PROCESSOR})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BASIC_CARD, RecipeType.NULL, new ItemStack[0]).register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ADVANCED_CARD, RecipeType.NULL, new ItemStack[0])
+            new SlimefunItem(SlimefunAEItemGroups.MATERIAL,
+                    BASIC_CARD,
+                    RecipeType.ENHANCED_CRAFTING_TABLE,
+                    new ItemStack[] {new ItemStack(Material.GOLD_INGOT), new ItemStack(Material.IRON_INGOT), null, new ItemStack(Material.REDSTONE), CALCULATION_PROCESSOR, new ItemStack(Material.IRON_INGOT), new ItemStack(Material.GOLD_INGOT), new ItemStack(Material.IRON_INGOT) ,null
+            }, new SlimefunItemStack(SlimefunAEItems.BASIC_CARD,2)).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL,
+                ADVANCED_CARD,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                new ItemStack[] {new ItemStack(Material.DIAMOND), new ItemStack(Material.IRON_INGOT), null, new ItemStack(Material.REDSTONE), CALCULATION_PROCESSOR, new ItemStack(Material.DIAMOND), new ItemStack(Material.GOLD_INGOT), new ItemStack(Material.IRON_INGOT) ,null
+                }, new SlimefunItemStack(SlimefunAEItems.ADVANCED_CARD,2)).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL,
+                ACCELERATION_CARD,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                new ItemStack[]{ADVANCED_CARD, CRYSTAL_FLUIX, null, null, null, null, null, null, null
+        }).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL,
+                CAPACITY_CARD,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                new ItemStack[]{BASIC_CARD, CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null})
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ACCELERATION_CARD, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL,
+                QUARTZ_GLASS,
+                RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[]{QUARTZ_DUST, new ItemStack(Material.GLASS), QUARTZ_DUST,new ItemStack(Material.GLASS), QUARTZ_DUST, new ItemStack(Material.GLASS), QUARTZ_DUST, new ItemStack(Material.GLASS), QUARTZ_DUST}, new SlimefunItemStack(SlimefunAEItems.QUARTZ_GLASS,4))
                 .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, CAPACITY_CARD, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, QUARTZ_GLASS, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
-        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BLANK_PATTERN, RecipeType.NULL, new ItemStack[0])
+        new SlimefunItem(SlimefunAEItemGroups.MATERIAL, BLANK_PATTERN, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[]{QUARTZ_GLASS, new ItemStack(Material.GLOWSTONE_DUST), QUARTZ_GLASS, new ItemStack(Material.GLOWSTONE_DUST), CRYSTAL_CERTUS_QUARTZ, new ItemStack(Material.GLOWSTONE_DUST), new ItemStack(Material.IRON_INGOT), new ItemStack(Material.IRON_INGOT), new ItemStack(Material.IRON_INGOT)})
                 .register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.MATERIAL, ENCODED_PATTERN, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
