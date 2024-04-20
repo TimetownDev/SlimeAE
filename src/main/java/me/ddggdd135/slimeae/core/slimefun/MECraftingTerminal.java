@@ -114,16 +114,19 @@ public class MECraftingTerminal extends METerminal {
                 if (cursor.getType().isAir() || SlimefunUtils.isItemSimilar(matched, cursor, true, false)) {
                     if (inventoryClickEvent.isShiftClick()) {
                         Inventory playerInventory = player.getInventory();
+                        int count = 0;
                         while (matched != null
                                 && !matched.getType().isAir()
                                 && InvUtils.fits(
                                         playerInventory,
                                         matched,
                                         IntStream.range(0, playerInventory.getSize())
-                                                .toArray())) {
+                                                .toArray())
+                                && count < 64) {
                             doCraft(block);
                             playerInventory.addItem(matched);
                             matched = matchItem(block);
+                            count++;
                         }
                         updateCraftingGui(block);
                     } else if (inventoryClickEvent.isLeftClick()
@@ -189,20 +192,35 @@ public class MECraftingTerminal extends METerminal {
         ItemStack matched = matchItem(block);
         if (matched == null || matched.getType().isAir()) return;
         IStorage networkStorage = info.getStorage();
-        ItemStack[] recipe = null;
         SlimefunItem slimefunItem = SlimefunItem.getByItem(matched);
         if (slimefunItem != null) {
-            recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
+            ItemStack[] recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
+            for (int i = 0; i < 9; i++) {
+                ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
+                if (itemStack == null || itemStack.getType().isAir()) continue;
+                itemStack.setAmount(itemStack.getAmount() - recipe[i].getAmount());
+                if (itemStack.getAmount() == 0) {
+                    ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(recipe[i], recipe[i].getAmount()));
+                    if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
+                }
+            }
         } else {
-            List<Recipe> recipes = Bukkit.getRecipesFor(matched);
-        }
-        for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
-            if (itemStack == null || itemStack.getType().isAir()) continue;
-            itemStack.setAmount(itemStack.getAmount() - recipe[i].getAmount());
-            if (itemStack.getAmount() == 0) {
-                ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(recipe[i], recipe[i].getAmount()));
-                if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
+            List<ItemStack> craftingSlots = new ArrayList<>();
+            for (int slot : getCraftSlots()) {
+                craftingSlots.add(inv.getItemInSlot(slot));
+            }
+            Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
+            if (recipe instanceof CraftingRecipe craftingRecipe) {
+                for (int i = 0; i < 9; i++) {
+                    ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
+                    if (itemStack == null || itemStack.getType().isAir()) continue;
+                    ItemStack backup = itemStack.clone();
+                    itemStack.setAmount(itemStack.getAmount() - 1);
+                    if (itemStack.getAmount() == 0) {
+                        ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(backup, 1));
+                        if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
+                    }
+                }
             }
         }
     }
