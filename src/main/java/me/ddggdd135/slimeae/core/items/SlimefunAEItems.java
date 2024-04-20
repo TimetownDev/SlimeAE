@@ -44,14 +44,14 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TINTED_GLASS : Material.GLASS,
                     "&f分子装配室"));
-    public static final SlimefunItemStack ONE_K_CRAFTING_STORAGE = new SlimefunItemStack(
-            "ONE_K_CRAFTING_STORAGE", new AdvancedCustomItemStack(Material.LIME_CONCRETE, "&f1K合成储存器"));
-    public static final SlimefunItemStack FOUR_K_CRAFTING_STORAGE = new SlimefunItemStack(
-            "FOUR_K_CRAFTING_STORAGE", new AdvancedCustomItemStack(Material.GREEN_CONCRETE, "&f4K合成储存器"));
-    public static final SlimefunItemStack SIXSTEEN_K_CRAFTING_STORAGE = new SlimefunItemStack(
-            "SIXSTEEN_K_CRAFTING_STORAGE", new AdvancedCustomItemStack(Material.CYAN_CONCRETE, "&f16K合成储存器"));
-    public static final SlimefunItemStack SIXTY_FOUR_K_CRAFTING_STORAGE = new SlimefunItemStack(
-            "SIXTY_FOUR_K_CRAFTING_STORAGE", new AdvancedCustomItemStack(Material.LIGHT_BLUE_CONCRETE, "&f64K合成储存器"));
+    public static final SlimefunItemStack CRAFTING_STORAGE_1K = new SlimefunItemStack(
+            "CRAFTING_STORAGE_1K", new AdvancedCustomItemStack(Material.LIME_CONCRETE, "&f1K合成储存器"));
+    public static final SlimefunItemStack CRAFTING_STORAGE_4K = new SlimefunItemStack(
+            "CRAFTING_STORAGE_4K", new AdvancedCustomItemStack(Material.GREEN_CONCRETE, "&f4K合成储存器"));
+    public static final SlimefunItemStack CRAFTING_STORAGE_16K = new SlimefunItemStack(
+            "CRAFTING_STORAGE_16K", new AdvancedCustomItemStack(Material.CYAN_CONCRETE, "&f16K合成储存器"));
+    public static final SlimefunItemStack CRAFTING_STORAGE_64K = new SlimefunItemStack(
+            "CRAFTING_STORAGE_64K", new AdvancedCustomItemStack(Material.LIGHT_BLUE_CONCRETE, "&f64K合成储存器"));
     public static final SlimefunItemStack CRAFTING_CO_PROCESSING_UNIT = new SlimefunItemStack(
             "CRAFTING_CO_PROCESSING_UNIT", new AdvancedCustomItemStack(Material.PURPLE_GLAZED_TERRACOTTA, "&f并行处理单元"));
     public static final SlimefunItemStack CRAFTING_UNIT = new SlimefunItemStack(
@@ -301,25 +301,25 @@ public class SlimefunAEItems {
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,
-                        ONE_K_CRAFTING_STORAGE,
+                        CRAFTING_STORAGE_1K,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_1K})
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,
-                        FOUR_K_CRAFTING_STORAGE,
+                        CRAFTING_STORAGE_4K,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_4K})
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,
-                        SIXSTEEN_K_CRAFTING_STORAGE,
+                        CRAFTING_STORAGE_16K,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_16K})
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,
-                        SIXTY_FOUR_K_CRAFTING_STORAGE,
+                        CRAFTING_STORAGE_64K,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_64K})
                 .register(plugin);
