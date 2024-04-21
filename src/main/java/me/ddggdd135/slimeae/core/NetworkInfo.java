@@ -75,7 +75,7 @@ public class NetworkInfo implements IDisposable {
                     Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
             SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
             if (slimefunItem instanceof IMECraftHolder IMECraftHolder) {
-                Collections.addAll(recipes, IMECraftHolder.getSupportedRecipes());
+                Collections.addAll(recipes, IMECraftHolder.getSupportedRecipes(location.getBlock()));
             }
         }
         return recipes;

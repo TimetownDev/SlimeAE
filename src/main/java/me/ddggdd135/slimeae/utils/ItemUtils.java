@@ -24,6 +24,7 @@ import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
 import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -493,19 +494,58 @@ public class ItemUtils {
                     InventoryClickEvent inventoryClickEvent,
                     Player player,
                     int i,
-                    ItemStack itemStack,
+                    ItemStack cursor,
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = getSettingItem(inventory, i);
                 if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, true, false)) {
-                    if (itemStack != null && !itemStack.getType().isAir()) {
-                        setSettingItem(inventory, i, itemStack);
+                    if (cursor != null && !cursor.getType().isAir()) {
+                        setSettingItem(inventory, i, cursor);
                     }
                 } else {
-                    if (itemStack == null || itemStack.getType().isAir()) {
+                    if (cursor == null || cursor.getType().isAir()) {
                         inventory.setItem(i, MenuItems.Setting);
                     } else {
-                        setSettingItem(inventory, i, itemStack);
+                        setSettingItem(inventory, i, cursor);
+                    }
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
+                return false;
+            }
+        };
+    }
+
+    @Nonnull
+    public static ChestMenu.MenuClickHandler getPatternSlotClickHandler() {
+        return new ChestMenu.AdvancedMenuClickHandler() {
+            @Override
+            public boolean onClick(
+                    InventoryClickEvent inventoryClickEvent,
+                    Player player,
+                    int i,
+                    ItemStack cursor,
+                    ClickAction clickAction) {
+                Inventory inventory = inventoryClickEvent.getClickedInventory();
+                ItemStack current = inventory.getItem(i);
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Pattern, true, false)) {
+                    if (cursor != null
+                            && !cursor.getType().isAir()
+                            && SlimefunItem.getByItem(cursor) instanceof Pattern) {
+                        inventory.setItem(i, cursor);
+                        inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
+                    }
+                } else {
+                    if (cursor == null || cursor.getType().isAir()) {
+                        inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
+                        inventory.setItem(i, MenuItems.Pattern);
+                    } else if (SlimefunItem.getByItem(cursor) instanceof Pattern) {
+                        inventory.setItem(i, cursor);
+                        inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
                 }
 

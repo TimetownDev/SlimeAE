@@ -44,11 +44,12 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     public static void saveStorage(@Nonnull ItemStack itemStack) {
-        NBTItem nbtItem = new NBTItem(itemStack, true);
+        NBTItem nbtItem = new NBTItem(itemStack);
         if (nbtItem.hasTag(ITEM_STORAGE_KEY)) nbtItem.removeKey(ITEM_STORAGE_KEY);
         NBTCompoundList list = nbtItem.getCompoundList(ITEM_STORAGE_KEY);
         list.clear();
         list.addAll(ItemUtils.toNBT(getStorage(itemStack).getStorage()));
+        nbtItem.applyNBT(itemStack);
     }
 
     public static void updateLore(@Nonnull ItemStack itemStack) {

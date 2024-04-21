@@ -3,38 +3,41 @@ package me.ddggdd135.slimeae.core;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import java.util.*;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
-import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class AutoCraftingSession {
     private CraftingRecipe recipe;
     private NetworkInfo info;
-    private Map<ItemStack[], CraftingRecipe> recipeCache = new HashMap<>();
+    private int count;
+    private List<Pair<CraftingRecipe, Integer>> craftingSteps;
+    private final Map<ItemStack[], CraftingRecipe> recipeCache = new HashMap<>();
 
-    //    public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, int count) {
-    public AutoCraftingSession() {
-        ItemStorage storage = new ItemStorage();
-        storage.addItem(
-                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ), 5000000));
-        storage.addItem(ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.LOGIC_PROCESSOR), 5000000));
-        storage.addItem(
-                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CALCULATION_PROCESSOR), 5000000));
-        storage.addItem(ItemUtils.createItems(new ItemStack(Material.IRON_INGOT), 64));
-        storage.addItem(ItemUtils.createItems(new ItemStack(Material.REDSTONE), 5000000));
-        storage.addItem(ItemUtils.createItems(new ItemStack(Material.GLASS), 5000000));
-        List<Pair<CraftingRecipe, Integer>> pairList =
-                match(getRecipe(new ItemStack(SlimefunAEItems.ME_ITEM_STORAGE_CELL_16M)), 1, storage);
-        System.out.println(pairList);
-        // TODO
+    public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, int count) {
+        //        ItemStorage storage = new ItemStorage();
+        //        storage.addItem(
+        //                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ),
+        // 5000000));
+        //        storage.addItem(ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.LOGIC_PROCESSOR),
+        // 5000000));
+        //        storage.addItem(
+        //                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CALCULATION_PROCESSOR),
+        // 5000000));
+        //        storage.addItem(ItemUtils.createItems(new ItemStack(Material.IRON_INGOT), 64));
+        //        storage.addItem(ItemUtils.createItems(new ItemStack(Material.REDSTONE), 5000000));
+        //        storage.addItem(ItemUtils.createItems(new ItemStack(Material.GLASS), 5000000));
+        //        List<Pair<CraftingRecipe, Integer>> pairList =
+        //                match(getRecipe(new ItemStack(SlimefunAEItems.ME_ITEM_STORAGE_CELL_16M)), 1, storage);
+        this.info = info;
+        this.recipe = recipe;
+        this.count = count;
     }
 
     private List<Pair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {

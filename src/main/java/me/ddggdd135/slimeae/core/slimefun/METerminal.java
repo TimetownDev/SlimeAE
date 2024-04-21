@@ -242,11 +242,11 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
                                 && InvUtils.fits(
                                         playerInventory,
                                         template,
-                                        IntStream.range(0, playerInventory.getSize())
-                                                .toArray())) {
+                                        IntStream.range(0, 36).toArray())) {
                             playerInventory.addItem(
                                     networkStorage.tryTakeItem(new ItemRequest(template, template.getMaxStackSize())));
-                        } else if (cursor.getType().isAir()
+                        } else if (!clickAction.isShiftClicked()
+                                        && cursor.getType().isAir()
                                 || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
                                         && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
                             ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(template, 1));

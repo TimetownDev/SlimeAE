@@ -6,8 +6,8 @@ import org.bukkit.block.Block;
 
 public interface IMECraftHolder extends IMEObject {
     @Nonnull
-    Block[] getCraftingDevices();
+    Block[] getCraftingDevices(@Nonnull Block block);
 
     @Nonnull
-    CraftingRecipe[] getSupportedRecipes();
+    CraftingRecipe[] getSupportedRecipes(@Nonnull Block block);
 }

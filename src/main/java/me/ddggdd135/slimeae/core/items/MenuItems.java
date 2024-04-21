@@ -13,6 +13,8 @@ public class MenuItems {
             "_AE_MN_EMPTY_", new AdvancedCustomItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " "));
     public static final SlimefunItemStack Setting = new SlimefunItemStack(
             "_AE_MN_SETTING_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}物品设置槽位"));
+    public static final SlimefunItemStack Pattern = new SlimefunItemStack(
+            "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}编码样板槽位"));
 
     public static final SlimefunItemStack PAGE_PREVIOUS_STACK = new SlimefunItemStack(
             "_AE_MN_PAGE_PREVIOUS_STACK_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&b上一页"));

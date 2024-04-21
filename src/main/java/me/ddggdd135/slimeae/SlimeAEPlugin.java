@@ -2,21 +2,17 @@ package me.ddggdd135.slimeae;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.UUID;
 import javax.annotation.Nonnull;
-import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.InventoryListener;
-import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,10 +52,10 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        for (UUID uuid : MEStorageCellCache.getInstances().keySet()) {
-            ItemStack itemStack = MEStorageCellCache.getInstances().get(uuid);
-            MEItemStorageCell.saveStorage(itemStack);
-        }
+        //        for (UUID uuid : MEStorageCellCache.getInstances().keySet()) {
+        //            ItemStack itemStack = MEStorageCellCache.getInstances().get(uuid);
+        //            MEItemStorageCell.saveStorage(itemStack);
+        //        }
     }
 
     @NotNull @Override
