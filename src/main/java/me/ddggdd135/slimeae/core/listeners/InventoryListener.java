@@ -7,7 +7,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunG
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.List;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.SCMenu;
+import me.ddggdd135.slimeae.api.AEMenu;
 import me.ddggdd135.slimeae.api.abstracts.AbstractMachineBlock;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
 import org.bukkit.NamespacedKey;
@@ -54,7 +54,7 @@ public class InventoryListener implements Listener {
         // At this point, it has been confirmed that the player clicked a dual input or output item and is in a sf guide
         Player p = (Player) e.getWhoClicked();
         SlimefunItem machine = SlimefunItem.getByItem(e.getClickedInventory().getItem(MACHINE_GUIDE_DISPLAY_SLOT));
-        SCMenu menu = new SCMenu(Slimefun.getLocalization().getMessage(p, "guide" + ".title.main"));
+        AEMenu menu = new AEMenu(Slimefun.getLocalization().getMessage(p, "guide" + ".title.main"));
         SurvivalSlimefunGuide guide = new SurvivalSlimefunGuide(false, false);
         if (!(machine instanceof AbstractMachineBlock machineBlock)) {
             return;

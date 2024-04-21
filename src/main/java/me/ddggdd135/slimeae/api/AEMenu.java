@@ -14,11 +14,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class SCMenu extends ChestMenu {
+public class AEMenu extends ChestMenu {
 
     private static final int BACK_BUTTON_SLOT = 0;
 
-    public SCMenu(String title) {
+    public AEMenu(String title) {
         super(title);
     }
 

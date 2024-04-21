@@ -210,7 +210,7 @@ public class MECraftingTerminal extends METerminal {
                 craftingSlots.add(inv.getItemInSlot(slot));
             }
             Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
-            if (recipe instanceof CraftingRecipe craftingRecipe) {
+            if (recipe instanceof CraftingRecipe) {
                 for (int i = 0; i < 9; i++) {
                     ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
                     if (itemStack == null || itemStack.getType().isAir()) continue;

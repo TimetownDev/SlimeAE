@@ -140,5 +140,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/FluffyMachines.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>io.github.sefiraat</groupId>
+            <artifactId>Networks</artifactId>
+            <version>MODIFIED_1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Networks.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
