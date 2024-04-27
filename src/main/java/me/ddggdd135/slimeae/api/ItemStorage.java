@@ -25,6 +25,10 @@ public class ItemStorage implements IStorage {
         storage = ItemUtils.getAmounts(itemStacks);
     }
 
+    public ItemStorage(@NonNull IStorage storage) {
+        this(storage.getStorage());
+    }
+
     public ItemStorage(@NonNull Map<ItemStack, Integer> items) {
         storage = new HashMap<>(items);
     }

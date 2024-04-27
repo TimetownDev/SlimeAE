@@ -5,6 +5,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
@@ -67,8 +68,10 @@ public class NetworkData {
             SlimefunBlockData blockData =
                     Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
             SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-            if (slimefunItem instanceof IMECraftHolder) {
+            if (slimefunItem instanceof IMECraftHolder IMECraftHolder) {
                 info.getCraftingHolders().add(location);
+                info.getRecipeMap()
+                        .put(location, new HashSet<>(List.of(IMECraftHolder.getSupportedRecipes(location.getBlock()))));
             }
         }
 

@@ -112,7 +112,7 @@
         <dependency>
             <groupId>com.github.StarWishsama</groupId>
             <artifactId>Slimefun4</artifactId>
-            <version>2024.3</version>
+            <version>dev-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

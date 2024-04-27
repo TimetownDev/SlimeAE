@@ -283,7 +283,7 @@ public class SlimefunAEItems {
                     new ItemStack(Material.IRON_INGOT)
                 })
                 .register(plugin);
-        new SlimefunItem(
+        new MolecularAssembler(
                         SlimefunAEItemGroups.MACHINE,
                         MOLECULAR_ASSEMBLER,
                         RecipeType.ENHANCED_CRAFTING_TABLE,

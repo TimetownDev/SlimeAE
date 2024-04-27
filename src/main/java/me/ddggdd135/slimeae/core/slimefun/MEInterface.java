@@ -190,7 +190,7 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
             ItemStack patternItem = inv.getItemInSlot(slot);
             if (patternItem == null || patternItem.getType().isAir()) continue;
             SlimefunItem slimefunItem = SlimefunItem.getByItem(patternItem);
-            if (!(slimefunItem instanceof Pattern pattern)) continue;
+            if (!(slimefunItem instanceof Pattern)) continue;
             CraftingRecipe recipe = Pattern.getRecipe(patternItem);
             if (recipe == null) continue;
             result.add(recipe);

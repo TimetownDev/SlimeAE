@@ -9,3 +9,6 @@ softdepend:
 depend:
   - Slimefun
   - CMILib
+commands:
+  aetest:
+    description: "ae_test_command"

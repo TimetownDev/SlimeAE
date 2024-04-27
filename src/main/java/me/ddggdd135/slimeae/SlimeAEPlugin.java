@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.core.NetworkData;
+import me.ddggdd135.slimeae.core.commands.TestCommand;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
@@ -11,6 +12,7 @@ import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.InventoryListener;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
+import net.Zrips.CMILib.commands.CMICommand;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,6 +42,10 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
+
+        TestCommand testCommand = new TestCommand();
+        getCommand("aetest").setExecutor(testCommand);
+        getCommand("aetest").setTabCompleter(testCommand);
 
         Bukkit.getScheduler()
                 .runTaskTimer(
