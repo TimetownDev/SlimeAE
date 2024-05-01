@@ -36,8 +36,7 @@ public class ItemTemplate
             handle.setType(Material.STONE);
             isAir = true;
         }
-        if (!isAir)
-            nbt_handle = new NBTItem(handle, true);
+        if (!isAir) nbt_handle = new NBTItem(handle, true);
     }
 
     public ItemTemplate(@NotNull ItemStack stack) throws IllegalArgumentException {
@@ -121,7 +120,8 @@ public class ItemTemplate
     public int hashCode() {
         if (nbt_handle == null && !isAir) {
             nbt_handle = new NBTItem(handle, true);
-            return nbt_handle.hashCode() + 31 * (isAir ? 32 : 255) ^ handle.getType().hashCode();
+            return nbt_handle.hashCode() + 31 * (isAir ? 32 : 255)
+                    ^ handle.getType().hashCode();
         } else {
             return 200 ^ 255;
         }

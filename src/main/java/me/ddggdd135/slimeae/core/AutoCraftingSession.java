@@ -2,8 +2,6 @@ package me.ddggdd135.slimeae.core;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -126,7 +124,7 @@ public class AutoCraftingSession {
             doCraft = false;
         }
         Location[] locations = info.getRecipeMap().entrySet().stream()
-                //.filter(x -> x.getValue().contains(next.key()))
+                // .filter(x -> x.getValue().contains(next.key()))
                 .map(x -> x.getKey())
                 .toArray(Location[]::new);
         int allocated = 0;
@@ -139,7 +137,8 @@ public class AutoCraftingSession {
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
                 if (allocated > maxDevices) return;
-                if (doCraft && device.canStartCrafting(deviceBlock, next.getKey())
+                if (doCraft
+                        && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
                                 ItemUtils.getAmounts(next.getKey().getInput())))) {
                     networkStorage.tryTakeItem(ItemUtils.createRequests(

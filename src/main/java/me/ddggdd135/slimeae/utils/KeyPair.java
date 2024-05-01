@@ -2,9 +2,10 @@ package me.ddggdd135.slimeae.utils;
 
 import java.util.Objects;
 
-public class KeyPair<TKey, TValue>{
+public class KeyPair<TKey, TValue> {
     private TKey key;
     private TValue value;
+
     public KeyPair(TKey key, TValue value) {
         this.key = key;
         this.value = value;
