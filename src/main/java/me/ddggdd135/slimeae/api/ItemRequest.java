@@ -12,7 +12,7 @@ public class ItemRequest {
     }
 
     public ItemStack getTemplate() {
-        return template;
+        return template.getHandle();
     }
 
     public void setTemplate(ItemStack template) {

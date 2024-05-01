@@ -560,7 +560,7 @@ public class ItemUtils {
                 .set(
                         ITEM_STORAGE_KEY,
                         PersistentDataType.STRING,
-                        DataUtils.itemStack2String(new ItemTemplate(itemStack)));
+                        DataUtils.itemStack2String(new ItemTemplate(itemStack).getHandle()));
         result.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();

@@ -8,37 +8,49 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.event.HoverEventSource;
 import org.bukkit.Material;
-import org.bukkit.UndefinedNullability;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-public class ItemTemplate extends ItemStack {
+public class ItemTemplate
+        implements Cloneable, HoverEventSource<HoverEvent.ShowItem>, net.kyori.adventure.translation.Translatable {
     private ItemStack handle;
+    private NBTItem nbt_handle;
+    private boolean isAir;
 
     protected ItemTemplate() {
-        handle = new ItemStack(Material.AIR, 0);
+        handle = new ItemStack(Material.STONE, 1);
+        isAir = true;
     }
 
     public ItemTemplate(@NotNull Material type) {
-        this(type, 0);
-    }
-
-    public ItemTemplate(@NotNull Material type, int amount) {
-        handle = new ItemStack(type, amount);
+        handle = new ItemStack(type, 1);
+        if (type.isAir()) {
+            handle.setType(Material.STONE);
+            isAir = true;
+        }
+        if (!isAir)
+            nbt_handle = new NBTItem(handle, true);
     }
 
     public ItemTemplate(@NotNull ItemStack stack) throws IllegalArgumentException {
         Preconditions.checkArgument(stack != null, "Cannot copy null stack");
-        this.handle = stack.clone();
-        this.handle.setAmount(0);
+        handle = stack.clone();
+        if (stack.getType().isAir()) {
+            handle.setType(Material.STONE);
+            isAir = true;
+        }
+        if (!isAir) {
+            handle.setAmount(1);
+            nbt_handle = new NBTItem(handle, true);
+        }
     }
 
     public @NotNull Material getType() {
@@ -47,38 +59,16 @@ public class ItemTemplate extends ItemStack {
 
     public void setType(@NotNull Material type) {
         Preconditions.checkArgument(type != null, "Material cannot be null");
-        handle.setType(type);
+        if (type.isAir()) isAir = true;
+        else isAir = false;
+        handle.setType(isAir ? Material.STONE : type);
     }
 
     public int getAmount() {
-        return 0;
+        return 1;
     }
 
     public void setAmount(int amount) {}
-
-    /** @deprecated */
-    @Deprecated
-    public @Nullable MaterialData getData() {
-        return handle.getData();
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public void setData(@Nullable MaterialData data) {
-        handle.setData(data);
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public void setDurability(short durability) {
-        handle.setDurability(durability);
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public short getDurability() {
-        return handle.getDurability();
-    }
 
     public int getMaxStackSize() {
         return handle.getMaxStackSize();
@@ -97,32 +87,44 @@ public class ItemTemplate extends ItemStack {
     }
 
     public boolean equals(Object obj) {
+        ItemStack itemStack;
         if (this == obj) {
             return true;
         } else if (!(obj instanceof ItemStack)) {
-            return false;
-        } else {
-            ItemStack stack = (ItemStack) obj;
-            return this.getAmount() == stack.getAmount() && this.isSimilar(stack);
-        }
+            if (obj instanceof ItemTemplate template) {
+                if (isAir != template.isAir) return false;
+                if (isAir && template.isAir) return true;
+                itemStack = template.getHandle();
+            } else return false;
+        } else itemStack = (ItemStack) obj;
+
+        return this.isSimilar(itemStack);
     }
 
     public boolean isSimilar(@Nullable ItemStack stack) {
-        if (stack == null) {
-            return false;
-        } else if (stack == this) {
-            return true;
-        } else {
-            return NBTItem.convertItemtoNBT(stack).equals(NBTItem.convertItemtoNBT(handle));
+        if (stack == null) return false;
+        else {
+            if (isAir != stack.getType().isAir()) return false;
+            if (isAir && stack.getType().isAir()) return true;
+            if (nbt_handle == null) nbt_handle = new NBTItem(handle, true);
+            return handle.getType() == stack.getType()
+                    && stack.getAmount() != 0
+                    && new NBTItem(stack, true).equals(nbt_handle);
         }
     }
 
-    public @NotNull ItemStack clone() {
+    @Override
+    public @NotNull ItemTemplate clone() {
         return new ItemTemplate(handle);
     }
 
     public int hashCode() {
-        return new NBTItem(handle, true).hashCode();
+        if (nbt_handle == null && !isAir) {
+            nbt_handle = new NBTItem(handle, true);
+            return nbt_handle.hashCode() + 31 * (isAir ? 32 : 255) ^ handle.getType().hashCode();
+        } else {
+            return 200 ^ 255;
+        }
     }
 
     public boolean containsEnchantment(@NotNull Enchantment ench) {
@@ -161,10 +163,6 @@ public class ItemTemplate extends ItemStack {
         return handle.serialize();
     }
 
-    public static @NotNull ItemStack deserialize(@NotNull Map<String, Object> args) {
-        return ItemStack.deserialize(args);
-    }
-
     public boolean editMeta(@NotNull Consumer<? super ItemMeta> consumer) {
         return handle.editMeta(consumer);
     }
@@ -173,7 +171,6 @@ public class ItemTemplate extends ItemStack {
         return handle.editMeta(metaClass, consumer);
     }
 
-    @UndefinedNullability
     public ItemMeta getItemMeta() {
         return handle.getItemMeta();
     }
@@ -197,48 +194,6 @@ public class ItemTemplate extends ItemStack {
 
     public @NotNull Component displayName() {
         return handle.displayName();
-    }
-
-    public @NotNull ItemStack ensureServerConversions() {
-        return handle.ensureServerConversions();
-    }
-
-    public @NotNull byte[] serializeAsBytes() {
-        return handle.serializeAsBytes();
-    }
-
-    /** @deprecated */
-    @Deprecated
-    public @Nullable String getI18NDisplayName() {
-        return handle.getI18NDisplayName();
-    }
-
-    public int getMaxItemUseDuration() {
-        return handle.getMaxItemUseDuration();
-    }
-
-    public @NotNull ItemStack asOne() {
-        return handle;
-    }
-
-    public @NotNull ItemStack asQuantity(int qty) {
-        return handle;
-    }
-
-    public @NotNull ItemStack add() {
-        return handle;
-    }
-
-    public @NotNull ItemStack add(int qty) {
-        return handle;
-    }
-
-    public @NotNull ItemStack subtract() {
-        return handle;
-    }
-
-    public @NotNull ItemStack subtract(int qty) {
-        return handle;
     }
 
     /** @deprecated */
@@ -305,8 +260,9 @@ public class ItemTemplate extends ItemStack {
         return handle.clone();
     }
 
-    public void setHandle(ItemStack handle) {
+    public void setHandle(@NotNull ItemStack handle) {
         this.handle = handle.clone();
-        this.handle.setAmount(0);
+        this.handle.setAmount(1);
+        nbt_handle = new NBTItem(this.handle, true);
     }
 }

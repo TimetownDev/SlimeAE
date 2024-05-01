@@ -31,6 +31,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import net.Zrips.CMILib.Colors.CMIChatColor;
+import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -46,7 +47,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
                 if (slimefunItem != null) {
                     return CMIChatColor.stripColor(slimefunItem.getItemName());
                 } else {
-                    return CMIChatColor.stripColor(itemStack.getItemMeta().getDisplayName());
+                    return CMIMaterial.get(itemStack.getType()).getTranslatedName();
                 }
             },
             Collator.getInstance(Locale.CHINA)::compare);
@@ -190,6 +191,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
             preset.addItem(slot, ChestMenuUtils.getBackground());
             preset.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
+        preset.setSize(54);
     }
 
     @Override

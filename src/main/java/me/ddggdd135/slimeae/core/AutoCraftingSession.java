@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.KeyPair;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -24,7 +25,7 @@ public class AutoCraftingSession {
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final int count;
-    private List<Pair<CraftingRecipe, Integer>> craftingSteps;
+    private List<KeyPair<CraftingRecipe, Integer>> craftingSteps;
     private final ItemStorage itemCache = new ItemStorage();
     private int running = 0;
 
@@ -64,13 +65,13 @@ public class AutoCraftingSession {
     }
 
     @Nonnull
-    public List<Pair<CraftingRecipe, Integer>> getCraftingSteps() {
+    public List<KeyPair<CraftingRecipe, Integer>> getCraftingSteps() {
         return craftingSteps;
     }
 
-    private List<Pair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
+    private List<KeyPair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
         // if (!info.getRecipes().contains(recipe)) throw new NoEnoughMaterialsException();
-        List<Pair<CraftingRecipe, Integer>> result = new ArrayList<>();
+        List<KeyPair<CraftingRecipe, Integer>> result = new ArrayList<>();
         Map<ItemStack, Integer> input = ItemUtils.getAmounts(recipe.getInput());
         for (ItemStack template : input.keySet()) {
             int amount = storage.getStorage().getOrDefault(template, 0);
@@ -100,7 +101,7 @@ public class AutoCraftingSession {
                 result.addAll(match(craftingRecipe, countToCraft, storage));
             }
         }
-        result.add(new ObjectObjectMutablePair<>(recipe, count));
+        result.add(new KeyPair<>(recipe, count));
         return result;
     }
 
@@ -114,13 +115,19 @@ public class AutoCraftingSession {
 
     public void moveNext(int maxDevices) {
         if (!hasNext()) return;
-        Pair<CraftingRecipe, Integer> next = craftingSteps.get(0);
-        if (next.value() <= 0) {
-            if (running == 0) craftingSteps.remove(0);
-            return;
+        KeyPair<CraftingRecipe, Integer> next = craftingSteps.get(0);
+        boolean doCraft = true;
+        if (next.getValue() <= 0) {
+            if (running <= 0) {
+                craftingSteps.remove(0);
+                return;
+            }
+
+            doCraft = false;
         }
         Location[] locations = info.getRecipeMap().entrySet().stream()
-                .filter(x -> x.getValue().contains(next.key()))
+                //.filter(x -> x.getValue().contains(next.key()))
+                .map(x -> x.getKey())
                 .toArray(Location[]::new);
         int allocated = 0;
         IStorage networkStorage = info.getStorage();
@@ -130,18 +137,19 @@ public class AutoCraftingSession {
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (!device.isSupport(deviceBlock, next.key())) continue;
+                if (!device.isSupport(deviceBlock, next.getKey())) continue;
                 if (allocated > maxDevices) return;
-                if (device.canStartCrafting(deviceBlock, next.key())
+                if (doCraft && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
-                                ItemUtils.getAmounts(next.key().getInput())))) {
+                                ItemUtils.getAmounts(next.getKey().getInput())))) {
                     networkStorage.tryTakeItem(ItemUtils.createRequests(
-                            ItemUtils.getAmounts(next.key().getInput())));
-                    device.startCrafting(deviceBlock, next.key());
+                            ItemUtils.getAmounts(next.getKey().getInput())));
+                    device.startCrafting(deviceBlock, next.getKey());
                     running++;
+                    next.setValue(next.getValue() - 1);
                 }
                 if (device.isFinished(deviceBlock)
-                        && device.getFinishedCraftingRecipe(deviceBlock).equals(next.key())) {
+                        && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
                     itemCache.addItem(finished.getOutput());
