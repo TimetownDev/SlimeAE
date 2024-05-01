@@ -50,9 +50,9 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 if (SlimeAEPlugin.getSlimefunTickCount() % 30 == 0) {
                     MEItemStorageCell.saveStorage(itemStack);
                     inv.markDirty();
-                    //Slimefun.getDatabaseManager()
-                    //        .getBlockDataController()
-                    //        .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
+                    Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
                 }
             }
         }

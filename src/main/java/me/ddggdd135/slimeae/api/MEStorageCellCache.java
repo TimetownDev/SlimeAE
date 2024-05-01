@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new HashMap<>();
-    private static final Map<UUID, ItemStack> instances = new HashMap<>();
     private final Map<ItemStack, Integer> storages;
     private int stored;
     private final int size;
@@ -44,7 +43,7 @@ public class MEStorageCellCache implements IStorage {
             uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
             if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
         }
-        instances.put(uuid, itemStack);
+
         return new MEStorageCellCache(itemStack);
     }
 
@@ -69,25 +68,23 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
-            ItemStack template = ItemUtils.createTemplateItem(itemStack);
-            if (SlimefunItem.getByItem(template) instanceof MEItemStorageCell) continue;
-            int amount = storages.getOrDefault(template, 0);
+            if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) continue;
+            int amount = storages.getOrDefault(itemStack, 0);
             int toAdd;
             if (stored + itemStack.getAmount() > size) toAdd = size - stored;
             else toAdd = itemStack.getAmount();
             stored += toAdd;
-            storages.put(template, amount + toAdd);
+            storages.put(itemStack, amount + toAdd);
             itemStack.setAmount(itemStack.getAmount() - toAdd);
-            trim(template);
+            trim(itemStack);
         }
     }
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            ItemStack template = ItemUtils.createTemplateItem(request.getTemplate());
-            if (!storages.containsKey(template) || storages.getOrDefault(template, 0) < request.getAmount())
-                return false;
+            if (!storages.containsKey(request.getTemplate())
+                    || storages.getOrDefault(request.getTemplate(), 0) < request.getAmount()) return false;
         }
         return true;
     }
@@ -118,7 +115,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Integer> getStorage() {
-        return new HashMap<>(storages);
+        return new ItemHashMap<>(storages);
     }
 
     @Override
@@ -137,10 +134,5 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public int hashCode() {
         return Objects.hash(uuid);
-    }
-
-    @Nonnull
-    public static Map<UUID, ItemStack> getInstances() {
-        return instances;
     }
 }

@@ -69,11 +69,10 @@ public class AutoCraftingSession {
     }
 
     private List<Pair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
-        //if (!info.getRecipes().contains(recipe)) throw new NoEnoughMaterialsException();
+        // if (!info.getRecipes().contains(recipe)) throw new NoEnoughMaterialsException();
         List<Pair<CraftingRecipe, Integer>> result = new ArrayList<>();
         Map<ItemStack, Integer> input = ItemUtils.getAmounts(recipe.getInput());
         for (ItemStack template : input.keySet()) {
-            //TODO hashCode错误
             int amount = storage.getStorage().getOrDefault(template, 0);
             int need = input.get(template) * count;
             if (amount >= need) {

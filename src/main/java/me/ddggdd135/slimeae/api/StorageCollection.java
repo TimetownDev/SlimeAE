@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae.api;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -43,7 +42,7 @@ public class StorageCollection implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull @NonNull ItemRequest[] requests) {
-        Map<ItemStack, Integer> rest = new HashMap<>();
+        Map<ItemStack, Integer> rest = new ItemHashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
@@ -68,7 +67,7 @@ public class StorageCollection implements IStorage {
 
     @Override
     public @NotNull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> result = new HashMap<>();
+        Map<ItemStack, Integer> result = new ItemHashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Integer> tmp = storage.getStorage();
             for (ItemStack itemStack : tmp.keySet()) {

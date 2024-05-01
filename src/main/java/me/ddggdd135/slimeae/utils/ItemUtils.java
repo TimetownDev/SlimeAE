@@ -12,15 +12,16 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.ItemHashMap;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
+import me.ddggdd135.slimeae.api.ItemTemplate;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -49,13 +50,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class ItemUtils {
     public static final NamespacedKey ITEM_STORAGE_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "item_storage");
-
-    @Nonnull
-    public static ItemStack createTemplateItem(ItemStack item) {
-        ItemStack template = item.clone();
-        template.setAmount(1);
-        return template;
-    }
 
     @Nonnull
     public static ItemStack[] createItems(@Nonnull ItemStack template, int amount) {
@@ -108,8 +102,8 @@ public class ItemUtils {
 
     public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            ItemStack template = ItemUtils.createTemplateItem(request.getTemplate());
-            if (!storage.containsKey(template) || storage.get(template) < request.getAmount()) return false;
+            if (!storage.containsKey(request.getTemplate()) || storage.get(request.getTemplate()) < request.getAmount())
+                return false;
         }
         return true;
     }
@@ -125,14 +119,13 @@ public class ItemUtils {
 
     @Nonnull
     public static Map<ItemStack, Integer> getAmounts(@Nonnull ItemStack[] itemStacks) {
-        Map<ItemStack, Integer> storage = new HashMap<>();
+        Map<ItemStack, Integer> storage = new ItemHashMap<>();
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
-            ItemStack template = ItemUtils.createTemplateItem(itemStack);
-            if (storage.containsKey(template)) {
-                storage.put(template, storage.get(template) + itemStack.getAmount());
+            if (storage.containsKey(itemStack)) {
+                storage.put(itemStack, storage.get(itemStack) + itemStack.getAmount());
             } else {
-                storage.put(template, itemStack.getAmount());
+                storage.put(itemStack, itemStack.getAmount());
             }
         }
         return storage;
@@ -141,7 +134,7 @@ public class ItemUtils {
     @Nonnull
     public static Map<ItemStack, Integer> takeItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
-        Map<ItemStack, Integer> storage = new HashMap<>(source);
+        Map<ItemStack, Integer> storage = new ItemHashMap<>(source);
         for (ItemStack itemStack : toTake.keySet()) {
             if (storage.containsKey(itemStack)) {
                 storage.put(itemStack, storage.get(itemStack) - toTake.get(itemStack));
@@ -155,7 +148,7 @@ public class ItemUtils {
     @Nonnull
     public static Map<ItemStack, Integer> addItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toAdd) {
-        Map<ItemStack, Integer> storage = new HashMap<>(source);
+        Map<ItemStack, Integer> storage = new ItemHashMap<>(source);
         for (ItemStack itemStack : toAdd.keySet()) {
             if (storage.containsKey(itemStack)) {
                 storage.put(itemStack, storage.get(itemStack) + toAdd.get(itemStack));
@@ -202,7 +195,7 @@ public class ItemUtils {
 
     @Nonnull
     public static Map<ItemStack, Integer> toStorage(@Nonnull NBTCompoundList nbt) {
-        Map<ItemStack, Integer> result = new HashMap<>();
+        Map<ItemStack, Integer> result = new ItemHashMap<>();
         for (ReadWriteNBT compound : nbt) {
             ItemStack itemStack = compound.getItemStack("item");
             int amount = compound.getInteger("amount");
@@ -320,10 +313,10 @@ public class ItemUtils {
                 @Override
                 public @NotNull Map<ItemStack, Integer> getStorage() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return new HashMap<>();
+                    if (inv == null) return new ItemHashMap<>();
                     int[] outputSlots =
                             inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
-                    if (outputSlots == null) return new HashMap<>();
+                    if (outputSlots == null) return new ItemHashMap<>();
                     ItemStorage storage = new ItemStorage();
                     for (int slot : outputSlots) {
                         ItemStack itemStack = inv.getItemInSlot(slot);
@@ -567,7 +560,7 @@ public class ItemUtils {
                 .set(
                         ITEM_STORAGE_KEY,
                         PersistentDataType.STRING,
-                        DataUtils.itemStack2String(createTemplateItem(itemStack)));
+                        DataUtils.itemStack2String(new ItemTemplate(itemStack)));
         result.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();

@@ -1,14 +1,13 @@
 package me.ddggdd135.slimeae.api;
 
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemRequest {
-    private ItemStack template;
+    private ItemTemplate template;
     private int amount;
 
     public ItemRequest(ItemStack template, int amount) {
-        this.template = ItemUtils.createTemplateItem(template);
+        this.template = new ItemTemplate(template);
         this.amount = amount;
     }
 
@@ -17,7 +16,7 @@ public class ItemRequest {
     }
 
     public void setTemplate(ItemStack template) {
-        this.template = ItemUtils.createTemplateItem(template);
+        this.template = new ItemTemplate(template);
     }
 
     public int getAmount() {

@@ -12,7 +12,6 @@ import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.InventoryListener;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
-import net.Zrips.CMILib.commands.CMICommand;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,10 +57,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        //        for (UUID uuid : MEStorageCellCache.getInstances().keySet()) {
-        //            ItemStack itemStack = MEStorageCellCache.getInstances().get(uuid);
-        //            MEItemStorageCell.saveStorage(itemStack);
-        //        }
     }
 
     @NotNull @Override
