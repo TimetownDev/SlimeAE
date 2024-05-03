@@ -233,5 +233,6 @@ public class AutoCraftingSession {
         }
         // build inventory
         menu.getContents();
+        menu.reset(true);
     }
 }
