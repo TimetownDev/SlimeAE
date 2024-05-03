@@ -146,6 +146,12 @@ public class AutoCraftingSession {
                 .toArray(Location[]::new);
         int allocated = 0;
         IStorage networkStorage = info.getStorage();
+        if (!networkStorage.contains(ItemUtils.createRequests(
+                ItemUtils.getAmounts(next.getKey().getInput()))) && running <= 0) {
+            //合成出现错误 重新规划
+            info.getCraftingSessions().remove(this);
+            new AutoCraftingSession(info, recipe, craftingSteps.get(craftingSteps.size() - 1).getValue());
+        }
         for (Location location : locations) {
             IMECraftHolder holder = (IMECraftHolder)
                     SlimefunItem.getById(StorageCacheUtils.getBlock(location).getSfId());
@@ -166,7 +172,8 @@ public class AutoCraftingSession {
                     running++;
                     next.setValue(next.getValue() - 1);
                     if (next.getValue() == 0) doCraft = false;
-                } else if (device.isFinished(deviceBlock)
+                } else if (running > 0
+                        && device.isFinished(deviceBlock)
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
