@@ -345,7 +345,7 @@ public class SlimefunAEItems {
                             new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);
-        new SlimefunItem(
+        new CraftingMonitor(
                         SlimefunAEItemGroups.MACHINE,
                         CRAFTING_MONITOR,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
@@ -426,7 +426,7 @@ public class SlimefunAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_TERMINAL, new ItemStack(Material.CRAFTING_TABLE), CALCULATION_PROCESSOR})
                 .register(plugin);
-        new SlimefunItem(
+        new MEPatternTerminal(
                         SlimefunAEItemGroups.MACHINE,
                         ME_PATTERN_TERMINAL,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
@@ -750,21 +750,17 @@ public class SlimefunAEItems {
                         },
                         new SlimefunItemStack(SlimefunAEItems.QUARTZ_GLASS, 4))
                 .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MATERIAL,
-                        BLANK_PATTERN,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {
-                            QUARTZ_GLASS,
-                            new ItemStack(Material.GLOWSTONE_DUST),
-                            QUARTZ_GLASS,
-                            new ItemStack(Material.GLOWSTONE_DUST),
-                            CRYSTAL_CERTUS_QUARTZ,
-                            new ItemStack(Material.GLOWSTONE_DUST),
-                            new ItemStack(Material.IRON_INGOT),
-                            new ItemStack(Material.IRON_INGOT),
-                            new ItemStack(Material.IRON_INGOT)
-                        })
+        new Pattern(SlimefunAEItemGroups.MATERIAL, BLANK_PATTERN, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    QUARTZ_GLASS,
+                    new ItemStack(Material.GLOWSTONE_DUST),
+                    QUARTZ_GLASS,
+                    new ItemStack(Material.GLOWSTONE_DUST),
+                    CRYSTAL_CERTUS_QUARTZ,
+                    new ItemStack(Material.GLOWSTONE_DUST),
+                    new ItemStack(Material.IRON_INGOT),
+                    new ItemStack(Material.IRON_INGOT),
+                    new ItemStack(Material.IRON_INGOT)
+                })
                 .register(plugin);
         new Pattern(SlimefunAEItemGroups.MATERIAL, ENCODED_PATTERN, RecipeType.NULL, new ItemStack[0]).register(plugin);
         // Cells

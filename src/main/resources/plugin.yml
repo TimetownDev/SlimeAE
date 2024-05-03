@@ -10,5 +10,5 @@ depend:
   - Slimefun
   - CMILib
 commands:
-  aetest:
+  ae_craft:
     description: "ae_test_command"

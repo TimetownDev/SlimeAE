@@ -7,12 +7,15 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.TicingBlock;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -32,6 +35,13 @@ public class MEController extends TicingBlock implements IMEController {
                 SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
                 ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
             });
+            // tick autoCrafting
+            Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
+            for (AutoCraftingSession session : sessions) {
+                if (!session.hasNext()) info.getCraftingSessions().remove(session);
+                else session.moveNext(8);
+            }
+            info.updateAutoCraftingMenu();
         }
     }
 

@@ -33,5 +33,10 @@ public class MenuItems {
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输入", "", "&7> 单击查看");
     public static final ItemStack MULTI_OUTPUT_ITEM =
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输出", "", "&7> 单击查看");
+    public static final ItemStack CRAFT_ITEM =
+            new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
+    public static final ItemStack CRAFTING_TABLE =
+            new CustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", "", "&7> 单击切换为流程配方");
+    public static final ItemStack COOKING = new CustomItemStack(Material.FURNACE, "&e流程配方", "", "&7> 单击切换为工作台配方");
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 }

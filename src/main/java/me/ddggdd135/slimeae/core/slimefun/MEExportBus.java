@@ -24,6 +24,7 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MEExportBus extends MEBus {
 
@@ -146,6 +147,16 @@ public class MEExportBus extends MEBus {
         super.init(preset);
         for (int slot : Setting_Slots) {
             preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
+        }
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+        for (int slot : Setting_Slots) {
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir())
+                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
         }
     }
 }

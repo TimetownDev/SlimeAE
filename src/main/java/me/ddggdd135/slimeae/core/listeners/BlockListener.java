@@ -1,11 +1,16 @@
 package me.ddggdd135.slimeae.core.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.events.PlayerRightClickEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Random;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
+import me.ddggdd135.slimeae.core.slimefun.CraftingMonitor;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -42,6 +47,18 @@ public class BlockListener implements Listener {
                 }
                 e.setDropItems(false);
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRightClick(PlayerRightClickEvent e) {
+        if (e.getSlimefunBlock().isEmpty()) return;
+        if (e.getSlimefunBlock().get() instanceof CraftingMonitor) {
+            Block block = e.getClickedBlock().get();
+            NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+            if (info == null) return;
+            info.openAutoCraftingSessionsMenu(e.getPlayer());
+            e.cancel();
         }
     }
 }

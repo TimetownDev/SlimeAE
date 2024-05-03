@@ -237,7 +237,9 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
                     IStorage networkStorage = info.getStorage();
                     Inventory playerInventory = player.getInventory();
                     ItemStack itemStack = menu.getItemInSlot(i);
-                    if (!SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
+                    if (itemStack != null
+                            && !itemStack.getType().isAir()
+                            && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
                         ItemStack template = ItemUtils.getDisplayItem(itemStack).clone();
                         template.setAmount(template.getMaxStackSize());
                         if (clickAction.isShiftClicked()

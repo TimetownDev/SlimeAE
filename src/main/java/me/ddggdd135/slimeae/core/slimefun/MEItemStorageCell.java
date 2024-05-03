@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
     public static final String ITEM_STORAGE_KEY = "item_storage";
-    private final int size;
+    private int size;
 
     public MEItemStorageCell(
             ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, int size) {
@@ -29,6 +29,10 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
 
     public int getSize() {
         return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public static int getSize(@Nonnull ItemStack itemStack) {

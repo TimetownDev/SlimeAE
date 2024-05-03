@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,7 +20,7 @@ public class AEMenu extends ChestMenu {
     private static final int BACK_BUTTON_SLOT = 0;
 
     public AEMenu(String title) {
-        super(title);
+        super(CMIChatColor.translate(title));
     }
 
     public void addBackButton(SurvivalSlimefunGuide guide, Player p, PlayerProfile profile) {

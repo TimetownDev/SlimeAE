@@ -139,10 +139,13 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
         for (int slot : Setting_Slots) {
-            ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir())
+                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
         }
         for (int slot : Pattern_Slots) {
-            menu.replaceExistingItem(slot, MenuItems.Pattern);
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir()) menu.replaceExistingItem(slot, MenuItems.Pattern);
         }
     }
 
@@ -174,7 +177,7 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
             if (slimefunItem instanceof IMECraftDevice IMECraftDevice) {
                 for (CraftingRecipe recipe : getRecipes(block)) {
                     if (result.contains(recipe)) continue;
-                    if (IMECraftDevice.isSupport(block, recipe)) result.add(recipe);
+                    if (IMECraftDevice.isSupport(device, recipe)) result.add(recipe);
                 }
             }
         }

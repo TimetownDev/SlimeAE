@@ -561,7 +561,7 @@ public class ItemUtils {
                         ITEM_STORAGE_KEY,
                         PersistentDataType.STRING,
                         DataUtils.itemStack2String(new ItemTemplate(itemStack).getHandle()));
-        result.setAmount(Math.min(itemStack.getMaxStackSize(), amount));
+        result.setAmount(Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
         lore.add("");

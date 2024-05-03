@@ -4,7 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.core.NetworkData;
-import me.ddggdd135.slimeae.core.commands.TestCommand;
+import me.ddggdd135.slimeae.core.commands.CraftCommand;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
@@ -42,9 +42,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
 
-        TestCommand testCommand = new TestCommand();
-        getCommand("aetest").setExecutor(testCommand);
-        getCommand("aetest").setTabCompleter(testCommand);
+        CraftCommand craftCommand = new CraftCommand();
+        getCommand("ae_craft").setExecutor(craftCommand);
+        getCommand("ae_craft").setTabCompleter(craftCommand);
 
         Bukkit.getScheduler()
                 .runTaskTimer(

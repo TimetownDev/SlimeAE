@@ -85,7 +85,7 @@ public class InfinityBarrelStorage implements IStorage {
         ItemStack itemStack = new ItemStack(material);
         if (meta != null) itemStack.setItemMeta(meta);
 
-        storage.put(itemStack, ReflectionUtils.<Integer>getField(cache, "amount") - 1);
+        storage.put(itemStack, ReflectionUtils.<Integer>getField(cache, "amount"));
         return storage;
     }
 

@@ -48,7 +48,7 @@ public class MolecularAssembler extends TicingBlock implements IMECraftDevice, M
 
     @Override
     public boolean canStartCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        return isSupport(block, recipe) && isFinished(block);
+        return isSupport(block, recipe) && processor.getOperation(block) == null;
     }
 
     @Override
