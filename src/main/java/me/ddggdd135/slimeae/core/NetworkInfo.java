@@ -104,7 +104,9 @@ public class NetworkInfo implements IDisposable {
 
     @Nullable public CraftingRecipe getRecipeFor(@Nonnull ItemStack output) {
         for (CraftingRecipe recipe : getRecipes()) {
-            if (Arrays.asList(recipe.getOutput()).contains(output)) return recipe;
+            for (ItemStack itemStack : recipe.getOutput()) {
+                if (itemStack.asOne().equals(output.asOne())) return recipe;
+            }
         }
 
         return null;

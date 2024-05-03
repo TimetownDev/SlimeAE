@@ -59,7 +59,7 @@ public class MolecularAssembler extends TicingBlock implements IMECraftDevice, M
     @Override
     public boolean isFinished(@Nonnull Block block) {
         CraftingOperation craftingOperation = processor.getOperation(block);
-        if (craftingOperation == null) return true;
+        if (craftingOperation == null) return false;
         return craftingOperation.isFinished();
     }
 

@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Arrays;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -30,7 +31,7 @@ public class MEPatternTerminal extends METerminal {
 
     @Override
     public int[] getBackgroundSlots() {
-        return new int[] {0, 1, 3, 5, 12, 13, 14, 21, 23, 30, 31, 32, 33, 34, 35, 39, 41, 48, 49, 50, 51, 52, 53};
+        return new int[] {0, 1, 3, 5, 12, 13, 14, 21, 23, 30, 31, 32, 34, 35, 39, 41, 48, 49, 50, 51, 52, 53};
     }
 
     @Override
@@ -96,6 +97,7 @@ public class MEPatternTerminal extends METerminal {
     public void init(@NotNull BlockMenuPreset preset) {
         super.init(preset);
         preset.addItem(getReturnItemSlot(), MenuItems.PUSH_BACK);
+        preset.addItem(getCraftButtonSlot(), MenuItems.CRAFT_ITEM);
     }
 
     @Override
@@ -118,7 +120,7 @@ public class MEPatternTerminal extends METerminal {
             }
             return false;
         });
-        blockMenu.addItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
+        blockMenu.replaceExistingItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
         blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
             ItemStack craftingTypeItem = blockMenu.getItemInSlot(i);
             if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true))
@@ -126,7 +128,6 @@ public class MEPatternTerminal extends METerminal {
             else blockMenu.replaceExistingItem(i, MenuItems.COOKING);
             return false;
         });
-        blockMenu.addItem(getCraftButtonSlot(), MenuItems.CRAFT_ITEM);
         blockMenu.addMenuClickHandler(getCraftButtonSlot(), (player, i, itemStack, clickAction) -> {
             makePattern(block);
             return false;
@@ -148,9 +149,15 @@ public class MEPatternTerminal extends METerminal {
             in.subtract();
             CraftingRecipe recipe = new CraftingRecipe(
                     CraftType.COOKING,
-                    Arrays.stream(getCraftSlots()).mapToObj(inv::getItemInSlot).toArray(ItemStack[]::new),
+                    Arrays.stream(getCraftSlots())
+                            .mapToObj(inv::getItemInSlot)
+                            .filter(Objects::nonNull)
+                            .filter(x -> !x.getType().isAir())
+                            .toArray(ItemStack[]::new),
                     Arrays.stream(getCraftOutputSlots())
                             .mapToObj(inv::getItemInSlot)
+                            .filter(Objects::nonNull)
+                            .filter(x -> !x.getType().isAir())
                             .toArray(ItemStack[]::new));
             Pattern.setRecipe(toOut, recipe);
         } else {
@@ -169,8 +176,11 @@ public class MEPatternTerminal extends METerminal {
             for (int i = 0; i < getCraftSlots().length; i++) {
                 int slot = getCraftSlots()[i];
                 ItemStack itemStack = inv.getItemInSlot(slot);
-                ItemStack target = recipe.getInput()[i];
-                if (!SlimefunUtils.isItemSimilar(target, itemStack, true, false)) return;
+                ItemStack target = recipe.getInput().length - 1 >= i ? recipe.getInput()[i] : null;
+                if (target == null && itemStack != null) return;
+                if (target != null && itemStack == null) return;
+                if (target == null) continue;
+                if (!target.equals(itemStack)) return;
             }
             toOut.setAmount(1);
             in.subtract();

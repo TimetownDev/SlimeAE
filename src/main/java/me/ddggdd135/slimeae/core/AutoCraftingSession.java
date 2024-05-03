@@ -18,7 +18,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyPair;
-import me.ddggdd135.slimeae.utils.RecipeUtils;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
@@ -86,19 +85,20 @@ public class AutoCraftingSession {
     private List<KeyPair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
         if (!info.getRecipes().contains(recipe)) throw new NoEnoughMaterialsException();
         List<KeyPair<CraftingRecipe, Integer>> result = new ArrayList<>();
-        Map<ItemStack, Integer> input = ItemUtils.getAmounts(recipe.getInput());
-        for (ItemStack template : input.keySet()) {
+        Map<ItemStack, Integer> in = ItemUtils.getAmounts(recipe.getInput());
+        for (ItemStack template : in.keySet()) {
             int amount = storage.getStorage().getOrDefault(template, 0);
-            int need = input.get(template) * count;
+            int need = in.get(template) * count;
             if (amount >= need) {
                 storage.tryTakeItem(new ItemRequest(template, need));
             } else if (amount == 0) {
                 // 计划合成
                 CraftingRecipe craftingRecipe = getRecipe(template);
                 if (craftingRecipe == null) throw new NoEnoughMaterialsException();
+                Map<ItemStack, Integer> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
+                Map<ItemStack, Integer> input = ItemUtils.getAmounts(craftingRecipe.getInput());
                 // 计算需要合成多少次
-                int out = ItemUtils.getAmounts(craftingRecipe.getOutput()).get(template)
-                        - input.getOrDefault(template, 0);
+                int out = output.get(template) - input.getOrDefault(template, 0);
                 int countToCraft = (int) Math.ceil(need / (double) out);
                 result.addAll(match(craftingRecipe, countToCraft, storage));
             } else {
@@ -108,9 +108,10 @@ public class AutoCraftingSession {
                 // 计划合成
                 CraftingRecipe craftingRecipe = getRecipe(template);
                 if (craftingRecipe == null) throw new NoEnoughMaterialsException();
+                Map<ItemStack, Integer> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
+                Map<ItemStack, Integer> input = ItemUtils.getAmounts(craftingRecipe.getInput());
                 // 计算需要合成多少次
-                int out = ItemUtils.getAmounts(craftingRecipe.getOutput()).get(template)
-                        - input.getOrDefault(template, 0);
+                int out = output.get(template) - input.getOrDefault(template, 0);
                 int countToCraft = (int) Math.ceil(need / (double) out);
                 result.addAll(match(craftingRecipe, countToCraft, storage));
             }
@@ -120,7 +121,7 @@ public class AutoCraftingSession {
     }
 
     @Nullable private CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
-        return info.getRecipes().contains(RecipeUtils.getRecipe(itemStack)) ? RecipeUtils.getRecipe(itemStack) : null;
+        return info.getRecipeFor(itemStack);
     }
 
     public boolean hasNext() {
@@ -164,8 +165,8 @@ public class AutoCraftingSession {
                     device.startCrafting(deviceBlock, next.getKey());
                     running++;
                     next.setValue(next.getValue() - 1);
-                }
-                if (device.isFinished(deviceBlock)
+                    if (next.getValue() == 0) doCraft = false;
+                } else if (device.isFinished(deviceBlock)
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);

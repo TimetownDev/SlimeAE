@@ -44,6 +44,8 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TINTED_GLASS : Material.GLASS,
                     "&f分子装配室"));
+    public static final SlimefunItemStack COOKING_ALLOCATOR =
+            new SlimefunItemStack("COOKING_ALLOCATOR", new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器"));
     public static final SlimefunItemStack CRAFTING_STORAGE_1K = new SlimefunItemStack(
             "CRAFTING_STORAGE_1K", new AdvancedCustomItemStack(Material.LIME_CONCRETE, "&f1K合成储存器"));
     public static final SlimefunItemStack CRAFTING_STORAGE_4K = new SlimefunItemStack(
@@ -293,6 +295,22 @@ public class SlimefunAEItems {
                             new ItemStack(Material.IRON_INGOT),
                             ANNIHILATION_CORE,
                             new ItemStack(Material.CRAFTING_TABLE),
+                            FORMATION_CORE,
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.GLASS),
+                            new ItemStack(Material.IRON_INGOT)
+                        })
+                .register(plugin);
+        new CookingAllocator(
+                        SlimefunAEItemGroups.MACHINE,
+                        COOKING_ALLOCATOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.GLASS),
+                            new ItemStack(Material.IRON_INGOT),
+                            ANNIHILATION_CORE,
+                            ME_IE_BUS,
                             FORMATION_CORE,
                             new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.GLASS),

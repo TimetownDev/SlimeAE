@@ -2,11 +2,11 @@ package me.ddggdd135.slimeae.core.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.utils.RecipeUtils;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -44,9 +44,7 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                     return false;
                 }
                 new AutoCraftingSession(
-                        info,
-                        RecipeUtils.getRecipe(player.getInventory().getItemInMainHand()),
-                        Integer.parseInt(strings[0]));
+                        info, Objects.requireNonNull(info.getRecipeFor(itemStack)), Integer.parseInt(strings[0]));
                 player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
             } catch (NumberFormatException e) {
                 player.sendMessage(CMIChatColor.translate("&c&l用法 /ae_craft <Amount>"));
