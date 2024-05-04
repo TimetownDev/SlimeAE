@@ -19,8 +19,6 @@ import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyPair;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
@@ -150,10 +148,12 @@ public class AutoCraftingSession {
         int allocated = 0;
         IStorage networkStorage = info.getStorage();
         if (!networkStorage.contains(ItemUtils.createRequests(
-                ItemUtils.getAmounts(next.getKey().getInput()))) && running <= 0) {
-            //合成出现错误 重新规划
+                        ItemUtils.getAmounts(next.getKey().getInput())))
+                && running <= 0) {
+            // 合成出现错误 重新规划
             info.getCraftingSessions().remove(this);
-            new AutoCraftingSession(info, recipe, craftingSteps.get(craftingSteps.size() - 1).getValue());
+            new AutoCraftingSession(
+                    info, recipe, craftingSteps.get(craftingSteps.size() - 1).getValue());
         }
         for (Location location : locations) {
             IMECraftHolder holder = (IMECraftHolder)
@@ -202,13 +202,13 @@ public class AutoCraftingSession {
         refreshGUI(54);
         menu.open(player);
     }
+
     public void refreshGUI(int maxSize) {
         refreshGUI(maxSize, true);
     }
 
     public void refreshGUI(int maxSize, boolean cancelButton) {
-        if (cancelButton)
-            maxSize--;
+        if (cancelButton) maxSize--;
         List<KeyPair<CraftingRecipe, Integer>> process = getCraftingSteps();
         List<KeyPair<CraftingRecipe, Integer>> process2 = getCraftingSteps();
         if (process.size() > maxSize - 1) {
@@ -261,7 +261,8 @@ public class AutoCraftingSession {
                             + item.getKey().getOutput()[0].getAmount());
                 } else {
                     lore.add("  - "
-                            + CMIMaterial.get(item.getKey().getOutput()[0].getType()).getTranslatedName() + " x "
+                            + CMIMaterial.get(item.getKey().getOutput()[0].getType())
+                                    .getTranslatedName() + " x "
                             + item.getKey().getOutput()[0].getAmount());
                 }
             }

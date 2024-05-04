@@ -7,6 +7,9 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.Arrays;
+import java.util.List;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.AEMenu;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
@@ -23,12 +26,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.List;
-
-public class MECraftPlanningTerminal extends METerminal{
-    public MECraftPlanningTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+public class MECraftPlanningTerminal extends METerminal {
+    public MECraftPlanningTerminal(
+            ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
@@ -51,7 +51,8 @@ public class MECraftPlanningTerminal extends METerminal{
             setPage(block, page);
         }
 
-        ItemStack[] itemStacks = Arrays.stream(recipes).map(x -> x.getOutput()[0]).toList().toArray(ItemStack[]::new);
+        ItemStack[] itemStacks =
+                Arrays.stream(recipes).map(x -> x.getOutput()[0]).toList().toArray(ItemStack[]::new);
         for (int i = 0; i < getDisplaySlots().length; i++) {
             if (itemStacks.length - 1 < i + page * getDisplaySlots().length) break;
             ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
@@ -76,8 +77,7 @@ public class MECraftPlanningTerminal extends METerminal{
                     try {
                         int amount = Integer.parseInt(msg);
 
-                        AutoCraftingSession session = new AutoCraftingSession(
-                                info, recipe, amount);
+                        AutoCraftingSession session = new AutoCraftingSession(info, recipe, amount);
                         session.refreshGUI(45, false);
                         AEMenu menu = session.getMenu();
                         int[] background = new int[] {45, 46, 48, 49, 50, 52, 53};

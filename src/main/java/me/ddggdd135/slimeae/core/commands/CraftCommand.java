@@ -1,10 +1,8 @@
 package me.ddggdd135.slimeae.core.commands;
 
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.AEMenu;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
@@ -12,8 +10,6 @@ import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -58,8 +54,7 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(CMIChatColor.translate("&c&l没有找到样板"));
                     return false;
                 }
-                AutoCraftingSession session = new AutoCraftingSession(
-                        info, recipe, Integer.parseInt(strings[0]));
+                AutoCraftingSession session = new AutoCraftingSession(info, recipe, Integer.parseInt(strings[0]));
                 session.refreshGUI(45, false);
                 AEMenu menu = session.getMenu();
                 int[] background = new int[] {45, 46, 48, 49, 50, 52, 53};

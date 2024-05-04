@@ -447,10 +447,10 @@ public class SlimefunAEItems {
                         new ItemStack[] {ME_TERMINAL, new ItemStack(Material.CRAFTING_TABLE), CALCULATION_PROCESSOR})
                 .register(plugin);
         new MECraftPlanningTerminal(
-                SlimefunAEItemGroups.MACHINE,
-                ME_CRAFT_PLANNING_TERMINAL,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                new ItemStack[] {ME_CRAFTING_TERMINAL, BLANK_PATTERN, CALCULATION_PROCESSOR})
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CRAFT_PLANNING_TERMINAL,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_CRAFTING_TERMINAL, BLANK_PATTERN, CALCULATION_PROCESSOR})
                 .register(plugin);
         new MEPatternTerminal(
                         SlimefunAEItemGroups.MACHINE,
