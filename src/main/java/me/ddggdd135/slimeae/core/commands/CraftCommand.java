@@ -3,10 +3,17 @@ package me.ddggdd135.slimeae.core.commands;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.AEMenu;
+import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -29,7 +36,10 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
         if (commandSender instanceof Player player) {
             Block block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
             NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-            if (info == null) player.sendMessage(CMIChatColor.translate("请站在对应网络方块上"));
+            if (info == null) {
+                player.sendMessage(CMIChatColor.translate("请站在对应网络方块上"));
+                return false;
+            }
             if (info.getCraftingSessions().size() >= 8) {
                 player.sendMessage(CMIChatColor.translate("&c&l这个网络已经有8个合成任务了"));
                 return false;
@@ -43,9 +53,35 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(CMIChatColor.translate("&c&l你是打算要合成空气吗?"));
                     return false;
                 }
-                new AutoCraftingSession(
-                        info, Objects.requireNonNull(info.getRecipeFor(itemStack)), Integer.parseInt(strings[0]));
-                player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
+                CraftingRecipe recipe = info.getRecipeFor(itemStack);
+                if (recipe == null) {
+                    player.sendMessage(CMIChatColor.translate("&c&l没有找到样板"));
+                    return false;
+                }
+                AutoCraftingSession session = new AutoCraftingSession(
+                        info, recipe, Integer.parseInt(strings[0]));
+                session.refreshGUI(45, false);
+                AEMenu menu = session.getMenu();
+                int[] background = new int[] {45, 46, 48, 49, 50, 52, 53};
+                int acceptSlot = 47;
+                int cancelSlot = 51;
+                for (int slot : background) {
+                    menu.replaceExistingItem(slot, ChestMenuUtils.getBackground());
+                    menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
+                }
+                menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
+                menu.addMenuClickHandler(acceptSlot, (p, i, itemStack1, clickAction) -> {
+                    player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
+                    session.refreshGUI(54);
+                    session.start();
+                    return false;
+                });
+                menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
+                menu.addMenuClickHandler(cancelSlot, (p, i, itemStack1, clickAction) -> {
+                    player.closeInventory();
+                    return false;
+                });
+                menu.open(player);
             } catch (NumberFormatException e) {
                 player.sendMessage(CMIChatColor.translate("&c&l用法 /ae_craft <Amount>"));
             } catch (NoEnoughMaterialsException | StackOverflowError e) {

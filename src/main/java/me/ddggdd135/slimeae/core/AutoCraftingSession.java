@@ -15,9 +15,12 @@ import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyPair;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
@@ -34,11 +37,11 @@ public class AutoCraftingSession {
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final int count;
-    private List<KeyPair<CraftingRecipe, Integer>> craftingSteps;
+    private final List<KeyPair<CraftingRecipe, Integer>> craftingSteps;
     private final ItemStorage itemCache = new ItemStorage();
     private int running = 0;
-    private volatile Set<Player> viewers = new HashSet<>();
-    private AEMenu menu = new AEMenu("&e合成任务 - " + "&a&l运行中  " + running);
+    private final AEMenu menu = new AEMenu("&e合成任务 - " + "&a&l运行中  " + running);
+    private boolean isCancelling = false;
 
     public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, int count) {
         //        ItemStorage storage = new ItemStorage();
@@ -60,7 +63,6 @@ public class AutoCraftingSession {
         this.count = count;
         menu.setSize(54);
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
-        info.getCraftingSessions().add(this);
     }
 
     @Nonnull
@@ -131,7 +133,8 @@ public class AutoCraftingSession {
     public void moveNext(int maxDevices) {
         if (!hasNext()) return;
         KeyPair<CraftingRecipe, Integer> next = craftingSteps.get(0);
-        boolean doCraft = true;
+        boolean doCraft = !isCancelling;
+        if (running == 0 && isCancelling) info.getCraftingSessions().remove(this);
         if (next.getValue() <= 0) {
             if (running <= 0) {
                 craftingSteps.remove(0);
@@ -192,18 +195,27 @@ public class AutoCraftingSession {
         }
 
         menu.getContents();
-        if (!menu.getInventory().getViewers().isEmpty()) refreshGUI();
+        if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
     }
 
     public void showGUI(Player player) {
-        refreshGUI();
+        refreshGUI(54);
         menu.open(player);
     }
+    public void refreshGUI(int maxSize) {
+        refreshGUI(maxSize, true);
+    }
 
-    public void refreshGUI() {
+    public void refreshGUI(int maxSize, boolean cancelButton) {
+        if (cancelButton)
+            maxSize--;
         List<KeyPair<CraftingRecipe, Integer>> process = getCraftingSteps();
-        if (process.size() > 53) process = process.subList(process.size() - 53, process.size());
-        for (int i = 0; i < 54; i++) {
+        List<KeyPair<CraftingRecipe, Integer>> process2 = getCraftingSteps();
+        if (process.size() > maxSize - 1) {
+            process2 = process.subList(maxSize, process.size());
+            process = process.subList(0, maxSize);
+        }
+        for (int i = 0; i < maxSize; i++) {
             menu.replaceExistingItem(i, null);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
@@ -239,8 +251,47 @@ public class AutoCraftingSession {
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
             i++;
         }
+        if (!process2.isEmpty()) {
+            ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
+            List<String> lore = new ArrayList<>();
+            for (KeyPair<CraftingRecipe, Integer> item : process2) {
+                SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
+                if (slimefunItem != null) {
+                    lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
+                            + item.getKey().getOutput()[0].getAmount());
+                } else {
+                    lore.add("  - "
+                            + CMIMaterial.get(item.getKey().getOutput()[0].getType()).getTranslatedName() + " x "
+                            + item.getKey().getOutput()[0].getAmount());
+                }
+            }
+            ItemMeta meta = itemStack.getItemMeta();
+            meta.getPersistentDataContainer().set(CRAFTING_KEY, PersistentDataType.BOOLEAN, true);
+            meta.setLore(CMIChatColor.translate(lore));
+            itemStack.setItemMeta(meta);
+            menu.addItem(maxSize, itemStack);
+        }
+
+        if (cancelButton) {
+            menu.replaceExistingItem(maxSize, MenuItems.CANCEL);
+            menu.addMenuClickHandler(maxSize, (player, i1, itemStack, clickAction) -> {
+                isCancelling = true;
+                player.sendMessage(CMIChatColor.translate("&a&l成功取消了合成任务"));
+                player.closeInventory();
+                return false;
+            });
+        }
         // build inventory
         menu.getContents();
         menu.reset(true);
+    }
+
+    public void start() {
+        if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
+        info.getCraftingSessions().add(this);
+    }
+
+    public AEMenu getMenu() {
+        return menu;
     }
 }

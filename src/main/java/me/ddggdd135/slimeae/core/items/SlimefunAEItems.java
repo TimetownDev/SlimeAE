@@ -76,6 +76,8 @@ public class SlimefunAEItems {
             "ME_STORAGE_BUS", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f&lME存储总线"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成终端"));
+    public static final SlimefunItemStack ME_CRAFT_PLANNING_TERMINAL = new SlimefunItemStack(
+            "ME_CRAFT_PLANNING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成计划终端"));
     public static final SlimefunItemStack ME_PATTERN_TERMINAL = new SlimefunItemStack(
             "ME_PATTERN_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME样板终端"));
     public static final SlimefunItemStack ME_TERMINAL =
@@ -443,6 +445,12 @@ public class SlimefunAEItems {
                         ME_CRAFTING_TERMINAL,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_TERMINAL, new ItemStack(Material.CRAFTING_TABLE), CALCULATION_PROCESSOR})
+                .register(plugin);
+        new MECraftPlanningTerminal(
+                SlimefunAEItemGroups.MACHINE,
+                ME_CRAFT_PLANNING_TERMINAL,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                new ItemStack[] {ME_CRAFTING_TERMINAL, BLANK_PATTERN, CALCULATION_PROCESSOR})
                 .register(plugin);
         new MEPatternTerminal(
                         SlimefunAEItemGroups.MACHINE,

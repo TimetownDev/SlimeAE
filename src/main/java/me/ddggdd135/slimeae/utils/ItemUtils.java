@@ -238,14 +238,16 @@ public class ItemUtils {
                 && SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) {
             return null;
         }
-        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
-                return new InfinityBarrelStorage(block);
+        if (slimefunBlockData != null) {
+            if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                    return new InfinityBarrelStorage(block);
+                }
             }
-        }
-        if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
-                return new FluffyBarrelStorage(block);
+            if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                    return new FluffyBarrelStorage(block);
+                }
             }
         }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());

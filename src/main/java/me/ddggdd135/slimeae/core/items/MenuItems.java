@@ -38,5 +38,9 @@ public class MenuItems {
     public static final ItemStack CRAFTING_TABLE =
             new CustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", "", "&7> 单击切换为流程配方");
     public static final ItemStack COOKING = new CustomItemStack(Material.FURNACE, "&e流程配方", "", "&7> 单击切换为工作台配方");
+    public static final SlimefunItemStack ACCEPT = new SlimefunItemStack(
+            "_AE_MN_ACCEPT_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l确认"));
+    public static final SlimefunItemStack CANCEL = new SlimefunItemStack(
+            "_AE_MN_CANCEL_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&c&l取消"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 }

@@ -161,7 +161,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         List<Map.Entry<ItemStack, Integer>> items =
                 storage.entrySet().stream().sorted(getSort(block)).toList();
 
-        ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(new ItemStack[0]);
+        ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(ItemStack[]::new);
         for (int i = 0; i < getDisplaySlots().length; i++) {
             if (itemStacks.length - 1 < i + page * getDisplaySlots().length) break;
             ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
