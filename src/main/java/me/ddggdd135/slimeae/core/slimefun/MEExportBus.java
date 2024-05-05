@@ -94,12 +94,7 @@ public class MEExportBus extends MEBus {
                 ItemUtils.setSettingItem(inv.getInventory(), slot, MenuItems.Setting);
             }
         }
-        for (int slot : Setting_Slots) {
-            ItemStack setting = inv.getItemInSlot(slot);
-            if (setting == null || setting.getType().isAir()) {
-                ItemUtils.setSettingItem(inv.getInventory(), slot, MenuItems.Setting);
-            }
-        }
+
         onExport(data.getLocation().getBlock());
     }
 
@@ -153,6 +148,7 @@ public class MEExportBus extends MEBus {
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+        super.newInstance(menu, block);
         for (int slot : Setting_Slots) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir())
