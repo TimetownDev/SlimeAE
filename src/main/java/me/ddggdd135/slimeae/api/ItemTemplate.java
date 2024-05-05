@@ -257,7 +257,8 @@ public class ItemTemplate
     }
 
     public ItemStack getHandle() {
-        return handle.clone();
+        if (!isAir) return handle.clone();
+        return new ItemStack(Material.AIR);
     }
 
     public void setHandle(@NotNull ItemStack handle) {
