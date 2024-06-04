@@ -29,10 +29,6 @@ public class MenuItems {
             "_AE_MN_FILTER_STACK_", new AdvancedCustomItemStack(Material.NAME_TAG, "&e设置过滤器 (右键点击以清除)"));
     public static final SlimefunItemStack PUSH_BACK = new SlimefunItemStack(
             "_AE_MN_PUSH_BACK_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l点击将物品返回ME网络"));
-    public static final ItemStack MULTI_INPUT_ITEM =
-            new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输入", "", "&7> 单击查看");
-    public static final ItemStack MULTI_OUTPUT_ITEM =
-            new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a多物品输出", "", "&7> 单击查看");
     public static final ItemStack CRAFT_ITEM =
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
     public static final ItemStack CRAFTING_TABLE =
