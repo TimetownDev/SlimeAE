@@ -9,6 +9,7 @@ softdepend:
 depend:
   - Slimefun
   - CMILib
+  - GuguSlimefunLib
 commands:
   ae_craft:
     description: "ae_test_command"

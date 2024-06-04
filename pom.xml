@@ -110,7 +110,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.StarWishsama</groupId>
+            <groupId>com.github.SlimefunGuguProject</groupId>
             <artifactId>Slimefun4</artifactId>
             <version>dev-SNAPSHOT</version>
             <scope>provided</scope>
@@ -139,6 +139,12 @@
             <version>035fe56381</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/FluffyMachines.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.github.TimetownDev</groupId>
+            <artifactId>GuguSlimefunLib</artifactId>
+            <version>c05cb69ad3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

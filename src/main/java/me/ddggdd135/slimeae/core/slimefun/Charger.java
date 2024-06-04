@@ -4,7 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import javax.annotation.Nonnull;
-import me.ddggdd135.slimeae.api.abstracts.AbstractMachineBlock;
+import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
