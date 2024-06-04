@@ -6,9 +6,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
@@ -18,7 +17,6 @@ import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class MEController extends TicingBlock implements IMEController {
@@ -47,14 +45,10 @@ public class MEController extends TicingBlock implements IMEController {
 
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
-        addItemHandler(new BlockBreakHandler(true, true) {
+        addItemHandler(new SimpleBlockBreakHandler() {
             @Override
-            public void onPlayerBreak(
-                    @Nonnull BlockBreakEvent blockBreakEvent,
-                    @Nonnull ItemStack itemStack,
-                    @Nonnull List<ItemStack> list) {
-                NetworkInfo info = SlimeAEPlugin.getNetworkData()
-                        .getNetworkInfo(blockBreakEvent.getBlock().getLocation());
+            public void onBlockBreak(@Nonnull Block block) {
+                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                 if (info != null) {
                     info.dispose();
                 }

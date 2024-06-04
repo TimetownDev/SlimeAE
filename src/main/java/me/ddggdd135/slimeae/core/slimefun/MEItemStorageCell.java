@@ -1,7 +1,5 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import de.tr7zw.changeme.nbtapi.NBTCompoundList;
-import de.tr7zw.changeme.nbtapi.NBTItem;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -11,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import net.Zrips.CMILib.Colors.CMIChatColor;

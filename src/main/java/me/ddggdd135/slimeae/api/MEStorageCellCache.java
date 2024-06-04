@@ -1,13 +1,13 @@
 package me.ddggdd135.slimeae.api;
 
-import de.tr7zw.changeme.nbtapi.NBTCompoundList;
-import de.tr7zw.changeme.nbtapi.NBTItem;
-import de.tr7zw.changeme.nbtapi.NBTType;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;

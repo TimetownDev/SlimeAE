@@ -26,8 +26,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
         instance = this;
+        // Plugin startup logic
         SlimefunAEItemGroups.onSetup(this);
         SlimefunAEItems.onSetup(this);
 
@@ -55,6 +55,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        for (World world : Bukkit.getWorlds()) {
+            world.getPopulators().removeIf(x -> x instanceof SlimefunBlockPopulator);
+        }
     }
 
     @NotNull @Override
