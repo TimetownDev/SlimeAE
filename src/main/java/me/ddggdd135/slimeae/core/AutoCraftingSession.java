@@ -18,7 +18,7 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import me.ddggdd135.slimeae.utils.KeyPair;
+import me.ddggdd135.slimeae.utils.KeyValuePair;
 import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
@@ -35,7 +35,7 @@ public class AutoCraftingSession {
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final int count;
-    private final List<KeyPair<CraftingRecipe, Integer>> craftingSteps;
+    private final List<KeyValuePair<CraftingRecipe, Integer>> craftingSteps;
     private final ItemStorage itemCache = new ItemStorage();
     private int running = 0;
     private final AEMenu menu = new AEMenu("&e合成任务 - " + "&a&l运行中  " + running);
@@ -78,13 +78,13 @@ public class AutoCraftingSession {
     }
 
     @Nonnull
-    public List<KeyPair<CraftingRecipe, Integer>> getCraftingSteps() {
+    public List<KeyValuePair<CraftingRecipe, Integer>> getCraftingSteps() {
         return craftingSteps;
     }
 
-    private List<KeyPair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
+    private List<KeyValuePair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
         if (!info.getRecipes().contains(recipe)) throw new NoEnoughMaterialsException();
-        List<KeyPair<CraftingRecipe, Integer>> result = new ArrayList<>();
+        List<KeyValuePair<CraftingRecipe, Integer>> result = new ArrayList<>();
         Map<ItemStack, Integer> in = ItemUtils.getAmounts(recipe.getInput());
         for (ItemStack template : in.keySet()) {
             int amount = storage.getStorage().getOrDefault(template, 0);
@@ -116,7 +116,7 @@ public class AutoCraftingSession {
                 result.addAll(match(craftingRecipe, countToCraft, storage));
             }
         }
-        result.add(new KeyPair<>(recipe, count));
+        result.add(new KeyValuePair<>(recipe, count));
         return result;
     }
 
@@ -130,7 +130,7 @@ public class AutoCraftingSession {
 
     public void moveNext(int maxDevices) {
         if (!hasNext()) return;
-        KeyPair<CraftingRecipe, Integer> next = craftingSteps.get(0);
+        KeyValuePair<CraftingRecipe, Integer> next = craftingSteps.get(0);
         boolean doCraft = !isCancelling;
         if (running == 0 && isCancelling) info.getCraftingSessions().remove(this);
         if (next.getValue() <= 0) {
@@ -209,8 +209,8 @@ public class AutoCraftingSession {
 
     public void refreshGUI(int maxSize, boolean cancelButton) {
         if (cancelButton) maxSize--;
-        List<KeyPair<CraftingRecipe, Integer>> process = getCraftingSteps();
-        List<KeyPair<CraftingRecipe, Integer>> process2 = getCraftingSteps();
+        List<KeyValuePair<CraftingRecipe, Integer>> process = getCraftingSteps();
+        List<KeyValuePair<CraftingRecipe, Integer>> process2 = getCraftingSteps();
         if (process.size() > maxSize - 1) {
             process2 = process.subList(maxSize, process.size());
             process = process.subList(0, maxSize);
@@ -220,7 +220,7 @@ public class AutoCraftingSession {
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
         int i = 0;
-        for (KeyPair<CraftingRecipe, Integer> item : process) {
+        for (KeyValuePair<CraftingRecipe, Integer> item : process) {
             ItemStack[] itemStacks = item.getKey().getOutput();
             ItemStack itemStack;
             if (itemStacks.length == 1) {
@@ -254,7 +254,7 @@ public class AutoCraftingSession {
         if (!process2.isEmpty()) {
             ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
             List<String> lore = new ArrayList<>();
-            for (KeyPair<CraftingRecipe, Integer> item : process2) {
+            for (KeyValuePair<CraftingRecipe, Integer> item : process2) {
                 SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
                 if (slimefunItem != null) {
                     lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "

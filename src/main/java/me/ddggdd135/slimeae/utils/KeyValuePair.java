@@ -2,11 +2,11 @@ package me.ddggdd135.slimeae.utils;
 
 import java.util.Objects;
 
-public class KeyPair<TKey, TValue> {
+public class KeyValuePair<TKey, TValue> {
     private TKey key;
     private TValue value;
 
-    public KeyPair(TKey key, TValue value) {
+    public KeyValuePair(TKey key, TValue value) {
         this.key = key;
         this.value = value;
     }
@@ -31,8 +31,8 @@ public class KeyPair<TKey, TValue> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        KeyPair<?, ?> keyPair = (KeyPair<?, ?>) o;
-        return Objects.equals(key, keyPair.key) && Objects.equals(value, keyPair.value);
+        KeyValuePair<?, ?> keyValuePair = (KeyValuePair<?, ?>) o;
+        return Objects.equals(key, keyValuePair.key) && Objects.equals(value, keyValuePair.value);
     }
 
     @Override
