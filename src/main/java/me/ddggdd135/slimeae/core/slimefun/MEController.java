@@ -27,20 +27,25 @@ public class MEController extends TicingBlock implements IMEController {
 
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
-        if (info != null) {
+        NetworkInfo info = null;
+        if (SlimeAEPlugin.getSlimefunTickCount() % 8 == 0) {
+            info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
+            if (info == null) return;
+            NetworkInfo finalInfo = info;
             info.getChildren().forEach(x -> {
                 SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
-                ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), info);
+                ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), finalInfo);
             });
-            // tick autoCrafting
-            Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
-            for (AutoCraftingSession session : sessions) {
-                if (!session.hasNext()) info.getCraftingSessions().remove(session);
-                else session.moveNext(8);
-            }
-            info.updateAutoCraftingMenu();
         }
+        if (info == null) info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        if (info == null) return;
+        // tick autoCrafting
+        Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
+        for (AutoCraftingSession session : sessions) {
+            if (!session.hasNext()) info.getCraftingSessions().remove(session);
+            else session.moveNext(8);
+        }
+        info.updateAutoCraftingMenu();
     }
 
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {

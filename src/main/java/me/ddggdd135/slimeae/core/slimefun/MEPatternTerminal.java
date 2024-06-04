@@ -105,17 +105,15 @@ public class MEPatternTerminal extends METerminal {
     public void newInstance(@Nonnull BlockMenu blockMenu, @Nonnull Block block) {
         super.newInstance(blockMenu, block);
         blockMenu.addMenuClickHandler(getReturnItemSlot(), (player, i, itemStack, clickAction) -> {
-            BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-            if (inv == null) return false;
             NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
             if (info == null) return false;
             IStorage networkStorage = info.getStorage();
             for (int slot : getCraftSlots()) {
-                ItemStack item = inv.getItemInSlot(slot);
+                ItemStack item = blockMenu.getItemInSlot(slot);
                 if (item != null && !item.getType().isAir()) networkStorage.pushItem(item);
             }
             for (int slot : getCraftOutputSlots()) {
-                ItemStack item = inv.getItemInSlot(slot);
+                ItemStack item = blockMenu.getItemInSlot(slot);
                 if (item != null && !item.getType().isAir()) networkStorage.pushItem(item);
             }
             return false;
@@ -135,13 +133,13 @@ public class MEPatternTerminal extends METerminal {
     }
 
     private void makePattern(Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
-        ItemStack out = inv.getItemInSlot(getPatternOutputSlot());
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
+        ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
-        ItemStack in = inv.getItemInSlot(getPatternSlot());
+        ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
         if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
-        ItemStack craftingTypeItem = inv.getItemInSlot(getCraftTypeSlot());
+        ItemStack craftingTypeItem = blockMenu.getItemInSlot(getCraftTypeSlot());
         ItemStack toOut = SlimefunAEItems.ENCODED_PATTERN.clone();
 
         if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true)) {
@@ -150,12 +148,12 @@ public class MEPatternTerminal extends METerminal {
             CraftingRecipe recipe = new CraftingRecipe(
                     CraftType.COOKING,
                     Arrays.stream(getCraftSlots())
-                            .mapToObj(inv::getItemInSlot)
+                            .mapToObj(blockMenu::getItemInSlot)
                             .filter(Objects::nonNull)
                             .filter(x -> !x.getType().isAir())
                             .toArray(ItemStack[]::new),
                     Arrays.stream(getCraftOutputSlots())
-                            .mapToObj(inv::getItemInSlot)
+                            .mapToObj(blockMenu::getItemInSlot)
                             .filter(Objects::nonNull)
                             .filter(x -> !x.getType().isAir())
                             .toArray(ItemStack[]::new));
@@ -163,7 +161,7 @@ public class MEPatternTerminal extends METerminal {
         } else {
             ItemStack output = null;
             for (int slot : getCraftOutputSlots()) {
-                ItemStack itemStack = inv.getItemInSlot(slot);
+                ItemStack itemStack = blockMenu.getItemInSlot(slot);
                 if (output != null
                         && !output.getType().isAir()
                         && itemStack != null
@@ -175,7 +173,7 @@ public class MEPatternTerminal extends METerminal {
             if (recipe == null) return;
             for (int i = 0; i < getCraftSlots().length; i++) {
                 int slot = getCraftSlots()[i];
-                ItemStack itemStack = inv.getItemInSlot(slot);
+                ItemStack itemStack = blockMenu.getItemInSlot(slot);
                 ItemStack target = recipe.getInput().length - 1 >= i ? recipe.getInput()[i] : null;
                 if (target == null && itemStack != null) return;
                 if (target != null && itemStack == null) return;
@@ -186,6 +184,6 @@ public class MEPatternTerminal extends METerminal {
             in.subtract();
             Pattern.setRecipe(toOut, recipe);
         }
-        inv.replaceExistingItem(getPatternOutputSlot(), toOut);
+        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 }

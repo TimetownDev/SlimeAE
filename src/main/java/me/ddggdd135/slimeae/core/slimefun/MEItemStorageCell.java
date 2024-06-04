@@ -1,5 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
+
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -59,10 +61,12 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static void updateLore(@Nonnull ItemStack itemStack) {
         MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
         List<String> lores = new ArrayList<>();
-        Map<ItemStack, Integer> storage = meStorageCellCache.getStorage();
-        for (ItemStack key : storage.keySet()) {
-            lores.add(CMIChatColor.translate(
-                    "{#Bright_Sun>}" + ItemUtils.getName(key) + " - " + storage.get(key) + "{#Carrot_Orange<}"));
+        List<Map.Entry<ItemStack, Integer>> storages = meStorageCellCache.getStorage().entrySet().stream()
+                .sorted(ALPHABETICAL_SORT)
+                .toList();
+        for (Map.Entry<ItemStack, Integer> entry : storages) {
+            lores.add(CMIChatColor.translate("{#Bright_Sun>}" + ItemUtils.getName(entry.getKey()) + " - "
+                    + entry.getValue() + "{#Carrot_Orange<}"));
         }
         itemStack.setLore(lores);
     }

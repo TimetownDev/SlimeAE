@@ -53,15 +53,15 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
         IStorage networkStorage = info.getStorage();
         for (int slot : Item_Slots) {
             int settingSlot = slot - 9;
-            ItemStack setting = ItemUtils.getSettingItem(inv.getInventory(), settingSlot);
-            ItemStack itemStack = inv.getItemInSlot(slot);
+            ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), settingSlot);
+            ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
                 if (itemStack != null
                         && !itemStack.getType().isAir()
@@ -85,7 +85,7 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
             if (received.length != 0) {
                 if (itemStack != null && !itemStack.getType().isAir())
                     itemStack.setAmount(amount + received[0].getAmount());
-                else inv.replaceExistingItem(slot, received[0]);
+                else blockMenu.replaceExistingItem(slot, received[0]);
             }
         }
     }
@@ -105,10 +105,10 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
 
             @Override
             public void onBlockBreak(@Nonnull Block b) {
-                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
 
-                if (inv != null) {
-                    inv.dropItems(b.getLocation(), Item_Slots);
+                if (blockMenu != null) {
+                    blockMenu.dropItems(b.getLocation(), Item_Slots);
                 }
             }
         };
@@ -187,11 +187,11 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
 
     @Nonnull
     public CraftingRecipe[] getRecipes(@Nonnull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return new CraftingRecipe[0];
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return new CraftingRecipe[0];
         Set<CraftingRecipe> result = new HashSet<>();
         for (int slot : Pattern_Slots) {
-            ItemStack patternItem = inv.getItemInSlot(slot);
+            ItemStack patternItem = blockMenu.getItemInSlot(slot);
             if (patternItem == null || patternItem.getType().isAir()) continue;
             SlimefunItem slimefunItem = SlimefunItem.getByItem(patternItem);
             if (!(slimefunItem instanceof Pattern)) continue;

@@ -52,10 +52,10 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Override
             public void onBlockBreak(@Nonnull Block b) {
-                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
 
-                if (inv != null) {
-                    inv.dropItems(b.getLocation(), Slots);
+                if (blockMenu != null) {
+                    blockMenu.dropItems(b.getLocation(), Slots);
                 }
             }
         };
@@ -66,34 +66,34 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
         return new IStorage() {
             @Override
             public void pushItem(@Nonnull ItemStack[] itemStacks) {
-                BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                if (inv == null) return;
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return;
                 for (ItemStack itemStack : itemStacks) {
-                    ItemStack result = inv.pushItem(itemStack, Slots);
+                    ItemStack result = blockMenu.pushItem(itemStack, Slots);
                     if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
                     else itemStack.setAmount(0);
                 }
-                inv.markDirty();
+                blockMenu.markDirty();
             }
 
             @Override
             public boolean contains(@Nonnull ItemRequest[] requests) {
-                BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                if (inv == null) return false;
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return false;
                 return ItemUtils.contains(getStorage(), requests);
             }
 
             @Nonnull
             @Override
             public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-                BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                if (inv == null) return new ItemStack[0];
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return new ItemStack[0];
                 Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                 ItemStorage found = new ItemStorage();
 
                 for (ItemStack itemStack : amounts.keySet()) {
                     for (int slot : Slots) {
-                        ItemStack item = inv.getItemInSlot(slot);
+                        ItemStack item = blockMenu.getItemInSlot(slot);
                         if (item == null || item.getType().isAir()) continue;
                         if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                             if (item.getAmount() > amounts.get(itemStack)) {
@@ -103,7 +103,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                                 break;
                             } else {
                                 found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-                                inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
+                                blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                 int rest = amounts.get(itemStack) - item.getAmount();
                                 if (rest != 0) amounts.put(itemStack, rest);
                                 else break;
@@ -111,24 +111,24 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                         }
                     }
                 }
-                inv.markDirty();
+                blockMenu.markDirty();
                 return found.toItemStacks();
             }
 
             @Override
             public @NotNull Map<ItemStack, Integer> getStorage() {
-                BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                if (inv == null) return new ItemHashMap<>();
-                return ItemUtils.getAmounts(inv.getContents());
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return new ItemHashMap<>();
+                return ItemUtils.getAmounts(blockMenu.getContents());
             }
 
             @Override
             public int getEmptySlots() {
-                BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                if (inv == null) return 0;
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return 0;
                 int found = 0;
                 for (int slot : Slots) {
-                    ItemStack itemStack = inv.getItemInSlot(slot);
+                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack == null || itemStack.getType().isAir()) found += 1;
                 }
                 return found;

@@ -168,9 +168,9 @@ public class MECraftingTerminal extends METerminal {
     @OverridingMethodsMustInvokeSuper
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         super.tick(block, item, data);
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
-        if (inv.hasViewer()) updateCraftingGui(block);
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
+        if (blockMenu.hasViewer()) updateCraftingGui(block);
     }
 
     public void updateCraftingGui(@Nonnull Block block) {

@@ -47,19 +47,21 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
     public boolean canStartCrafting(@NotNull Block block, @NotNull CraftingRecipe recipe) {
         if (!isSupport(block, recipe)) return false;
         if (running.contains(block)) return false;
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return false;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return false;
 
-        block = block.getRelative(getDirection(inv));
-        inv = StorageCacheUtils.getMenu(block.getLocation());
+        block = block.getRelative(getDirection(blockMenu));
+        blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return false;
-        if (inv != null) {
-            int[] inputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.INSERT, null);
+        if (blockMenu != null) {
+            int[] inputSlots =
+                    blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, null);
 
-            int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
+            int[] outputSlots =
+                    blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, null);
 
-            return InvUtils.fitAll(inv.getInventory(), recipe.getInput(), inputSlots)
-                    && InvUtils.fitAll(inv.getInventory(), recipe.getOutput(), outputSlots);
+            return InvUtils.fitAll(blockMenu.getInventory(), recipe.getInput(), inputSlots)
+                    && InvUtils.fitAll(blockMenu.getInventory(), recipe.getOutput(), outputSlots);
         } else if (block.getState() instanceof Container container) {
             Inventory inventory = container.getInventory();
             return InvUtils.fitAll(
@@ -72,8 +74,9 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public void startCrafting(@NotNull Block block, @NotNull CraftingRecipe recipe) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        ItemUtils.getStorage(block.getRelative(getDirection(inv)), false, false).pushItem(recipe.getInput());
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, false)
+                .pushItem(recipe.getInput());
         running.add(block);
         recipeMap.put(block, recipe);
     }
@@ -83,11 +86,11 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
         if (!recipeMap.containsKey(block)) return false;
         if (!running.contains(block)) return false;
         if (!isSupport(block, recipeMap.get(block))) return false;
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return false;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return false;
 
         CraftingRecipe recipe = recipeMap.get(block);
-        block = block.getRelative(getDirection(inv));
+        block = block.getRelative(getDirection(blockMenu));
         if (block.getBlockData().getMaterial().isAir()) return false;
         return ItemUtils.getStorage(block, false, false)
                 .contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
@@ -100,8 +103,8 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public void finishCrafting(@NotNull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        ItemUtils.getStorage(block.getRelative(getDirection(inv)), false, true)
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, true)
                 .tryTakeItem(ItemUtils.createRequests(
                         ItemUtils.getAmounts(recipeMap.get(block).getOutput())));
         running.remove(block);

@@ -34,11 +34,11 @@ public class MECraftPlanningTerminal extends METerminal {
 
     @Override
     public void updateGui(@Nonnull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         for (int slot : getDisplaySlots()) {
-            inv.replaceExistingItem(slot, MenuItems.Empty);
-            inv.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
+            blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+            blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
@@ -68,8 +68,8 @@ public class MECraftPlanningTerminal extends METerminal {
                             DataUtils.itemStack2String(new ItemTemplate(itemStack).getHandle()));
             meta.setLore(List.of(CMIChatColor.translate("  &e可合成")));
             result.setItemMeta(meta);
-            inv.replaceExistingItem(slot, result);
-            inv.addMenuClickHandler(slot, (player, i1, itemStack12, clickAction) -> {
+            blockMenu.replaceExistingItem(slot, result);
+            blockMenu.addMenuClickHandler(slot, (player, i1, itemStack12, clickAction) -> {
                 player.closeInventory();
                 player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
                 ChatUtils.awaitInput(player, msg -> {

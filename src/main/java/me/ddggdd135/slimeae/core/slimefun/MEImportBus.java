@@ -42,11 +42,11 @@ public class MEImportBus extends MEBus {
     }
 
     protected void onImport(Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        BlockFace current = getDirection(inv);
+        BlockFace current = getDirection(blockMenu);
         if (current == BlockFace.SELF) return;
         Block transportBlock = block.getRelative(current);
         IStorage storage = ItemUtils.getStorage(transportBlock);

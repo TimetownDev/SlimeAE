@@ -181,10 +181,10 @@ public class ItemUtils {
         return true;
     }
 
-    public static int getItemAmount(BlockMenu inv, int[] slots, ItemStack itemStack) {
+    public static int getItemAmount(BlockMenu blockMenu, int[] slots, ItemStack itemStack) {
         int founded = 0;
         for (int slot : slots) {
-            ItemStack item = inv.getItemInSlot(slot);
+            ItemStack item = blockMenu.getItemInSlot(slot);
             if (item == null || item.getType().isAir()) continue;
             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                 founded += item.getAmount();

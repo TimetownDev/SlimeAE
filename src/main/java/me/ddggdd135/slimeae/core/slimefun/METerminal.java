@@ -97,12 +97,12 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
+        if (blockMenu.hasViewer()) updateGui(block);
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        if (inv.hasViewer()) updateGui(block);
-        ItemStack itemStack = inv.getItemInSlot(getInputSlot());
+        ItemStack itemStack = blockMenu.getItemInSlot(getInputSlot());
         if (itemStack != null && !itemStack.getType().isAir()) info.getStorage().pushItem(itemStack);
     }
 
@@ -143,10 +143,10 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
     }
 
     public void updateGui(@Nonnull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         for (int slot : getDisplaySlots()) {
-            inv.replaceExistingItem(slot, MenuItems.Empty);
+            blockMenu.replaceExistingItem(slot, MenuItems.Empty);
         }
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
@@ -158,8 +158,10 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
             if (page < 0) page = 0;
             setPage(block, page);
         }
-        List<Map.Entry<ItemStack, Integer>> items =
-                storage.entrySet().stream().sorted(getSort(block)).toList();
+        List<Map.Entry<ItemStack, Integer>> items = storage.entrySet().stream()
+                .sorted(ALPHABETICAL_SORT)
+                .sorted(getSort(block))
+                .toList();
 
         ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(ItemStack[]::new);
         for (int i = 0; i < getDisplaySlots().length; i++) {
@@ -167,7 +169,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
             ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
             if (itemStack == null || itemStack.getType().isAir()) continue;
             int slot = getDisplaySlots()[i];
-            inv.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, storage.get(itemStack)));
+            blockMenu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, storage.get(itemStack)));
         }
     }
 

@@ -38,16 +38,16 @@ public class MEExportBus extends MEBus {
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     private void onExport(Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        if (getDirection(inv) == BlockFace.SELF) return;
-        Block target = block.getRelative(getDirection(inv));
+        if (getDirection(blockMenu) == BlockFace.SELF) return;
+        Block target = block.getRelative(getDirection(blockMenu));
         IStorage networkStorage = info.getStorage();
         BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
         for (int slot : Setting_Slots) {
-            ItemStack setting = ItemUtils.getSettingItem(inv.getInventory(), slot);
+            ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
             if (setting == null
                     || setting.getType().isAir()
                     || SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) continue;

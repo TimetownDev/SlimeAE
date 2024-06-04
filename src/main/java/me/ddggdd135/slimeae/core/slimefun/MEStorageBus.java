@@ -38,12 +38,12 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
     }
 
     @Nullable public IStorage getStorage(Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        BlockFace blockFace = getDirection(inv);
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        BlockFace blockFace = getDirection(blockMenu);
         if (blockFace == BlockFace.SELF) return null;
         Block b = block.getRelative(blockFace);
         if (b.getBlockData().getMaterial().isAir()) return null;
-        inv.markDirty();
+        blockMenu.markDirty();
         return ItemUtils.getStorage(b);
     }
 }

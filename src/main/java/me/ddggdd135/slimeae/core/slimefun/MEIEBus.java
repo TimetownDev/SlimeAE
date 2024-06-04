@@ -26,11 +26,11 @@ public class MEIEBus extends MEExportBus {
     @OverridingMethodsMustInvokeSuper
     public void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         super.tick(block, item, data);
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        BlockFace current = getDirection(inv);
+        BlockFace current = getDirection(blockMenu);
         if (current == BlockFace.SELF) return;
         Block transportBlock = block.getRelative(current);
         IStorage storage = ItemUtils.getStorage(transportBlock);
