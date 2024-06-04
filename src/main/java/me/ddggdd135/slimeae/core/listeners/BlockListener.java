@@ -2,10 +2,16 @@ package me.ddggdd135.slimeae.core.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.events.PlayerRightClickEvent;
+import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Random;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.interfaces.IMEController;
+import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
+import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
+import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.CraftingMonitor;
@@ -15,6 +21,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class BlockListener implements Listener {
@@ -48,6 +55,30 @@ public class BlockListener implements Listener {
                 e.setDropItems(false);
             }
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBlockBreakEx(BlockBreakEvent e) {
+        SlimeAEPlugin.getNetworkData().clearData(e.getBlock().getLocation());
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onMEBlockPlace(SlimefunBlockPlaceEvent e) {
+        if (e.getSlimefunItem() instanceof IMEObject IMEObject) {
+            NetworkData networkData = SlimeAEPlugin.getNetworkData();
+            networkData.AllNetworkBlocks.add(e.getBlockPlaced().getLocation());
+            if (IMEObject instanceof IMEController)
+                networkData.AllControllers.add(e.getBlockPlaced().getLocation());
+            if (IMEObject instanceof IMEStorageObject IMEStorageObject)
+                networkData.AllNetworkStorageBlocks.put(e.getBlockPlaced().getLocation(), IMEStorageObject);
+            if (IMEObject instanceof IMECraftHolder IMECraftHolder)
+                networkData.AllNetworkCraftHolders.put(e.getPlayer().getLocation(), IMECraftHolder);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onSlimefunBlockPlace(SlimefunBlockPlaceEvent e) {
+        SlimeAEPlugin.getNetworkData().clearData(e.getBlockPlaced().getLocation());
     }
 
     @EventHandler

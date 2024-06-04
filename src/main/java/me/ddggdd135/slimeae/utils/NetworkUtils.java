@@ -8,13 +8,15 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 public class NetworkUtils {
-    public static void scan(Block block, Set<Location> blocks) {
+    public static void scanDirectly(@Nonnull Block block, @Nonnull Set<Location> blocks) {
         BlockDataController controller = Slimefun.getDatabaseManager().getBlockDataController();
         for (BlockFace blockFace : Valid_Faces) {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
@@ -24,14 +26,33 @@ public class NetworkUtils {
                     && SlimefunItem.getById(blockData.getSfId()) instanceof IMEObject
                     && !testLocation.getBlock().getType().isAir()) {
                 blocks.add(testLocation);
-                scan(testLocation.getBlock(), blocks);
+                scanDirectly(testLocation.getBlock(), blocks);
             }
         }
     }
 
-    public static Set<Location> scan(Block block) {
+    @Nonnull
+    public static Set<Location> scanDirectly(@Nonnull Block block) {
         Set<Location> result = new HashSet<>();
-        scan(block, result);
+        scanDirectly(block, result);
         return result;
+    }
+
+    @Nonnull
+    public static Set<Location> scan(Location location) {
+        Set<Location> result = new HashSet<>();
+        scan(location, result);
+        return result;
+    }
+
+    public static void scan(@Nonnull Location location, @Nonnull Set<Location> blocks) {
+        for (BlockFace blockFace : Valid_Faces) {
+            Location testLocation = location.add(blockFace.getDirection());
+            if (blocks.contains(testLocation)) continue;
+            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.contains(testLocation)) {
+                blocks.add(testLocation);
+                scanDirectly(testLocation.getBlock(), blocks);
+            }
+        }
     }
 }
