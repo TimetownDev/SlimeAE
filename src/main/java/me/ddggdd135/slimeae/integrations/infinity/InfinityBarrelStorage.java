@@ -63,10 +63,10 @@ public class InfinityBarrelStorage implements IStorage {
         for (ItemRequest request : requests) {
             if (Boolean.TRUE.equals(ReflectionUtils.invokePrivateMethod(
                     cache, "matches", new Class<?>[] {ItemStack.class}, request.getTemplate()))) {
-                int amount = ReflectionUtils.getField(cache, "amount");
+                int amount = ReflectionUtils.<Integer>getField(cache, "amount") - 1;
                 int toTake = Math.min(amount, request.getAmount());
                 if (toTake != 0) {
-                    ReflectionUtils.setField(cache, "amount", amount - toTake);
+                    ReflectionUtils.setField(cache, "amount", amount + 1 - toTake);
                     toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
                 }
             }
@@ -85,7 +85,7 @@ public class InfinityBarrelStorage implements IStorage {
         ItemStack itemStack = new ItemStack(material);
         if (meta != null) itemStack.setItemMeta(meta);
 
-        storage.put(itemStack, ReflectionUtils.<Integer>getField(cache, "amount"));
+        storage.put(itemStack, ReflectionUtils.<Integer>getField(cache, "amount") - 1);
         return storage;
     }
 
