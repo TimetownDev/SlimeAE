@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.core;
 
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.*;
 import javax.annotation.Nonnull;
@@ -12,8 +11,7 @@ import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import net.Zrips.CMILib.Colors.CMIChatColor;
-import net.Zrips.CMILib.Items.CMIMaterial;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -144,17 +142,7 @@ public class NetworkInfo implements IDisposable {
                         Material.BARREL,
                         "&e&l多物品",
                         Arrays.stream(itemStacks)
-                                .map(x -> {
-                                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x);
-                                    if (slimefunItem != null) {
-                                        return "  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
-                                                + x.getAmount();
-                                    } else {
-                                        return "  - "
-                                                + CMIMaterial.get(x.getType()).getTranslatedName() + " x "
-                                                + x.getAmount();
-                                    }
-                                })
+                                .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
                                 .toArray(String[]::new));
                 itemStack.setAmount(Math.min(64, session.getCount()));
             }

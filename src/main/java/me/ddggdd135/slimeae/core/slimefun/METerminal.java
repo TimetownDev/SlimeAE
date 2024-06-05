@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.text.Collator;
@@ -19,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -30,29 +32,22 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import net.Zrips.CMILib.Colors.CMIChatColor;
-import net.Zrips.CMILib.Items.CMIMaterial;
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class METerminal extends TicingBlock implements IMEObject, InventoryBlock {
     public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
-            itemStackIntegerEntry -> {
-                ItemStack itemStack = itemStackIntegerEntry.getKey();
-                SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-                if (slimefunItem != null) {
-                    return CMIChatColor.stripColor(slimefunItem.getItemName());
-                } else {
-                    return CMIMaterial.get(itemStack.getType()).getTranslatedName();
-                }
-            },
+            itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
             Collator.getInstance(Locale.CHINA)::compare);
 
     public static final Comparator<Map.Entry<ItemStack, Integer>> NUMERICAL_SORT = Map.Entry.comparingByValue();
+    public static final String PAGE_KEY = "page";
+    public static final String SORT_KEY = "sort";
+    public static final String FILTER_KEY = "filter";
 
     public int[] getBackgroundSlots() {
         return new int[] {17, 26};
@@ -111,22 +106,22 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         createPreset(this);
     }
 
-    public static int getPage(Block block) {
-        String value = StorageCacheUtils.getData(block.getLocation(), "page");
+    public int getPage(Block block) {
+        String value = StorageCacheUtils.getData(block.getLocation(), PAGE_KEY);
         if (value == null || Integer.parseInt(value) < 0) return 0;
         return Integer.parseInt(value);
     }
 
-    public static void setPage(Block block, int value) {
+    public void setPage(Block block, int value) {
         if (value < 0) {
-            StorageCacheUtils.setData(block.getLocation(), "page", "0");
+            StorageCacheUtils.setData(block.getLocation(), PAGE_KEY, "0");
             return;
         }
-        StorageCacheUtils.setData(block.getLocation(), "page", String.valueOf(value));
+        StorageCacheUtils.setData(block.getLocation(), PAGE_KEY, String.valueOf(value));
     }
 
-    public static Comparator<Map.Entry<ItemStack, Integer>> getSort(Block block) {
-        String value = StorageCacheUtils.getData(block.getLocation(), "sort");
+    public Comparator<Map.Entry<ItemStack, Integer>> getSort(Block block) {
+        String value = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
         if (value == null) return ALPHABETICAL_SORT;
         int id = Integer.parseInt(value);
         if (id == 0) return ALPHABETICAL_SORT;
@@ -134,12 +129,27 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         return ALPHABETICAL_SORT;
     }
 
-    public static void setSort(Block block, int value) {
+    public void setSort(Block block, int value) {
         if (value < 0 || value > 1) {
-            StorageCacheUtils.setData(block.getLocation(), "sort", "0");
+            StorageCacheUtils.setData(block.getLocation(), SORT_KEY, "0");
             return;
         }
-        StorageCacheUtils.setData(block.getLocation(), "sort", String.valueOf(value));
+        StorageCacheUtils.setData(block.getLocation(), SORT_KEY, String.valueOf(value));
+    }
+
+    @Nonnull
+    public String getFilter(@Nonnull Block block) {
+        String filter = StorageCacheUtils.getData(block.getLocation(), FILTER_KEY);
+        if (filter == null) {
+            setFilter(block, "");
+            return "";
+        }
+
+        return filter;
+    }
+
+    public void setFilter(@Nonnull Block block, @Nonnull String filter) {
+        StorageCacheUtils.setData(block.getLocation(), FILTER_KEY, filter);
     }
 
     public void updateGui(@Nonnull Block block) {
@@ -161,6 +171,20 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         List<Map.Entry<ItemStack, Integer>> items = storage.entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
                 .sorted(getSort(block))
+                .filter(x -> {
+                    String filter = getFilter(block);
+                    if (filter.isEmpty()) {
+                        return true;
+                    }
+
+                    if (x.getKey().getType().toString().toLowerCase(Locale.ROOT).startsWith(filter)) {
+                        return true;
+                    }
+
+                    String name = ChatColor.stripColor(
+                            ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                    return name.contains(filter);
+                })
                 .toList();
 
         ItemStack[] itemStacks = items.stream().map(Map.Entry::getKey).toList().toArray(ItemStack[]::new);
@@ -188,7 +212,7 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         for (int slot : getBackgroundSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground());
             preset.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
@@ -198,23 +222,23 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         menu.replaceExistingItem(getPageNext(), MenuItems.PAGE_NEXT_STACK);
-        menu.addMenuClickHandler(getPageNext(), (player, i, itemStack, clickAction) -> {
+        menu.addMenuClickHandler(getPageNext(), (player, i, cursor, clickAction) -> {
             setPage(block, getPage(block) + 1);
             updateGui(block);
             return false;
         });
 
         menu.replaceExistingItem(getPagePrevious(), MenuItems.PAGE_PREVIOUS_STACK);
-        menu.addMenuClickHandler(getPagePrevious(), (player, i, itemStack, clickAction) -> {
+        menu.addMenuClickHandler(getPagePrevious(), (player, i, cursor, clickAction) -> {
             setPage(block, getPage(block) - 1);
             updateGui(block);
             return false;
         });
 
         menu.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
-        menu.addMenuClickHandler(getChangeSort(), (player, i, itemStack, clickAction) -> {
+        menu.addMenuClickHandler(getChangeSort(), (player, i, cursor, clickAction) -> {
             Comparator<Map.Entry<ItemStack, Integer>> sort = getSort(block);
             if (sort == ALPHABETICAL_SORT) setSort(block, 1);
             if (sort == NUMERICAL_SORT) setSort(block, 0);
@@ -222,7 +246,22 @@ public class METerminal extends TicingBlock implements IMEObject, InventoryBlock
         });
 
         menu.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
-        menu.addMenuClickHandler(getFilter(), (player, i, itemStack, clickAction) -> false);
+        menu.addMenuClickHandler(getFilter(), (player, i, cursor, clickAction) -> {
+            if (clickAction.isRightClicked()) {
+                setFilter(block, "");
+            } else {
+                player.closeInventory();
+                player.sendMessage(ChatColor.YELLOW + "请输入你想要过滤的物品名称(显示名)或类型");
+                ChatUtils.awaitInput(player, filter -> {
+                    if (filter.isBlank()) {
+                        return;
+                    }
+                    setFilter(block, filter.toLowerCase(Locale.ROOT));
+                    player.sendMessage(ChatColor.GREEN + "已启用过滤器");
+                });
+            }
+            return false;
+        });
 
         for (int slot : getDisplaySlots()) {
             menu.replaceExistingItem(slot, MenuItems.Empty);

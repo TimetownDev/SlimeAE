@@ -3,14 +3,16 @@ package me.ddggdd135.slimeae.core.commands;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -19,16 +21,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class CraftCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(
-            @NotNull CommandSender commandSender,
-            @NotNull Command command,
-            @NotNull String s,
-            @NotNull String[] strings) {
+            @Nonnull CommandSender commandSender,
+            @Nonnull Command command,
+            @Nonnull String s,
+            @Nonnull String[] strings) {
         if (commandSender instanceof Player player) {
             Block block = player.getLocation().getBlock().getRelative(BlockFace.DOWN);
             NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
@@ -88,10 +88,10 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(
-            @NotNull CommandSender commandSender,
-            @NotNull Command command,
-            @NotNull String s,
-            @NotNull String[] strings) {
+            @Nonnull CommandSender commandSender,
+            @Nonnull Command command,
+            @Nonnull String s,
+            @Nonnull String[] strings) {
         return new ArrayList<>();
     }
 }

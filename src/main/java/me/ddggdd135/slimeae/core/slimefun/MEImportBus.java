@@ -41,7 +41,7 @@ public class MEImportBus extends MEBus {
         return new int[0];
     }
 
-    protected void onImport(Block block) {
+    protected void onImport(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());

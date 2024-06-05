@@ -22,7 +22,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class MEPatternTerminal extends METerminal {
     public MEPatternTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -94,7 +93,7 @@ public class MEPatternTerminal extends METerminal {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         super.init(preset);
         preset.addItem(getReturnItemSlot(), MenuItems.PUSH_BACK);
         preset.addItem(getCraftButtonSlot(), MenuItems.CRAFT_ITEM);

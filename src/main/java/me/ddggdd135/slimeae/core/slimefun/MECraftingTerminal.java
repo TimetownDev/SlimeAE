@@ -33,7 +33,6 @@ import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import org.jetbrains.annotations.NotNull;
 
 public class MECraftingTerminal extends METerminal {
     public MECraftingTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -89,7 +88,7 @@ public class MECraftingTerminal extends METerminal {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         super.init(preset);
         preset.addItem(getReturnItemSlot(), MenuItems.PUSH_BACK);
     }

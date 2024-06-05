@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
@@ -23,8 +25,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class CookingAllocator extends MEBus implements IMECraftDevice {
     private Map<Block, CraftingRecipe> recipeMap = new HashMap<>();
@@ -40,12 +40,12 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
     }
 
     @Override
-    public boolean isSupport(@NotNull Block block, @NotNull CraftingRecipe recipe) {
+    public boolean isSupport(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         return recipe.getCraftType() == CraftType.COOKING;
     }
 
     @Override
-    public boolean canStartCrafting(@NotNull Block block, @NotNull CraftingRecipe recipe) {
+    public boolean canStartCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         if (!isSupport(block, recipe)) return false;
         if (running.contains(block)) return false;
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
@@ -74,7 +74,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
     }
 
     @Override
-    public void startCrafting(@NotNull Block block, @NotNull CraftingRecipe recipe) {
+    public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, false)
                 .pushItem(recipe.getInput());
@@ -83,7 +83,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
     }
 
     @Override
-    public boolean isFinished(@NotNull Block block) {
+    public boolean isFinished(@Nonnull Block block) {
         if (!recipeMap.containsKey(block)) return false;
         if (!running.contains(block)) return false;
         if (!isSupport(block, recipeMap.get(block))) return false;
@@ -97,13 +97,13 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
                 .contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
     }
 
-    @Nullable @Override
-    public CraftingRecipe getFinishedCraftingRecipe(@NotNull Block block) {
+    @Override
+    @Nullable public CraftingRecipe getFinishedCraftingRecipe(@Nonnull Block block) {
         return recipeMap.getOrDefault(block, null);
     }
 
     @Override
-    public void finishCrafting(@NotNull Block block) {
+    public void finishCrafting(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, true)
                 .tryTakeItem(ItemUtils.createRequests(

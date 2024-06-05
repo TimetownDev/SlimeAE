@@ -4,10 +4,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataControlle
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Random;
+import javax.annotation.Nonnull;
 import org.bukkit.*;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class OreGenerator extends BlockPopulator {
     private final ItemStack item;
@@ -21,7 +21,7 @@ public class OreGenerator extends BlockPopulator {
     }
 
     @Override
-    public void populate(@NotNull World world, @NotNull Random random, @NotNull Chunk source) {
+    public void populate(@Nonnull World world, @Nonnull Random random, @Nonnull Chunk source) {
         int chunkX = source.getX();
         int chunkZ = source.getZ();
         for (int i = 0; i < 5; i++) { // 生成5个矿脉

@@ -25,7 +25,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * ME单元 相当于AE版本的原版大箱子
@@ -116,7 +115,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
             }
 
             @Override
-            public @NotNull Map<ItemStack, Integer> getStorage() {
+            public @Nonnull Map<ItemStack, Integer> getStorage() {
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return new ItemHashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
@@ -153,10 +152,10 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         preset.setSize(6 * 9);
     }
 
     @Override
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {}
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {}
 }

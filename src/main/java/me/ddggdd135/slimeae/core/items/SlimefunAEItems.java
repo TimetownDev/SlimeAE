@@ -5,12 +5,12 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.libraries.version.Version;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 

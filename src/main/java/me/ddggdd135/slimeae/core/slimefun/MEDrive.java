@@ -10,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -21,8 +22,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
     public static final int[] Boarder_Slots = new int[] {
@@ -82,8 +81,8 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         };
     }
 
-    @Nullable @Override
-    public IStorage getStorage(Block block) {
+    @Override
+    @Nullable public IStorage getStorage(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return null;
         StorageCollection storageCollection = new StorageCollection();
@@ -110,7 +109,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         for (int slot : Boarder_Slots) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
@@ -118,7 +117,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         for (int slot : MEItemStorageCell_Slots) {
             menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
                 ItemStack itemStack = menu.getItemInSlot(i);

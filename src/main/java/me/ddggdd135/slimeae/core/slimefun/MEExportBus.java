@@ -22,10 +22,11 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class MEExportBus extends MEBus {
 
@@ -148,7 +149,7 @@ public class MEExportBus extends MEBus {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
         for (int slot : Setting_Slots) {
             if (menu.getItemInSlot(slot) == null

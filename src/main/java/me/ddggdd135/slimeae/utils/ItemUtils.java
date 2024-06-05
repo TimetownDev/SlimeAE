@@ -16,6 +16,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTContainer;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
@@ -32,11 +33,13 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import net.Zrips.CMILib.Colors.CMIChatColor;
-import net.Zrips.CMILib.Items.CMIItemStack;
+import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
+import org.bukkit.block.Furnace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.FurnaceInventory;
@@ -45,8 +48,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 
 public class ItemUtils {
     public static final NamespacedKey ITEM_STORAGE_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "item_storage");
@@ -221,12 +222,6 @@ public class ItemUtils {
         return list;
     }
 
-    public static String getName(@Nonnull ItemStack itemStack) {
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (slimefunItem == null) return new CMIItemStack(itemStack).getRealName();
-        return slimefunItem.getItemName();
-    }
-
     @Nullable public static IStorage getStorage(@Nonnull Block block) {
         return getStorage(block, true);
     }
@@ -259,7 +254,7 @@ public class ItemUtils {
         if (inv != null) {
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull ItemStack[] itemStacks) {
                     if (isReadOnly) return;
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return;
@@ -319,7 +314,8 @@ public class ItemUtils {
                 }
 
                 @Override
-                public @NotNull Map<ItemStack, Integer> getStorage() {
+                @Nonnull
+                public Map<ItemStack, Integer> getStorage() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return new ItemHashMap<>();
                     int[] outputSlots =
@@ -341,7 +337,7 @@ public class ItemUtils {
         } else if (PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull @NotNull @NonNull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull ItemStack[] itemStacks) {
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
                         furnaceInventory.addItem(itemStacks);
@@ -391,7 +387,8 @@ public class ItemUtils {
                 }
 
                 @Override
-                public @NotNull Map<ItemStack, Integer> getStorage() {
+                @Nonnull
+                public Map<ItemStack, Integer> getStorage() {
                     Container container =
                             (Container) PaperLib.getBlockState(block, false).getState();
                     ItemStack[] items = new ItemStack[0];
@@ -457,7 +454,8 @@ public class ItemUtils {
         return null;
     }
 
-    @NotNull private static ItemStack[] getVanillaItemStacks(Block block) {
+    @Nonnull
+    private static ItemStack[] getVanillaItemStacks(Block block) {
         Container container = (Container) PaperLib.getBlockState(block, false).getState();
         ItemStack[] items = new ItemStack[0];
         if (container instanceof Furnace furnace) {
@@ -592,5 +590,16 @@ public class ItemUtils {
     public static <T extends SlimefunItem> T setRecipeOutput(@Nonnull T item, @Nonnull ItemStack output) {
         item.setRecipeOutput(output);
         return item;
+    }
+
+    public static String getItemName(ItemStack itemStack) {
+        String displayName = itemStack.getItemMeta().getDisplayName();
+        if (!displayName.isEmpty()) return displayName;
+        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
+        if (slimefunItem != null) {
+            return slimefunItem.getItemName();
+        } else {
+            return CMIMaterial.get(itemStack.getType()).getTranslatedName();
+        }
     }
 }

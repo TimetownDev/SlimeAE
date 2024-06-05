@@ -30,7 +30,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class MEInterface extends TicingBlock implements IMECraftHolder, InventoryBlock {
     public static final int[] Boarder_Slots =
@@ -126,7 +125,7 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void init(@NotNull BlockMenuPreset preset) {
+    public void init(@Nonnull BlockMenuPreset preset) {
         preset.drawBackground(Boarder_Slots);
         for (int slot : Setting_Slots) {
             preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
@@ -138,7 +137,7 @@ public class MEInterface extends TicingBlock implements IMECraftHolder, Inventor
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void newInstance(@NotNull BlockMenu menu, @NotNull Block block) {
+    public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         for (int slot : Setting_Slots) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir())

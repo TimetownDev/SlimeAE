@@ -9,7 +9,11 @@ import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.CookingRecipe;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class RecipeUtils {
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {

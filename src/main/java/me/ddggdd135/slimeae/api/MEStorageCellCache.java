@@ -1,7 +1,12 @@
 package me.ddggdd135.slimeae.api;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;

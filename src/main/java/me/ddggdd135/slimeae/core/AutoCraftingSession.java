@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -19,7 +20,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyValuePair;
-import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -230,17 +230,7 @@ public class AutoCraftingSession {
                         Material.BARREL,
                         "&e&l多物品",
                         Arrays.stream(itemStacks)
-                                .map(x -> {
-                                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x);
-                                    if (slimefunItem != null) {
-                                        return "  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
-                                                + x.getAmount();
-                                    } else {
-                                        return "  - "
-                                                + CMIMaterial.get(x.getType()).getTranslatedName() + " x "
-                                                + x.getAmount();
-                                    }
-                                })
+                                .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
                                 .toArray(String[]::new));
                 itemStack.setAmount(Math.min(64, item.getValue()));
             }

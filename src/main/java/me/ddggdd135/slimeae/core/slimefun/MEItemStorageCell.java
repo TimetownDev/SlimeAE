@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import net.Zrips.CMILib.Colors.CMIChatColor;
 import org.bukkit.inventory.ItemStack;
 
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
@@ -67,7 +67,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
                 .sorted(ALPHABETICAL_SORT)
                 .toList();
         for (Map.Entry<ItemStack, Integer> entry : storages) {
-            lores.add(CMIChatColor.translate("{#Bright_Sun>}" + ItemUtils.getName(entry.getKey()) + " - "
+            lores.add(CMIChatColor.translate("{#Bright_Sun>}" + ItemUtils.getItemName(entry.getKey()) + " - "
                     + entry.getValue() + "{#Carrot_Orange<}"));
         }
         itemStack.setLore(lores);
