@@ -4,8 +4,10 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.core.attributes.DistinctiveItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -18,9 +20,19 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class Pattern extends SlimefunItem {
+public class Pattern extends SlimefunItem implements DistinctiveItem {
     public Pattern(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
+    }
+
+    @Override
+    public boolean canStack(@Nonnull ItemMeta sfItemMeta, @Nonnull ItemMeta itemMeta) {
+        List<String> lorea = sfItemMeta.getLore();
+        List<String> loreb = itemMeta.getLore();
+        if (lorea == null && loreb == null) return true;
+        if (lorea == null) lorea = new ArrayList<>();
+        if (loreb == null) loreb = new ArrayList<>();
+        return lorea.isEmpty() && loreb.isEmpty() && sfItemMeta.equals(itemMeta);
     }
 
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
@@ -40,6 +52,7 @@ public class Pattern extends SlimefunItem {
         compound.setEnum("crafting_type", recipe.getCraftType());
         compound.setItemStackArray("input", recipe.getInput());
         compound.setItemStackArray("output", recipe.getOutput());
+        nbtItem.setUUID("uuid", UUID.randomUUID());
         nbtItem.applyNBT(itemStack);
         List<String> lore = new ArrayList<>();
         lore.add("&a输入");
