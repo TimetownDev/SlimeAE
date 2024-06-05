@@ -38,7 +38,7 @@ public class InfinityBarrelStorage implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        if (!isReadOnly && cache != null) cache.depositAll(itemStacks);
+        if (!isReadOnly && cache != null) cache.depositAll(itemStacks, true);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class InfinityBarrelStorage implements IStorage {
                 int amount = ReflectionUtils.<Integer>getField(cache, "amount") - 1;
                 int toTake = Math.min(amount, request.getAmount());
                 if (toTake != 0) {
-                    ReflectionUtils.setField(cache, "amount", amount + 1 - toTake);
+                    cache.amount(amount + 1 - toTake);
                     toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
                 }
             }
