@@ -46,18 +46,6 @@ public class SlimefunAEItems {
                     "&f分子装配室"));
     public static final SlimefunItemStack COOKING_ALLOCATOR =
             new SlimefunItemStack("COOKING_ALLOCATOR", new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器"));
-    public static final SlimefunItemStack CRAFTING_STORAGE_1K = new SlimefunItemStack(
-            "CRAFTING_STORAGE_1K", new AdvancedCustomItemStack(Material.LIME_CONCRETE, "&f1K合成储存器"));
-    public static final SlimefunItemStack CRAFTING_STORAGE_4K = new SlimefunItemStack(
-            "CRAFTING_STORAGE_4K", new AdvancedCustomItemStack(Material.GREEN_CONCRETE, "&f4K合成储存器"));
-    public static final SlimefunItemStack CRAFTING_STORAGE_16K = new SlimefunItemStack(
-            "CRAFTING_STORAGE_16K", new AdvancedCustomItemStack(Material.CYAN_CONCRETE, "&f16K合成储存器"));
-    public static final SlimefunItemStack CRAFTING_STORAGE_64K = new SlimefunItemStack(
-            "CRAFTING_STORAGE_64K", new AdvancedCustomItemStack(Material.LIGHT_BLUE_CONCRETE, "&f64K合成储存器"));
-    public static final SlimefunItemStack CRAFTING_CO_PROCESSING_UNIT = new SlimefunItemStack(
-            "CRAFTING_CO_PROCESSING_UNIT", new AdvancedCustomItemStack(Material.PURPLE_GLAZED_TERRACOTTA, "&f并行处理单元"));
-    public static final SlimefunItemStack CRAFTING_UNIT = new SlimefunItemStack(
-            "CRAFTING_UNIT", new AdvancedCustomItemStack(Material.CHISELED_STONE_BRICKS, "&f合成单元"));
     public static final SlimefunItemStack CRAFTING_MONITOR =
             new SlimefunItemStack("ME_CRAFTING_MONITOR", new AdvancedCustomItemStack(Material.SEA_LANTERN, "&f合成监视器"));
     public static final SlimefunItemStack ENERGY_CELL =
@@ -320,65 +308,6 @@ public class SlimefunAEItems {
                             new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.GLASS),
                             new ItemStack(Material.IRON_INGOT)
-                        })
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_STORAGE_1K,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_1K})
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_STORAGE_4K,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_4K})
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_STORAGE_16K,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_16K})
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_STORAGE_64K,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {CRAFTING_UNIT, ME_ITEM_STORAGE_COMPONENT_64K})
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_CO_PROCESSING_UNIT,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {CRAFTING_UNIT, ENGINEERING_PROCESSOR})
-                .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_UNIT,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {
-                            new ItemStack(Material.IRON_INGOT),
-                            CALCULATION_PROCESSOR,
-                            new ItemStack(Material.IRON_INGOT),
-                            ME_GLASS_CABLE,
-                            LOGIC_PROCESSOR,
-                            ME_GLASS_CABLE,
-                            new ItemStack(Material.IRON_INGOT),
-                            CALCULATION_PROCESSOR,
-                            new ItemStack(Material.IRON_INGOT)
-                        })
-                .register(plugin);
-        new CraftingMonitor(
-                        SlimefunAEItemGroups.MACHINE,
-                        CRAFTING_MONITOR,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {
-                            CRAFTING_UNIT,
-                            null,
-                            null,
-                            new ItemStack(Material.REDSTONE_TORCH),
-                            CALCULATION_PROCESSOR,
-                            new ItemStack(Material.LAPIS_LAZULI)
                         })
                 .register(plugin);
         new SlimefunItem(
