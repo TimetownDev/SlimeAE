@@ -406,6 +406,19 @@ public class SlimefunAEItems {
                                     new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);
+        new CraftingMonitor(
+                        SlimefunAEItemGroups.MACHINE,
+                        CRAFTING_MONITOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            null,
+                            null,
+                            null,
+                            new ItemStack(Material.REDSTONE_TORCH),
+                            CALCULATION_PROCESSOR,
+                            new ItemStack(Material.LAPIS_LAZULI)
+                        })
+                .register(plugin);
         // Materials
 
         SlimefunItem crystal_certus_quartz = new SlimefunItem(

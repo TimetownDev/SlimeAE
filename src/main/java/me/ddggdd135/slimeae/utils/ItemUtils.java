@@ -561,6 +561,11 @@ public class ItemUtils {
 
     @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount) {
+        return createDisplayItem(itemStack, amount, true);
+    }
+
+    @Nonnull
+    public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount, boolean addLore) {
         ItemStack result = itemStack.clone();
         ItemMeta meta = result.getItemMeta();
         meta.getPersistentDataContainer()
@@ -569,11 +574,13 @@ public class ItemUtils {
                         PersistentDataType.STRING,
                         DataUtils.itemStack2String(new ItemStack(itemStack.asOne())));
         result.setAmount(Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
-        List<String> lore = meta.getLore();
-        if (lore == null) lore = new ArrayList<>();
-        lore.add("");
-        lore.add(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}"));
-        meta.setLore(lore);
+        if (addLore) {
+            List<String> lore = meta.getLore();
+            if (lore == null) lore = new ArrayList<>();
+            lore.add("");
+            lore.add(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}"));
+            meta.setLore(lore);
+        }
         result.setItemMeta(meta);
         return result;
     }

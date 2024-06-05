@@ -21,6 +21,7 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -29,10 +30,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.CraftingRecipe;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class MECraftingTerminal extends METerminal {
     public MECraftingTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -150,13 +152,11 @@ public class MECraftingTerminal extends METerminal {
             }
         });
         blockMenu.addMenuClickHandler(getReturnItemSlot(), (player, i, itemStack, clickAction) -> {
-            BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-            if (inv == null) return false;
             NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
             if (info == null) return false;
             IStorage networkStorage = info.getStorage();
             for (int slot : getCraftSlots()) {
-                ItemStack item = inv.getItemInSlot(slot);
+                ItemStack item = blockMenu.getItemInSlot(slot);
                 if (item != null && !item.getType().isAir()) networkStorage.pushItem(item);
             }
             return false;
@@ -180,12 +180,12 @@ public class MECraftingTerminal extends METerminal {
             inv.replaceExistingItem(getCraftOutputSlot(), MenuItems.Empty);
             return;
         }
-        inv.replaceExistingItem(getCraftOutputSlot(), matched);
+        inv.replaceExistingItem(getCraftOutputSlot(), ItemUtils.createDisplayItem(matched, matched.getAmount(), false));
     }
 
     public void doCraft(@Nonnull Block block) {
-        BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (inv == null) return;
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
         ItemStack matched = matchItem(block);
@@ -195,7 +195,7 @@ public class MECraftingTerminal extends METerminal {
         if (slimefunItem != null) {
             ItemStack[] recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
             for (int i = 0; i < 9; i++) {
-                ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
+                ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
                 if (itemStack == null || itemStack.getType().isAir()) continue;
                 itemStack.setAmount(itemStack.getAmount() - recipe[i].getAmount());
                 if (itemStack.getAmount() == 0) {
@@ -206,12 +206,12 @@ public class MECraftingTerminal extends METerminal {
         } else {
             List<ItemStack> craftingSlots = new ArrayList<>();
             for (int slot : getCraftSlots()) {
-                craftingSlots.add(inv.getItemInSlot(slot));
+                craftingSlots.add(blockMenu.getItemInSlot(slot));
             }
             Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
-            if (recipe instanceof CraftingRecipe) {
+            if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
                 for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = inv.getItemInSlot(getCraftSlots()[i]);
+                    ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
                     if (itemStack == null || itemStack.getType().isAir()) continue;
                     ItemStack backup = itemStack.clone();
                     itemStack.setAmount(itemStack.getAmount() - 1);
@@ -247,7 +247,7 @@ public class MECraftingTerminal extends METerminal {
 
         if (matched == null) {
             Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
-            if (recipe instanceof CraftingRecipe) matched = recipe.getResult();
+            if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) matched = recipe.getResult();
         }
         return matched;
     }

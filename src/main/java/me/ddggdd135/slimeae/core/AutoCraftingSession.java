@@ -38,7 +38,7 @@ public class AutoCraftingSession {
     private final List<KeyValuePair<CraftingRecipe, Integer>> craftingSteps;
     private final ItemStorage itemCache = new ItemStorage();
     private int running = 0;
-    private final AEMenu menu = new AEMenu("&e合成任务 - " + "&a&l运行中  " + running);
+    private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
 
     public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, int count) {
@@ -210,7 +210,7 @@ public class AutoCraftingSession {
     public void refreshGUI(int maxSize, boolean cancelButton) {
         if (cancelButton) maxSize--;
         List<KeyValuePair<CraftingRecipe, Integer>> process = getCraftingSteps();
-        List<KeyValuePair<CraftingRecipe, Integer>> process2 = getCraftingSteps();
+        List<KeyValuePair<CraftingRecipe, Integer>> process2 = new ArrayList<>();
         if (process.size() > maxSize - 1) {
             process2 = process.subList(maxSize, process.size());
             process = process.subList(0, maxSize);
@@ -220,7 +220,8 @@ public class AutoCraftingSession {
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
         int i = 0;
-        for (KeyValuePair<CraftingRecipe, Integer> item : process) {
+        for (int j = 0; j < process.size(); j++) {
+            KeyValuePair<CraftingRecipe, Integer> item = process.get(i);
             ItemStack[] itemStacks = item.getKey().getOutput();
             ItemStack itemStack;
             if (itemStacks.length == 1) {
@@ -232,10 +233,15 @@ public class AutoCraftingSession {
                         Arrays.stream(itemStacks)
                                 .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
                                 .toArray(String[]::new));
-                itemStack.setAmount(Math.min(64, item.getValue()));
             }
             ItemMeta meta = itemStack.getItemMeta();
             meta.getPersistentDataContainer().set(CRAFTING_KEY, PersistentDataType.BOOLEAN, true);
+            List<String> lore = meta.getLore();
+            if (lore == null) lore = new ArrayList<>();
+            lore.add("");
+            lore.add("&a计划合成 &e" + item.getValue());
+            if (i == 0 && running != 0) lore.add("&a合成中 &e" + running);
+            meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
             menu.addItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
@@ -260,11 +266,11 @@ public class AutoCraftingSession {
             meta.getPersistentDataContainer().set(CRAFTING_KEY, PersistentDataType.BOOLEAN, true);
             meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
-            menu.addItem(maxSize, itemStack);
+            menu.addItem(maxSize - 1, itemStack);
         }
 
         if (cancelButton) {
-            menu.replaceExistingItem(maxSize, MenuItems.CANCEL);
+            menu.addItem(maxSize, MenuItems.CANCEL);
             menu.addMenuClickHandler(maxSize, (player, i1, itemStack, clickAction) -> {
                 isCancelling = true;
                 player.sendMessage(CMIChatColor.translate("&a&l成功取消了合成任务"));
