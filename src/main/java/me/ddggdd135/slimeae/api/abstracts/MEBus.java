@@ -11,6 +11,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
+import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,7 +248,8 @@ public abstract class MEBus extends TicingBlock implements IMEObject, InventoryB
             if (item.canUse(player, true) && hasPermission) {
                 targetMenu.open(player);
             }
-        } else if (targetBlock.getState() instanceof Container container && hasPermission) {
+        } else if (PaperLib.getBlockState(targetBlock, false).getState() instanceof Container container
+                && hasPermission) {
             player.openInventory(container.getInventory());
         }
     }

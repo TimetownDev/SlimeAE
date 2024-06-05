@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
@@ -61,7 +62,7 @@ public class MEExportBus extends MEBus {
                     ItemStack[] taken = networkStorage.tryTakeItem(request);
                     if (taken.length != 0) targetInv.pushItem(taken[0], inputSlots);
                 }
-            } else if (target.getState() instanceof Container container) {
+            } else if (PaperLib.getBlockState(target, false).getState() instanceof Container container) {
                 Inventory inventory = container.getInventory();
                 if (InvUtils.fitAll(
                         inventory,

@@ -6,6 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.ArrayList;
@@ -260,40 +261,42 @@ public class ItemUtils {
                 @Override
                 public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
                     if (isReadOnly) return;
-                    BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return;
+                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                    if (blockMenu == null) return;
                     for (ItemStack itemStack : itemStacks) {
                         if (itemStack.getType().isAir()) continue;
-                        int[] inputSlots = inv.getPreset()
-                                .getSlotsAccessedByItemTransport(inv, ItemTransportFlow.INSERT, itemStack);
+                        int[] inputSlots = blockMenu
+                                .getPreset()
+                                .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, itemStack);
                         if (inputSlots == null) continue;
-                        ItemStack rest = inv.pushItem(itemStack, inputSlots);
+                        ItemStack rest = blockMenu.pushItem(itemStack, inputSlots);
                         if (rest != null) itemStack.setAmount(rest.getAmount());
                     }
-                    inv.markDirty();
+                    blockMenu.markDirty();
                 }
 
                 @Override
                 public boolean contains(@Nonnull ItemRequest[] requests) {
-                    BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return false;
+                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                    if (blockMenu == null) return false;
                     return ItemUtils.contains(getStorage(), requests);
                 }
 
                 @Nonnull
                 @Override
                 public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-                    BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return new ItemStack[0];
+                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                    if (blockMenu == null) return new ItemStack[0];
                     Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                     ItemStorage found = new ItemStorage();
 
                     for (ItemStack itemStack : amounts.keySet()) {
-                        int[] outputSlots = inv.getPreset()
-                                .getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, itemStack);
+                        int[] outputSlots = blockMenu
+                                .getPreset()
+                                .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, itemStack);
                         if (outputSlots == null) continue;
                         for (int slot : outputSlots) {
-                            ItemStack item = inv.getItemInSlot(slot);
+                            ItemStack item = blockMenu.getItemInSlot(slot);
                             if (item == null || item.getType().isAir()) continue;
                             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                                 if (item.getAmount() > amounts.get(itemStack)) {
@@ -303,7 +306,7 @@ public class ItemUtils {
                                     break;
                                 } else {
                                     found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-                                    inv.replaceExistingItem(slot, new ItemStack(Material.AIR));
+                                    blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                     int rest = amounts.get(itemStack) - item.getAmount();
                                     if (rest != 0) amounts.put(itemStack, rest);
                                     else break;
@@ -311,7 +314,7 @@ public class ItemUtils {
                             }
                         }
                     }
-                    inv.markDirty();
+                    blockMenu.markDirty();
                     return found.toItemStacks();
                 }
 
@@ -335,11 +338,10 @@ public class ItemUtils {
                     return 0;
                 }
             };
-        } else if (block.getState() instanceof Container) {
+        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
                 @Override
                 public void pushItem(@Nonnull @NotNull @NonNull ItemStack[] itemStacks) {
-                    Container container = (Container) block.getState();
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
                         furnaceInventory.addItem(itemStacks);
@@ -390,7 +392,8 @@ public class ItemUtils {
 
                 @Override
                 public @NotNull Map<ItemStack, Integer> getStorage() {
-                    Container container = (Container) block.getState();
+                    Container container =
+                            (Container) PaperLib.getBlockState(block, false).getState();
                     ItemStack[] items = new ItemStack[0];
                     if (container instanceof Furnace furnace) {
                         items = new ItemStack[] {furnace.getInventory().getResult()};
@@ -404,7 +407,8 @@ public class ItemUtils {
                 public int getEmptySlots() {
                     if (!canHasEmptySlots()) return 0;
                     else {
-                        Inventory inventory = ((Chest) block.getState()).getBlockInventory();
+                        Inventory inventory =
+                                ((Chest) PaperLib.getBlockState(block, false).getState()).getBlockInventory();
                         int slots = 0;
                         for (int i = 0; i < 27; i++) {
                             ItemStack itemStack = inventory.getItem(i);
@@ -416,7 +420,7 @@ public class ItemUtils {
 
                 @Override
                 public boolean canHasEmptySlots() {
-                    return block.getState() instanceof Chest;
+                    return PaperLib.getBlockState(block, false).getState() instanceof Chest;
                 }
             };
         }
@@ -444,7 +448,7 @@ public class ItemUtils {
                 if (item == null || item.getType().isAir()) continue;
                 return item;
             }
-        } else if (block.getState() instanceof Container) {
+        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container) {
             ItemStack[] items = getVanillaItemStacks(block);
             for (ItemStack itemStack : items) {
                 if (itemStack != null && !itemStack.getType().isAir()) return itemStack;
@@ -454,7 +458,7 @@ public class ItemUtils {
     }
 
     @NotNull private static ItemStack[] getVanillaItemStacks(Block block) {
-        Container container = (Container) block.getState();
+        Container container = (Container) PaperLib.getBlockState(block, false).getState();
         ItemStack[] items = new ItemStack[0];
         if (container instanceof Furnace furnace) {
             FurnaceInventory furnaceInventory = furnace.getInventory();

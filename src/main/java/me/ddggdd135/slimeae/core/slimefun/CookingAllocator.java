@@ -5,6 +5,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,7 +63,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
             return InvUtils.fitAll(blockMenu.getInventory(), recipe.getInput(), inputSlots)
                     && InvUtils.fitAll(blockMenu.getInventory(), recipe.getOutput(), outputSlots);
-        } else if (block.getState() instanceof Container container) {
+        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             Inventory inventory = container.getInventory();
             return InvUtils.fitAll(
                     inventory,
