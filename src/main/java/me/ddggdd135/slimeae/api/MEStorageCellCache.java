@@ -9,6 +9,7 @@ import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -25,9 +26,13 @@ public class MEStorageCellCache implements IStorage {
         NBTItem nbtItem = new NBTItem(itemStack, true);
         NBTCompoundList nbt = nbtItem.getCompoundList(MEItemStorageCell.ITEM_STORAGE_KEY);
         size = MEItemStorageCell.getSize(itemStack);
-        storages = ItemUtils.toStorage(nbt);
-        for (ItemStack key : storages.keySet()) {
-            stored += storages.get(key);
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
+            storages = new CreativeItemIntegerMap();
+        else {
+            storages = ItemUtils.toStorage(nbt);
+            for (ItemStack key : storages.keySet()) {
+                stored += storages.get(key);
+            }
         }
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
             nbtItem.setUUID(MEItemStorageCell.UUID_KEY, UUID.randomUUID());
@@ -68,6 +73,12 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
+        if (storages instanceof CreativeItemIntegerMap) {
+            for (ItemStack itemStack : itemStacks) {
+                itemStack.setAmount(0);
+            }
+            return;
+        }
         for (ItemStack itemStack : itemStacks) {
             if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) continue;
             int amount = storages.getOrDefault(itemStack, 0);
@@ -83,6 +94,8 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
+        if (storages instanceof CreativeItemIntegerMap) return true;
+
         for (ItemRequest request : requests) {
             if (!storages.containsKey(request.getTemplate())
                     || storages.getOrDefault(request.getTemplate(), 0) < request.getAmount()) return false;
@@ -93,6 +106,10 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
+        if (storages instanceof CreativeItemIntegerMap) {
+            return ItemUtils.createItems(requests);
+        }
+
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storages.containsKey(request.getTemplate())) {
@@ -116,6 +133,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Integer> getStorage() {
+        if (storages instanceof CreativeItemIntegerMap) return storages;
         return new ItemHashMap<>(storages);
     }
 

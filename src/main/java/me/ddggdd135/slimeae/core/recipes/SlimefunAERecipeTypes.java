@@ -1,9 +1,9 @@
 package me.ddggdd135.slimeae.core.recipes;
 
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
-import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 

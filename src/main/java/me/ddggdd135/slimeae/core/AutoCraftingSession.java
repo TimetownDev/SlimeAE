@@ -7,6 +7,7 @@ import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -16,7 +17,6 @@ import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyValuePair;
 import net.Zrips.CMILib.Colors.CMIChatColor;
@@ -143,7 +143,7 @@ public class AutoCraftingSession {
         }
         Location[] locations = info.getRecipeMap().entrySet().stream()
                 .filter(x -> x.getValue().contains(next.getKey()))
-                .map(x -> x.getKey())
+                .map(Map.Entry::getKey)
                 .toArray(Location[]::new);
         int allocated = 0;
         IStorage networkStorage = info.getStorage();

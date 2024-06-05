@@ -1,10 +1,10 @@
 package me.ddggdd135.slimeae.core.items;
 
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.groups.DummyItemGroup;
 import me.ddggdd135.slimeae.core.groups.MainItemGroup;
-import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

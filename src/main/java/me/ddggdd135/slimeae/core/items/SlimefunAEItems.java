@@ -4,11 +4,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
-import me.ddggdd135.slimeae.utils.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import net.Zrips.CMILib.Version.Version;
 import org.bukkit.Material;
@@ -180,6 +180,9 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_16M = new SlimefunItemStack(
             "ME_ITEM_STORAGE_CELL_16M",
             new AdvancedCustomItemStack(Material.MUSIC_DISC_OTHERSIDE, "{#3388fb}16m-ME存储元件"));
+    public static final SlimefunItemStack ME_CREATIVE_ITEM_STORAGE_CELL = new SlimefunItemStack(
+            "ME_CREATIVE_ITEM_STORAGE_CELL",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#3366ff>}创造存储元件{#33ccf3<}"));
     public static final SlimefunItemStack FORMATION_CORE =
             new SlimefunItemStack("FORMATION_CORE", new AdvancedCustomItemStack(Material.GOLD_NUGGET, "{#33ccf3}成型核心"));
     public static final SlimefunItemStack ANNIHILATION_CORE = new SlimefunItemStack(
@@ -846,6 +849,9 @@ public class SlimefunAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_16M},
                         16 * 1024 * 1024)
+                .register(plugin);
+        new MECreativeItemStorageCell(
+                        SlimefunAEItemGroups.CELL, ME_CREATIVE_ITEM_STORAGE_CELL, RecipeType.NULL, new ItemStack[0])
                 .register(plugin);
     }
 }

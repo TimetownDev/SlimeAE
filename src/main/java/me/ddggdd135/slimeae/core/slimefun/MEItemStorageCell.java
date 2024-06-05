@@ -50,6 +50,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     public static void saveStorage(@Nonnull ItemStack itemStack) {
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
         NBTItem nbtItem = new NBTItem(itemStack);
         if (nbtItem.hasTag(ITEM_STORAGE_KEY)) nbtItem.removeKey(ITEM_STORAGE_KEY);
         NBTCompoundList list = nbtItem.getCompoundList(ITEM_STORAGE_KEY);
@@ -59,6 +60,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     public static void updateLore(@Nonnull ItemStack itemStack) {
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
         MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
         List<String> lores = new ArrayList<>();
         List<Map.Entry<ItemStack, Integer>> storages = meStorageCellCache.getStorage().entrySet().stream()

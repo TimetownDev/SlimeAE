@@ -108,6 +108,10 @@ public class ItemUtils {
         return true;
     }
 
+    public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest request) {
+        return storage.containsKey(request.getTemplate()) && storage.get(request.getTemplate()) >= request.getAmount();
+    }
+
     @Nonnull
     public static ItemRequest[] createRequests(@Nonnull Map<ItemStack, Integer> itemStacks) {
         List<ItemRequest> requests = new ArrayList<>();
@@ -562,7 +566,7 @@ public class ItemUtils {
                 .set(
                         ITEM_STORAGE_KEY,
                         PersistentDataType.STRING,
-                        DataUtils.itemStack2String(new ItemTemplate(itemStack).getHandle()));
+                        DataUtils.itemStack2String(new ItemStack(itemStack.asOne())));
         result.setAmount(Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         List<String> lore = meta.getLore();
         if (lore == null) lore = new ArrayList<>();
@@ -578,7 +582,8 @@ public class ItemUtils {
         if (!dataContainer.has(ITEM_STORAGE_KEY, PersistentDataType.STRING)) return null;
         String string =
                 itemStack.getItemMeta().getPersistentDataContainer().get(ITEM_STORAGE_KEY, PersistentDataType.STRING);
-        return DataUtils.string2ItemStack(string);
+        ItemStack result = DataUtils.string2ItemStack(string);
+        return result;
     }
 
     public static <T extends SlimefunItem> T setRecipeOutput(@Nonnull T item, @Nonnull ItemStack output) {
