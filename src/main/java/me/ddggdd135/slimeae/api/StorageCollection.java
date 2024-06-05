@@ -12,6 +12,7 @@ public class StorageCollection implements IStorage {
     private final Map<ItemStack, IStorage> takeCache;
     private final Map<ItemStack, IStorage> pushCache;
     private final Set<ItemStack> notIncluded;
+
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));
         this.takeCache = new ItemHashMap<>();
@@ -74,8 +75,7 @@ public class StorageCollection implements IStorage {
     public boolean contains(@Nonnull ItemRequest[] requests) {
         Map<ItemStack, Integer> storage = getStorage();
         for (ItemRequest request : requests) {
-            if (notIncluded.contains(request.getTemplate()))
-                return false;
+            if (notIncluded.contains(request.getTemplate())) return false;
             if (!ItemUtils.contains(storage, request)) {
                 notIncluded.add(request.getTemplate());
                 return false;
@@ -99,7 +99,7 @@ public class StorageCollection implements IStorage {
         }
         ItemUtils.trim(rest);
         for (Map.Entry<ItemStack, Integer> entry : rest.entrySet()) {
-            if(takeCache.containsKey(entry.getKey())) {
+            if (takeCache.containsKey(entry.getKey())) {
                 IStorage storage = takeCache.get(entry.getKey());
                 ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
                 rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
@@ -131,8 +131,7 @@ public class StorageCollection implements IStorage {
         Map<ItemStack, Integer> result = new ItemHashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Integer> tmp = storage.getStorage();
-            if (tmp instanceof CreativeItemIntegerMap)
-                return tmp;
+            if (tmp instanceof CreativeItemIntegerMap) return tmp;
             for (ItemStack itemStack : tmp.keySet()) {
                 if (result.containsKey(itemStack)) {
                     result.put(itemStack, result.get(itemStack) + tmp.get(itemStack));

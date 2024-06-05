@@ -15,7 +15,6 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
-import me.ddggdd135.guguslimefunlib.api.ItemTemplate;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTContainer;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
