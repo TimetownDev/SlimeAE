@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 public class CreativeItemIntegerMap implements Map<ItemStack, Integer> {
     public static final Set<ItemStack> allItemStacks;
     public static final Set<Map.Entry<ItemStack, Integer>> allAmount;
-    public static final int amount = Integer.MAX_VALUE / 2;
+    public static final int amount = 64 * 1024;
 
     public CreativeItemIntegerMap(@Nonnull Map<ItemStack, Integer> items) {}
 
