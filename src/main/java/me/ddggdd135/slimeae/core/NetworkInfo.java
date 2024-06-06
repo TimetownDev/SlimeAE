@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.StorageCollection;
@@ -17,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class NetworkInfo implements IDisposable {
     private Location controller;
@@ -25,7 +27,7 @@ public class NetworkInfo implements IDisposable {
     private Map<Location, Set<CraftingRecipe>> recipeMap = new HashMap<>();
     private IStorage storage = new StorageCollection();
     private Set<AutoCraftingSession> craftingSessions = new HashSet<>();
-    private AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
+    private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
 
     @Nonnull
     public Location getController() {
@@ -146,6 +148,13 @@ public class NetworkInfo implements IDisposable {
                                 .toArray(String[]::new));
                 itemStack.setAmount(Math.min(64, session.getCount()));
             }
+            ItemMeta meta = itemStack.getItemMeta();
+            List<String> lore = meta.getLore();
+            if (lore == null) lore = new ArrayList<>();
+            lore.add("");
+            lore.add("&e点击查看");
+            meta.setLore(CMIChatColor.translate(lore));
+            itemStack.setItemMeta(meta);
             autoCraftingMenu.replaceExistingItem(i, itemStack);
             autoCraftingMenu.addMenuClickHandler(i, (player, i1, itemStack1, clickAction) -> {
                 session.showGUI(player);
