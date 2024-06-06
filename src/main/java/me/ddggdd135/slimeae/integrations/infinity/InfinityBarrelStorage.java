@@ -93,4 +93,18 @@ public class InfinityBarrelStorage implements IStorage {
     public int getEmptySlots() {
         return 0;
     }
+
+    @Override
+    public int getTier(@Nonnull ItemStack itemStack) {
+        Material material = ReflectionUtils.getField(cache, "material");
+        ItemMeta meta = ReflectionUtils.getField(cache, "meta");
+        if (cache == null || material == null || ReflectionUtils.<Integer>getField(cache, "amount") <= 0) return 0;
+        ItemStack stored = new ItemStack(material);
+        if (meta != null) stored.setItemMeta(meta);
+        if (Boolean.TRUE.equals(
+                ReflectionUtils.invokePrivateMethod(cache, "matches", new Class<?>[] {ItemStack.class}, itemStack)))
+            return 1000;
+
+        return 0;
+    }
 }

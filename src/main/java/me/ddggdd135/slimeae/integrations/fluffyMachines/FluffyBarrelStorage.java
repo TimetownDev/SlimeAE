@@ -103,4 +103,14 @@ public class FluffyBarrelStorage implements IStorage {
     public int getEmptySlots() {
         return 0;
     }
+
+    @Override
+    public int getTier(@Nonnull ItemStack itemStack) {
+        ItemStack storedItem = barrel.getStoredItem(block);
+        if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
+            return 2000;
+        }
+
+        return 0;
+    }
 }

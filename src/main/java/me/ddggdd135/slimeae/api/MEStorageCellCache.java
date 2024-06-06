@@ -159,4 +159,11 @@ public class MEStorageCellCache implements IStorage {
     public int hashCode() {
         return Objects.hash(uuid);
     }
+
+    @Override
+    public int getTier(@Nonnull ItemStack itemStack) {
+        if (storages.containsKey(itemStack)) return 200;
+
+        return 0;
+    }
 }

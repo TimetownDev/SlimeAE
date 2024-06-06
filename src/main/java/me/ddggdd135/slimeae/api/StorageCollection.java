@@ -59,7 +59,21 @@ public class StorageCollection implements IStorage {
                 storage.pushItem(itemStack);
             }
         }
-        for (IStorage storage : storages) {
+        ItemStack[] finalItemStacks = itemStacks;
+        List<IStorage> sorted = new ArrayList<>(storages.stream()
+                .sorted(Comparator.comparing(
+                        x -> {
+                            int tierx = 0;
+                            for (ItemStack itemStack : finalItemStacks) {
+                                tierx += x.getTier(itemStack);
+                            }
+
+                            return tierx;
+                        },
+                        Integer::compare))
+                .toList());
+        Collections.reverse(sorted);
+        for (IStorage storage : sorted) {
             storage.pushItem(itemStacks);
             for (ItemStack itemStack : itemStacks) {
                 if (itemStack.getAmount() == 0 && !itemStack.getType().isAir()) {
@@ -159,5 +173,15 @@ public class StorageCollection implements IStorage {
             if (storage.canHasEmptySlots()) return true;
         }
         return false;
+    }
+
+    @Override
+    public int getTier(@Nonnull ItemStack itemStack) {
+        int tier = Integer.MIN_VALUE;
+        for (IStorage storage : storages) {
+            tier = Math.max(tier, storage.getTier(itemStack));
+        }
+
+        return tier;
     }
 }

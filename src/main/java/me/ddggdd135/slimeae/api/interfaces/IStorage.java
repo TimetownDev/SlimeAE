@@ -43,4 +43,8 @@ public interface IStorage {
     default boolean canHasEmptySlots() {
         return false;
     }
+
+    default int getTier(@Nonnull ItemStack itemStack) {
+        return 0;
+    }
 }
