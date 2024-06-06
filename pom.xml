@@ -130,7 +130,7 @@
         <dependency>
             <groupId>com.github.TimetownDev</groupId>
             <artifactId>GuguSlimefunLib</artifactId>
-            <version>4c8bfe6d24</version>
+            <version>daa8903620</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

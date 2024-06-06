@@ -10,7 +10,9 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.GuguSlimefunLib;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
@@ -21,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
     public static final String ITEM_STORAGE_KEY = "item_storage";
+    public static final String SERVER_UUID_KEY = "server_uuid";
     private int size;
 
     public MEItemStorageCell(
@@ -39,7 +42,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
 
     public static int getSize(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell)) {
+        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell) || !isCurrectServer(itemStack)) {
             return 0;
         } else return meItemStorageCell.getSize();
     }
@@ -71,5 +74,21 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
                     + entry.getValue() + "{#Carrot_Orange<}"));
         }
         itemStack.setLore(lores);
+    }
+
+    @Nonnull
+    public static UUID getServerUUID(@Nonnull ItemStack itemStack) {
+        NBTItem nbtItem = new NBTItem(itemStack, true);
+        UUID uuid = nbtItem.getUUID(SERVER_UUID_KEY);
+        if (uuid == null) {
+            nbtItem.setUUID(SERVER_UUID_KEY, GuguSlimefunLib.getServerUUID());
+            return GuguSlimefunLib.getServerUUID();
+        }
+
+        return uuid;
+    }
+
+    public static boolean isCurrectServer(@Nonnull ItemStack itemStack) {
+        return getServerUUID(itemStack).equals(GuguSlimefunLib.getServerUUID());
     }
 }
