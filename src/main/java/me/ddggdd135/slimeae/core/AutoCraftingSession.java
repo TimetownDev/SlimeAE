@@ -151,9 +151,14 @@ public class AutoCraftingSession {
                         ItemUtils.getAmounts(next.getKey().getInput())))
                 && running <= 0) {
             // 合成出现错误 重新规划
-            info.getCraftingSessions().remove(this);
-            new AutoCraftingSession(
-                    info, recipe, craftingSteps.get(craftingSteps.size() - 1).getValue());
+            try {
+                info.getCraftingSessions().remove(this);
+                new AutoCraftingSession(
+                        info,
+                        recipe,
+                        craftingSteps.get(craftingSteps.size() - 1).getValue());
+            } catch (Throwable ignored) {
+            }
         }
         for (Location location : locations) {
             IMECraftHolder holder = (IMECraftHolder)

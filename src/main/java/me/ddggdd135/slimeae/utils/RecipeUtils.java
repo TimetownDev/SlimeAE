@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
@@ -32,6 +33,7 @@ public class RecipeUtils {
                 return new CraftingRecipe(
                         CraftType.CRAFTING_TABLE,
                         shapedRecipe.getIngredientMap().values().stream()
+                                .filter(Objects::nonNull)
                                 .map(x -> new ItemStack(x.getType(), x.getAmount()))
                                 .toArray(ItemStack[]::new),
                         new ItemStack(
@@ -42,6 +44,7 @@ public class RecipeUtils {
                 return new CraftingRecipe(
                         CraftType.CRAFTING_TABLE,
                         Arrays.stream(shapelessRecipe.getIngredientList().toArray(new ItemStack[0]))
+                                .filter(Objects::nonNull)
                                 .map(x -> new ItemStack(x.getType(), x.getAmount()))
                                 .toArray(ItemStack[]::new),
                         new ItemStack(
