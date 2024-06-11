@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
+import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -39,7 +39,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class METerminal extends TicingBlock implements IMEObject, InventoryBlock {
+public class METerminal extends TickingBlock implements IMEObject, InventoryBlock {
     public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
             Collator.getInstance(Locale.CHINA)::compare);

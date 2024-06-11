@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
+import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -38,7 +38,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public abstract class MEBus extends TicingBlock implements IMEObject, InventoryBlock {
+public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
 
     public int getNorthSlot() {

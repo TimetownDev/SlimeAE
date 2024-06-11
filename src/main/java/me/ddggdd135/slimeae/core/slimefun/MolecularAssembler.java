@@ -10,7 +10,7 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.MachineProcessHolder;
 import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
+import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
@@ -19,7 +19,8 @@ import me.ddggdd135.slimeae.core.recipes.CraftingOperation;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class MolecularAssembler extends TicingBlock implements IMECraftDevice, MachineProcessHolder<CraftingOperation> {
+public class MolecularAssembler extends TickingBlock
+        implements IMECraftDevice, MachineProcessHolder<CraftingOperation> {
     private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
 
     public MolecularAssembler(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {

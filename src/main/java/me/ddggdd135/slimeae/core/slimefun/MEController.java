@@ -10,7 +10,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import me.ddggdd135.guguslimefunlib.api.abstracts.TicingBlock;
+import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -19,7 +19,7 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class MEController extends TicingBlock implements IMEController {
+public class MEController extends TickingBlock implements IMEController {
     @Override
     public boolean isSynchronized() {
         return true;
