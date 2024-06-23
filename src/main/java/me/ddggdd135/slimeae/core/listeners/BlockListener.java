@@ -40,12 +40,13 @@ public class BlockListener implements Listener {
                                 StorageCacheUtils.getSfItem(e.getBlock().getLocation());
                         if (b == sfItem) {
                             doDrop(e.getBlock().getLocation(), slimefunItem.getRecipeOutput());
+                            e.setDropItems(false);
                         }
                     } else if (e.getBlock().getType() == itemStack.getType()) {
                         doDrop(e.getBlock().getLocation(), slimefunItem.getRecipeOutput());
+                        e.setDropItems(false);
                     }
                 }
-                e.setDropItems(false);
             }
         }
     }
