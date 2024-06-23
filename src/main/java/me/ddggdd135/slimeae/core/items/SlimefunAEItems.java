@@ -330,9 +330,9 @@ public class SlimefunAEItems {
                 })
                 .register(plugin);
         new Charger(SlimefunAEItemGroups.MACHINE, CHARGER, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
-                    new ItemStack(Material.IRON_INGOT), CRYSTAL_FLUIX, new ItemStack(Material.IRON_INGOT),
+                    new ItemStack(Material.IRON_INGOT), SlimefunItems.FERROSILICON, new ItemStack(Material.IRON_INGOT),
                     new ItemStack(Material.IRON_INGOT), null, null,
-                    new ItemStack(Material.IRON_INGOT), CRYSTAL_FLUIX, new ItemStack(Material.IRON_INGOT)
+                    new ItemStack(Material.IRON_INGOT), SlimefunItems.FERROSILICON, new ItemStack(Material.IRON_INGOT)
                 })
                 .register(plugin);
         new MEImportBus(
