@@ -5,6 +5,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.mooy1.infinityexpansion.items.storage.StorageCache;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+
+import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -76,7 +78,7 @@ public class InfinityBarrelStorage implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> storage = new ItemHashMap<>();
+        Map<ItemStack, Integer> storage = new HashMap<>();
         Material material = ReflectionUtils.getField(cache, "material");
         ItemMeta meta = ReflectionUtils.getField(cache, "meta");
 
@@ -85,7 +87,7 @@ public class InfinityBarrelStorage implements IStorage {
         ItemStack itemStack = new ItemStack(material);
         if (meta != null) itemStack.setItemMeta(meta);
 
-        storage.put(itemStack, ReflectionUtils.<Integer>getField(cache, "amount") - 1);
+        storage.put(itemStack.asOne(), ReflectionUtils.<Integer>getField(cache, "amount") - 1);
         return storage;
     }
 

@@ -65,7 +65,7 @@ public class MECraftPlanningTerminal extends METerminal {
                     .set(
                             ItemUtils.ITEM_STORAGE_KEY,
                             PersistentDataType.STRING,
-                            DataUtils.itemStack2String(new ItemTemplate(itemStack).getHandle()));
+                            DataUtils.itemStack2String(itemStack.asOne()));
             meta.setLore(List.of(CMIChatColor.translate("  &e可合成")));
             result.setItemMeta(meta);
             blockMenu.replaceExistingItem(slot, result);

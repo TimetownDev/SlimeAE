@@ -21,7 +21,7 @@ public class MEImportBus extends MEBus {
 
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     public MEImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {

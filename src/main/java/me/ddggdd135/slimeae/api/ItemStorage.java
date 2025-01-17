@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -11,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ItemStorage implements IStorage {
-    @NonNull private Map<ItemStack, Integer> storage = new ItemHashMap<>();
+    @NonNull private Map<ItemStack, Integer> storage = new HashMap<>();
 
     private void trim(@NonNull ItemStack template) {
         if (storage.containsKey(template) && storage.get(template) == 0) {
@@ -30,18 +31,19 @@ public class ItemStorage implements IStorage {
     }
 
     public ItemStorage(@NonNull Map<ItemStack, Integer> items) {
-        storage = new ItemHashMap<>(items);
+        storage = new HashMap<>(items);
     }
 
     @Override
     public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
-            if (storage.containsKey(itemStack)) {
-                int amount = storage.get(itemStack);
+            ItemStack template = itemStack.asOne();
+            if (storage.containsKey(template)) {
+                int amount = storage.get(template);
                 amount += itemStack.getAmount();
-                storage.put(itemStack, amount);
+                storage.put(template, amount);
             } else {
-                storage.put(itemStack, itemStack.getAmount());
+                storage.put(template, itemStack.getAmount());
             }
             itemStack.setAmount(0);
             trim(itemStack);
@@ -50,12 +52,13 @@ public class ItemStorage implements IStorage {
 
     public void addItem(@NonNull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
-            if (storage.containsKey(itemStack)) {
-                int amount = storage.get(itemStack);
+            ItemStack template = itemStack.asOne();
+            if (storage.containsKey(template)) {
+                int amount = storage.get(template);
                 amount += itemStack.getAmount();
-                storage.put(itemStack, amount);
+                storage.put(template, amount);
             } else {
-                storage.put(itemStack, itemStack.getAmount());
+                storage.put(template, itemStack.getAmount());
             }
             trim(itemStack);
         }
@@ -94,7 +97,7 @@ public class ItemStorage implements IStorage {
 
     @Override
     @NonNull public Map<ItemStack, Integer> getStorage() {
-        return new ItemHashMap<>(storage);
+        return new HashMap<>(storage);
     }
 
     @Override

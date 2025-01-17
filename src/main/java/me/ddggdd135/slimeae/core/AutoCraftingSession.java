@@ -196,6 +196,7 @@ public class AutoCraftingSession {
         for (ItemStack itemStack : toPush) {
             ItemStack[] items = itemCache.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE));
             networkStorage.pushItem(items);
+            items = Arrays.stream(items).filter(x->x.getAmount() !=0).toArray(ItemStack[]::new);
             itemCache.pushItem(items);
         }
 
@@ -224,8 +225,7 @@ public class AutoCraftingSession {
             menu.replaceExistingItem(i, null);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
-        int i = 0;
-        for (int j = 0; j < process.size(); j++) {
+        for (int i = 0; i < process.size(); i++) {
             KeyValuePair<CraftingRecipe, Integer> item = process.get(i);
             ItemStack[] itemStacks = item.getKey().getOutput();
             ItemStack itemStack;
@@ -250,7 +250,6 @@ public class AutoCraftingSession {
             itemStack.setItemMeta(meta);
             menu.addItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
-            i++;
         }
         if (!process2.isEmpty()) {
             ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
@@ -277,15 +276,19 @@ public class AutoCraftingSession {
         if (cancelButton) {
             menu.addItem(maxSize, MenuItems.CANCEL);
             menu.addMenuClickHandler(maxSize, (player, i1, itemStack, clickAction) -> {
+                if (isCancelling) {
+                    info.getCraftingSessions().remove(this);
+                    player.sendMessage(CMIChatColor.translate("&a&l成功强制取消了合成任务"));
+                    return false;
+                }
                 isCancelling = true;
-                player.sendMessage(CMIChatColor.translate("&a&l成功取消了合成任务"));
+                player.sendMessage(CMIChatColor.translate("&a&l开始取消合成任务"));
                 player.closeInventory();
                 return false;
             });
         }
         // build inventory
         menu.getContents();
-        menu.reset(true);
     }
 
     public void start() {

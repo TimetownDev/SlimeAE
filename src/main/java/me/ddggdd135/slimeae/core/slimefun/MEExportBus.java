@@ -63,22 +63,22 @@ public class MEExportBus extends MEBus {
                     ItemStack[] taken = networkStorage.tryTakeItem(request);
                     if (taken.length != 0) targetInv.pushItem(taken[0], inputSlots);
                 }
-            } else if (PaperLib.getBlockState(target, false).getState() instanceof Container container) {
-                Inventory inventory = container.getInventory();
-                if (InvUtils.fitAll(
-                        inventory,
-                        new ItemStack[] {setting},
-                        IntStream.range(0, inventory.getSize()).toArray())) {
-                    ItemStack[] taken = networkStorage.tryTakeItem(request);
-                    if (taken.length != 0) inventory.addItem(taken);
-                }
+//            } else if (PaperLib.getBlockState(target, false).getState() instanceof Container container) {
+//                Inventory inventory = container.getInventory();
+//                if (InvUtils.fitAll(
+//                        inventory,
+//                        new ItemStack[] {setting},
+//                        IntStream.range(0, inventory.getSize()).toArray())) {
+//                    ItemStack[] taken = networkStorage.tryTakeItem(request);
+//                    if (taken.length != 0) inventory.addItem(taken);
+//                }
             }
         }
     }
 
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     @Override

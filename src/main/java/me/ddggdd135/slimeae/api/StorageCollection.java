@@ -15,8 +15,8 @@ public class StorageCollection implements IStorage {
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ArrayList<>(List.of(storages));
-        this.takeCache = new ItemHashMap<>();
-        this.pushCache = new ItemHashMap<>();
+        this.takeCache = new HashMap<>();
+        this.pushCache = new HashMap<>();
         this.notIncluded = new HashSet<>();
     }
 
@@ -101,7 +101,7 @@ public class StorageCollection implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Integer> rest = new ItemHashMap<>();
+        Map<ItemStack, Integer> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
@@ -142,7 +142,7 @@ public class StorageCollection implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> result = new ItemHashMap<>();
+        Map<ItemStack, Integer> result = new HashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Integer> tmp = storage.getStorage();
             if (tmp instanceof CreativeItemIntegerMap) return tmp;

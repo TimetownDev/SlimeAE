@@ -46,7 +46,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
 
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     @Override

@@ -83,12 +83,13 @@ public class MEStorageCellCache implements IStorage {
         for (ItemStack itemStack : itemStacks) {
             if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                     || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) continue;
-            int amount = storages.getOrDefault(itemStack, 0);
+            ItemStack template = itemStack.asOne();
+            int amount = storages.getOrDefault(template, 0);
             int toAdd;
             if (stored + itemStack.getAmount() > size) toAdd = size - stored;
             else toAdd = itemStack.getAmount();
             stored += toAdd;
-            storages.put(itemStack, amount + toAdd);
+            storages.put(template, amount + toAdd);
             itemStack.setAmount(itemStack.getAmount() - toAdd);
             trim(itemStack);
         }
@@ -136,7 +137,7 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public @Nonnull Map<ItemStack, Integer> getStorage() {
         if (storages instanceof CreativeItemIntegerMap) return storages;
-        return new ItemHashMap<>(storages);
+        return new HashMap<>(storages);
     }
 
     @Override

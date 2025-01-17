@@ -86,7 +86,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     @Override

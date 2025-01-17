@@ -22,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 public class MEController extends TickingBlock implements IMEController {
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     @Override

@@ -4,20 +4,20 @@ import me.ddggdd135.guguslimefunlib.api.ItemTemplate;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemRequest {
-    private ItemTemplate template;
+    private ItemStack template;
     private int amount;
 
     public ItemRequest(ItemStack template, int amount) {
-        this.template = new ItemTemplate(template);
+        this.template = template.asOne();
         this.amount = amount;
     }
 
     public ItemStack getTemplate() {
-        return template.getHandle();
+        return template;
     }
 
     public void setTemplate(ItemStack template) {
-        this.template = new ItemTemplate(template);
+        this.template = template.asOne();
     }
 
     public int getAmount() {
