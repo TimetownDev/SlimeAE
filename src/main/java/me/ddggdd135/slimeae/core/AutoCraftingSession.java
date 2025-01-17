@@ -196,7 +196,7 @@ public class AutoCraftingSession {
         for (ItemStack itemStack : toPush) {
             ItemStack[] items = itemCache.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE));
             networkStorage.pushItem(items);
-            items = Arrays.stream(items).filter(x->x.getAmount() !=0).toArray(ItemStack[]::new);
+            items = Arrays.stream(items).filter(x -> x.getAmount() != 0).toArray(ItemStack[]::new);
             itemCache.pushItem(items);
         }
 

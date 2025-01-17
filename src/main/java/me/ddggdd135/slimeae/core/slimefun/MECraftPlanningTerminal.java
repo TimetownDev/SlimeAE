@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
-import me.ddggdd135.guguslimefunlib.api.ItemTemplate;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;

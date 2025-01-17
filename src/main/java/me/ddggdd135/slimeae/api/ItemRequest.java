@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.api;
 
-import me.ddggdd135.guguslimefunlib.api.ItemTemplate;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemRequest {

@@ -6,10 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
-import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -24,8 +21,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Container;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
@@ -63,15 +58,16 @@ public class MEExportBus extends MEBus {
                     ItemStack[] taken = networkStorage.tryTakeItem(request);
                     if (taken.length != 0) targetInv.pushItem(taken[0], inputSlots);
                 }
-//            } else if (PaperLib.getBlockState(target, false).getState() instanceof Container container) {
-//                Inventory inventory = container.getInventory();
-//                if (InvUtils.fitAll(
-//                        inventory,
-//                        new ItemStack[] {setting},
-//                        IntStream.range(0, inventory.getSize()).toArray())) {
-//                    ItemStack[] taken = networkStorage.tryTakeItem(request);
-//                    if (taken.length != 0) inventory.addItem(taken);
-//                }
+                //            } else if (PaperLib.getBlockState(target, false).getState() instanceof Container
+                // container) {
+                //                Inventory inventory = container.getInventory();
+                //                if (InvUtils.fitAll(
+                //                        inventory,
+                //                        new ItemStack[] {setting},
+                //                        IntStream.range(0, inventory.getSize()).toArray())) {
+                //                    ItemStack[] taken = networkStorage.tryTakeItem(request);
+                //                    if (taken.length != 0) inventory.addItem(taken);
+                //                }
             }
         }
     }
