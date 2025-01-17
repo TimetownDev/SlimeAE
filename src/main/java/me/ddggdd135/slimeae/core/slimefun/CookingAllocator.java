@@ -108,7 +108,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
         CraftingRecipe recipe = recipeMap.get(block);
         block = block.getRelative(getDirection(blockMenu));
         if (block.getBlockData().getMaterial().isAir()) return false;
-        return ItemUtils.getStorage(block, false, false)
+        return ItemUtils.getStorage(block, false, false, true)
                 .contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
     }
 

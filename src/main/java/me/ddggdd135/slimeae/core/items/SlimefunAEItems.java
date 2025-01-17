@@ -17,61 +17,108 @@ import org.bukkit.inventory.ItemStack;
 public class SlimefunAEItems {
     // CABLE
     public static final SlimefunItemStack ME_GLASS_CABLE = new SlimefunItemStack(
-            "ME_GLASS_CABLE", new AdvancedCustomItemStack(Material.GLASS, "{#Vanilla_Ice}ME玻璃线缆"));
+            "ME_GLASS_CABLE",
+            new AdvancedCustomItemStack(Material.GLASS, "{#Vanilla_Ice}ME玻璃线缆", "", "{#3366ff>}用于连接AE设备{#33ccf3<}"));
     public static final SlimefunItemStack ME_DENSE_CABLE = new SlimefunItemStack(
-            "ME_DENSE_CABLE", new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}ME致密线缆"));
+            "ME_DENSE_CABLE",
+            new AdvancedCustomItemStack(
+                    SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}ME致密线缆", "", "&e用于连接AE设备", "&e和ME玻璃线缆相比 仅仅是外观不同"));
     // MACHINE
     public static final SlimefunItemStack ME_CONTROLLER = new SlimefunItemStack(
-            "ME_CONTROLLER", new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Bright_Gray}ME控制器"));
+            "ME_CONTROLLER",
+            new AdvancedCustomItemStack(
+                    Material.BLACK_STAINED_GLASS,
+                    "{#Bright_Gray}ME控制器",
+                    "",
+                    "&e&lAE网络的核心",
+                    "&eAE允许同一个网络中存在多个控制器{#33ccf3<}"));
     public static final SlimefunItemStack ME_UNIT = new SlimefunItemStack(
-            "ME_UNIT", new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Starship}ME单元"));
+            "ME_UNIT",
+            new AdvancedCustomItemStack(
+                    Material.BLACK_STAINED_GLASS, "{#Starship}ME单元", "", "{#Bright_Red}此物品性能极差 仅供测试使用"));
     public static final SlimefunItemStack ME_INTERFACE = new SlimefunItemStack(
             "ME_INTERFACE",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_17_R1)
                             ? Material.TARGET
                             : Material.CHISELED_STONE_BRICKS,
-                    "{#Vanilla_Ice}ME接口"));
+                    "{#Vanilla_Ice}ME接口",
+                    "",
+                    "{#3366ff>}用它来与货运网络交互{#33ccf3<}",
+                    "{#3366ff>}合成设备需要放在它旁边运行{#33ccf3<}",
+                    "{#3366ff>}在里面放入蓝图 就可以在合成计划终端中自动合成{#33ccf3<}"));
     public static final SlimefunItemStack ME_DRIVE = new SlimefunItemStack(
             "ME_DRIVE",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
                             ? Material.CHISELED_BOOKSHELF
                             : Material.BOOKSHELF,
-                    "&fME驱动器"));
+                    "&fME驱动器",
+                    "",
+                    "{#3366ff>}用于放置ME存储元件{#33ccf3<}"));
     public static final SlimefunItemStack MOLECULAR_ASSEMBLER = new SlimefunItemStack(
             "MOLECULAR_ASSEMBLER",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TINTED_GLASS : Material.GLASS,
-                    "&f分子装配室"));
-    public static final SlimefunItemStack COOKING_ALLOCATOR =
-            new SlimefunItemStack("COOKING_ALLOCATOR", new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器"));
-    public static final SlimefunItemStack CRAFTING_MONITOR =
-            new SlimefunItemStack("ME_CRAFTING_MONITOR", new AdvancedCustomItemStack(Material.SEA_LANTERN, "&f合成监视器"));
+                    "&f分子装配室",
+                    "",
+                    "{#3366ff>}在自动合成中充当原版和粘液合成台{#33ccf3<}",
+                    "{#3366ff>}需要放在ME接口旁边 且只能用于AE的自动合成{#33ccf3<}"));
+    public static final SlimefunItemStack COOKING_ALLOCATOR = new SlimefunItemStack(
+            "COOKING_ALLOCATOR",
+            new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器", "", "{#3366ff>}自动合成时将物品放于指定的容器{#33ccf3<}"));
+    public static final SlimefunItemStack CRAFTING_MONITOR = new SlimefunItemStack(
+            "ME_CRAFTING_MONITOR",
+            new AdvancedCustomItemStack(Material.SEA_LANTERN, "&f合成监视器", "", "{#3366ff>}右键它就能管理进行的自动合成任务{#33ccf3<}"));
     public static final SlimefunItemStack ENERGY_CELL =
             new SlimefunItemStack("ME_ENERGY_CELL", new AdvancedCustomItemStack(Material.AMETHYST_BLOCK, "&f能源元件"));
-    public static final SlimefunItemStack INSCRIBER =
-            new SlimefunItemStack("ME_INSCRIBER", new AdvancedCustomItemStack(Material.ANVIL, "&f压印机"));
-    public static final SlimefunItemStack CHARGER =
-            new SlimefunItemStack("ME_CHARGER", new AdvancedCustomItemStack(Material.LECTERN, "&f充能器"));
+    public static final SlimefunItemStack INSCRIBER = new SlimefunItemStack(
+            "ME_INSCRIBER", new AdvancedCustomItemStack(Material.ANVIL, "&f压印机", "", "{#3366ff>}用于生产板材{#33ccf3<}"));
+    public static final SlimefunItemStack CHARGER = new SlimefunItemStack(
+            "ME_CHARGER", new AdvancedCustomItemStack(Material.LECTERN, "&f充能器", "", "{#3366ff>}用于制造赛特斯石英{#33ccf3<}"));
     public static final SlimefunItemStack ME_IMPORT_BUS = new SlimefunItemStack(
-            "ME_IMPORT_BUS", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS, "{#Bright_Green}&lME输入总线"));
+            "ME_IMPORT_BUS",
+            new AdvancedCustomItemStack(
+                    Material.LIME_STAINED_GLASS,
+                    "{#Bright_Green}&lME输入总线",
+                    "",
+                    "{#3366ff>}抽取指定容器中的物品 不支持原版容器{#33ccf3<}"));
     public static final SlimefunItemStack ME_EXPORT_BUS = new SlimefunItemStack(
-            "ME_EXPORT_BUS", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS, "{#Bright_Red}&lME输出总线"));
+            "ME_EXPORT_BUS",
+            new AdvancedCustomItemStack(
+                    Material.RED_STAINED_GLASS,
+                    "{#Bright_Red}&lME输出总线",
+                    "",
+                    "{#3366ff>}输出指定的物品到指定的容器中 不支持原版容器{#33ccf3<}"));
     public static final SlimefunItemStack ME_IE_BUS = new SlimefunItemStack(
-            "ME_IE_BUS", new AdvancedCustomItemStack(Material.YELLOW_STAINED_GLASS, "{#Starship}&lME输入输出总线"));
+            "ME_IE_BUS",
+            new AdvancedCustomItemStack(
+                    Material.YELLOW_STAINED_GLASS,
+                    "{#Starship}&lME输入输出总线",
+                    "",
+                    "{#3366ff>}同时抽取和输出物品到指定的容器中 不支持原版容器{#33ccf3<}"));
     public static final SlimefunItemStack ME_STORAGE_BUS = new SlimefunItemStack(
-            "ME_STORAGE_BUS", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f&lME存储总线"));
+            "ME_STORAGE_BUS",
+            new AdvancedCustomItemStack(
+                    Material.WHITE_STAINED_GLASS,
+                    "&f&lME存储总线",
+                    "",
+                    "{#3366ff>}将方块的存储接入AE网络{#33ccf3<}",
+                    "&e支持蓬松桶和无尽存储单元",
+                    "&e不支持原版容器"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成终端"));
     public static final SlimefunItemStack ME_CRAFT_PLANNING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFT_PLANNING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成计划终端"));
     public static final SlimefunItemStack ME_PATTERN_TERMINAL = new SlimefunItemStack(
-            "ME_PATTERN_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME样板终端"));
-    public static final SlimefunItemStack ME_TERMINAL =
-            new SlimefunItemStack("ME_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME终端"));
+            "ME_PATTERN_TERMINAL",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME样板终端", "", "{#3366ff>}可以制作编码样板{#33ccf3<}"));
+    public static final SlimefunItemStack ME_TERMINAL = new SlimefunItemStack(
+            "ME_TERMINAL",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME终端", "", "{#3366ff>}管理AE网络中的物品{#33ccf3<}"));
     public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
-            "ME_ENERGY_ACCEPTOR", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器"));
+            "ME_ENERGY_ACCEPTOR",
+            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器", "", "&c现在它还没用 敬请期待"));
 
     // MATERIAL
     public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
@@ -170,7 +217,8 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(Material.MUSIC_DISC_OTHERSIDE, "{#3388fb}16m-ME存储元件"));
     public static final SlimefunItemStack ME_CREATIVE_ITEM_STORAGE_CELL = new SlimefunItemStack(
             "ME_CREATIVE_ITEM_STORAGE_CELL",
-            new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#3366ff>}创造存储元件{#33ccf3<}"));
+            new AdvancedCustomItemStack(
+                    Material.MUSIC_DISC_PIGSTEP, "{#3366ff>}创造存储元件{#33ccf3<}", "", "&c&l可以从中拿取任意物品"));
     public static final SlimefunItemStack FORMATION_CORE =
             new SlimefunItemStack("FORMATION_CORE", new AdvancedCustomItemStack(Material.GOLD_NUGGET, "{#33ccf3}成型核心"));
     public static final SlimefunItemStack ANNIHILATION_CORE = new SlimefunItemStack(
@@ -197,18 +245,20 @@ public class SlimefunAEItems {
                             ? Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
                     "{#33ccf3}加速卡"));
-    public static final SlimefunItemStack CAPACITY_CARD = new SlimefunItemStack(
-            "CAPACITY_CARD",
-            new AdvancedCustomItemStack(
-                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
-                            ? Material.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE
-                            : Material.SHULKER_SHELL,
-                    "{#33ccf3}容量卡"));
+    //    public static final SlimefunItemStack CAPACITY_CARD = new SlimefunItemStack(
+    //            "CAPACITY_CARD",
+    //            new AdvancedCustomItemStack(
+    //                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+    //                            ? Material.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE
+    //                            : Material.SHULKER_SHELL,
+    //                    "{#33ccf3}容量卡"));
 
     public static final SlimefunItemStack QUARTZ_GLASS =
             new SlimefunItemStack("QUARTZ_GLASS", new AdvancedCustomItemStack(Material.GLASS, "{#33ccf3}石英玻璃"));
-    public static final SlimefunItemStack BLANK_PATTERN =
-            new SlimefunItemStack("BLANK_PATTERN", new AdvancedCustomItemStack(Material.PAPER, "{#33ccf3}空白样板"));
+    public static final SlimefunItemStack BLANK_PATTERN = new SlimefunItemStack(
+            "BLANK_PATTERN",
+            new AdvancedCustomItemStack(
+                    Material.PAPER, "{#33ccf3}空白样板", "", "{#3366ff>}在ME样板终端中用它制造编码样板 用于自动合成{#33ccf3<}"));
     public static final SlimefunItemStack ENCODED_PATTERN = new SlimefunItemStack(
             "ENCODED_PATTERN",
             new AdvancedCustomItemStack(
@@ -698,12 +748,13 @@ public class SlimefunAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ADVANCED_CARD, CRYSTAL_FLUIX, null, null, null, null, null, null, null})
                 .register(plugin);
-        new SlimefunItem(
-                        SlimefunAEItemGroups.MATERIAL,
-                        CAPACITY_CARD,
-                        RecipeType.ENHANCED_CRAFTING_TABLE,
-                        new ItemStack[] {BASIC_CARD, CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null, null, null})
-                .register(plugin);
+        //        new SlimefunItem(
+        //                        SlimefunAEItemGroups.MATERIAL,
+        //                        CAPACITY_CARD,
+        //                        RecipeType.ENHANCED_CRAFTING_TABLE,
+        //                        new ItemStack[] {BASIC_CARD, CRYSTAL_CERTUS_QUARTZ, null, null, null, null, null,
+        // null, null})
+        //                .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MATERIAL,
                         QUARTZ_GLASS,

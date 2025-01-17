@@ -5,6 +5,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -229,6 +231,11 @@ public class ItemUtils {
     }
 
     @Nullable public static IStorage getStorage(@Nonnull Block block, boolean checkNetwork, boolean isReadOnly) {
+        return getStorage(block, checkNetwork, isReadOnly, false);
+    }
+
+    @Nullable public static IStorage getStorage(
+            @Nonnull Block block, boolean checkNetwork, boolean isReadOnly, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (checkNetwork
                 && slimefunBlockData != null
@@ -332,95 +339,92 @@ public class ItemUtils {
                     return 0;
                 }
             };
-            //        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container container) {
-            //            return new IStorage() {
-            //                @Override
-            //                public void pushItem(@Nonnull ItemStack[] itemStacks) {
-            //                    if (container instanceof Furnace furnace) {
-            //                        FurnaceInventory furnaceInventory = furnace.getInventory();
-            //                        furnaceInventory.addItem(itemStacks);
-            //                    } else if (container instanceof Chest chest) {
-            //                        Inventory inventory = chest.getBlockInventory();
-            //                        if (InvUtils.fitAll(
-            //                                inventory,
-            //                                itemStacks,
-            //                                IntStream.range(0, inventory.getSize()).toArray())) {
-            //                            inventory.addItem(itemStacks);
-            //                        }
-            //                    }
-            //                }
-            //
-            //                @Override
-            //                public boolean contains(@Nonnull ItemRequest[] requests) {
-            //                    return ItemUtils.contains(getStorage(), requests);
-            //                }
-            //
-            //                @Nonnull
-            //                @Override
-            //                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-            //                    ItemStack[] items = getVanillaItemStacks(block);
-            //                    Map<ItemStack, Integer> amounts =
-            // ItemUtils.getAmounts(ItemUtils.createItems(requests));
-            //                    ItemStorage found = new ItemStorage();
-            //
-            //                    for (ItemStack itemStack : amounts.keySet()) {
-            //                        for (ItemStack item : items) {
-            //                            if (item == null || item.getType().isAir()) continue;
-            //                            if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-            //                                if (item.getAmount() > amounts.get(itemStack)) {
-            //                                    found.addItem(ItemUtils.createItems(itemStack,
-            // amounts.get(itemStack)));
-            //                                    int rest = item.getAmount() - amounts.get(itemStack);
-            //                                    item.setAmount(rest);
-            //                                    break;
-            //                                } else {
-            //                                    found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-            //                                    int rest = amounts.get(itemStack) - item.getAmount();
-            //                                    item.setAmount(0);
-            //                                    if (rest != 0) amounts.put(itemStack, rest);
-            //                                    else break;
-            //                                }
-            //                            }
-            //                        }
-            //                    }
-            //                    return found.toItemStacks();
-            //                }
-            //
-            //                @Override
-            //                @Nonnull
-            //                public Map<ItemStack, Integer> getStorage() {
-            //                    Container container =
-            //                            (Container) PaperLib.getBlockState(block, false).getState();
-            //                    ItemStack[] items = new ItemStack[0];
-            //                    if (container instanceof Furnace furnace) {
-            //                        items = new ItemStack[] {furnace.getInventory().getResult()};
-            //                    } else if (container instanceof Chest chest) {
-            //                        items = chest.getInventory().getContents();
-            //                    }
-            //                    return ItemUtils.getAmounts(items);
-            //                }
-            //
-            //                @Override
-            //                public int getEmptySlots() {
-            //                    if (!canHasEmptySlots()) return 0;
-            //                    else {
-            //                        Inventory inventory =
-            //                                ((Chest) PaperLib.getBlockState(block,
-            // false).getState()).getBlockInventory();
-            //                        int slots = 0;
-            //                        for (int i = 0; i < 27; i++) {
-            //                            ItemStack itemStack = inventory.getItem(i);
-            //                            if (itemStack == null || itemStack.getType().isAir()) slots++;
-            //                        }
-            //                        return slots;
-            //                    }
-            //                }
-            //
-            //                @Override
-            //                public boolean canHasEmptySlots() {
-            //                    return PaperLib.getBlockState(block, false).getState() instanceof Chest;
-            //                }
-            //            };
+        } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
+            return new IStorage() {
+                @Override
+                public void pushItem(@Nonnull ItemStack[] itemStacks) {
+                    if (container instanceof Furnace furnace) {
+                        FurnaceInventory furnaceInventory = furnace.getInventory();
+                        furnaceInventory.addItem(itemStacks);
+                    } else if (container instanceof Chest chest) {
+                        Inventory inventory = chest.getBlockInventory();
+                        if (InvUtils.fitAll(
+                                inventory,
+                                itemStacks,
+                                IntStream.range(0, inventory.getSize()).toArray())) {
+                            inventory.addItem(itemStacks);
+                        }
+                    }
+                }
+
+                @Override
+                public boolean contains(@Nonnull ItemRequest[] requests) {
+                    return ItemUtils.contains(getStorage(), requests);
+                }
+
+                @Nonnull
+                @Override
+                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
+                    ItemStack[] items = getVanillaItemStacks(block);
+                    Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
+                    ItemStorage found = new ItemStorage();
+
+                    for (ItemStack itemStack : amounts.keySet()) {
+                        for (ItemStack item : items) {
+                            if (item == null || item.getType().isAir()) continue;
+                            if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
+                                if (item.getAmount() > amounts.get(itemStack)) {
+                                    found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
+                                    int rest = item.getAmount() - amounts.get(itemStack);
+                                    item.setAmount(rest);
+                                    break;
+                                } else {
+                                    found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
+                                    int rest = amounts.get(itemStack) - item.getAmount();
+                                    item.setAmount(0);
+                                    if (rest != 0) amounts.put(itemStack, rest);
+                                    else break;
+                                }
+                            }
+                        }
+                    }
+                    return found.toItemStacks();
+                }
+
+                @Override
+                @Nonnull
+                public Map<ItemStack, Integer> getStorage() {
+                    Container container =
+                            (Container) PaperLib.getBlockState(block, false).getState();
+                    ItemStack[] items = new ItemStack[0];
+                    if (container instanceof Furnace furnace) {
+                        items = new ItemStack[] {furnace.getInventory().getResult()};
+                    } else if (container instanceof Chest chest) {
+                        items = chest.getInventory().getContents();
+                    }
+                    return ItemUtils.getAmounts(items);
+                }
+
+                @Override
+                public int getEmptySlots() {
+                    if (!canHasEmptySlots()) return 0;
+                    else {
+                        Inventory inventory =
+                                ((Chest) PaperLib.getBlockState(block, false).getState()).getBlockInventory();
+                        int slots = 0;
+                        for (int i = 0; i < 27; i++) {
+                            ItemStack itemStack = inventory.getItem(i);
+                            if (itemStack == null || itemStack.getType().isAir()) slots++;
+                        }
+                        return slots;
+                    }
+                }
+
+                @Override
+                public boolean canHasEmptySlots() {
+                    return PaperLib.getBlockState(block, false).getState() instanceof Chest;
+                }
+            };
         }
         return null;
     }
