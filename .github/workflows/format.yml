@@ -1,0 +1,43 @@
+name: Format Code
+
+on:
+  workflow_dispatch: # 手动触发
+  pull_request:
+    types: [closed] # PR合并后触发
+    branches: [ "**" ]
+
+jobs:
+  format:
+    # 只在PR被合并时运行
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+          
+      - name: Format code with Spotless
+        run: mvn spotless:apply
+        
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code || echo "changes=true" >> $GITHUB_OUTPUT
+          
+      - name: Commit changes
+        if: steps.git-check.outputs.changes == 'true' 
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "style: format code with spotless"
+          git push 
