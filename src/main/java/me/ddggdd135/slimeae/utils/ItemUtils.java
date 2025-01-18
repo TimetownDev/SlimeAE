@@ -1,21 +1,39 @@
 package me.ddggdd135.slimeae.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
+import org.bukkit.block.Furnace;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
@@ -35,24 +53,21 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.Zrips.CMILib.Items.CMIMaterial;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Container;
-import org.bukkit.block.Furnace;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.FurnaceInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
+/**
+ * 物品操作工具类
+ * 提供了一系列处理物品堆、存储和显示的实用方法
+ */
 public class ItemUtils {
     public static final NamespacedKey ITEM_STORAGE_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "item_storage");
 
+    /**
+     * 根据模板物品创建指定数量的物品堆数组
+     *
+     * @param template 模板物品
+     * @param amount 总数量
+     * @return 物品堆数组，每个物品堆不超过最大堆叠数
+     */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull ItemStack template, int amount) {
         List<ItemStack> itemStacks = new ArrayList<>();
@@ -71,6 +86,12 @@ public class ItemUtils {
         return itemStacks.toArray(new ItemStack[0]);
     }
 
+    /**
+     * 将存储映射转换为物品堆数组
+     *
+     * @param storage 物品到数量的映射
+     * @return 物品堆数组
+     */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull Map<ItemStack, Integer> storage) {
         List<ItemStack> itemStacks = new ArrayList<>();
@@ -80,6 +101,12 @@ public class ItemUtils {
         return itemStacks.toArray(new ItemStack[0]);
     }
 
+    /**
+     * 根据物品请求创建物品堆数组
+     *
+     * @param requests 物品请求数组
+     * @return 物品堆数组
+     */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
@@ -89,6 +116,12 @@ public class ItemUtils {
         return itemStacks.toArray(new ItemStack[0]);
     }
 
+    /**
+     * 移除数量为0的物品堆
+     *
+     * @param itemStacks 要处理的物品堆数组
+     * @return 处理后的物品堆数组
+     */
     @Nonnull
     public static ItemStack[] trimItems(@Nonnull ItemStack[] itemStacks) {
         List<ItemStack> itemStackList = new ArrayList<>();
@@ -100,6 +133,13 @@ public class ItemUtils {
         return itemStackList.toArray(new ItemStack[0]);
     }
 
+    /**
+     * 检查存储中是否包含所有请求的物品
+     *
+     * @param storage 物品存储
+     * @param requests 物品请求数组
+     * @return 是否包含所有请求的物品
+     */
     public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
             if (!storage.containsKey(request.getTemplate()) || storage.get(request.getTemplate()) < request.getAmount())
@@ -108,10 +148,23 @@ public class ItemUtils {
         return true;
     }
 
+    /**
+     * 检查存储中是否包含指定的物品请求
+     *
+     * @param storage 物品存储
+     * @param request 物品请求
+     * @return 是否包含请求的物品
+     */
     public static boolean contains(@Nonnull Map<ItemStack, Integer> storage, @Nonnull ItemRequest request) {
         return storage.containsKey(request.getTemplate()) && storage.get(request.getTemplate()) >= request.getAmount();
     }
 
+    /**
+     * 将物品存储映射转换为物品请求数组
+     *
+     * @param itemStacks 物品存储映射
+     * @return 物品请求数组
+     */
     @Nonnull
     public static ItemRequest[] createRequests(@Nonnull Map<ItemStack, Integer> itemStacks) {
         List<ItemRequest> requests = new ArrayList<>();
@@ -121,6 +174,12 @@ public class ItemUtils {
         return requests.toArray(new ItemRequest[0]);
     }
 
+    /**
+     * 获取物品堆数组中每种物品的数量
+     *
+     * @param itemStacks 物品堆数组
+     * @return 物品到数量的映射
+     */
     @Nonnull
     public static Map<ItemStack, Integer> getAmounts(@Nonnull ItemStack[] itemStacks) {
         Map<ItemStack, Integer> storage = new HashMap<>();
@@ -136,6 +195,13 @@ public class ItemUtils {
         return storage;
     }
 
+    /**
+     * 从源存储中移除指定的物品
+     *
+     * @param source 源存储
+     * @param toTake 要移除的物品及数量
+     * @return 更新后的存储映射
+     */
     @Nonnull
     public static Map<ItemStack, Integer> takeItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
@@ -150,6 +216,13 @@ public class ItemUtils {
         return storage;
     }
 
+    /**
+     * 向源存储中添加物品
+     *
+     * @param source 源存储
+     * @param toAdd 要添加的物品及数量
+     * @return 更新后的存储映射
+     */
     @Nonnull
     public static Map<ItemStack, Integer> addItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toAdd) {
@@ -164,6 +237,11 @@ public class ItemUtils {
         return storage;
     }
 
+    /**
+     * 移除存储中数量为0或空的物品
+     *
+     * @param storage 要清理的存储映射
+     */
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
         List<ItemStack> toRemove = new ArrayList<>();
         for (ItemStack itemStack : storage.keySet()) {
@@ -234,7 +312,17 @@ public class ItemUtils {
         return getStorage(block, checkNetwork, isReadOnly, false);
     }
 
-    @Nullable public static IStorage getStorage(
+    /**
+     * 获取方块菜单中指定槽位的物品存储
+     *
+     * @param block 目标方块
+     * @param checkNetwork 是否检查网络
+     * @param isReadOnly 是否只读
+     * @param allowVanilla 是否允许原版容器
+     * @return 存储接口，如果无法获取则返回null
+     */
+    @Nullable 
+    public static IStorage getStorage(
             @Nonnull Block block, boolean checkNetwork, boolean isReadOnly, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (checkNetwork
@@ -564,11 +652,17 @@ public class ItemUtils {
         };
     }
 
-    @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount) {
         return createDisplayItem(itemStack, amount, true);
     }
-
+    /**
+     * 创建用于显示的物品堆
+     *
+     * @param itemStack 原始物品堆
+     * @param amount 显示数量
+     * @param addLore 是否添加描述
+     * @return 用于显示的物品堆
+     */
     @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount, boolean addLore) {
         ItemStack result = itemStack.clone();

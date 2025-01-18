@@ -1,25 +1,31 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
+
+import org.bukkit.inventory.ItemStack;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.GuguSlimefunLib;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import org.bukkit.inventory.ItemStack;
 
+/**
+ * ME物品存储元件类
+ * 用于存储物品的基本单元
+ */
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
     public static final String ITEM_STORAGE_KEY = "item_storage";
@@ -62,6 +68,11 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         nbtItem.applyNBT(itemStack);
     }
 
+    /**
+     * 更新存储元件的物品列表
+     *
+     * @param itemStack 存储元件物品
+     */
     public static void updateLore(@Nonnull ItemStack itemStack) {
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
         MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);

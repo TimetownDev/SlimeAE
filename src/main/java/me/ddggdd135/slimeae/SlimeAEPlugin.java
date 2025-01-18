@@ -1,9 +1,14 @@
 package me.ddggdd135.slimeae;
 
-import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.commands.CraftCommand;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
@@ -12,10 +17,10 @@ import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * SlimeAE插件的主类
+ */
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
     private final NetworkData networkData = new NetworkData();
@@ -66,7 +71,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     }
 
     @Override
-    @Nullable public String getBugTrackerURL() {
+    @Nullable
+    public String getBugTrackerURL() {
         return null;
     }
 
@@ -75,20 +81,36 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         return instance;
     }
 
+    /**
+     * 获取网络数据管理器
+     * @return 网络数据管理器实例
+     */
     @Nonnull
     public static NetworkData getNetworkData() {
         return getInstance().networkData;
     }
 
+    /**
+     * 获取Slimefun计时器计数
+     * @return 当前的计时器计数值
+     */
     public static int getSlimefunTickCount() {
         return getInstance().slimefunTickCount;
     }
 
+    /**
+     * 获取无尽贪婪集成实例
+     * @return 无尽贪婪集成实例
+     */
     @Nonnull
     public static InfinityIntegration getInfinityIntegration() {
         return getInstance().infinityIntegration;
     }
 
+    /**
+     * 获取蓬松科技集成实例
+     * @return 蓬松科技集成实例
+     */
     @Nonnull
     public static FluffyMachinesIntegration getFluffyMachinesIntegration() {
         return getInstance().fluffyMachinesIntegration;
