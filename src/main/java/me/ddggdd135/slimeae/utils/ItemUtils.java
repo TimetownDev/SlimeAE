@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -94,11 +95,10 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull Map<ItemStack, Integer> storage) {
-        List<ItemStack> itemStacks = new ArrayList<>();
-        for (ItemStack itemStack : storage.keySet()) {
-            itemStacks.addAll(List.of(createItems(itemStack, storage.get(itemStack))));
-        }
-        return itemStacks.toArray(new ItemStack[0]);
+        return storage.entrySet().stream()
+            .filter(e -> e.getValue() > 0)
+            .flatMap(e -> Stream.of(createItems(e.getKey(), e.getValue())))
+            .toArray(ItemStack[]::new);
     }
 
     /**

@@ -1,18 +1,12 @@
 package me.ddggdd135.slimeae.core.commands;
 
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.AEMenu;
-import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.CraftingRecipe;
-import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
-import me.ddggdd135.slimeae.core.AutoCraftingSession;
-import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.core.items.MenuItems;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -21,6 +15,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.CraftingRecipe;
+import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
+import me.ddggdd135.slimeae.core.AutoCraftingSession;
+import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 
 public class CraftCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -79,8 +84,12 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                 menu.open(player);
             } catch (NumberFormatException e) {
                 player.sendMessage(CMIChatColor.translate("&c&l用法 /ae_craft <Amount>"));
-            } catch (NoEnoughMaterialsException | StackOverflowError e) {
-                player.sendMessage(CMIChatColor.translate("&e&l没有足够的材料"));
+            } catch (NoEnoughMaterialsException e) {
+                player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
+                for (Map.Entry<ItemStack, Integer> entry : e.getMissingMaterials().entrySet()) {
+                    String itemName = ItemUtils.getItemName(entry.getKey());
+                    player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                }
             }
         }
         return false;

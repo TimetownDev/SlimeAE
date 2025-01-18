@@ -1,21 +1,25 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
+
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import org.bukkit.block.*;
-import org.bukkit.inventory.ItemStack;
 
 public class MEImportBus extends MEBus {
 
@@ -52,11 +56,21 @@ public class MEImportBus extends MEBus {
         IStorage storage = ItemUtils.getStorage(transportBlock);
         if (storage == null) return;
         IStorage networkStorage = info.getStorage();
-        while (true) {
+        
+        // 最多尝试9次
+        int maxAttempts = 9;
+        int attempts = 0;
+        
+        while (attempts++ < maxAttempts) {
             ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
-            if (itemStack == null || itemStack.getType().isAir()) break;
+            if (itemStack == null || itemStack.getType().isAir()) {
+                break;
+            }
+            
             networkStorage.pushItem(itemStack);
-            if (!(itemStack.getType().isAir())) break;
+            if (!itemStack.getType().isAir()) {
+                break;
+            }
         }
     }
 

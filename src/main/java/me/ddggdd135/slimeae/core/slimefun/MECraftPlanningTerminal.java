@@ -1,15 +1,24 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
+import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -20,10 +29,6 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 public class MECraftPlanningTerminal extends METerminal {
     public MECraftPlanningTerminal(
@@ -102,7 +107,11 @@ public class MECraftPlanningTerminal extends METerminal {
                     } catch (NumberFormatException e) {
                         player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
                     } catch (NoEnoughMaterialsException e) {
-                        player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料"));
+                        player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
+                        for (Map.Entry<ItemStack, Integer> entry : e.getMissingMaterials().entrySet()) {
+                            String itemName = ItemUtils.getItemName(entry.getKey());
+                            player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                        }
                     }
                 });
                 return false;
