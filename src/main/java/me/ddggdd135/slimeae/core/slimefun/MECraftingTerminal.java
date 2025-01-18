@@ -1,28 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
-import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -30,6 +9,13 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -41,6 +27,16 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import net.Zrips.CMILib.Colors.CMIChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class MECraftingTerminal extends METerminal {
     public MECraftingTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -196,7 +192,8 @@ public class MECraftingTerminal extends METerminal {
         if (info == null) return;
         if (info.getCraftingSessions().size() >= NetworkInfo.MAX_CRAFTING_SESSIONS) {
             for (HumanEntity viewer : blockMenu.getInventory().getViewers()) {
-                viewer.sendMessage(CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.MAX_CRAFTING_SESSIONS + "个合成任务了"));
+                viewer.sendMessage(
+                        CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.MAX_CRAFTING_SESSIONS + "个合成任务了"));
             }
             return;
         }

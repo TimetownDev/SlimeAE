@@ -1,14 +1,12 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
 import javax.annotation.Nonnull;
-
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-
-import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
 
 /**
  * 赛特斯石英水晶资源生成器

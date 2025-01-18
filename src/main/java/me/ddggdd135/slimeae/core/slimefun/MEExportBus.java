@@ -1,20 +1,14 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.inventory.ItemStack;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
@@ -25,6 +19,9 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
 
@@ -40,31 +37,31 @@ public class MEExportBus extends MEBus {
     private void onExport(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
-        
+
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        
+
         BlockFace direction = getDirection(blockMenu);
         if (direction == BlockFace.SELF) return;
-        
+
         Block target = block.getRelative(direction);
         BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
         if (targetInv == null) return;
-        
+
         IStorage networkStorage = info.getStorage();
-        
+
         for (int slot : Setting_Slots) {
             ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
-            if (setting == null || 
-                setting.getType().isAir() || 
-                SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
+            if (setting == null
+                    || setting.getType().isAir()
+                    || SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
                 continue;
             }
-            
-            int[] inputSlots = targetInv.getPreset()
-                    .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
+
+            int[] inputSlots =
+                    targetInv.getPreset().getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
             if (inputSlots == null || inputSlots.length == 0) continue;
-            
+
             if (targetInv.fits(setting, inputSlots)) {
                 ItemStack[] taken = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount()));
                 if (taken.length != 0) {

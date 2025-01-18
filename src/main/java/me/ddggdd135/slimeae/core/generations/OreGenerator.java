@@ -1,20 +1,16 @@
 package me.ddggdd135.slimeae.core.generations;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Random;
-
 import javax.annotation.Nonnull;
-
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.inventory.ItemStack;
-
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
-
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 
 /**
  * 矿物生成器类,用于在世界中生成自定义矿物
@@ -26,7 +22,7 @@ public class OreGenerator extends BlockPopulator {
 
     /**
      * 构造一个新的矿物生成器
-     * 
+     *
      * @param itemStack 要生成的矿物物品
      * @param size 矿脉大小
      * @param height 生成的最大高度
@@ -39,7 +35,7 @@ public class OreGenerator extends BlockPopulator {
 
     /**
      * 在指定区块中生成矿物
-     * 
+     *
      * @param world 目标世界
      * @param random 随机数生成器
      * @param source 目标区块

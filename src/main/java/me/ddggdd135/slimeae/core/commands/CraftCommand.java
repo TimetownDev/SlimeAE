@@ -1,22 +1,11 @@
 package me.ddggdd135.slimeae.core.commands;
 
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -26,6 +15,14 @@ import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class CraftCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -42,7 +39,8 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                 return false;
             }
             if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
-                player.sendMessage(CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
+                player.sendMessage(
+                        CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
                 return false;
             }
             if (strings.length == 0) {
@@ -51,7 +49,8 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
             try {
                 int amount = Integer.parseInt(strings[0]);
                 if (amount > NetworkInfo.getMaxCraftingAmount()) {
-                    player.sendMessage(CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                    player.sendMessage(
+                            CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
                     return false;
                 }
                 if (amount <= 0) {
@@ -96,7 +95,8 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(CMIChatColor.translate("&c&l用法 /ae_craft <Amount>"));
             } catch (NoEnoughMaterialsException e) {
                 player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
-                for (Map.Entry<ItemStack, Integer> entry : e.getMissingMaterials().entrySet()) {
+                for (Map.Entry<ItemStack, Integer> entry :
+                        e.getMissingMaterials().entrySet()) {
                     String itemName = ItemUtils.getItemName(entry.getKey());
                     player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
                 }

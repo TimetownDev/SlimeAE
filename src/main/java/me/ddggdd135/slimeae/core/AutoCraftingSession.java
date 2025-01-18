@@ -1,28 +1,16 @@
 package me.ddggdd135.slimeae.core;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
-
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -38,6 +26,14 @@ import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.KeyValuePair;
 import net.Zrips.CMILib.Items.CMIMaterial;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 public class AutoCraftingSession {
     public static NamespacedKey CRAFTING_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "auto_crafting");
@@ -130,7 +126,8 @@ public class AutoCraftingSession {
                     result.addAll(match(craftingRecipe, countToCraft, storage));
                 } catch (NoEnoughMaterialsException e) {
                     // 合并子合成缺少的材料
-                    for (Map.Entry<ItemStack, Integer> entry : e.getMissingMaterials().entrySet()) {
+                    for (Map.Entry<ItemStack, Integer> entry :
+                            e.getMissingMaterials().entrySet()) {
                         missing.addItem(ItemUtils.createItems(entry.getKey(), entry.getValue()));
                     }
                 }
@@ -153,7 +150,8 @@ public class AutoCraftingSession {
                     result.addAll(match(craftingRecipe, countToCraft, storage));
                 } catch (NoEnoughMaterialsException e) {
                     // 合并子合成缺少的材料
-                    for (Map.Entry<ItemStack, Integer> entry : e.getMissingMaterials().entrySet()) {
+                    for (Map.Entry<ItemStack, Integer> entry :
+                            e.getMissingMaterials().entrySet()) {
                         missing.addItem(ItemUtils.createItems(entry.getKey(), entry.getValue()));
                     }
                 }

@@ -1,22 +1,19 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import javax.annotation.Nullable;
-
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.inventory.ItemStack;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * ME存储总线类
@@ -70,8 +67,7 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
      * @return 外部存储接口，如果无法获取则返回null
      */
     @Override
-    @Nullable 
-    public IStorage getStorage(Block block) {
+    @Nullable public IStorage getStorage(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         BlockFace blockFace = getDirection(blockMenu);
         if (blockFace == BlockFace.SELF) return null;
