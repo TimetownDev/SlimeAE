@@ -1,9 +1,24 @@
 package me.ddggdd135.slimeae.core;
 
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -13,12 +28,6 @@ import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class NetworkInfo implements IDisposable {
     private Location controller;
@@ -28,6 +37,30 @@ public class NetworkInfo implements IDisposable {
     private IStorage storage = new StorageCollection();
     private Set<AutoCraftingSession> craftingSessions = new HashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
+    
+    // 缓存配置值
+    private static int maxCraftingSessions;
+    private static int maxCraftingAmount;
+    
+    // 从配置文件获取最大值
+    public static int getMaxCraftingSessions() {
+        return maxCraftingSessions;
+    }
+    
+    public static int getMaxCraftingAmount() {
+        return maxCraftingAmount;
+    }
+    
+    // 重载配置
+    public static void reloadConfig() {
+        maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-sessions", 8);
+        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 4096);
+    }
+    
+    // 静态初始化块,在类加载时加载配置
+    static {
+        reloadConfig();
+    }
 
     @Nonnull
     public Location getController() {

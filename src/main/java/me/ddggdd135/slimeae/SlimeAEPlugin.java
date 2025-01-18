@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.core.NetworkData;
+import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.CraftCommand;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
@@ -31,6 +32,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onEnable() {
         instance = this;
+        
+        // 保存默认配置
+        saveDefaultConfig();
+        
+        // 重载网络配置
+        NetworkInfo.reloadConfig();
+        
         // Plugin startup logic
         SlimefunAEItemGroups.onSetup(this);
         SlimefunAEItems.onSetup(this);

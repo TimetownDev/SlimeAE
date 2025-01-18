@@ -41,14 +41,24 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(CMIChatColor.translate("请站在对应网络方块上"));
                 return false;
             }
-            if (info.getCraftingSessions().size() >= 8) {
-                player.sendMessage(CMIChatColor.translate("&c&l这个网络已经有8个合成任务了"));
+            if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
+                player.sendMessage(CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
                 return false;
             }
             if (strings.length == 0) {
                 player.sendMessage(CMIChatColor.translate("&c&l用法 /ae_craft <Amount>"));
             }
             try {
+                int amount = Integer.parseInt(strings[0]);
+                if (amount > NetworkInfo.getMaxCraftingAmount()) {
+                    player.sendMessage(CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                    return false;
+                }
+                if (amount <= 0) {
+                    player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                    return false;
+                }
+
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack.getType().isAir()) {
                     player.sendMessage(CMIChatColor.translate("&c&l你是打算要合成空气吗?"));
@@ -59,7 +69,7 @@ public class CraftCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(CMIChatColor.translate("&c&l没有找到样板"));
                     return false;
                 }
-                AutoCraftingSession session = new AutoCraftingSession(info, recipe, Integer.parseInt(strings[0]));
+                AutoCraftingSession session = new AutoCraftingSession(info, recipe, amount);
                 session.refreshGUI(45, false);
                 AEMenu menu = session.getMenu();
                 int[] background = new int[] {45, 46, 48, 49, 50, 52, 53};

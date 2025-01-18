@@ -80,6 +80,14 @@ public class MECraftPlanningTerminal extends METerminal {
                     if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
                     try {
                         int amount = Integer.parseInt(msg);
+                        if (amount > NetworkInfo.getMaxCraftingAmount()) {
+                            player.sendMessage(CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                            return;
+                        }
+                        if (amount <= 0) {
+                            player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                            return;
+                        }
 
                         AutoCraftingSession session = new AutoCraftingSession(info, recipe, amount);
                         session.refreshGUI(45, false);
@@ -93,6 +101,10 @@ public class MECraftPlanningTerminal extends METerminal {
                         }
                         menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
                         menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
+                            if (info.getCraftingSessions().size() >= NetworkInfo.MAX_CRAFTING_SESSIONS) {
+                                player.sendMessage(CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.MAX_CRAFTING_SESSIONS + "个合成任务了"));
+                                return false;
+                            }
                             player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
                             session.refreshGUI(54);
                             session.start();
