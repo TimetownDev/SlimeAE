@@ -8,6 +8,7 @@ softdepend:
   - FluffyMachines
 depend:
   - Slimefun
+  - GuizhanLibPlugin
   - CMILib
   - GuguSlimefunLib
 commands:
