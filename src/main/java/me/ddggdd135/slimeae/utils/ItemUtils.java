@@ -668,7 +668,7 @@ public class ItemUtils {
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
-                        inventory.setItem(i, MenuItems.Pattern);
+                        inventory.setItem(i, MenuItems.Card);
                     } else if (SlimefunItem.getByItem(cursor) instanceof Card) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
