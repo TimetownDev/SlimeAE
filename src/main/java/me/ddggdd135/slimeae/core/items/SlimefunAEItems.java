@@ -1,8 +1,5 @@
 package me.ddggdd135.slimeae.core.items;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
@@ -36,6 +33,8 @@ import me.ddggdd135.slimeae.core.slimefun.MEUnit;
 import me.ddggdd135.slimeae.core.slimefun.MolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public class SlimefunAEItems {
     // CABLE

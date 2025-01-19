@@ -1,15 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -20,6 +12,8 @@ import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
@@ -32,31 +26,67 @@ import me.ddggdd135.slimeae.core.recipes.CraftingOperation;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 
 public class MolecularAssembler extends TickingBlock
         implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
     private static final int[] BORDER_SLOTS = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8,        // 第一行
-        9, 10, 14, 15, 16, 17,            // 第二行边框和空格
-        18, 19, 25, 26,                   // 第三行边框和空格
-        27, 28, 32, 33, 34, 35,           // 第四行边框和空格
-        36, 37, 38, 39, 40, 41, 42, 43, 44, // 第五行
-        48, 49, 50, 51, 52, 53  // 最后一行
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8, // 第一行
+        9,
+        10,
+        14,
+        15,
+        16,
+        17, // 第二行边框和空格
+        18,
+        19,
+        25,
+        26, // 第三行边框和空格
+        27,
+        28,
+        32,
+        33,
+        34,
+        35, // 第四行边框和空格
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44, // 第五行
+        48,
+        49,
+        50,
+        51,
+        52,
+        53 // 最后一行
     };
-    
+
     private static final int[] INPUT_SLOTS = {
         11, 12, 13,
         20, 21, 22,
         29, 30, 31
     };
-    
+
     private static final int PROGRESS_SLOT = 23;
     private static final int OUTPUT_SLOT = 24;
-    
-    private static final int[] CARD_SLOTS = {
-        45, 46, 47  // 左下角的3个卡槽位
+
+    private static final int[] CARD_SLOTS = {45, 46, 47 // 左下角的3个卡槽位
     };
-    
+
     private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
 
     public MolecularAssembler(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -89,26 +119,28 @@ public class MolecularAssembler extends TickingBlock
             ItemUtils.setSettingItem(menu.getInventory(), INPUT_SLOTS[i], input[i]);
         }
 
-            if (isFinished(block)) {
-                menu.replaceExistingItem(PROGRESS_SLOT, ChestMenuUtils.getBackground());
-                return;
-            }
-            
-            operation.addProgress(1);
-            
-            int progress = operation.getProgress();
-            int maxProgress = operation.getTotalTicks();
-            
-            menu.replaceExistingItem(PROGRESS_SLOT,
-                new CustomItemStack(Material.GREEN_STAINED_GLASS_PANE,
-                    "&a进度: &e" + progress + "&7/&e" + maxProgress,
-                    "&7" + (int)((progress / (double)maxProgress) * 100) + "%"));
-                    
-            ItemStack[] output = operation.getRecipe().getOutput();
-            if (output.length > 0) {
-                ItemStack displayItem = output[0].clone();
-                menu.replaceExistingItem(OUTPUT_SLOT, displayItem);
-            }
+        if (isFinished(block)) {
+            menu.replaceExistingItem(PROGRESS_SLOT, ChestMenuUtils.getBackground());
+            return;
+        }
+
+        operation.addProgress(1);
+
+        int progress = operation.getProgress();
+        int maxProgress = operation.getTotalTicks();
+
+        menu.replaceExistingItem(
+                PROGRESS_SLOT,
+                new CustomItemStack(
+                        Material.GREEN_STAINED_GLASS_PANE,
+                        "&a进度: &e" + progress + "&7/&e" + maxProgress,
+                        "&7" + (int) ((progress / (double) maxProgress) * 100) + "%"));
+
+        ItemStack[] output = operation.getRecipe().getOutput();
+        if (output.length > 0) {
+            ItemStack displayItem = output[0].clone();
+            menu.replaceExistingItem(OUTPUT_SLOT, displayItem);
+        }
     }
 
     @Override
@@ -181,13 +213,13 @@ public class MolecularAssembler extends TickingBlock
         for (int slot : BORDER_SLOTS) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
-        
+
         for (int slot : INPUT_SLOTS) {
             preset.addItem(slot, MenuItems.Empty, ChestMenuUtils.getEmptyClickHandler());
         }
-        
+
         preset.addItem(PROGRESS_SLOT, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-            
+
         preset.addItem(OUTPUT_SLOT, MenuItems.Empty, (player, i, itemStack, clickAction) -> false);
 
         // 添加卡槽位的点击处理
@@ -200,7 +232,7 @@ public class MolecularAssembler extends TickingBlock
     public void newInstance(BlockMenu menu, Block block) {
         // 初始化卡槽位
         for (int slot : CARD_SLOTS) {
-            if (menu.getItemInSlot(slot) == null 
+            if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
             }
