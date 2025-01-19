@@ -3,4 +3,9 @@ auto-crafting:
   # 每个网络最大同时进行的自动合成任务数
   max-sessions: 8
   # 每个自动合成任务最大物品数量
-  max-amount: 4096 
+  max-amount: 4096
+
+# 世界生成设置
+world-gen:
+  # 是否启用矿石生成
+  enable-ore-gen: true 
