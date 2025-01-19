@@ -323,6 +323,7 @@ public class AutoCraftingSession {
                 if (isCancelling) {
                     info.getCraftingSessions().remove(this);
                     player.sendMessage(CMIChatColor.translate("&a&l成功强制取消了合成任务"));
+                    player.closeInventory();
                     return false;
                 }
                 isCancelling = true;
