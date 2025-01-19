@@ -133,5 +133,11 @@
             <version>45627c6f8e</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>net.guizhanss</groupId>
+            <artifactId>GuizhanLibPlugin</artifactId>
+            <version>1.7.6</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
