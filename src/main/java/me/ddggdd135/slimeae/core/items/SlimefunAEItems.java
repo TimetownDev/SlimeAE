@@ -1,5 +1,8 @@
 package me.ddggdd135.slimeae.core.items;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
@@ -7,12 +10,32 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.version.Version;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
-import me.ddggdd135.slimeae.core.slimefun.*;
+import me.ddggdd135.slimeae.core.slimefun.AccelerationCard;
+import me.ddggdd135.slimeae.core.slimefun.Charger;
+import me.ddggdd135.slimeae.core.slimefun.CookingAllocator;
+import me.ddggdd135.slimeae.core.slimefun.CraftingMonitor;
+import me.ddggdd135.slimeae.core.slimefun.CrystalCertusQuartz;
+import me.ddggdd135.slimeae.core.slimefun.Inscriber;
+import me.ddggdd135.slimeae.core.slimefun.MEController;
+import me.ddggdd135.slimeae.core.slimefun.MECraftPlanningTerminal;
+import me.ddggdd135.slimeae.core.slimefun.MECraftingTerminal;
+import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
+import me.ddggdd135.slimeae.core.slimefun.MEDrive;
+import me.ddggdd135.slimeae.core.slimefun.MEExportBus;
+import me.ddggdd135.slimeae.core.slimefun.MEIEBus;
+import me.ddggdd135.slimeae.core.slimefun.MEImportBus;
+import me.ddggdd135.slimeae.core.slimefun.MEInterface;
+import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
+import me.ddggdd135.slimeae.core.slimefun.MEPatternTerminal;
+import me.ddggdd135.slimeae.core.slimefun.MEStorageBus;
+import me.ddggdd135.slimeae.core.slimefun.METerminal;
+import me.ddggdd135.slimeae.core.slimefun.MEUnit;
+import me.ddggdd135.slimeae.core.slimefun.MolecularAssembler;
+import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
 public class SlimefunAEItems {
     // CABLE
@@ -708,7 +731,7 @@ public class SlimefunAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {new ItemStack(Material.QUARTZ), FLUIX_DUST, LOGIC_PROCESSOR})
                 .register(plugin);
-        new SlimefunItem(
+        new Card(
                         SlimefunAEItemGroups.MATERIAL,
                         BASIC_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
@@ -725,7 +748,7 @@ public class SlimefunAEItems {
                         },
                         new SlimefunItemStack(SlimefunAEItems.BASIC_CARD, 2))
                 .register(plugin);
-        new SlimefunItem(
+        new Card(
                         SlimefunAEItemGroups.MATERIAL,
                         ADVANCED_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
@@ -742,7 +765,7 @@ public class SlimefunAEItems {
                         },
                         new SlimefunItemStack(SlimefunAEItems.ADVANCED_CARD, 2))
                 .register(plugin);
-        new SlimefunItem(
+        new AccelerationCard(
                         SlimefunAEItemGroups.MATERIAL,
                         ACCELERATION_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
