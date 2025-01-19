@@ -1,7 +1,9 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
@@ -128,4 +130,9 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+
+    @Override
+    public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {
+        // 流程分配器不需要每tick处理，保持空实现
+    }
 }

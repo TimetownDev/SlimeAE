@@ -1,7 +1,9 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import javax.annotation.Nullable;
@@ -75,5 +77,10 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
         if (b.getBlockData().getMaterial().isAir()) return null;
         blockMenu.markDirty();
         return ItemUtils.getStorage(b);
+    }
+
+    @Override
+    public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {
+        // ME存储总线不需要每tick处理，保持空实现
     }
 }
