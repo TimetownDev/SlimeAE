@@ -29,6 +29,7 @@ import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.core.slimefun.MEInterface;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
 import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
@@ -321,12 +322,15 @@ public class ItemUtils {
     @Nullable public static IStorage getStorage(
             @Nonnull Block block, boolean checkNetwork, boolean isReadOnly, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
-        if (checkNetwork
-                && slimefunBlockData != null
-                && SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof IMEObject) {
-            return null;
-        }
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+
         if (slimefunBlockData != null) {
+            if (checkNetwork
+                    && slimefunItem instanceof IMEObject) {
+                if (!(slimefunItem instanceof MEInterface))
+                    return null;
+                else isReadOnly = true;
+            }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
                     return new InfinityBarrelStorage(block);
@@ -341,10 +345,11 @@ public class ItemUtils {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return null;
         if (inv != null) {
+            boolean finalIsReadOnly = isReadOnly;
             return new IStorage() {
                 @Override
                 public void pushItem(@Nonnull ItemStack[] itemStacks) {
-                    if (isReadOnly) return;
+                    if (finalIsReadOnly) return;
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return;
                     for (ItemStack itemStack : itemStacks) {

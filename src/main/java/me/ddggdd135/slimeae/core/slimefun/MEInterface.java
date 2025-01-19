@@ -61,8 +61,6 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
 
-        tickCards(block, item, data);
-
         IStorage networkStorage = info.getStorage();
         for (int slot : ITEM_SLOTS) {
             int settingSlot = slot - 9;
@@ -87,13 +85,24 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                 continue;
             }
 
+            ItemStack newItemStack = null;
+            if (itemStack != null && !itemStack.getType().isAir()) {
+                newItemStack = itemStack.clone();
+                itemStack.setAmount(0);
+            }
             ItemStack[] received = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount() - amount));
             if (received.length != 0) {
-                if (itemStack != null && !itemStack.getType().isAir())
-                    itemStack.setAmount(amount + received[0].getAmount());
+                if (newItemStack != null && !newItemStack.getType().isAir()) {
+                    newItemStack.setAmount(amount + received[0].getAmount());
+                    blockMenu.replaceExistingItem(slot, newItemStack);
+                }
                 else blockMenu.replaceExistingItem(slot, received[0]);
+            } else if (newItemStack != null){
+                itemStack.setAmount(newItemStack.getAmount());
             }
         }
+
+        tickCards(block, item, data);
     }
 
     public MEInterface(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {

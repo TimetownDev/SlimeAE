@@ -53,8 +53,9 @@ public class StorageCollection implements IStorage {
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
-            if (pushCache.containsKey(itemStack)) {
-                IStorage storage = pushCache.get(itemStack);
+            ItemStack template = itemStack.asOne();
+            if (pushCache.containsKey(template)) {
+                IStorage storage = pushCache.get(template);
                 storage.pushItem(itemStack);
             }
         }

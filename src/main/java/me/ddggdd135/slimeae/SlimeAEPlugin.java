@@ -11,6 +11,7 @@ import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
+import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
 import org.bukkit.Bukkit;
@@ -39,6 +40,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载矿石生成配置
         SlimefunBlockPopulator.reloadConfig();
+
+        // 重载合成卡冷却时间配置
+        CraftingCard.reloadConfig();
 
         // Plugin startup logic
         SlimefunAEItemGroups.onSetup(this);

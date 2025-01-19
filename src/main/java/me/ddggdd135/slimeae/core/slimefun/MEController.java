@@ -17,6 +17,7 @@ import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
 public class MEController extends TickingBlock implements IMEController {
@@ -42,7 +43,10 @@ public class MEController extends TickingBlock implements IMEController {
         // tick autoCrafting
         Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
         for (AutoCraftingSession session : sessions) {
-            if (!session.hasNext()) info.getCraftingSessions().remove(session);
+            if (!session.hasNext()) {
+                info.getCraftingSessions().remove(session);
+                session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
+            }
             else session.moveNext(8);
         }
         info.updateAutoCraftingMenu();

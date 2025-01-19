@@ -10,28 +10,7 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
-import me.ddggdd135.slimeae.core.slimefun.AccelerationCard;
-import me.ddggdd135.slimeae.core.slimefun.Charger;
-import me.ddggdd135.slimeae.core.slimefun.CookingAllocator;
-import me.ddggdd135.slimeae.core.slimefun.CraftingMonitor;
-import me.ddggdd135.slimeae.core.slimefun.CrystalCertusQuartz;
-import me.ddggdd135.slimeae.core.slimefun.Inscriber;
-import me.ddggdd135.slimeae.core.slimefun.MEController;
-import me.ddggdd135.slimeae.core.slimefun.MECraftPlanningTerminal;
-import me.ddggdd135.slimeae.core.slimefun.MECraftingTerminal;
-import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
-import me.ddggdd135.slimeae.core.slimefun.MEDrive;
-import me.ddggdd135.slimeae.core.slimefun.MEExportBus;
-import me.ddggdd135.slimeae.core.slimefun.MEIEBus;
-import me.ddggdd135.slimeae.core.slimefun.MEImportBus;
-import me.ddggdd135.slimeae.core.slimefun.MEInterface;
-import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
-import me.ddggdd135.slimeae.core.slimefun.MEPatternTerminal;
-import me.ddggdd135.slimeae.core.slimefun.MEStorageBus;
-import me.ddggdd135.slimeae.core.slimefun.METerminal;
-import me.ddggdd135.slimeae.core.slimefun.MEUnit;
-import me.ddggdd135.slimeae.core.slimefun.MolecularAssembler;
-import me.ddggdd135.slimeae.core.slimefun.Pattern;
+import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -272,6 +251,13 @@ public class SlimefunAEItems {
                             ? Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
                     "{#33ccf3}加速卡"));
+    public static final SlimefunItemStack CRAFTING_CARD = new SlimefunItemStack(
+            "CRAFTING_CARD",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
+                            : Material.SHULKER_SHELL,
+                    "{#33ccf3}合成卡"));
     //    public static final SlimefunItemStack CAPACITY_CARD = new SlimefunItemStack(
     //            "CAPACITY_CARD",
     //            new AdvancedCustomItemStack(
@@ -774,6 +760,14 @@ public class SlimefunAEItems {
                         ACCELERATION_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ADVANCED_CARD, CRYSTAL_FLUIX, null, null, null, null, null, null, null})
+                .register(plugin);
+        new CraftingCard(
+                        SlimefunAEItemGroups.MATERIAL,
+                        CRAFTING_CARD,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            BASIC_CARD, new ItemStack(Material.CRAFTING_TABLE), null, null, null, null, null, null, null
+                        })
                 .register(plugin);
         //        new SlimefunItem(
         //                        SlimefunAEItemGroups.MATERIAL,

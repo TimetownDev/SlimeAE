@@ -4,6 +4,8 @@ auto-crafting:
   max-sessions: 8
   # 每个自动合成任务最大物品数量
   max-amount: 4096
+  # 合成卡冷却时间(tick)
+  crafting-card-cooldown: 200
 
 # 世界生成设置
 world-gen:
