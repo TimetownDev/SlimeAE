@@ -21,12 +21,15 @@ import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
-import me.ddggdd135.slimeae.api.interfaces.*;
+import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
+import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
+import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
@@ -108,6 +111,15 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
 
                 if (blockMenu != null) {
                     blockMenu.dropItems(b.getLocation(), Item_Slots);
+                }
+
+                for (int slot : Pattern_Slots) {
+                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
+                    if (itemStack != null
+                            && itemStack.getType() != Material.AIR
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Pattern, true, false))) {
+                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
+                    }
                 }
             }
         };

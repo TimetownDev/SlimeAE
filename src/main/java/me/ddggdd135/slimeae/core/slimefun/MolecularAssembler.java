@@ -12,6 +12,7 @@ import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
@@ -247,6 +248,16 @@ public class MolecularAssembler extends TickingBlock
             public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
+
+                for (int slot : CARD_SLOTS) {
+                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
+                    if (itemStack != null
+                            && itemStack.getType() != Material.AIR
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Card, true, false))) {
+                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
+                    }
+                }
+
                 CraftingOperation operation = processor.getOperation(b);
                 if (operation == null) return;
 
