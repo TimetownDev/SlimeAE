@@ -280,7 +280,7 @@ public class AutoCraftingSession {
                         Material.BARREL,
                         "&e&l多物品",
                         Arrays.stream(itemStacks)
-                                .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
+                                .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount() + "次")
                                 .toArray(String[]::new));
             }
             ItemMeta meta = itemStack.getItemMeta();
@@ -288,7 +288,7 @@ public class AutoCraftingSession {
             List<String> lore = meta.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
-            lore.add("&a计划合成 &e" + item.getValue());
+            lore.add("&a计划合成 &e" + item.getValue() + "&a次");
             if (i == 0 && running != 0) lore.add("&a合成中 &e" + running);
             meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
