@@ -1,5 +1,9 @@
 package me.ddggdd135.slimeae.core.items;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
@@ -33,8 +37,6 @@ import me.ddggdd135.slimeae.core.slimefun.MEUnit;
 import me.ddggdd135.slimeae.core.slimefun.MolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
 public class SlimefunAEItems {
     // CABLE
@@ -179,28 +181,28 @@ public class SlimefunAEItems {
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
                             ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
-                    "{#Sky_Blue}逻辑处理器"));
+                    "{#Sky_Blue}逻辑处理器").addFlags(ItemFlag.values()));
     public static final SlimefunItemStack CALCULATION_PROCESSOR = new SlimefunItemStack(
             "CALCULATION_PROCESSOR",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
                             ? Material.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
-                    "{#Sky_Blue}运算处理器"));
+                    "{#Sky_Blue}运算处理器").addFlags(ItemFlag.values()));
     public static final SlimefunItemStack ENGINEERING_PROCESSOR = new SlimefunItemStack(
             "ENGINEERING_PROCESSOR",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
                             ? Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
-                    "{#Sky_Blue}工程处理器"));
+                    "{#Sky_Blue}工程处理器").addFlags(ItemFlag.values()));
     public static final SlimefunItemStack ME_STORAGE_HOUSING = new SlimefunItemStack(
             "ME_STORAGE_HOUSING",
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
                             ? Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE
                             : Material.SHULKER_SHELL,
-                    "{#Bright_Gray}ME存储外壳"));
+                    "{#Bright_Gray}ME存储外壳").addFlags(ItemFlag.values()));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_1K = new SlimefunItemStack(
             "ME_ITEM_STORAGE_COMPONENT_1K", new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}1k-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_4K = new SlimefunItemStack(
