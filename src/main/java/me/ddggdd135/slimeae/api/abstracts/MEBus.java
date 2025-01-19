@@ -12,6 +12,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -38,8 +42,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock {
+public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock, ICardHolder {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
+
+    private static final int[] CARD_SLOTS = {45, 46, 47}; // 左下角3个槽位
 
     public int getNorthSlot() {
         return 12;
@@ -67,8 +73,51 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     public int[] getBackgroundSlots() {
         return new int[] {
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 21, 23, 24, 25, 26, 27, 28, 29, 31, 32, 34,
-            35, 36, 37, 38, 39, 40, 41, 42, 43, 44
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            13,
+            14,
+            16,
+            17,
+            18,
+            19,
+            21,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            31,
+            32,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53 // 移除45,46,47用于卡槽
         };
     }
 
@@ -137,6 +186,11 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 getDownSlot(),
                 getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
                 (player, i, itemStack, clickAction) -> false);
+
+        for (int slot : CARD_SLOTS) {
+            preset.addItem(slot, MenuItems.Card, ChestMenuUtils.getEmptyClickHandler());
+            preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
+        }
     }
 
     @Override
@@ -171,6 +225,13 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         menu.addMenuClickHandler(
                 getDownSlot(),
                 (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.DOWN));
+
+        for (int slot : CARD_SLOTS) {
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir()) {
+                menu.replaceExistingItem(slot, MenuItems.Card);
+            }
+        }
     }
 
     private boolean directionClick(Player player, ClickAction action, BlockMenu blockMenu, BlockFace blockFace) {
@@ -319,5 +380,15 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
     @OverridingMethodsMustInvokeSuper
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         if (data.getBlockMenu().hasViewer()) updateGui(data);
+
+        tickCards(block, item, data);
+        onMEBusTick(block, item, data);
     }
+
+    @Override
+    public int[] getCardSlots() {
+        return CARD_SLOTS;
+    }
+
+    public abstract void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data);
 }

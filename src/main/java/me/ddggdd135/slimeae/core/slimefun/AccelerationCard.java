@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.MachineProcessHolder;
 import io.github.thebusybiscuit.slimefun4.core.machines.MachineOperation;
 import me.ddggdd135.slimeae.api.abstracts.Card;
+import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,11 +20,19 @@ public class AccelerationCard extends Card {
 
     @Override
     public void onTick(Block block, SlimefunItem item, SlimefunBlockData data) {
-        if (!(item instanceof MachineProcessHolder processorHolder)) return;
-        MachineOperation operation = processorHolder.getMachineProcessor().getOperation(block);
-        if (operation == null) {
+        // 处理普通机器
+        if (item instanceof MachineProcessHolder processorHolder) {
+            MachineOperation operation = processorHolder.getMachineProcessor().getOperation(block);
+            if (operation != null && !operation.isFinished()) {
+                operation.addProgress(1);
+            }
             return;
         }
-        if (!operation.isFinished()) operation.addProgress(1);
+
+        // 处理ME总线
+        if (item instanceof MEBus meBus) {
+            // 额外调用一次onMEBusTick来加速处理
+            meBus.onMEBusTick(block, item, data);
+        }
     }
 }

@@ -34,7 +34,7 @@ public class MEExportBus extends MEBus {
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
-    private void onExport(Block block) {
+    public void onExport(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
 
@@ -78,8 +78,7 @@ public class MEExportBus extends MEBus {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        super.tick(block, item, data);
+    public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation().getBlock().getLocation());
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData()
@@ -123,14 +122,6 @@ public class MEExportBus extends MEBus {
     @Override
     public int getDownSlot() {
         return 20;
-    }
-
-    @Override
-    public int[] getBackgroundSlots() {
-        return new int[] {
-            0, 6, 7, 8, 10, 15, 16, 17, 18, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
-            43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53
-        };
     }
 
     @Override

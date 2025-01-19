@@ -24,8 +24,8 @@ public class MEIEBus extends MEExportBus {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        super.tick(block, item, data);
+    public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
+        super.onMEBusTick(block, item, data);
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
@@ -37,19 +37,9 @@ public class MEIEBus extends MEExportBus {
         if (storage == null) return;
         IStorage networkStorage = info.getStorage();
 
-        int maxAttempts = 9;
-        int attempts = 0;
+        ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
+        if (itemStack == null || itemStack.getType().isAir()) return;
 
-        while (attempts++ < maxAttempts) {
-            ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
-            if (itemStack == null || itemStack.getType().isAir()) {
-                break;
-            }
-
-            networkStorage.pushItem(itemStack);
-            if (!itemStack.getType().isAir()) {
-                break;
-            }
-        }
+        networkStorage.pushItem(itemStack);
     }
 }

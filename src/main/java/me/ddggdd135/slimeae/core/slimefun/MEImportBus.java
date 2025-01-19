@@ -42,7 +42,7 @@ public class MEImportBus extends MEBus {
         return new int[0];
     }
 
-    protected void onImport(@Nonnull Block block) {
+    public void onImport(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
@@ -50,31 +50,17 @@ public class MEImportBus extends MEBus {
         BlockFace current = getDirection(blockMenu);
         if (current == BlockFace.SELF) return;
         Block transportBlock = block.getRelative(current);
-        IStorage storage = ItemUtils.getStorage(transportBlock);
-        if (storage == null) return;
         IStorage networkStorage = info.getStorage();
 
-        // 最多尝试9次
-        int maxAttempts = 9;
-        int attempts = 0;
+        ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
+        if (itemStack == null || itemStack.getType().isAir()) return;
 
-        while (attempts++ < maxAttempts) {
-            ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
-            if (itemStack == null || itemStack.getType().isAir()) {
-                break;
-            }
-
-            networkStorage.pushItem(itemStack);
-            if (!itemStack.getType().isAir()) {
-                break;
-            }
-        }
+        networkStorage.pushItem(itemStack);
     }
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        super.tick(block, item, data);
+    public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         onImport(data.getLocation().getBlock());
     }
 }
