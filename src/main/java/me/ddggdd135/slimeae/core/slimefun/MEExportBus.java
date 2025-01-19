@@ -143,4 +143,51 @@ public class MEExportBus extends MEBus {
                 ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
         }
     }
+
+    @Override
+    public int[] getBackgroundSlots() {
+        return new int[] {
+            0,
+            1,
+            2,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            15,
+            16,
+            17,
+            18,
+            19,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53 // 移除45,46,47用于卡槽
+        };
+    }
 }
