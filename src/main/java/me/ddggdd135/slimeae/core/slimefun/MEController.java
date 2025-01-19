@@ -11,18 +11,14 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
-
-import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class MEController extends TickingBlock implements IMEController {
@@ -50,9 +46,10 @@ public class MEController extends TickingBlock implements IMEController {
         for (AutoCraftingSession session : sessions) {
             if (!session.hasNext()) {
                 info.getCraftingSessions().remove(session);
-                Slimefun.runSync(()->{session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);});
-            }
-            else session.moveNext(8);
+                Slimefun.runSync(() -> {
+                    session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
+                });
+            } else session.moveNext(8);
         }
         info.updateAutoCraftingMenu();
     }
