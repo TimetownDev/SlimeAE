@@ -131,15 +131,15 @@ public class SlimefunAEItems {
                     "&e支持蓬松桶和无尽存储单元",
                     "&e不支持原版容器"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
-            "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成终端"));
+            "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&fME合成终端"));
     public static final SlimefunItemStack ME_CRAFT_PLANNING_TERMINAL = new SlimefunItemStack(
-            "ME_CRAFT_PLANNING_TERMINAL", new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME合成计划终端"));
+            "ME_CRAFT_PLANNING_TERMINAL", new AdvancedCustomItemStack(Material.SEA_LANTERN, "&fME合成计划终端"));
     public static final SlimefunItemStack ME_PATTERN_TERMINAL = new SlimefunItemStack(
             "ME_PATTERN_TERMINAL",
-            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME样板终端", "", "{#3366ff>}可以制作编码样板{#33ccf3<}"));
+            new AdvancedCustomItemStack(Material.LOOM, "&fME样板终端", "", "{#3366ff>}可以制作编码样板{#33ccf3<}"));
     public static final SlimefunItemStack ME_TERMINAL = new SlimefunItemStack(
             "ME_TERMINAL",
-            new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&fME终端", "", "{#3366ff>}管理AE网络中的物品{#33ccf3<}"));
+            new AdvancedCustomItemStack(Material.SHROOMLIGHT, "&fME终端", "", "{#3366ff>}管理AE网络中的物品{#33ccf3<}"));
     public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
             "ME_ENERGY_ACCEPTOR",
             new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器", "", "&c现在它还没用 敬请期待"));
