@@ -1,26 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.IntStream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
-import org.bukkit.ChatColor;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -29,6 +10,15 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -43,6 +33,12 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class METerminal extends TickingBlock implements IMEObject, InventoryBlock {
     public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
@@ -160,21 +156,21 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public void updateGui(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
-        
+
         // 清空显示槽
         for (int slot : getDisplaySlots()) {
             blockMenu.replaceExistingItem(slot, MenuItems.Empty);
         }
-        
+
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        
+
         IStorage networkStorage = info.getStorage();
         Map<ItemStack, Integer> storage = networkStorage.getStorage();
 
         // 获取过滤器
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
-        
+
         // 过滤和排序逻辑
         List<Map.Entry<ItemStack, Integer>> items = new ArrayList<>(storage.entrySet());
         if (!filter.isEmpty()) {
@@ -183,16 +179,17 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 if (itemType.startsWith(filter)) {
                     return false;
                 }
-                String name = ChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                String name =
+                        ChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
                 if (name == null) return true;
                 return !name.contains(filter);
             });
         }
-        
+
         // 对整个列表进行排序
         items.sort(getSort(block));
-        
+
         // 计算分页
         int page = getPage(block);
         int maxPage = (int) Math.max(0, Math.ceil(items.size() / (double) getDisplaySlots().length) - 1);
@@ -200,16 +197,16 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             page = maxPage;
             setPage(block, page);
         }
-        
+
         // 显示当前页的物品
         int startIndex = page * getDisplaySlots().length;
         int endIndex = Math.min(startIndex + getDisplaySlots().length, items.size());
-        
+
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             Map.Entry<ItemStack, Integer> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
             if (itemStack == null || itemStack.getType().isAir()) continue;
-            
+
             int slot = getDisplaySlots()[i];
             blockMenu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, entry.getValue()));
         }
