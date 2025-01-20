@@ -273,6 +273,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                     }
                     setFilter(block, filter.toLowerCase(Locale.ROOT));
                     player.sendMessage(ChatColor.GREEN + "已启用过滤器");
+                    menu.open(player);
                 });
             }
             return false;
