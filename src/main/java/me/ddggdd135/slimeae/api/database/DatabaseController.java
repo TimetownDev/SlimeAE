@@ -4,9 +4,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import me.ddggdd135.slimeae.utils.ReflectionUtils;
-
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -18,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.slimeae.utils.ReflectionUtils;
 
 public abstract class DatabaseController<TData> {
     protected BlockDataController blockDataController;
@@ -31,6 +30,7 @@ public abstract class DatabaseController<TData> {
     protected Map<TData, Integer> scheduledWriteTasks;
     protected AtomicInteger tasks = new AtomicInteger();
     protected final Logger logger;
+
     public DatabaseController(Class<TData> clazz) {
         this.clazz = clazz;
         scheduledWriteTasks = new ConcurrentHashMap<>();
@@ -71,7 +71,7 @@ public abstract class DatabaseController<TData> {
     }
 
     public void executeSql(String sql) {
-        ReflectionUtils.invokePrivateMethod(adapter, "executeSql", new Class[]{String.class}, sql);
+        ReflectionUtils.invokePrivateMethod(adapter, "executeSql", new Class[] {String.class}, sql);
     }
 
     public List<Map<String, String>> execQuery(String sql) {
@@ -91,7 +91,7 @@ public abstract class DatabaseController<TData> {
                 while (result.next()) {
                     Map<String, String> data = new HashMap<>();
                     ResultSetMetaData metaData = result.getMetaData();
-                    for (int i = 1; i < metaData.getColumnCount() + 1;i++) {
+                    for (int i = 1; i < metaData.getColumnCount() + 1; i++) {
                         String name = metaData.getColumnName(i);
                         data.put(name, result.getString(i));
                     }
@@ -104,6 +104,7 @@ public abstract class DatabaseController<TData> {
     }
 
     public abstract void update(TData data);
+
     public void delete() {
         executeSql("DELETE FROM " + getTableName());
     }

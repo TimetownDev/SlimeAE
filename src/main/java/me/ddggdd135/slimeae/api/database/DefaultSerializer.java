@@ -1,17 +1,18 @@
 package me.ddggdd135.slimeae.api.database;
 
-import me.ddggdd135.slimeae.utils.ReflectionUtils;
-import me.ddggdd135.slimeae.utils.SerializeUtils;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import me.ddggdd135.slimeae.utils.ReflectionUtils;
+import me.ddggdd135.slimeae.utils.SerializeUtils;
 
-public class DefaultSerializer<T> implements Serializer<T>{
+public class DefaultSerializer<T> implements Serializer<T> {
     private final Class<T> clazz;
+
     public DefaultSerializer(Class<T> clazz) {
         this.clazz = clazz;
     }
+
     @Override
     public T deserialize(Map<String, String> data) {
         try {
@@ -37,8 +38,7 @@ public class DefaultSerializer<T> implements Serializer<T>{
             }
 
             return object;
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }

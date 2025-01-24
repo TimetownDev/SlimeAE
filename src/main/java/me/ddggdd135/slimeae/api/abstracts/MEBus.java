@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

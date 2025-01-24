@@ -130,7 +130,8 @@ public class MEStorageCellCache implements IStorage {
                     itemStacks.addAll(List.of(tmp));
                     stored -= request.getAmount();
                     storages.put(request.getTemplate(), amount - request.getAmount());
-                    SlimeAEPlugin.getStorageCellDataController().updateAsync(this, request.getTemplate(), amount - request.getAmount(), false);
+                    SlimeAEPlugin.getStorageCellDataController()
+                            .updateAsync(this, request.getTemplate(), amount - request.getAmount(), false);
                 } else {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
