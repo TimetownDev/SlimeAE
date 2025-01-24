@@ -4,6 +4,8 @@ import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import me.ddggdd135.slimeae.api.database.StorageCellDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.CraftCommand;
@@ -27,6 +29,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private int slimefunTickCount;
     private final InfinityIntegration infinityIntegration = new InfinityIntegration();
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
+    private final StorageCellDataController storageCellDataController = new StorageCellDataController();
 
     @Override
     public void onEnable() {
@@ -53,6 +56,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已支持");
         if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已支持");
 
+        storageCellDataController.init();
+
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
@@ -75,6 +80,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().removeIf(x -> x instanceof SlimefunBlockPopulator);
         }
+
+        storageCellDataController.shutdown();
     }
 
     @Override
@@ -126,5 +133,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static FluffyMachinesIntegration getFluffyMachinesIntegration() {
         return getInstance().fluffyMachinesIntegration;
+    }
+
+    public static StorageCellDataController getStorageCellDataController() {
+        return getInstance().storageCellDataController;
     }
 }

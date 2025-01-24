@@ -33,7 +33,7 @@ public class SlimefunAEItems {
                     "{#Bright_Gray}ME控制器",
                     "",
                     "&e&lAE网络的核心",
-                    "&eAE允许同一个网络中存在多个控制器{#33ccf3<}"));
+                    "&eAE不允许同一个网络中存在多个控制器{#33ccf3<}"));
     public static final SlimefunItemStack ME_UNIT = new SlimefunItemStack(
             "ME_UNIT",
             new AdvancedCustomItemStack(

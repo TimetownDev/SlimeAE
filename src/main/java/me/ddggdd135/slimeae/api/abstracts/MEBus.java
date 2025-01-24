@@ -188,7 +188,6 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 (player, i, itemStack, clickAction) -> false);
 
         for (int slot : CARD_SLOTS) {
-            preset.addItem(slot, MenuItems.Card, ChestMenuUtils.getEmptyClickHandler());
             preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
         }
     }

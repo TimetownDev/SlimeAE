@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
@@ -21,7 +22,7 @@ public class MEStorageCellCache implements IStorage {
     private final int size;
     private final UUID uuid;
 
-    private MEStorageCellCache(ItemStack itemStack) {
+    public MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
         NBTItem nbtItem = new NBTItem(itemStack, true);
         NBTCompoundList nbt = nbtItem.getCompoundList(MEItemStorageCell.ITEM_STORAGE_KEY);
@@ -29,9 +30,15 @@ public class MEStorageCellCache implements IStorage {
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
             storages = new CreativeItemIntegerMap();
         else {
-            storages = ItemUtils.toStorage(nbt);
-            for (ItemStack key : storages.keySet()) {
-                stored += storages.get(key);
+            if (nbt != null) {
+                storages = ItemUtils.toStorage(nbt);
+                for (ItemStack key : storages.keySet()) {
+                    stored += storages.get(key);
+                }
+
+                nbt.clear();
+            } else {
+                storages = new HashMap<>();
             }
         }
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
@@ -50,7 +57,7 @@ public class MEStorageCellCache implements IStorage {
             if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
         }
 
-        return new MEStorageCellCache(itemStack);
+        return SlimeAEPlugin.getStorageCellDataController().loadData(itemStack);
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {
@@ -68,6 +75,7 @@ public class MEStorageCellCache implements IStorage {
     private void trim(@Nonnull ItemStack template) {
         if (storages.containsKey(template) && storages.getOrDefault(template, 0) == 0) {
             storages.remove(template);
+            SlimeAEPlugin.getStorageCellDataController().deleteAsync(this, template);
         }
     }
 
@@ -89,6 +97,7 @@ public class MEStorageCellCache implements IStorage {
             else toAdd = itemStack.getAmount();
             stored += toAdd;
             storages.put(template, amount + toAdd);
+            SlimeAEPlugin.getStorageCellDataController().updateAsync(this, template, amount + toAdd, amount == 0);
             itemStack.setAmount(itemStack.getAmount() - toAdd);
             trim(itemStack);
         }
@@ -121,6 +130,7 @@ public class MEStorageCellCache implements IStorage {
                     itemStacks.addAll(List.of(tmp));
                     stored -= request.getAmount();
                     storages.put(request.getTemplate(), amount - request.getAmount());
+                    SlimeAEPlugin.getStorageCellDataController().updateAsync(this, request.getTemplate(), amount - request.getAmount(), false);
                 } else {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
@@ -137,6 +147,10 @@ public class MEStorageCellCache implements IStorage {
     public @Nonnull Map<ItemStack, Integer> getStorage() {
         if (storages instanceof CreativeItemIntegerMap) return storages;
         return new HashMap<>(storages);
+    }
+
+    public Map<ItemStack, Integer> getSourceStorage() {
+        return storages;
     }
 
     @Override
@@ -162,5 +176,13 @@ public class MEStorageCellCache implements IStorage {
         if (storages.containsKey(itemStack)) return 200;
 
         return 0;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void updateStored(int stored) {
+        this.stored = stored;
     }
 }
