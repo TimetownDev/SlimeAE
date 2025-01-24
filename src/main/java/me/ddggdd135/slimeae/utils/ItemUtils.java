@@ -325,10 +325,8 @@ public class ItemUtils {
         SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
 
         if (slimefunBlockData != null) {
-            if (checkNetwork
-                    && slimefunItem instanceof IMEObject) {
-                if (!(slimefunItem instanceof MEInterface))
-                    return null;
+            if (checkNetwork && slimefunItem instanceof IMEObject) {
+                if (!(slimefunItem instanceof MEInterface)) return null;
                 else isReadOnly = true;
             }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {

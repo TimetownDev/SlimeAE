@@ -95,9 +95,8 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                 if (newItemStack != null && !newItemStack.getType().isAir()) {
                     newItemStack.setAmount(amount + received[0].getAmount());
                     blockMenu.replaceExistingItem(slot, newItemStack);
-                }
-                else blockMenu.replaceExistingItem(slot, received[0]);
-            } else if (newItemStack != null){
+                } else blockMenu.replaceExistingItem(slot, received[0]);
+            } else if (newItemStack != null) {
                 itemStack.setAmount(newItemStack.getAmount());
             }
         }
