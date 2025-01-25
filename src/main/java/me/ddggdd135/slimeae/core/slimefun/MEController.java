@@ -49,7 +49,7 @@ public class MEController extends TickingBlock implements IMEController {
                 Slimefun.runSync(() -> {
                     session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
                 });
-            } else session.moveNext(8);
+            } else session.moveNext(512);
         }
         info.updateAutoCraftingMenu();
     }
