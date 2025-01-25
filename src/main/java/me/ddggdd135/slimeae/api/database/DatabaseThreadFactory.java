@@ -1,14 +1,15 @@
 package me.ddggdd135.slimeae.api.database;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jetbrains.annotations.NotNull;
 
 public class DatabaseThreadFactory implements ThreadFactory {
     private final AtomicInteger threadCount = new AtomicInteger(0);
     private String threadName = "SF-Database-Thread";
+
     public DatabaseThreadFactory() {}
+
     public DatabaseThreadFactory(String threadName) {
         this.threadName = threadName;
     }
