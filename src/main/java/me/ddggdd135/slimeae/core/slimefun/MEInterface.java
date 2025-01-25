@@ -68,8 +68,14 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
                 if (itemStack != null
-                        && !itemStack.getType().isAir()
-                        && !SlimefunUtils.isItemSimilar(setting, itemStack, true, false))
+                        && !itemStack.getType().isAir())
+                    networkStorage.pushItem(itemStack);
+                continue;
+            }
+
+            if (!SlimefunUtils.isItemSimilar(setting, itemStack, true, false)) {
+                if (itemStack != null
+                        && !itemStack.getType().isAir())
                     networkStorage.pushItem(itemStack);
                 continue;
             }
