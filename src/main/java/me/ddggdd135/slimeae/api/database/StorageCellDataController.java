@@ -30,7 +30,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     @Override
     public String getTableName() {
-        return "STORAGECELL_DATA";
+        return "ae_storagecell_data";
     }
 
     @Override
