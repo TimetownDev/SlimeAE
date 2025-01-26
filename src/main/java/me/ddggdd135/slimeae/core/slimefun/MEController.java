@@ -29,16 +29,17 @@ public class MEController extends TickingBlock implements IMEController {
 
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        NetworkInfo info = null;
-        if (SlimeAEPlugin.getSlimefunTickCount() % 32 == 0) {
-            info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
-            if (info == null) return;
-            NetworkInfo finalInfo = info;
-            info.getChildren().forEach(x -> {
-                SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
-                ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), finalInfo);
-            });
-        }
+        SlimeAEPlugin.getNetworkData().AllControllers.add(block.getLocation());
+        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.add(block.getLocation());
+        if (SlimeAEPlugin.getSlimefunTickCount() % 4 != 0) return;
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
+        if (info == null) return;
+        NetworkInfo finalInfo = info;
+        info.getChildren().forEach(x -> {
+            SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
+            ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), finalInfo);
+        });
+
         if (info == null) info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
         // tick autoCrafting
