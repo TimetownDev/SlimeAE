@@ -39,17 +39,6 @@ public class MEController extends TickingBlock implements IMEController {
             slimefunItem.onNetworkUpdate(x.getBlock(), info);
         });
 
-        // tick autoCrafting
-        Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
-        for (AutoCraftingSession session : sessions) {
-            if (!session.hasNext()) {
-                info.getCraftingSessions().remove(session);
-                Slimefun.runSync(() -> {
-                    session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
-                });
-            } else session.moveNext(512);
-        }
-        info.updateAutoCraftingMenu();
     }
 
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {

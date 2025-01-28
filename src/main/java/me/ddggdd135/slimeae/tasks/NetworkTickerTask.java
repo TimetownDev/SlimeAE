@@ -3,7 +3,9 @@ package me.ddggdd135.slimeae.tasks;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import javax.annotation.Nonnull;
@@ -51,6 +53,18 @@ public class NetworkTickerTask implements Runnable {
                         if (slimefunItem == null) return;
                         slimefunItem.onNetworkTick(x.getBlock(), networkInfo);
                     });
+
+                    // tick autoCrafting
+                    Set<AutoCraftingSession> sessions = new HashSet<>(networkInfo.getCraftingSessions());
+                    for (AutoCraftingSession session : sessions) {
+                        if (!session.hasNext()) {
+                            networkInfo.getCraftingSessions().remove(session);
+                            Slimefun.runSync(() -> {
+                                session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
+                            });
+                        } else session.moveNext(512);
+                    }
+                    networkInfo.updateAutoCraftingMenu();
                 }
             }
         } catch (Exception | LinkageError x) {
