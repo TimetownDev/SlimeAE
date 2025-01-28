@@ -1,6 +1,10 @@
 package me.ddggdd135.slimeae.core.listeners;
 
+import static me.ddggdd135.slimeae.api.interfaces.IMEObject.Valid_Faces;
+
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
+import java.util.HashSet;
+import java.util.Set;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
@@ -15,21 +19,22 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static me.ddggdd135.slimeae.api.interfaces.IMEObject.Valid_Faces;
-
 public class NetworkListener implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onSlimefunBlockPlace(SlimefunBlockPlaceEvent e) {
-        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.remove(e.getBlockPlaced().getLocation());
+        SlimeAEPlugin.getNetworkData()
+                .AllNetworkBlocks
+                .remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().AllControllers.remove(e.getBlockPlaced().getLocation());
-        SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlockPlaced().getLocation());
+        SlimeAEPlugin.getNetworkData()
+                .AllStorageObjects
+                .remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().BannedScanSet.remove(e.getBlockPlaced().getLocation());
         if (e.getSlimefunItem() instanceof IMEObject IMEObject) {
-            SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(e.getBlockPlaced().getLocation(), IMEObject);
+            SlimeAEPlugin.getNetworkData()
+                    .AllNetworkBlocks
+                    .put(e.getBlockPlaced().getLocation(), IMEObject);
         }
 
         if (e.getSlimefunItem() instanceof IMEController IMEController) {
@@ -37,11 +42,15 @@ public class NetworkListener implements Listener {
         }
 
         if (e.getSlimefunItem() instanceof IMEStorageObject IMEStorageObject) {
-            SlimeAEPlugin.getNetworkData().AllStorageObjects.put(e.getBlockPlaced().getLocation(), IMEStorageObject);
+            SlimeAEPlugin.getNetworkData()
+                    .AllStorageObjects
+                    .put(e.getBlockPlaced().getLocation(), IMEStorageObject);
         }
 
         if (e.getSlimefunItem() instanceof IMECraftHolder IMECraftHolder) {
-            SlimeAEPlugin.getNetworkData().AllCraftHolders.put(e.getBlockPlaced().getLocation(), IMECraftHolder);
+            SlimeAEPlugin.getNetworkData()
+                    .AllCraftHolders
+                    .put(e.getBlockPlaced().getLocation(), IMECraftHolder);
         }
         Block block = e.getBlockPlaced();
         Set<NetworkInfo> networkInfos = new HashSet<>();
@@ -49,8 +58,7 @@ public class NetworkListener implements Listener {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
             if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) {
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(testLocation);
-                if (info != null)
-                    networkInfos.add(info);
+                if (info != null) networkInfos.add(info);
             }
         }
 
@@ -72,9 +80,9 @@ public class NetworkListener implements Listener {
         SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlock().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlock().getLocation());
 
-
         SlimeAEPlugin.getNetworkData().BannedScanSet.add(e.getBlock().getLocation());
-        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
+        NetworkInfo networkInfo =
+                SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
         if (networkInfo != null) {
             networkInfo.getChildren().clear();
             SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());

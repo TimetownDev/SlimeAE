@@ -1,14 +1,10 @@
 package me.ddggdd135.slimeae.core;
 
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import it.unimi.dsi.fastutil.ints.IntComparator;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -24,9 +20,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import static me.ddggdd135.slimeae.utils.ComparatorUtils.AUTO_CRAFTING_SESSION_COMPARATOR;
-import static me.ddggdd135.slimeae.utils.ComparatorUtils.LOCATION_COMPARATOR;
 
 public class NetworkInfo implements IDisposable {
     private Location controller;

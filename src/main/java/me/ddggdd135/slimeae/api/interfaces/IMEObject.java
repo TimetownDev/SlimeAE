@@ -16,5 +16,6 @@ public interface IMEObject {
             BlockFace.SELF);
 
     void onNetworkUpdate(Block block, NetworkInfo networkInfo);
+
     void onNetworkTick(Block block, NetworkInfo networkInfo);
 }

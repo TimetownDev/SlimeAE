@@ -1,22 +1,15 @@
 package me.ddggdd135.slimeae.core;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-
+import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
-
-import javax.annotation.Nullable;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
@@ -26,8 +19,7 @@ public class NetworkData {
     public final Map<Location, IMECraftHolder> AllCraftHolders = new ConcurrentHashMap<>();
     public final Set<Location> BannedScanSet = new HashSet<>();
 
-    @Nullable
-    public NetworkInfo getNetworkInfo(Location location) {
+    @Nullable public NetworkInfo getNetworkInfo(Location location) {
         for (NetworkInfo info : AllNetworkData) {
             if (info.getChildren().contains(location)) return info;
             if (info.getController().equals(location)) return info;
@@ -45,8 +37,7 @@ public class NetworkData {
         if (info.getChildren().size() == 1 || info.getChildren().isEmpty()) {
             Set<Location> children = NetworkUtils.scan(controller.getBlock());
             for (Location location : children) {
-                if (AllControllers.containsKey(location)
-                        && !location.equals(controller)) {
+                if (AllControllers.containsKey(location) && !location.equals(controller)) {
                     info.dispose();
                     return null;
                 }
@@ -75,7 +66,6 @@ public class NetworkData {
             info.getRecipeMap()
                     .put(location, new HashSet<>(List.of(slimefunItem.getSupportedRecipes(location.getBlock()))));
         }
-
 
         return info;
     }

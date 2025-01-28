@@ -65,7 +65,6 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         //        list.addAll(ItemUtils.toNBT(getStorage(itemStack).getStorage()));
         //        nbtItem.applyNBT(itemStack);
 
-
         SlimeAEPlugin.getStorageCellDataController().updateAsync(getStorage(itemStack));
     }
 

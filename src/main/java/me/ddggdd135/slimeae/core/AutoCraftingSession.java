@@ -205,7 +205,8 @@ public class AutoCraftingSession {
             }
         }
         for (Location location : locations) {
-            IMECraftHolder holder = SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+            IMECraftHolder holder =
+                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
             if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(next.getKey())))
                 continue;
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {

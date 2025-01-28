@@ -5,19 +5,14 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import java.util.HashSet;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
-import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.block.Block;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
 public class MEController extends TickingBlock implements IMEController {
@@ -34,11 +29,11 @@ public class MEController extends TickingBlock implements IMEController {
         NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
         if (info == null) return;
         info.getChildren().forEach(x -> {
-            IMEObject slimefunItem = SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
+            IMEObject slimefunItem =
+                    SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
             if (slimefunItem == null) return;
             slimefunItem.onNetworkUpdate(x.getBlock(), info);
         });
-
     }
 
     public MEController(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -58,7 +53,5 @@ public class MEController extends TickingBlock implements IMEController {
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Override
-    public void onNetworkTick(Block block, NetworkInfo networkInfo) {
-
-    }
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

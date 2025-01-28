@@ -135,8 +135,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
     public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {
         // 流程分配器不需要每tick处理，保持空实现
     }
-    @Override
-    public void onNetworkTick(Block block, NetworkInfo networkInfo) {
 
-    }
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }
