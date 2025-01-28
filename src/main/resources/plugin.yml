@@ -1,5 +1,7 @@
 name: SlimeAEPlugin
 version: '${project.version}'
+
+
 main: me.ddggdd135.slimeae.SlimeAEPlugin
 api-version: '1.16'
 authors: [Ddggdd135]
@@ -11,6 +13,21 @@ depend:
   - GuizhanLibPlugin
   - CMILib
   - GuguSlimefunLib
+
+
 commands:
-  ae_craft:
-    description: "ae_test_command"
+  SlimeAE:
+    description: "SlimeAE基本命令"
+    aliases: ae
+
+
+permissions:
+  slimeae.cleardata:
+    description: "清空存储元件的数据"
+    default: op
+  slimeae.uuid:
+    description: "获取此存储元件的UUID"
+    default: op
+  slimeae.viewitems:
+    description: "查看存储元件中的物品"
+    default: op

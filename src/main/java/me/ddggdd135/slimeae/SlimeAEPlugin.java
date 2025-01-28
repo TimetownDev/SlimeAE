@@ -7,7 +7,11 @@ import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.database.StorageCellDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.core.commands.CraftCommand;
+import me.ddggdd135.slimeae.core.commands.SlimeAECommand;
+import me.ddggdd135.slimeae.core.commands.subcommands.CleardataCommand;
+import me.ddggdd135.slimeae.core.commands.subcommands.HelpCommand;
+import me.ddggdd135.slimeae.core.commands.subcommands.UuidCommand;
+import me.ddggdd135.slimeae.core.commands.subcommands.ViewitemsCommand;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
@@ -16,6 +20,8 @@ import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
+import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
+import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -33,6 +39,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
+    private final NetworkCheckTask networkChecker = new NetworkCheckTask();
+    private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
+    private final SlimeAECommand slimeAECommand = new SlimeAECommand();
 
     @Override
     public void onEnable() {
@@ -66,10 +75,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
 
-        CraftCommand craftCommand = new CraftCommand();
-        getCommand("ae_craft").setExecutor(craftCommand);
-        getCommand("ae_craft").setTabCompleter(craftCommand);
-
         Bukkit.getScheduler()
                 .runTaskTimer(
                         this,
@@ -77,6 +82,16 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
                         1,
                         Slimefun.getTickerTask().getTickRate());
         networkTicker.start(this);
+        networkChecker.start(this);
+        networkRefresher.start(this);
+
+        slimeAECommand.addSubCommand(new HelpCommand());
+        slimeAECommand.addSubCommand(new CleardataCommand());
+        slimeAECommand.addSubCommand(new UuidCommand());
+        slimeAECommand.addSubCommand(new ViewitemsCommand());
+
+        getCommand("SlimeAE").setExecutor(slimeAECommand);
+        getCommand("SlimeAE").setTabCompleter(slimeAECommand);
     }
 
     @Override
@@ -151,5 +166,18 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkTickerTask getNetworkTicker() {
         return getInstance().networkTicker;
+    }
+    @Nonnull
+    public static NetworkCheckTask getNetworkChecker() {
+        return getInstance().networkChecker;
+    }
+    @Nonnull
+    public static NetworkRefreshTask getNetworkRefresher() {
+        return getInstance().networkRefresher;
+    }
+
+    @Nonnull
+    public static SlimeAECommand getSlimeAECommand() {
+        return getInstance().slimeAECommand;
     }
 }

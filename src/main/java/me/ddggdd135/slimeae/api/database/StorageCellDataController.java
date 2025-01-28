@@ -58,6 +58,10 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + data.getUuid() + "';");
     }
 
+    public void delete(UUID uuid) {
+        executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + uuid + "';");
+    }
+
     public void delete(MEStorageCellCache data, ItemStack itemStack) {
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + data.getUuid() + "' AND item_hash = "
                 + getItemHash(itemStack) + ";");
@@ -78,6 +82,12 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     public void deleteAsync(MEStorageCellCache data) {
         submitWriteTask(data, () -> {
             delete(data);
+        });
+    }
+
+    public void deleteAsync(UUID uuid) {
+        submitWriteTask(null, () -> {
+            delete(uuid);
         });
     }
 

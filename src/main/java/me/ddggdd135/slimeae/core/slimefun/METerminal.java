@@ -124,10 +124,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public Comparator<Map.Entry<ItemStack, Integer>> getSort(Block block) {
         String value = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
         if (value == null) return ALPHABETICAL_SORT;
-        int id = Integer.parseInt(value);
-        if (id == 0) return ALPHABETICAL_SORT;
-        if (id == 1) return NUMERICAL_SORT;
-        return ALPHABETICAL_SORT;
+        return int2Sort(Integer.parseInt(value));
     }
 
     public void setSort(Block block, int value) {
@@ -332,4 +329,10 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
+
+    public static Comparator<Map.Entry<ItemStack, Integer>> int2Sort(int id) {
+        if (id == 0) return ALPHABETICAL_SORT;
+        if (id == 1) return NUMERICAL_SORT;
+        return ALPHABETICAL_SORT;
+    }
 }

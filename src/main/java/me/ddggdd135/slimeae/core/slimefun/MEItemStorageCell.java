@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.GuguSlimefunLib;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
@@ -51,8 +52,9 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         } else return meItemStorageCell.getSize();
     }
 
-    @Nonnull
+    @Nullable
     public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+        if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
         return MEStorageCellCache.getMEStorageCellCache(itemStack);
     }
 
