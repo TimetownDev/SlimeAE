@@ -30,7 +30,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public class MolecularAssembler extends TickingBlock
         // 如果不是TickingBlock的话 玩家不打开一次方块就没法自动合成 奇怪的bug
@@ -99,7 +98,7 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     protected void tick(
-            @NotNull Block block, @NotNull SlimefunItem slimefunItem, @NotNull SlimefunBlockData slimefunBlockData) {}
+            @Nonnull Block block, @Nonnull SlimefunItem slimefunItem, @Nonnull SlimefunBlockData slimefunBlockData) {}
 
     public MolecularAssembler(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);

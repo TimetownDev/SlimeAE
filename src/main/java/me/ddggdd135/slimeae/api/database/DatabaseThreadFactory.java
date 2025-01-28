@@ -2,7 +2,7 @@ package me.ddggdd135.slimeae.api.database;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nonnull;
 
 public class DatabaseThreadFactory implements ThreadFactory {
     private final AtomicInteger threadCount = new AtomicInteger(0);
@@ -27,7 +27,7 @@ public class DatabaseThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(@NotNull Runnable r) {
+    public Thread newThread(@Nonnull Runnable r) {
         return new Thread(r, threadName + threadCount.getAndIncrement());
     }
 }
