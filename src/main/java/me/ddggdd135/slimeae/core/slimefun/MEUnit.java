@@ -82,11 +82,12 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
     }
 
     @Override
-    @Nullable public IStorage getStorage(Block block) {
+    @Nullable
+    public IStorage getStorage(Block block) {
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         return new IStorage() {
             @Override
             public void pushItem(@Nonnull ItemStack[] itemStacks) {
-                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return;
                 for (ItemStack itemStack : itemStacks) {
                     ItemStack result = blockMenu.pushItem(itemStack, Slots);
@@ -98,7 +99,6 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Override
             public boolean contains(@Nonnull ItemRequest[] requests) {
-                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return false;
                 return ItemUtils.contains(getStorage(), requests);
             }
@@ -106,7 +106,6 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
             @Nonnull
             @Override
             public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return new ItemStack[0];
                 Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                 ItemStorage found = new ItemStorage();
@@ -137,14 +136,12 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Override
             public @Nonnull Map<ItemStack, Integer> getStorage() {
-                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return new HashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
             }
 
             @Override
             public int getEmptySlots() {
-                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                 if (blockMenu == null) return 0;
                 int found = 0;
                 for (int slot : Slots) {

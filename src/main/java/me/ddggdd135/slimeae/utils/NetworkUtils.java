@@ -28,7 +28,10 @@ public class NetworkUtils {
                 scan(testLocation.getBlock(), blocks);
             } else {
                 SlimefunBlockData blockData = StorageCacheUtils.getBlock(testLocation);
-                if (blockData == null) continue;
+                if (blockData == null) {
+                    SlimeAEPlugin.getNetworkData().BannedScanSet.add(testLocation);
+                    continue;
+                }
                 SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
                 if (slimefunItem instanceof IMEObject IMEObject) {
                     blocks.add(testLocation);

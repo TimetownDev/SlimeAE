@@ -6,10 +6,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
+
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
@@ -19,12 +24,17 @@ public class NetworkData {
     public final Map<Location, IMECraftHolder> AllCraftHolders = new ConcurrentHashMap<>();
     public final Set<Location> BannedScanSet = new HashSet<>();
 
-    @Nullable public NetworkInfo getNetworkInfo(Location location) {
+    @Nullable
+    public NetworkInfo getNetworkInfo(Location location) {
+        NetworkInfo re = null;
+        Set<NetworkInfo> toDispose = new HashSet<>();
         for (NetworkInfo info : AllNetworkData) {
             if (info.getChildren().contains(location)) return info;
             if (info.getController().equals(location)) return info;
         }
-        return null;
+
+        toDispose.forEach(NetworkInfo::dispose);
+        return re;
     }
 
     public NetworkInfo refreshNetwork(Location controller) {
