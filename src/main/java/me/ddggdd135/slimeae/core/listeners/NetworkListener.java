@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.core.listeners;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
@@ -15,7 +14,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,26 +28,26 @@ public class NetworkListener implements Listener {
         SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().BannedScanSet.remove(e.getBlockPlaced().getLocation());
-        if (e.getSlimefunItem() instanceof IMEObject) {
-            SlimeAEPlugin.getNetworkData().AllNetworkBlocks.add(e.getBlockPlaced().getLocation());
+        if (e.getSlimefunItem() instanceof IMEObject IMEObject) {
+            SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(e.getBlockPlaced().getLocation(), IMEObject);
         }
 
-        if (e.getSlimefunItem() instanceof IMEController) {
-            SlimeAEPlugin.getNetworkData().AllControllers.add(e.getBlockPlaced().getLocation());
+        if (e.getSlimefunItem() instanceof IMEController IMEController) {
+            SlimeAEPlugin.getNetworkData().AllControllers.put(e.getBlockPlaced().getLocation(), IMEController);
         }
 
-        if (e.getSlimefunItem() instanceof IMEStorageObject) {
-            SlimeAEPlugin.getNetworkData().AllStorageObjects.add(e.getBlockPlaced().getLocation());
+        if (e.getSlimefunItem() instanceof IMEStorageObject IMEStorageObject) {
+            SlimeAEPlugin.getNetworkData().AllStorageObjects.put(e.getBlockPlaced().getLocation(), IMEStorageObject);
         }
 
-        if (e.getSlimefunItem() instanceof IMECraftHolder) {
-            SlimeAEPlugin.getNetworkData().AllCraftHolders.add(e.getBlockPlaced().getLocation());
+        if (e.getSlimefunItem() instanceof IMECraftHolder IMECraftHolder) {
+            SlimeAEPlugin.getNetworkData().AllCraftHolders.put(e.getBlockPlaced().getLocation(), IMECraftHolder);
         }
         Block block = e.getBlockPlaced();
         Set<NetworkInfo> networkInfos = new HashSet<>();
         for (BlockFace blockFace : Valid_Faces) {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
-            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.contains(testLocation)) {
+            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) {
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(testLocation);
                 if (info != null)
                     networkInfos.add(info);
@@ -73,6 +71,14 @@ public class NetworkListener implements Listener {
         SlimeAEPlugin.getNetworkData().AllControllers.remove(e.getBlock().getLocation());
         SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlock().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlock().getLocation());
+
+
+        SlimeAEPlugin.getNetworkData().BannedScanSet.add(e.getBlock().getLocation());
+        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
+        if (networkInfo != null) {
+            networkInfo.getChildren().clear();
+            SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
+        }
         SlimeAEPlugin.getNetworkData().BannedScanSet.remove(e.getBlock().getLocation());
     }
 }

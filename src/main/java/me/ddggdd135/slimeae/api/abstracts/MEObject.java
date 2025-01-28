@@ -30,4 +30,7 @@ public class MEObject extends SlimefunItem implements IMEObject {
 
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

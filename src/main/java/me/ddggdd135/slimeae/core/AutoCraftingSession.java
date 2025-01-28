@@ -189,7 +189,7 @@ public class AutoCraftingSession {
                 .filter(x -> x.getValue().contains(next.getKey()))
                 .map(Map.Entry::getKey)
                 .toArray(Location[]::new);
-        int allocated = 0;
+
         IStorage networkStorage = info.getStorage();
         if (!networkStorage.contains(ItemUtils.createRequests(
                         ItemUtils.getAmounts(next.getKey().getInput())))
@@ -205,15 +205,14 @@ public class AutoCraftingSession {
             }
         }
         for (Location location : locations) {
-            IMECraftHolder holder = (IMECraftHolder)
-                    SlimefunItem.getById(StorageCacheUtils.getBlock(location).getSfId());
-            if (!Arrays.stream(holder.getSupportedRecipes(location.getBlock())).anyMatch(x -> x.equals(next.getKey())))
+            IMECraftHolder holder = SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+            if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(next.getKey())))
                 continue;
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
-                if (allocated > maxDevices) return;
+                if (running > maxDevices) return;
                 if (doCraft
                         && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
@@ -232,7 +231,6 @@ public class AutoCraftingSession {
                     itemCache.addItem(finished.getOutput());
                     running--;
                 }
-                allocated++;
             }
         }
 

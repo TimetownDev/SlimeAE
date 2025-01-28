@@ -179,4 +179,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
     @Override
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {}
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

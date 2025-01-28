@@ -1,15 +1,14 @@
 package me.ddggdd135.slimeae.core;
 
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import it.unimi.dsi.fastutil.ints.IntComparator;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -26,11 +25,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import static me.ddggdd135.slimeae.utils.ComparatorUtils.AUTO_CRAFTING_SESSION_COMPARATOR;
+import static me.ddggdd135.slimeae.utils.ComparatorUtils.LOCATION_COMPARATOR;
+
 public class NetworkInfo implements IDisposable {
     private Location controller;
     private Set<Location> children = new HashSet<>();
     private Set<Location> craftingHolders = new HashSet<>();
-    private Map<Location, Set<CraftingRecipe>> recipeMap = new HashMap<>();
+    private Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private Set<AutoCraftingSession> craftingSessions = new HashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");

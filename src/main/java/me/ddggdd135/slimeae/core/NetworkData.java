@@ -6,11 +6,13 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+
 import me.ddggdd135.slimeae.api.StorageCollection;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
-import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
-import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 
@@ -18,22 +20,23 @@ import javax.annotation.Nullable;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
-    public final Set<Location> AllNetworkBlocks = new HashSet<>();
-    public final Set<Location> AllControllers = new HashSet<>();
-    public final Set<Location> AllStorageObjects = new HashSet<>();
-    public final Set<Location> AllCraftHolders = new HashSet<>();
+    public final Map<Location, IMEObject> AllNetworkBlocks = new ConcurrentHashMap<>();
+    public final Map<Location, IMEController> AllControllers = new ConcurrentHashMap<>();
+    public final Map<Location, IMEStorageObject> AllStorageObjects = new ConcurrentHashMap<>();
+    public final Map<Location, IMECraftHolder> AllCraftHolders = new ConcurrentHashMap<>();
     public final Set<Location> BannedScanSet = new HashSet<>();
 
     @Nullable
     public NetworkInfo getNetworkInfo(Location location) {
         for (NetworkInfo info : AllNetworkData) {
             if (info.getChildren().contains(location)) return info;
+            if (info.getController().equals(location)) return info;
         }
         return null;
     }
 
     public NetworkInfo refreshNetwork(Location controller) {
-        if (!AllControllers.contains(controller)) return null;
+        if (!AllControllers.containsKey(controller)) return null;
         NetworkInfo info = getNetworkInfo(controller);
         if (info == null) {
             info = new NetworkInfo(controller);
@@ -42,7 +45,7 @@ public class NetworkData {
         if (info.getChildren().size() == 1 || info.getChildren().isEmpty()) {
             Set<Location> children = NetworkUtils.scan(controller.getBlock());
             for (Location location : children) {
-                if (AllControllers.contains(location)
+                if (AllControllers.containsKey(location)
                         && !location.equals(controller)) {
                     info.dispose();
                     return null;
@@ -53,28 +56,24 @@ public class NetworkData {
             info.getChildren().addAll(children);
         }
 
+        info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
+
         StorageCollection networkStorage = new StorageCollection();
         for (Location location : info.getChildren()) {
-            if (!AllStorageObjects.contains(location)) continue;
-            SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
-            SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-            if (slimefunItem instanceof IMEStorageObject IMEStorageObject) {
-                IStorage storage = IMEStorageObject.getStorage(location.getBlock());
-                if (storage != null) networkStorage.addStorage(storage);
-            }
+            if (!AllStorageObjects.containsKey(location)) continue;
+            IMEStorageObject slimefunItem = AllStorageObjects.get(location);
+            IStorage storage = slimefunItem.getStorage(location.getBlock());
+            if (storage != null) networkStorage.addStorage(storage);
         }
         info.setStorage(networkStorage);
 
         info.getCraftingHolders().clear();
         for (Location location : info.getChildren()) {
-            if (!AllCraftHolders.contains(location)) continue;
-            SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
-            SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-            if (slimefunItem instanceof IMECraftHolder IMECraftHolder) {
-                info.getCraftingHolders().add(location);
-                info.getRecipeMap()
-                        .put(location, new HashSet<>(List.of(IMECraftHolder.getSupportedRecipes(location.getBlock()))));
-            }
+            if (!AllCraftHolders.containsKey(location)) continue;
+            IMECraftHolder slimefunItem = AllCraftHolders.get(location);
+            info.getCraftingHolders().add(location);
+            info.getRecipeMap()
+                    .put(location, new HashSet<>(List.of(slimefunItem.getSupportedRecipes(location.getBlock()))));
         }
 
 

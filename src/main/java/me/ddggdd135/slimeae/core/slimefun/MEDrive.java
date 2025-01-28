@@ -139,4 +139,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             });
         }
     }
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

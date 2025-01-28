@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae.api;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
@@ -16,7 +17,7 @@ import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
-    private static final Map<UUID, MEStorageCellCache> cache = new HashMap<>();
+    private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
     private final Map<ItemStack, Integer> storages;
     private int stored;
     private final int size;

@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -29,19 +28,17 @@ public class MEController extends TickingBlock implements IMEController {
 
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        SlimeAEPlugin.getNetworkData().AllControllers.add(block.getLocation());
-        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.add(block.getLocation());
+        SlimeAEPlugin.getNetworkData().AllControllers.put(block.getLocation(), (IMEController) item);
+        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(block.getLocation(), (IMEObject) item);
         if (SlimeAEPlugin.getSlimefunTickCount() % 4 != 0) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
         if (info == null) return;
-        NetworkInfo finalInfo = info;
         info.getChildren().forEach(x -> {
-            SlimefunBlockData blockData = StorageCacheUtils.getBlock(x);
-            ((IMEObject) SlimefunItem.getById(blockData.getSfId())).onNetworkUpdate(x.getBlock(), finalInfo);
+            IMEObject slimefunItem = SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
+            if (slimefunItem == null) return;
+            slimefunItem.onNetworkUpdate(x.getBlock(), info);
         });
 
-        if (info == null) info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (info == null) return;
         // tick autoCrafting
         Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
         for (AutoCraftingSession session : sessions) {
@@ -70,4 +67,9 @@ public class MEController extends TickingBlock implements IMEController {
 
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {
+
+    }
 }

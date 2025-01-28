@@ -24,7 +24,7 @@ public class NetworkUtils {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
             if (blocks.contains(testLocation)) continue;
             if (SlimeAEPlugin.getNetworkData().BannedScanSet.contains(testLocation)) return;
-            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.contains(testLocation)
+            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)
                     && !testLocation.getBlock().getType().isAir()) {
                 blocks.add(testLocation);
                 scan(testLocation.getBlock(), blocks);
@@ -32,20 +32,20 @@ public class NetworkUtils {
                 SlimefunBlockData blockData = StorageCacheUtils.getBlock(testLocation);
                 if (blockData == null) continue;
                 SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-                if (slimefunItem instanceof IMEObject) {
+                if (slimefunItem instanceof IMEObject IMEObject) {
                     blocks.add(testLocation);
-                    SlimeAEPlugin.getNetworkData().AllNetworkBlocks.add(testLocation);
+                    SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(testLocation, IMEObject);
 
-                    if (slimefunItem instanceof IMEController) {
-                        SlimeAEPlugin.getNetworkData().AllControllers.add(testLocation);
+                    if (slimefunItem instanceof IMEController IMEController) {
+                        SlimeAEPlugin.getNetworkData().AllControllers.put(testLocation, IMEController);
                     }
 
-                    if (slimefunItem instanceof IMEStorageObject) {
-                        SlimeAEPlugin.getNetworkData().AllStorageObjects.add(testLocation);
+                    if (slimefunItem instanceof IMEStorageObject IMEStorageObject) {
+                        SlimeAEPlugin.getNetworkData().AllStorageObjects.put(testLocation, IMEStorageObject);
                     }
 
-                    if (slimefunItem instanceof IMECraftHolder) {
-                        SlimeAEPlugin.getNetworkData().AllCraftHolders.add(testLocation);
+                    if (slimefunItem instanceof IMECraftHolder IMECraftHolder) {
+                        SlimeAEPlugin.getNetworkData().AllCraftHolders.put(testLocation, IMECraftHolder);
                     }
 
                     scan(testLocation.getBlock(), blocks);

@@ -21,7 +21,7 @@ public class AccelerationCard extends Card {
     @Override
     public void onTick(Block block, SlimefunItem item, SlimefunBlockData data) {
         // 处理普通机器
-        if (item instanceof MachineProcessHolder processorHolder) {
+        if (item instanceof MachineProcessHolder<?> processorHolder) {
             MachineOperation operation = processorHolder.getMachineProcessor().getOperation(block);
             if (operation != null && !operation.isFinished()) {
                 operation.addProgress(1);

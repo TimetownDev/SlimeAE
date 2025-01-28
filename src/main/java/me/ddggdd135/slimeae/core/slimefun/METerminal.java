@@ -329,4 +329,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             });
         }
     }
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

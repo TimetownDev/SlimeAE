@@ -79,10 +79,10 @@ public class MEExportBus extends MEBus {
     @Override
     @OverridingMethodsMustInvokeSuper
     public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation().getBlock().getLocation());
+        BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation());
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData()
-                .getNetworkInfo(data.getLocation().getBlock().getLocation());
+                .getNetworkInfo(data.getLocation());
         if (info == null) return;
         for (int slot : Setting_Slots) {
             ItemStack setting = inv.getItemInSlot(slot);

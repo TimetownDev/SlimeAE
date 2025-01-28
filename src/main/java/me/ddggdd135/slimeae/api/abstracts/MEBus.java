@@ -23,6 +23,7 @@ import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
@@ -389,4 +390,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
     }
 
     public abstract void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data);
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

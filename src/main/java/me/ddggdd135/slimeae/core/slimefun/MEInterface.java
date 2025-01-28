@@ -249,4 +249,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
     public int[] getCardSlots() {
         return CARD_SLOTS;
     }
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

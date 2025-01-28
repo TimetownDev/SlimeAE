@@ -23,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class CraftingCard extends Card {
 
-    // 使用ConcurrentHashMap来存储CD信息
     private static final Map<Location, Long> cooldowns = new ConcurrentHashMap<>();
     private static int cooldownTicks;
 

@@ -30,8 +30,10 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MolecularAssembler extends TickingBlock
+        //如果不是TickingBlock的话 玩家不打开一次方块就没法自动合成 奇怪的bug
         implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
     private static final int[] BORDER_SLOTS = {
         0,
@@ -90,6 +92,16 @@ public class MolecularAssembler extends TickingBlock
 
     private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
 
+    @Override
+    public boolean isSynchronized() {
+        return false;
+    }
+
+    @Override
+    protected void tick(@NotNull Block block, @NotNull SlimefunItem slimefunItem, @NotNull SlimefunBlockData slimefunBlockData) {
+
+    }
+
     public MolecularAssembler(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this, item.getDisplayName());
@@ -97,15 +109,11 @@ public class MolecularAssembler extends TickingBlock
     }
 
     @Override
-    public boolean isSynchronized() {
-        return false;
-    }
-
-    @Override
-    protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        BlockMenu menu = slimefunBlockData.getBlockMenu();
         if (menu == null) return;
-        tickCards(block, item, data);
+        tickCards(block, SlimefunItem.getById(slimefunBlockData.getSfId()), slimefunBlockData);
         CraftingOperation operation = processor.getOperation(block);
         if (operation == null) {
             for (int slot : INPUT_SLOTS) {

@@ -4,6 +4,8 @@ import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import io.github.thebusybiscuit.slimefun4.implementation.tasks.TickerTask;
 import me.ddggdd135.slimeae.api.database.StorageCellDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -16,12 +18,16 @@ import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
+import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Logger;
+
 /**
  * SlimeAE插件的主类
+ * @author JWJUN233233
  */
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
@@ -30,6 +36,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final InfinityIntegration infinityIntegration = new InfinityIntegration();
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
+    private final NetworkTickerTask networkTicker = new NetworkTickerTask();
 
     @Override
     public void onEnable() {
@@ -73,6 +80,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
                         () -> slimefunTickCount++,
                         1,
                         Slimefun.getTickerTask().getTickRate());
+        networkTicker.start(this);
     }
 
     @Override
@@ -81,6 +89,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().removeIf(x -> x instanceof SlimefunBlockPopulator);
         }
+
+        networkTicker.setPaused(true);
+        networkTicker.halt();
 
         storageCellDataController.shutdown();
     }
@@ -136,7 +147,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         return getInstance().fluffyMachinesIntegration;
     }
 
+    @Nonnull
     public static StorageCellDataController getStorageCellDataController() {
         return getInstance().storageCellDataController;
+    }
+
+    @Nonnull
+    public static NetworkTickerTask getNetworkTicker() {
+        return getInstance().networkTicker;
     }
 }
