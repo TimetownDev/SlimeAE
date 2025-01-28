@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 public class SlimefunAEItemGroups {
     public static final ItemStack MAIN_ITEM_GROUP_CURSOR =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}能源应用2");
+    public static final ItemStack INFO_CURSOR = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息");
     public static final ItemStack CABLE_CURSOR =
             new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}线缆");
     public static final ItemStack MACHINE_CURSOR =
@@ -23,6 +24,8 @@ public class SlimefunAEItemGroups {
     public static final ItemStack CELL_CURSOR = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件");
     public static final MainItemGroup MAIN_ITEM_GROUP =
             new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_CURSOR);
+    public static final DummyItemGroup INFO =
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "info"), INFO_CURSOR);
     public static final DummyItemGroup CABLE =
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "cable"), CABLE_CURSOR);
     public static final DummyItemGroup MACHINE =
@@ -34,10 +37,12 @@ public class SlimefunAEItemGroups {
 
     public static void onSetup(SlimeAEPlugin plugin) {
         MAIN_ITEM_GROUP.register(plugin);
+        INFO.register(plugin);
         CABLE.register(plugin);
         MACHINE.register(plugin);
         MATERIAL.register(plugin);
         CELL.register(plugin);
+        MAIN_ITEM_GROUP.addItemGroup(INFO);
         MAIN_ITEM_GROUP.addItemGroup(CABLE);
         MAIN_ITEM_GROUP.addItemGroup(MACHINE);
         MAIN_ITEM_GROUP.addItemGroup(MATERIAL);

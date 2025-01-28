@@ -4,6 +4,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.skins.PlayerHead;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.skins.PlayerSkin;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.version.Version;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -12,11 +14,32 @@ import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import net.Zrips.CMILib.CMILib;
+import net.Zrips.CMILib.Container.CMIPlayer;
+import net.Zrips.CMILib.Items.CMIAsyncHead;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
 public class SlimefunAEItems {
+    // INFO
+    public static final SlimefunItemStack INFO = new SlimefunItemStack(
+            "AE_INFO",
+            new AdvancedCustomItemStack(Material.PAPER),
+            "&e信息",
+            "",
+            "&e版本 " + SlimeAEPlugin.getInstance().getPluginVersion()
+    );
+    public static final SlimefunItemStack CONTRIBUTOR1 = new SlimefunItemStack(
+            "AE_CONTRIBUTOR1",
+            "85fffd0a33794006c5bacfc3082e70d59e96153f247ea3f787b559004515a02", "&e开发者 &bJWJUN233233");;
+    public static final SlimefunItemStack DEBUGGER1 = new SlimefunItemStack(
+            "AE_DEBUGGER1",
+            "3271b1c6094a5837ff3d6d1477992d5f0f74d9247f188a4ef9f5aa0454fe43e3", "&e测试者 &cZombies2333");;
+
     // CABLE
     public static final SlimefunItemStack ME_GLASS_CABLE = new SlimefunItemStack(
             "ME_GLASS_CABLE",
@@ -275,6 +298,11 @@ public class SlimefunAEItems {
                     "{#33ccf3}编码样板"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
+        // Infos
+
+        new SlimefunItem(SlimefunAEItemGroups.INFO, INFO, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.INFO, CONTRIBUTOR1, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.INFO, DEBUGGER1, RecipeType.NULL, new ItemStack[0]).register(plugin);
         // Cables
 
         ItemUtils.setRecipeOutput(
