@@ -4,20 +4,16 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.interfaces.IMEController;
-import me.ddggdd135.slimeae.api.interfaces.IMEObject;
-import me.ddggdd135.slimeae.core.AutoCraftingSession;
-import me.ddggdd135.slimeae.core.NetworkInfo;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.scheduler.BukkitScheduler;
-
-import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
+import javax.annotation.Nonnull;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.interfaces.IMEController;
+import me.ddggdd135.slimeae.core.NetworkInfo;
+import org.bukkit.scheduler.BukkitScheduler;
 
-public class NetworkCheckTask implements Runnable{
+public class NetworkCheckTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
     private boolean running = false;
@@ -68,10 +64,7 @@ public class NetworkCheckTask implements Runnable{
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()
                     .getLogger()
-                    .log(
-                            Level.SEVERE,
-                            x,
-                            () -> "An Exception was caught while checking the MEControllers for SlimeAE");
+                    .log(Level.SEVERE, x, () -> "An Exception was caught while checking the MEControllers for SlimeAE");
         } finally {
             reset();
         }

@@ -82,8 +82,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
     }
 
     @Override
-    @Nullable
-    public IStorage getStorage(Block block) {
+    @Nullable public IStorage getStorage(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         return new IStorage() {
             @Override

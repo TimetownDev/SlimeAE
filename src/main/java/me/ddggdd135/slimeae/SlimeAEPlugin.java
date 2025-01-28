@@ -167,10 +167,12 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     public static NetworkTickerTask getNetworkTicker() {
         return getInstance().networkTicker;
     }
+
     @Nonnull
     public static NetworkCheckTask getNetworkChecker() {
         return getInstance().networkChecker;
     }
+
     @Nonnull
     public static NetworkRefreshTask getNetworkRefresher() {
         return getInstance().networkRefresher;

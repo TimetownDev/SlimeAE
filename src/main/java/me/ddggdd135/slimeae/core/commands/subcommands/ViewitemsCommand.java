@@ -1,27 +1,27 @@
 package me.ddggdd135.slimeae.core.commands.subcommands;
 
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.NUMERICAL_SORT;
+
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.*;
+import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.SubCommand;
-import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.METerminal;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -30,18 +30,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.IntStream;
-
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.NUMERICAL_SORT;
-
 public class ViewitemsCommand extends SubCommand {
     private final Map<UUID, String> filterCache = new HashMap<>();
     private final Map<UUID, Integer> sortCache = new HashMap<>();
     private final Map<UUID, Integer> pageCache = new HashMap<>();
+
     @Override
     @Nonnull
     public String getName() {
@@ -88,7 +81,7 @@ public class ViewitemsCommand extends SubCommand {
             sortCache.put(data.getUuid(), 0);
             pageCache.put(data.getUuid(), 0);
 
-            //------接下来是抄的METerminal的屎山代码------
+            // ------接下来是抄的METerminal的屎山代码------
             AEMenu menu = new AEMenu("&e存储元件 " + data.getUuid().toString());
             menu.setPlayerInventoryClickable(true);
             menu.setEmptySlotsClickable(true);
@@ -158,19 +151,20 @@ public class ViewitemsCommand extends SubCommand {
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
                                 && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
-                            ItemStack template = ItemUtils.getDisplayItem(itemStack).clone();
+                            ItemStack template =
+                                    ItemUtils.getDisplayItem(itemStack).clone();
                             template.setAmount(template.getMaxStackSize());
                             if (clickAction.isShiftClicked()
                                     && InvUtils.fits(
-                                    playerInventory,
-                                    template,
-                                    IntStream.range(0, 36).toArray())) {
+                                            playerInventory,
+                                            template,
+                                            IntStream.range(0, 36).toArray())) {
                                 playerInventory.addItem(
                                         data.tryTakeItem(new ItemRequest(template, template.getMaxStackSize())));
                             } else if (!clickAction.isShiftClicked()
-                                    && cursor.getType().isAir()
+                                            && cursor.getType().isAir()
                                     || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
-                                    && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
+                                            && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
                                 ItemStack[] gotten = data.tryTakeItem(new ItemRequest(template, 1));
                                 if (gotten.length != 0) {
                                     ItemStack newCursor = gotten[0];
@@ -199,8 +193,7 @@ public class ViewitemsCommand extends SubCommand {
     }
 
     @Override
-    @Nullable
-    public List<String> onTabComplete(
+    @Nullable public List<String> onTabComplete(
             @Nonnull CommandSender commandSender, @Nonnull Command command, @Nonnull String s, @Nonnull String[] args) {
         return List.of();
     }
@@ -261,24 +254,26 @@ public class ViewitemsCommand extends SubCommand {
             menu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, entry.getValue()));
         }
     }
+
     private void createInputThread(AEMenu menu, MEStorageCellCache data) {
         new Thread(() -> {
-            while (true) {
-                try {
-                    if (menu.getInventory().getViewers().isEmpty()) {
-                        return;
+                    while (true) {
+                        try {
+                            if (menu.getInventory().getViewers().isEmpty()) {
+                                return;
+                            }
+                            ItemStack itemStack = menu.getItemInSlot(getInputSlot());
+                            if (itemStack != null && !itemStack.getType().isAir()) {
+                                data.pushItem(itemStack);
+                                updateGui(menu, data);
+                            }
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            return;
+                        }
                     }
-                    ItemStack itemStack = menu.getItemInSlot(getInputSlot());
-                    if (itemStack != null && !itemStack.getType().isAir()) {
-                        data.pushItem(itemStack);
-                        updateGui(menu, data);
-                    }
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
-        }).start();
+                })
+                .start();
     }
 
     private int[] getBackgroundSlots() {
@@ -287,12 +282,12 @@ public class ViewitemsCommand extends SubCommand {
 
     private int[] getDisplaySlots() {
         return new int[] {
-                0, 1, 2, 3, 4, 5, 6, 7,
-                9, 10, 11, 12, 13, 14, 15, 16,
-                18, 19, 20, 21, 22, 23, 24, 25,
-                27, 28, 29, 30, 31, 32, 33, 34,
-                36, 37, 38, 39, 40, 41, 42, 43,
-                45, 46, 47, 48, 49, 50, 51, 52
+            0, 1, 2, 3, 4, 5, 6, 7,
+            9, 10, 11, 12, 13, 14, 15, 16,
+            18, 19, 20, 21, 22, 23, 24, 25,
+            27, 28, 29, 30, 31, 32, 33, 34,
+            36, 37, 38, 39, 40, 41, 42, 43,
+            45, 46, 47, 48, 49, 50, 51, 52
         };
     }
 

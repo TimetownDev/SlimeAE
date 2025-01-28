@@ -1,16 +1,15 @@
 package me.ddggdd135.slimeae.tasks;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import javax.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-
-public class NetworkRefreshTask implements Runnable{
+public class NetworkRefreshTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
     private boolean running = false;
@@ -53,10 +52,7 @@ public class NetworkRefreshTask implements Runnable{
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()
                     .getLogger()
-                    .log(
-                            Level.SEVERE,
-                            x,
-                            () -> "An Exception was caught while refresh Networks for SlimeAE");
+                    .log(Level.SEVERE, x, () -> "An Exception was caught while refresh Networks for SlimeAE");
         } finally {
             reset();
         }

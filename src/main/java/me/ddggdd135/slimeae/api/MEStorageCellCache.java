@@ -61,8 +61,7 @@ public class MEStorageCellCache implements IStorage {
         return SlimeAEPlugin.getStorageCellDataController().loadData(itemStack);
     }
 
-    @Nullable
-    public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {
+    @Nullable public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {
         return cache.getOrDefault(uuid, null);
     }
 
