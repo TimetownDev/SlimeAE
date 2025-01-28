@@ -29,7 +29,6 @@ public class NetworkUtils {
             } else {
                 SlimefunBlockData blockData = StorageCacheUtils.getBlock(testLocation);
                 if (blockData == null) {
-                    SlimeAEPlugin.getNetworkData().BannedScanSet.add(testLocation);
                     continue;
                 }
                 SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());

@@ -26,13 +26,18 @@ public class MEController extends TickingBlock implements IMEController {
         SlimeAEPlugin.getNetworkData().AllControllers.put(block.getLocation(), (IMEController) item);
         SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(block.getLocation(), (IMEObject) item);
         if (SlimeAEPlugin.getSlimefunTickCount() % 4 != 0) return;
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        if (info == null) {
+            info = SlimeAEPlugin.getNetworkData().refreshNetwork(block.getLocation());
+        }
+
         if (info == null) return;
+        NetworkInfo finalInfo = info;
         info.getChildren().forEach(x -> {
             IMEObject slimefunItem =
                     SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
             if (slimefunItem == null) return;
-            slimefunItem.onNetworkUpdate(x.getBlock(), info);
+            slimefunItem.onNetworkUpdate(x.getBlock(), finalInfo);
         });
     }
 
