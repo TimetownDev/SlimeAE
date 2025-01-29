@@ -2,6 +2,8 @@ package me.ddggdd135.slimeae.api;
 
 import java.util.*;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +21,8 @@ public class StorageCollection implements IStorage {
         this.notIncluded = new HashSet<>();
     }
 
-    public void addStorage(@Nonnull IStorage storage) {
+    public void addStorage(@Nullable IStorage storage) {
+        if (storage == null) return;
         storages.add(storage);
         notIncluded.clear();
     }

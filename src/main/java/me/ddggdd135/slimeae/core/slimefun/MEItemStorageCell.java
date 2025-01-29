@@ -52,7 +52,8 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         } else return meItemStorageCell.getSize();
     }
 
-    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+    @Nullable
+    public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
         if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
             return new MEStorageCellCache(itemStack);
