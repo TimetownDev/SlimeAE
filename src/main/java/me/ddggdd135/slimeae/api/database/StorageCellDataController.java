@@ -123,6 +123,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
             });
         }
     }
+
     public void cancelWriteTask(MEStorageCellCache data) {
         scheduledWriteTasks.remove(data);
     }

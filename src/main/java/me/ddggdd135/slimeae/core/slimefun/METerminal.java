@@ -48,8 +48,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     public static final Comparator<Map.Entry<ItemStack, Integer>> NUMERICAL_SORT = Map.Entry.comparingByValue();
     public static final Comparator<Map.Entry<ItemStack, Integer>> MATERIAL_SORT = Comparator.comparing(
-            itemStackIntegerEntry -> itemStackIntegerEntry.getKey().getType().ordinal(),
-            Integer::compare);
+            itemStackIntegerEntry -> itemStackIntegerEntry.getKey().getType().ordinal(), Integer::compare);
     public static final String PAGE_KEY = "page";
     public static final String SORT_KEY = "sort";
     public static final String FILTER_KEY = "filter";
@@ -181,17 +180,15 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 if (itemType.startsWith(filter)) {
                     return false;
                 }
-                String name =
-                        CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                String name = CMIChatColor.stripColor(
+                        ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
                 return !name.contains(filter);
             });
         }
 
-        if (storage instanceof CreativeItemIntegerMap)
-            items.sort(MATERIAL_SORT);
-        else
-            items.sort(getSort(block));
+        if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);
+        else items.sort(getSort(block));
 
         // 计算分页
         int page = getPage(block);

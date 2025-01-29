@@ -52,10 +52,10 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         } else return meItemStorageCell.getSize();
     }
 
-    @Nullable
-    public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
         if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return new MEStorageCellCache(itemStack);
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
+            return new MEStorageCellCache(itemStack);
         return MEStorageCellCache.getMEStorageCellCache(itemStack);
     }
 
@@ -90,8 +90,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
                 break;
             }
             lines++;
-            lores.add(CMIChatColor.translate("&e" + ItemUtils.getItemName(entry.getKey()) + " - "
-                    + entry.getValue()));
+            lores.add(CMIChatColor.translate("&e" + ItemUtils.getItemName(entry.getKey()) + " - " + entry.getValue()));
         }
         itemStack.setLore(lores);
     }

@@ -1,5 +1,7 @@
 package me.ddggdd135.slimeae.core.commands.subcommands;
 
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.*;
+
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
@@ -27,8 +29,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.*;
 
 public class ViewitemsCommand extends SubCommand {
     private final Map<UUID, String> filterCache = new HashMap<>();
@@ -212,17 +212,15 @@ public class ViewitemsCommand extends SubCommand {
                 if (itemType.startsWith(filter)) {
                     return false;
                 }
-                String name =
-                        CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                String name = CMIChatColor.stripColor(
+                        ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
                 return !name.contains(filter);
             });
         }
 
-        if (storage instanceof CreativeItemIntegerMap)
-            items.sort(MATERIAL_SORT);
-        else
-            items.sort(METerminal.int2Sort(sortCache.get(data.getUuid())));
+        if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);
+        else items.sort(METerminal.int2Sort(sortCache.get(data.getUuid())));
 
         // 计算分页
         int page = pageCache.get(data.getUuid());
