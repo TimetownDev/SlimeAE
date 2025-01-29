@@ -23,6 +23,7 @@ import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.CreativeItemIntegerMap;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -46,6 +47,9 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             Collator.getInstance(Locale.CHINA)::compare);
 
     public static final Comparator<Map.Entry<ItemStack, Integer>> NUMERICAL_SORT = Map.Entry.comparingByValue();
+    public static final Comparator<Map.Entry<ItemStack, Integer>> MATERIAL_SORT = Comparator.comparing(
+            itemStackIntegerEntry -> itemStackIntegerEntry.getKey().getType().ordinal(),
+            Integer::compare);
     public static final String PAGE_KEY = "page";
     public static final String SORT_KEY = "sort";
     public static final String FILTER_KEY = "filter";
@@ -128,7 +132,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     }
 
     public void setSort(Block block, int value) {
-        if (value < 0 || value > 1) {
+        if (value < 0 || value > 2) {
             StorageCacheUtils.setData(block.getLocation(), SORT_KEY, "0");
             return;
         }
@@ -154,13 +158,14 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
 
-        // 清空显示槽
-        for (int slot : getDisplaySlots()) {
-            blockMenu.replaceExistingItem(slot, MenuItems.Empty);
-        }
-
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (info == null) return;
+        if (info == null) {
+            // 清空显示槽
+            for (int slot : getDisplaySlots()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+            }
+            return;
+        }
 
         IStorage networkStorage = info.getStorage();
         Map<ItemStack, Integer> storage = networkStorage.getStorage();
@@ -177,15 +182,16 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                     return false;
                 }
                 String name =
-                        ChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                        CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
-                if (name == null) return true;
                 return !name.contains(filter);
             });
         }
 
-        // 对整个列表进行排序
-        items.sort(getSort(block));
+        if (storage instanceof CreativeItemIntegerMap)
+            items.sort(MATERIAL_SORT);
+        else
+            items.sort(getSort(block));
 
         // 计算分页
         int page = getPage(block);
@@ -197,14 +203,22 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         // 显示当前页的物品
         int startIndex = page * getDisplaySlots().length;
-        int endIndex = Math.min(startIndex + getDisplaySlots().length, items.size());
+        int endIndex = startIndex + getDisplaySlots().length;
 
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
+            int slot = getDisplaySlots()[i];
+            if (i + startIndex >= items.size()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+                continue;
+            }
             Map.Entry<ItemStack, Integer> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
-            if (itemStack == null || itemStack.getType().isAir()) continue;
 
-            int slot = getDisplaySlots()[i];
+            if (itemStack == null || itemStack.getType().isAir()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+                continue;
+            }
+
             blockMenu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, entry.getValue()));
         }
     }
@@ -251,9 +265,12 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         menu.replaceExistingItem(getChangeSort(), MenuItems.CHANGE_SORT_STACK);
         menu.addMenuClickHandler(getChangeSort(), (player, i, cursor, clickAction) -> {
-            Comparator<Map.Entry<ItemStack, Integer>> sort = getSort(block);
-            if (sort == ALPHABETICAL_SORT) setSort(block, 1);
-            if (sort == NUMERICAL_SORT) setSort(block, 0);
+            String value = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
+            if (value == null) {
+                setSort(block, 0);
+                return false;
+            }
+            setSort(block, Integer.parseInt(value) + 1);
             return false;
         });
 
@@ -333,6 +350,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public static Comparator<Map.Entry<ItemStack, Integer>> int2Sort(int id) {
         if (id == 0) return ALPHABETICAL_SORT;
         if (id == 1) return NUMERICAL_SORT;
+        if (id == 2) return MATERIAL_SORT;
         return ALPHABETICAL_SORT;
     }
 }

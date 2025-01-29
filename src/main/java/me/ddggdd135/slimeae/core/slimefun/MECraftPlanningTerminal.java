@@ -59,13 +59,8 @@ public class MECraftPlanningTerminal extends METerminal {
             CraftingRecipe recipe = recipes[i + page * getDisplaySlots().length];
             if (itemStack == null || itemStack.getType().isAir()) continue;
             int slot = getDisplaySlots()[i];
-            ItemStack result = itemStack.clone();
+            ItemStack result = ItemUtils.createDisplayItem(itemStack, 1, false);
             ItemMeta meta = result.getItemMeta();
-            meta.getPersistentDataContainer()
-                    .set(
-                            ItemUtils.ITEM_STORAGE_KEY,
-                            PersistentDataType.STRING,
-                            DataUtils.itemStack2String(itemStack.asOne()));
             meta.setLore(List.of(CMIChatColor.translate("  &e可合成")));
             result.setItemMeta(meta);
             blockMenu.replaceExistingItem(slot, result);

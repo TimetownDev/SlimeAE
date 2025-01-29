@@ -1,8 +1,5 @@
 package me.ddggdd135.slimeae.core.commands.subcommands;
 
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.NUMERICAL_SORT;
-
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
@@ -13,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.api.CreativeItemIntegerMap;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.SubCommand;
@@ -29,6 +27,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import static me.ddggdd135.slimeae.core.slimefun.METerminal.*;
 
 public class ViewitemsCommand extends SubCommand {
     private final Map<UUID, String> filterCache = new HashMap<>();
@@ -199,11 +199,6 @@ public class ViewitemsCommand extends SubCommand {
     }
 
     private void updateGui(AEMenu menu, MEStorageCellCache data) {
-        // 清空显示槽
-        for (int slot : getDisplaySlots()) {
-            menu.replaceExistingItem(slot, MenuItems.Empty);
-        }
-
         Map<ItemStack, Integer> storage = data.getStorage();
 
         // 获取过滤器
@@ -218,15 +213,16 @@ public class ViewitemsCommand extends SubCommand {
                     return false;
                 }
                 String name =
-                        ChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+                        CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
-                if (name == null) return true;
                 return !name.contains(filter);
             });
         }
 
-        // 对整个列表进行排序
-        items.sort(METerminal.int2Sort(sortCache.get(data.getUuid())));
+        if (storage instanceof CreativeItemIntegerMap)
+            items.sort(MATERIAL_SORT);
+        else
+            items.sort(METerminal.int2Sort(sortCache.get(data.getUuid())));
 
         // 计算分页
         int page = pageCache.get(data.getUuid());
@@ -246,11 +242,19 @@ public class ViewitemsCommand extends SubCommand {
         int endIndex = Math.min(startIndex + getDisplaySlots().length, items.size());
 
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
+            int slot = getDisplaySlots()[i];
+            if (i + startIndex >= items.size()) {
+                menu.replaceExistingItem(slot, MenuItems.Empty);
+                continue;
+            }
             Map.Entry<ItemStack, Integer> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
-            if (itemStack == null || itemStack.getType().isAir()) continue;
 
-            int slot = getDisplaySlots()[i];
+            if (itemStack == null || itemStack.getType().isAir()) {
+                menu.replaceExistingItem(slot, MenuItems.Empty);
+                continue;
+            }
+
             menu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, entry.getValue()));
         }
     }

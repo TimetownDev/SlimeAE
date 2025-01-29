@@ -18,6 +18,7 @@ import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTContainer;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -55,8 +56,7 @@ import org.bukkit.persistence.PersistentDataType;
  * 提供了一系列处理物品堆、存储和显示的实用方法
  */
 public class ItemUtils {
-    public static final NamespacedKey ITEM_STORAGE_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "item_storage");
-
+    public static final String ITEM_STORAGE = "item_storage";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -698,31 +698,29 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount, boolean addLore) {
-        ItemStack result = itemStack.clone();
-        ItemMeta meta = result.getItemMeta();
-        meta.getPersistentDataContainer()
-                .set(
-                        ITEM_STORAGE_KEY,
-                        PersistentDataType.STRING,
-                        DataUtils.itemStack2String(new ItemStack(itemStack.asOne())));
+        ItemStack result = new ItemStack(itemStack.getType());
+        ItemMeta meta = itemStack.getItemMeta();
         result.setAmount(Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         if (addLore) {
             List<String> lore = meta.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
-            lore.add(CMIChatColor.translate("{#Bright_Sun>}物品数量 " + amount + "{#Carrot_Orange<}"));
+            lore.add(CMIChatColor.translate("&e物品数量 " + amount));
             meta.setLore(lore);
         }
         result.setItemMeta(meta);
         return result;
     }
 
-    @Nullable public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
-        PersistentDataContainer dataContainer = itemStack.getItemMeta().getPersistentDataContainer();
-        if (!dataContainer.has(ITEM_STORAGE_KEY, PersistentDataType.STRING)) return null;
-        String string =
-                itemStack.getItemMeta().getPersistentDataContainer().get(ITEM_STORAGE_KEY, PersistentDataType.STRING);
-        ItemStack result = DataUtils.string2ItemStack(string);
+    @Nullable
+    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
+        ItemStack result = itemStack.asOne();
+        ItemMeta meta = result.getItemMeta();
+        List<String> lore = meta.getLore();
+        lore.remove(lore.size() - 1);
+        lore.remove(lore.size() - 1);
+        meta.setLore(lore);
+        result.setItemMeta(meta);
         return result;
     }
 
