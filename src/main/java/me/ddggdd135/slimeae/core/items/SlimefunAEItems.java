@@ -30,7 +30,8 @@ public class SlimefunAEItems {
             "&e开发者 &bJWJUN233233");
     ;
     public static final SlimefunItemStack DEBUGGER1 = new SlimefunItemStack(
-            "AE_DEBUGGER1", "3271b1c6094a5837ff3d6d1477992d5f0f74d9247f188a4ef9f5aa0454fe43e3", "&e测试者 &cZombies2333");
+            "AE_DEBUGGER1", "3271b1c6094a5837ff3d6d1477992d5f0f74d9247f188a4ef9f5aa0454fe43e3",
+            "&e测试者 &cZombie_2333");
     ;
 
     // CABLE

@@ -12,6 +12,6 @@ SlimeAE是一个Slimefun附属插件，可以创建一个复杂的物品存储�
 
 ## 感谢
 
-感谢 Zombies2333 帮忙测试并完善插件。
+感谢 Zombie_2333 帮忙测试并完善插件。
 
 感谢 **myallworld.top** 的服主提供的测试环境。
