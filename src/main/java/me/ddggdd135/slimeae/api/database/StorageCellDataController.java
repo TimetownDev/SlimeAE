@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
@@ -35,6 +36,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     @Override
     public void update(MEStorageCellCache data) {
+        cancelWriteTask(data);
         delete(data);
 
         for (Map.Entry<ItemStack, Integer> entry : data.getStorage().entrySet()) {
@@ -55,6 +57,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     }
 
     public void delete(MEStorageCellCache data) {
+        cancelWriteTask(data);
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + data.getUuid() + "';");
     }
 
@@ -68,6 +71,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     }
 
     public void updateAsync(MEStorageCellCache data) {
+        cancelWriteTask(data);
         submitWriteTask(data, () -> {
             update(data);
         });
@@ -80,6 +84,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     }
 
     public void deleteAsync(MEStorageCellCache data) {
+        cancelWriteTask(data);
         submitWriteTask(data, () -> {
             delete(data);
         });
@@ -97,24 +102,29 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         });
     }
 
-    public void submitWriteTask(MEStorageCellCache data, Runnable runnable) {
-        int tasks = 0;
+    public synchronized void submitWriteTask(MEStorageCellCache data, Runnable runnable) {
+        Queue<Runnable> queue;
         if (scheduledWriteTasks.containsKey(data)) {
-            tasks = scheduledWriteTasks.get(data);
+            queue = scheduledWriteTasks.get(data);
+            queue.add(runnable);
+        } else {
+            queue = new ConcurrentLinkedQueue<>();
+            scheduledWriteTasks.put(data, queue);
+            writeExecutor.submit(() -> {
+                Queue<Runnable> tasks = scheduledWriteTasks.remove(data);
+                while (!tasks.isEmpty()) {
+                    Runnable next = tasks.remove();
+                    try {
+                        next.run();
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, e.getMessage());
+                    }
+                }
+            });
         }
-        scheduledWriteTasks.put(data, tasks + 1);
-        this.tasks.incrementAndGet();
-        writeExecutor.submit(() -> {
-            try {
-                if (scheduledWriteTasks.containsKey(data)) runnable.run();
-            } catch (Exception e) {
-                logger.log(Level.WARNING, e.getMessage());
-            } finally {
-                int tasks1 = scheduledWriteTasks.get(data);
-                scheduledWriteTasks.put(data, tasks1 - 1);
-                this.tasks.decrementAndGet();
-            }
-        });
+    }
+    public void cancelWriteTask(MEStorageCellCache data) {
+        scheduledWriteTasks.remove(data);
     }
 
     protected long getItemHash(ItemStack itemStack) {

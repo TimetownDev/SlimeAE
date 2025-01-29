@@ -21,7 +21,6 @@ public class NetworkUtils {
         for (BlockFace blockFace : Valid_Faces) {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
             if (blocks.contains(testLocation)) continue;
-            if (SlimeAEPlugin.getNetworkData().BannedScanSet.contains(testLocation)) return;
             if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)
                     && !testLocation.getBlock().getType().isAir()) {
                 blocks.add(testLocation);
@@ -49,8 +48,6 @@ public class NetworkUtils {
                     }
 
                     scan(testLocation.getBlock(), blocks);
-                } else {
-                    SlimeAEPlugin.getNetworkData().BannedScanSet.add(testLocation);
                 }
             }
         }

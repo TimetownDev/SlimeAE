@@ -37,24 +37,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-        if (blockMenu == null) return;
-        for (int slot : MEItemStorageCell_Slots) {
-            ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (itemStack != null
-                    && !itemStack.getType().isAir()
-                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    && MEItemStorageCell.isCurrectServer(itemStack)) {
-                MEItemStorageCell.updateLore(itemStack);
-                MEItemStorageCell.saveStorage(itemStack);
-                blockMenu.markDirty();
-                Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
-            }
-        }
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Nonnull
     private BlockBreakHandler onBlockBreak() {
@@ -72,7 +55,6 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                                 && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                                 && MEItemStorageCell.isCurrectServer(itemStack)) {
                             MEItemStorageCell.updateLore(itemStack);
-                            MEItemStorageCell.saveStorage(itemStack);
                         }
                     }
                     blockMenu.dropItems(b.getLocation(), MEItemStorageCell_Slots);
@@ -127,7 +109,6 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                         && MEItemStorageCell.isCurrectServer(itemStack)) {
                     MEItemStorageCell.updateLore(itemStack);
-                    MEItemStorageCell.saveStorage(itemStack);
                 }
                 NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                 if (networkInfo == null) return true;
@@ -141,5 +122,21 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     }
 
     @Override
-    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
+        for (int slot : MEItemStorageCell_Slots) {
+            ItemStack itemStack = blockMenu.getItemInSlot(slot);
+            if (itemStack != null
+                    && !itemStack.getType().isAir()
+                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+                    && MEItemStorageCell.isCurrectServer(itemStack)) {
+                MEItemStorageCell.updateLore(itemStack);
+                blockMenu.markDirty();
+                Slimefun.getDatabaseManager()
+                        .getBlockDataController()
+                        .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
+            }
+        }
+    }
 }

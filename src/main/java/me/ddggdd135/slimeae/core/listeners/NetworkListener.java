@@ -30,7 +30,6 @@ public class NetworkListener implements Listener {
                 .AllStorageObjects
                 .remove(e.getBlockPlaced().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlockPlaced().getLocation());
-        SlimeAEPlugin.getNetworkData().BannedScanSet.remove(e.getBlockPlaced().getLocation());
         if (e.getSlimefunItem() instanceof IMEObject IMEObject) {
             SlimeAEPlugin.getNetworkData()
                     .AllNetworkBlocks
@@ -80,13 +79,11 @@ public class NetworkListener implements Listener {
         SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlock().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlock().getLocation());
 
-        SlimeAEPlugin.getNetworkData().BannedScanSet.add(e.getBlock().getLocation());
         NetworkInfo networkInfo =
                 SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
         if (networkInfo != null) {
             networkInfo.getChildren().clear();
             SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
         }
-        SlimeAEPlugin.getNetworkData().BannedScanSet.remove(e.getBlock().getLocation());
     }
 }
