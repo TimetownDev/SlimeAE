@@ -27,8 +27,7 @@ public abstract class DatabaseController<TData> {
     protected ExecutorService readExecutor;
     protected ExecutorService writeExecutor;
     protected ExecutorService callbackExecutor;
-    protected Map<TData, Integer> scheduledWriteTasks;
-    protected AtomicInteger tasks = new AtomicInteger();
+    protected Map<TData, Queue<Runnable>> scheduledWriteTasks;
     protected final Logger logger;
 
     public DatabaseController(Class<TData> clazz) {
@@ -54,13 +53,13 @@ public abstract class DatabaseController<TData> {
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
         try {
-            float totalTask = tasks.get();
-            var pendingTask = tasks.get();
+            float totalTask = scheduledWriteTasks.size();
+            var pendingTask = scheduledWriteTasks.size();
             while (pendingTask > 0) {
                 var doneTaskPercent = String.format("%.1f", (totalTask - pendingTask) / totalTask * 100);
                 logger.log(Level.INFO, "数据保存中，请稍候... 剩余 {0} 个任务 ({1}%)", new Object[] {pendingTask, doneTaskPercent});
                 TimeUnit.SECONDS.sleep(1);
-                pendingTask = tasks.get();
+                pendingTask = scheduledWriteTasks.size();
             }
 
             logger.info("数据保存完成.");
