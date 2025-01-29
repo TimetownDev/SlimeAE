@@ -102,25 +102,30 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         });
     }
 
-    public synchronized void submitWriteTask(MEStorageCellCache data, Runnable runnable) {
+    public void submitWriteTask(MEStorageCellCache data, Runnable runnable) {
         Queue<Runnable> queue;
-        if (scheduledWriteTasks.containsKey(data)) {
-            queue = scheduledWriteTasks.get(data);
-            queue.add(runnable);
-        } else {
-            queue = new ConcurrentLinkedQueue<>();
-            scheduledWriteTasks.put(data, queue);
-            writeExecutor.submit(() -> {
-                Queue<Runnable> tasks = scheduledWriteTasks.remove(data);
-                while (!tasks.isEmpty()) {
-                    Runnable next = tasks.remove();
-                    try {
-                        next.run();
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, e.getMessage());
+        synchronized(scheduledWriteTasks) {
+            if (scheduledWriteTasks.containsKey(data)) {
+                queue = scheduledWriteTasks.get(data);
+                queue.add(runnable);
+            } else {
+                queue = new ConcurrentLinkedQueue<>();
+                scheduledWriteTasks.put(data, queue);
+                writeExecutor.submit(() -> {
+                    Queue<Runnable> tasks;
+                    synchronized (scheduledWriteTasks) {
+                        tasks = scheduledWriteTasks.remove(data);
                     }
-                }
-            });
+                    while (!tasks.isEmpty()) {
+                        Runnable next = tasks.remove();
+                        try {
+                            next.run();
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, e.getMessage());
+                        }
+                    }
+                });
+            }
         }
     }
 

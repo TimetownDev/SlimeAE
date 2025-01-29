@@ -26,7 +26,7 @@ public abstract class DatabaseController<TData> {
     protected ExecutorService readExecutor;
     protected ExecutorService writeExecutor;
     protected ExecutorService callbackExecutor;
-    protected Map<TData, Queue<Runnable>> scheduledWriteTasks;
+    protected final Map<TData, Queue<Runnable>> scheduledWriteTasks;
     protected final Logger logger;
 
     public DatabaseController(Class<TData> clazz) {
