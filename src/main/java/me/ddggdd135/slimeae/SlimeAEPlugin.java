@@ -24,6 +24,7 @@ import me.ddggdd135.slimeae.integrations.InfinityIntegration;
 import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
 import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
+import net.Zrips.CMILib.Colors.CMIChatColor;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -57,7 +58,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         }
 
         getLogger().info("############################################");
-        getLogger().info("               §aSlime§dAE §f- §a粘液§dAE              ");
+        getLogger().info(CMIChatColor.translate("               &aSlime&dAE &f- &a粘液&dAE              "));
         getLogger().info(" 作者: JWJUN233233 测试: Zombie_2333,HolderSea");
         getLogger().info("############################################");
         tryUpdate();
