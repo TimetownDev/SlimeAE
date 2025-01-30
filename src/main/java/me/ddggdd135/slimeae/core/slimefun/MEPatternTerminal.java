@@ -156,7 +156,7 @@ public class MEPatternTerminal extends METerminal {
                             .filter(Objects::nonNull)
                             .filter(x -> !x.getType().isAir())
                             .toArray(ItemStack[]::new));
-            Pattern.setRecipe(toOut, recipe);
+            toOut = Pattern.setRecipe(toOut, recipe);
         } else {
             ItemStack output = null;
             for (int slot : getCraftOutputSlots()) {
@@ -181,7 +181,7 @@ public class MEPatternTerminal extends METerminal {
             }
             toOut.setAmount(1);
             in.subtract();
-            Pattern.setRecipe(toOut, recipe);
+            toOut = Pattern.setRecipe(toOut, recipe);
         }
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }

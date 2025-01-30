@@ -561,7 +561,8 @@ public class ItemUtils {
         inv.setItem(slot, item);
     }
 
-    @Nullable public static ItemStack getSettingItem(@Nonnull Inventory inv, int slot) {
+    @Nullable
+    public static ItemStack getSettingItem(@Nonnull Inventory inv, int slot) {
         ItemStack itemStack = inv.getItem(slot);
         if (itemStack == null || itemStack.getType().isAir()) return null;
         ItemStack item = itemStack.clone();
