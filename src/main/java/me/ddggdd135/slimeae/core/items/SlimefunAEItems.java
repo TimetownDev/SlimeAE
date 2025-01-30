@@ -28,10 +28,12 @@ public class SlimefunAEItems {
             "AE_CONTRIBUTOR1",
             "85fffd0a33794006c5bacfc3082e70d59e96153f247ea3f787b559004515a02",
             "&e开发者 &bJWJUN233233");
-    ;
+
     public static final SlimefunItemStack DEBUGGER1 = new SlimefunItemStack(
-            "AE_DEBUGGER1", "3271b1c6094a5837ff3d6d1477992d5f0f74d9247f188a4ef9f5aa0454fe43e3", "&e测试者 &cZombie_2333");
-    ;
+            "AE_DEBUGGER1", "6e3818350104939ea10e184c25c60193e6d409c431ea92b6af3a91a745112bbc", "&e测试者 &cZombie_2333");
+
+    public static final SlimefunItemStack DEBUGGER2 = new SlimefunItemStack(
+            "AE_DEBUGGER2", "fe85ac40d1952d4a4a8faa123fa0dd496dc080c7bf777f1eacd962cf8cd4d322", "&e测试者 &1HolderSea");
 
     // CABLE
     public static final SlimefunItemStack ME_GLASS_CABLE = new SlimefunItemStack(
@@ -296,6 +298,7 @@ public class SlimefunAEItems {
         new SlimefunItem(SlimefunAEItemGroups.INFO, INFO, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.INFO, CONTRIBUTOR1, RecipeType.NULL, new ItemStack[0]).register(plugin);
         new SlimefunItem(SlimefunAEItemGroups.INFO, DEBUGGER1, RecipeType.NULL, new ItemStack[0]).register(plugin);
+        new SlimefunItem(SlimefunAEItemGroups.INFO, DEBUGGER2, RecipeType.NULL, new ItemStack[0]).register(plugin);
         // Cables
 
         ItemUtils.setRecipeOutput(
