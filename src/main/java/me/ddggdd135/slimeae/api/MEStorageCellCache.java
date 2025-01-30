@@ -14,6 +14,7 @@ import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
@@ -24,30 +25,28 @@ public class MEStorageCellCache implements IStorage {
 
     public MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
-        NBTItem nbtItem = new NBTItem(itemStack, true);
         size = MEItemStorageCell.getSize(itemStack);
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
             storages = new CreativeItemIntegerMap();
         else {
             storages = new ConcurrentHashMap<>();
         }
-        if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
-            nbtItem.setUUID(MEItemStorageCell.UUID_KEY, UUID.randomUUID());
+        NBTItem nbtItem = new NBTItem(itemStack);
         uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
         cache.put(uuid, this);
     }
 
-    public static MEStorageCellCache getMEStorageCellCache(ItemStack itemStack) {
-        NBTItem nbtItem = new NBTItem(itemStack, true);
+    public static ResultWithItem<MEStorageCellCache> getMEStorageCellCache(ItemStack itemStack) {
+        NBTItem nbtItem = new NBTItem(itemStack);
         UUID uuid = UUID.randomUUID();
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray)) {
             nbtItem.setUUID(MEItemStorageCell.UUID_KEY, uuid);
         } else {
             uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
-            if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
+            if (getMEStorageCellCache(uuid) != null) return new ResultWithItem<>(getMEStorageCellCache(uuid), itemStack);
         }
 
-        return SlimeAEPlugin.getStorageCellDataController().loadData(itemStack);
+        return SlimeAEPlugin.getStorageCellDataController().loadData(nbtItem.getItem());
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {

@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.database;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -104,8 +105,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         return hash;
     }
 
-    public MEStorageCellCache loadData(ItemStack itemStack) {
-
+    public ResultWithItem<MEStorageCellCache> loadData(ItemStack itemStack) {
         MEStorageCellCache storageCellCache = new MEStorageCellCache(itemStack);
         Map<ItemStack, Integer> storage = storageCellCache.getSourceStorage();
         int stored = 0;
@@ -124,6 +124,6 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
         storageCellCache.updateStored(stored);
 
-        return storageCellCache;
+        return new ResultWithItem<>(storageCellCache, itemStack);
     }
 }

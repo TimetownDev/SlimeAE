@@ -14,6 +14,8 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -53,7 +55,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
                                 && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                                && MEItemStorageCell.isCurrectServer(itemStack)) {
+                                && MEItemStorageCell.isCurrentServer(itemStack)) {
                             MEItemStorageCell.updateLore(itemStack);
                         }
                     }
@@ -73,8 +75,10 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             if (itemStack != null
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    && MEItemStorageCell.isCurrectServer(itemStack)) {
-                storageCollection.addStorage(MEItemStorageCell.getStorage(itemStack));
+                    && MEItemStorageCell.isCurrentServer(itemStack)) {
+                ResultWithItem<MEStorageCellCache> result = MEItemStorageCell.getStorage(itemStack);
+                blockMenu.replaceExistingItem(slot, result.getItemStack());
+                storageCollection.addStorage(result.getResult());
             }
         }
         return storageCollection;
@@ -107,14 +111,14 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 if (itemStack != null
                         && !itemStack.getType().isAir()
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                        && MEItemStorageCell.isCurrectServer(itemStack)) {
+                        && MEItemStorageCell.isCurrentServer(itemStack)) {
                     MEItemStorageCell.updateLore(itemStack);
                 }
                 NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                 if (networkInfo == null) return true;
                 StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
                 if (itemStack != null) {
-                    storageCollection.removeStorage(MEItemStorageCell.getStorage(itemStack));
+                    storageCollection.removeStorage(MEItemStorageCell.getStorage(itemStack).getResult());
                 }
                 return true;
             });
@@ -130,7 +134,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             if (itemStack != null
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    && MEItemStorageCell.isCurrectServer(itemStack)) {
+                    && MEItemStorageCell.isCurrentServer(itemStack)) {
                 MEItemStorageCell.updateLore(itemStack);
                 blockMenu.markDirty();
                 Slimefun.getDatabaseManager()

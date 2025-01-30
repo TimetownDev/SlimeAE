@@ -12,10 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.slimeae.api.CreativeItemIntegerMap;
-import me.ddggdd135.slimeae.api.ItemRequest;
-import me.ddggdd135.slimeae.api.MEStorageCellCache;
-import me.ddggdd135.slimeae.api.SubCommand;
+import me.ddggdd135.slimeae.api.*;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.METerminal;
@@ -71,11 +68,14 @@ public class ViewitemsCommand extends SubCommand {
                 return false;
             }
 
-            MEStorageCellCache data = MEItemStorageCell.getStorage(itemStack);
-            if (data == null) {
+            ResultWithItem<MEStorageCellCache> result = MEItemStorageCell.getStorage(itemStack);
+            if (result == null) {
                 commandSender.sendMessage(CMIChatColor.translate("&e你确定你拿着存储元件？"));
                 return false;
             }
+
+            MEStorageCellCache data = result.getResult();
+            player.getInventory().setItemInMainHand(result.getItemStack());
 
             filterCache.put(data.getUuid(), "");
             sortCache.put(data.getUuid(), 0);

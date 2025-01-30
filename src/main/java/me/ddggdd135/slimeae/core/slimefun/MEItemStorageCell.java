@@ -18,8 +18,10 @@ import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * ME物品存储元件类
@@ -47,15 +49,16 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
 
     public static int getSize(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell) || !isCurrectServer(itemStack)) {
+        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell) || !isCurrentServer(itemStack)) {
             return 0;
         } else return meItemStorageCell.getSize();
     }
 
-    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+    @Nullable
+    public static ResultWithItem<MEStorageCellCache> getStorage(@Nonnull ItemStack itemStack) {
         if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
-            return new MEStorageCellCache(itemStack);
+            return new ResultWithItem<>(new MEStorageCellCache(itemStack), itemStack);
         return MEStorageCellCache.getMEStorageCellCache(itemStack);
     }
 
@@ -68,7 +71,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         //        list.addAll(ItemUtils.toNBT(getStorage(itemStack).getStorage()));
         //        nbtItem.applyNBT(itemStack);
 
-        SlimeAEPlugin.getStorageCellDataController().updateAsync(getStorage(itemStack));
+        SlimeAEPlugin.getStorageCellDataController().updateAsync(getStorage(itemStack).getResult());
     }
 
     /**
@@ -76,9 +79,11 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
      *
      * @param itemStack 存储元件物品
      */
-    public static void updateLore(@Nonnull ItemStack itemStack) {
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
-        MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
+    public static ItemStack updateLore(@Nonnull ItemStack itemStack) {
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return itemStack;
+        ResultWithItem<MEStorageCellCache> result = MEStorageCellCache.getMEStorageCellCache(itemStack);
+        MEStorageCellCache meStorageCellCache = result.getResult();
+        ItemStack toReturn = result.getItemStack();
         List<String> lores = new ArrayList<>();
         List<Map.Entry<ItemStack, Integer>> storages = meStorageCellCache.getStorage().entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
@@ -92,22 +97,27 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
             lines++;
             lores.add(CMIChatColor.translate("&e" + ItemUtils.getItemName(entry.getKey()) + " - " + entry.getValue()));
         }
-        itemStack.setLore(lores);
+        toReturn.setLore(lores);
+        return toReturn;
     }
 
     @Nonnull
     public static UUID getServerUUID(@Nonnull ItemStack itemStack) {
+        ItemMeta meta = itemStack.getItemMeta();
         NBTItem nbtItem = new NBTItem(itemStack, true);
         UUID uuid = nbtItem.getUUID(SERVER_UUID_KEY);
         if (uuid == null) {
             nbtItem.setUUID(SERVER_UUID_KEY, GuguSlimefunLib.getServerUUID());
+            itemStack.setItemMeta(meta);
             return GuguSlimefunLib.getServerUUID();
         }
+
+        itemStack.setItemMeta(meta);
 
         return uuid;
     }
 
-    public static boolean isCurrectServer(@Nonnull ItemStack itemStack) {
+    public static boolean isCurrentServer(@Nonnull ItemStack itemStack) {
         return getServerUUID(itemStack).equals(GuguSlimefunLib.getServerUUID());
     }
 }
