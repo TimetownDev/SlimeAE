@@ -1,0 +1,129 @@
+name: Bug反馈
+description: 反馈本插件的Bug或问题
+labels: ["bug"]
+assignees:
+  - JWJUN233233
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 欢迎来到 TimetownDev 的问题追踪器
+        你正在反馈 SlimeAE 出现的 Bug。
+        建议先阅读[这篇文章](https://slimefun-wiki.guizhanss.cn/How-to-report-bugs)了解如何正确地汇报Bug。
+
+        <strong><i>你必须填写标注为星号（*）的表单项</i></strong>
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 检查项目
+      description: 在汇报之前，你需要确认
+      options:
+        - label: 你使用的是从构建站下载的版本
+          required: false
+        - label: 你没有对下载的文件内容进行任何更改
+          required: true
+        - label: 你已经寻找过[已知问题列表](https://github.com/SlimefunGuguProject/Networks/issues)，且没有找到相同的问题
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: |
+        详细描述你要反馈的问题
+        提供详细的信息能让我们更快地处理问题
+      placeholder: 只说"不能用"没法让开发者定位问题。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: |
+        请详细描述如何才能复现该问题
+        如果有视频，请在此提供视频链接
+      placeholder: |
+        1. xxx
+        2. xxx
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 预期行为
+      description: |
+        你觉得应该发生什么
+        有时候，问题的原因是你误解了某个功能。
+    validations:
+      required: true
+
+  - type: input
+    id: server-log
+    attributes:
+      label: 服务器日志
+      description: |
+        请查看服务器日志中是否包含任何报错，如果有请上传至 [https://paste.guizhanss.net/](https://paste.guizhanss.net/) 并在此填入链接。
+        **不要直接在这里粘贴日志**
+      placeholder: https://paste.guizhanss.net/...
+    validations:
+      required: false
+
+  - type: input
+    id: error-report
+    attributes:
+      label: 错误报告
+      description: |
+        如果服务器日志中提到了`/plugins/Slimefun/error-reports`中的文件（即错误报告）
+        请上传至 [https://paste.guizhanss.net/](https://paste.guizhanss.net/) 并在此填入链接。
+        **不要直接在这里粘贴错误报告**
+      placeholder: https://paste.guizhanss.net/...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: server-software
+    attributes:
+      label: 服务端软件
+      description: 请选择你服务端所使用的软件
+      options:
+        - Spigot
+        - Paper
+        - Folia
+        - Purpur
+        - Airplane
+        - 其他 (请在问题描述里写明)
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: Minecraft 版本
+      description: 请填写你的 Minecraft 版本
+    validations:
+      required: true
+
+  - type: textarea
+    id: slimefun-version
+    attributes:
+      label: Slimefun版本
+      description: |
+        请填写Slimefun版本
+        (例如 v4.9-canary-08120db)
+        如果你有管理员权限，建议运行`/sf versions`指令，截图并在此上传指令输出的**所有内容**。
+    validations:
+      required: true
+
+  - type: input
+    id: version-plugin
+    attributes:
+      label: 插件版本
+      description: |
+        请填写插件版本
+        (例如 Build 1 (git x114514))
+        (例如 xxxxxx-beta)
+    validations:
+      required: true
