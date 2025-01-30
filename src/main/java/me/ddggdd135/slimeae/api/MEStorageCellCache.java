@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;

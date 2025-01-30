@@ -256,7 +256,7 @@ public class AutoCraftingSession {
             if (doCraft
                     && device.canStartCrafting(deviceBlock, next.getKey())
                     && networkStorage.contains(ItemUtils.createRequests(
-                    ItemUtils.getAmounts(next.getKey().getInput())))) {
+                            ItemUtils.getAmounts(next.getKey().getInput())))) {
                 networkStorage.tryTakeItem(ItemUtils.createRequests(
                         ItemUtils.getAmounts(next.getKey().getInput())));
                 device.startCrafting(deviceBlock, next.getKey());

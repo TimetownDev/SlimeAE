@@ -14,11 +14,9 @@ public interface IMECraftDevice extends IMEObject {
 
     boolean isFinished(@Nonnull Block block);
 
-    @Nullable
-    CraftingRecipe getFinishedCraftingRecipe(@Nonnull Block block);
+    @Nullable CraftingRecipe getFinishedCraftingRecipe(@Nonnull Block block);
 
     void finishCrafting(@Nonnull Block block);
 
     boolean isGlobal(Block block);
-    
 }

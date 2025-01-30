@@ -12,8 +12,6 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-
-import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ReflectionUtils;
 
 public abstract class DatabaseController<TData> {
@@ -108,7 +106,7 @@ public abstract class DatabaseController<TData> {
 
     public void submitWriteTask(TData data, Runnable runnable) {
         Queue<Runnable> queue;
-        synchronized(scheduledWriteTasks) {
+        synchronized (scheduledWriteTasks) {
             if (scheduledWriteTasks.containsKey(data)) {
                 queue = scheduledWriteTasks.get(data);
                 queue.add(runnable);

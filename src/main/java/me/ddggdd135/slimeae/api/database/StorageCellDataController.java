@@ -2,8 +2,6 @@ package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
@@ -92,8 +90,6 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     public void deleteAsync(MEStorageCellCache data, ItemStack itemStack) {
         submitWriteTask(data, () -> delete(data, itemStack));
     }
-
-
 
     protected long getItemHash(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir() || itemStack.getAmount() == 0) return 0;

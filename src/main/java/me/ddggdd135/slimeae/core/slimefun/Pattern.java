@@ -62,7 +62,7 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
 
         meta.setLore(CMIChatColor.translate(lore));
         itemStack.setItemMeta(meta);
-        //先clone meta 不然nbt修改后因为bug会导致名称丢失
+        // 先clone meta 不然nbt修改后因为bug会导致名称丢失
 
         NBTItem nbtItem = new NBTItem(itemStack);
         if (nbtItem.hasTag("recipe")) nbtItem.removeKey("recipe");
