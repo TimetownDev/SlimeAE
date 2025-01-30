@@ -204,6 +204,7 @@ public class AutoCraftingSession {
             } catch (Throwable ignored) {
             }
         }
+        Set<Block> globalDevices = new HashSet<>();
         for (Location location : locations) {
             IMECraftHolder holder =
                     SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
@@ -212,6 +213,9 @@ public class AutoCraftingSession {
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+                if (device.isGlobal(deviceBlock)) {
+                    continue;
+                }
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
                 if (running > maxDevices) return;
                 if (doCraft
@@ -232,6 +236,40 @@ public class AutoCraftingSession {
                     itemCache.addItem(finished.getOutput());
                     running--;
                 }
+            }
+        }
+        for (Location location : info.getRecipeMap().keySet()) {
+            IMECraftHolder holder =
+                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
+                IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
+                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+                if (device.isGlobal(deviceBlock)) {
+                    globalDevices.add(deviceBlock);
+                }
+            }
+        }
+        for (Block deviceBlock : globalDevices) {
+            IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
+                    StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+            if (running > maxDevices) return;
+            if (doCraft
+                    && device.canStartCrafting(deviceBlock, next.getKey())
+                    && networkStorage.contains(ItemUtils.createRequests(
+                    ItemUtils.getAmounts(next.getKey().getInput())))) {
+                networkStorage.tryTakeItem(ItemUtils.createRequests(
+                        ItemUtils.getAmounts(next.getKey().getInput())));
+                device.startCrafting(deviceBlock, next.getKey());
+                running++;
+                next.setValue(next.getValue() - 1);
+                if (next.getValue() == 0) doCraft = false;
+            } else if (running > 0
+                    && device.isFinished(deviceBlock)
+                    && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
+                CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                device.finishCrafting(deviceBlock);
+                itemCache.addItem(finished.getOutput());
+                running--;
             }
         }
 

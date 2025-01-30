@@ -68,7 +68,6 @@ public class NetworkListener implements Listener {
         } else {
             NetworkInfo info = networkInfos.toArray(NetworkInfo[]::new)[0];
             info.getChildren().clear();
-            SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
         }
     }
 
@@ -83,7 +82,6 @@ public class NetworkListener implements Listener {
                 SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
         if (networkInfo != null) {
             networkInfo.getChildren().clear();
-            SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
         }
     }
 }

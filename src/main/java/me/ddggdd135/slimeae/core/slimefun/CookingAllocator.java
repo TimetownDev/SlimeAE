@@ -138,4 +138,9 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
+
+    @Override
+    public boolean isGlobal(Block block) {
+        return false;
+    }
 }

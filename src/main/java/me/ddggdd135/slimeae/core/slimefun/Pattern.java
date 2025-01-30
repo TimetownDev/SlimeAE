@@ -36,7 +36,7 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
     }
 
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
-        NBTItem nbtItem = new NBTItem(itemStack, true);
+        NBTItem nbtItem = new NBTItem(itemStack);
         if (!nbtItem.hasTag("recipe", NBTType.NBTTagCompound)) return null;
         NBTCompound compound = nbtItem.getOrCreateCompound("recipe");
         return new CraftingRecipe(
@@ -45,7 +45,25 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
                 compound.getItemStackArray("output"));
     }
 
-    public static void setRecipe(@Nonnull ItemStack itemStack, @Nonnull CraftingRecipe recipe) {
+    @Nonnull
+    public static ItemStack setRecipe(@Nonnull ItemStack itemStack, @Nonnull CraftingRecipe recipe) {
+        ItemMeta meta = itemStack.getItemMeta();
+        List<String> lore = new ArrayList<>();
+        lore.add("&a输入");
+        for (ItemStack input : recipe.getInput()) {
+            if (input == null || input.getType().isAir()) continue;
+            lore.add("  &e- &f" + ItemUtils.getItemName(input) + "&f x " + input.getAmount());
+        }
+        lore.add("&e输出");
+        for (ItemStack output : recipe.getOutput()) {
+            if (output == null || output.getType().isAir()) continue;
+            lore.add("  &e- &f" + ItemUtils.getItemName(output) + "&f x " + output.getAmount());
+        }
+
+        meta.setLore(CMIChatColor.translate(lore));
+        itemStack.setItemMeta(meta);
+        //先clone meta 不然nbt修改后因为bug会导致名称丢失
+
         NBTItem nbtItem = new NBTItem(itemStack);
         if (nbtItem.hasTag("recipe")) nbtItem.removeKey("recipe");
         NBTCompound compound = nbtItem.getOrCreateCompound("recipe");
@@ -53,18 +71,6 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
         compound.setItemStackArray("input", recipe.getInput());
         compound.setItemStackArray("output", recipe.getOutput());
         nbtItem.setUUID("uuid", UUID.randomUUID());
-        nbtItem.applyNBT(itemStack);
-        List<String> lore = new ArrayList<>();
-        lore.add("&a输入");
-        for (ItemStack input : recipe.getInput()) {
-            lore.add("  &e- &f" + ItemUtils.getItemName(input) + "&f x " + input.getAmount());
-        }
-        lore.add("&e输出");
-        for (ItemStack output : recipe.getOutput()) {
-            lore.add("  &e- &f" + ItemUtils.getItemName(output) + "&f x " + output.getAmount());
-        }
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setLore(CMIChatColor.translate(lore));
-        itemStack.setItemMeta(meta);
+        return nbtItem.getItem();
     }
 }

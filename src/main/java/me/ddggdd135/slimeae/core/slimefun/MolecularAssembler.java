@@ -123,6 +123,7 @@ public class MolecularAssembler extends TickingBlock
         }
         ItemStack[] input = operation.getRecipe().getInput();
         for (int i = 0; i < input.length; i++) {
+            if (input[i] == null || input[i].getType().isAir()) continue;
             ItemUtils.setSettingItem(menu.getInventory(), INPUT_SLOTS[i], input[i]);
         }
 
@@ -272,5 +273,10 @@ public class MolecularAssembler extends TickingBlock
                 }
             }
         };
+    }
+
+    @Override
+    public boolean isGlobal(Block block) {
+        return true;
     }
 }
