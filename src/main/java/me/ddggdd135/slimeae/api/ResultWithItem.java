@@ -10,8 +10,16 @@ public class ResultWithItem<T> {
         return itemStack;
     }
 
+    public void setItemStack(ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
+
     public T getResult() {
         return result;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
     }
 
     public ResultWithItem(T result, ItemStack itemStack) {

@@ -35,7 +35,12 @@ public class MEStorageCellCache implements IStorage {
         cache.put(uuid, this);
     }
 
-    public static ResultWithItem<MEStorageCellCache> getMEStorageCellCache(ItemStack itemStack) {
+    @Nullable public static ResultWithItem<MEStorageCellCache> getMEStorageCellCache(@Nonnull ItemStack itemStack) {
+        ResultWithItem<Boolean> isCurrentServerResult = MEItemStorageCell.isCurrentServer(itemStack);
+        if (!isCurrentServerResult.getResult()) {
+            return null;
+        }
+        itemStack = isCurrentServerResult.getItemStack();
         NBTItem nbtItem = new NBTItem(itemStack);
         UUID uuid = UUID.randomUUID();
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray)) {

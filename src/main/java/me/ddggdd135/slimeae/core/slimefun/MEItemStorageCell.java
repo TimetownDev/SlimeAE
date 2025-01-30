@@ -21,7 +21,6 @@ import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * ME物品存储元件类
@@ -49,7 +48,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
 
     public static int getSize(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell) || !isCurrentServer(itemStack)) {
+        if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell)) {
             return 0;
         } else return meItemStorageCell.getSize();
     }
@@ -102,22 +101,19 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     @Nonnull
-    public static UUID getServerUUID(@Nonnull ItemStack itemStack) {
-        ItemMeta meta = itemStack.getItemMeta();
-        NBTItem nbtItem = new NBTItem(itemStack, true);
+    public static ResultWithItem<UUID> getServerUUID(@Nonnull ItemStack itemStack) {
+        NBTItem nbtItem = new NBTItem(itemStack);
         UUID uuid = nbtItem.getUUID(SERVER_UUID_KEY);
         if (uuid == null) {
             nbtItem.setUUID(SERVER_UUID_KEY, GuguSlimefunLib.getServerUUID());
-            itemStack.setItemMeta(meta);
-            return GuguSlimefunLib.getServerUUID();
+            return new ResultWithItem<>(GuguSlimefunLib.getServerUUID(), nbtItem.getItem());
         }
 
-        itemStack.setItemMeta(meta);
-
-        return uuid;
+        return new ResultWithItem<>(uuid, itemStack);
     }
 
-    public static boolean isCurrentServer(@Nonnull ItemStack itemStack) {
-        return getServerUUID(itemStack).equals(GuguSlimefunLib.getServerUUID());
+    public static ResultWithItem<Boolean> isCurrentServer(@Nonnull ItemStack itemStack) {
+        ResultWithItem<UUID> result = getServerUUID(itemStack);
+        return new ResultWithItem<>(result.getResult().equals(GuguSlimefunLib.getServerUUID()), result.getItemStack());
     }
 }
