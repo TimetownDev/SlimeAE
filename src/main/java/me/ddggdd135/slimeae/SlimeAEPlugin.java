@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.database.StorageCellDataController;
@@ -23,6 +24,7 @@ import me.ddggdd135.slimeae.integrations.InfinityIntegration;
 import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
 import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
+import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -46,6 +48,19 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onEnable() {
         instance = this;
+
+        if (!getServer().getPluginManager().isPluginEnabled("GuizhanLibPlugin")) {
+            getLogger().log(Level.SEVERE, "本插件需要 鬼斩前置库插件(GuizhanLibPlugin) 才能运行!");
+            getLogger().log(Level.SEVERE, "从此处下载: https://50l.cc/gzlib");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        getLogger().info("############################################");
+        getLogger().info("               §aSlime§dAE §f- §a粘液§dAE              ");
+        getLogger().info(" 作者: JWJUN233233 测试: Zombie_2333,HolderSea");
+        getLogger().info("############################################");
+        tryUpdate();
 
         // 保存默认配置
         saveDefaultConfig();
@@ -121,6 +136,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static SlimeAEPlugin getInstance() {
         return instance;
+    }
+
+    public void tryUpdate() {
+        if (getConfig().getBoolean("auto-update")
+                && getDescription().getVersion().startsWith("Build")) {
+            GuizhanUpdater.start(this, getFile(), "TimetownDev", "SlimeAE", "master");
+        }
     }
 
     /**

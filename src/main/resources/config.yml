@@ -1,3 +1,6 @@
+#自动更新
+auto-update: true
+
 # 自动合成相关设置
 auto-crafting:
   # 每个网络最大同时进行的自动合成任务数

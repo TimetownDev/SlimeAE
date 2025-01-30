@@ -1,16 +1,15 @@
 name: SlimeAEPlugin
 version: '${project.version}'
 
-
 main: me.ddggdd135.slimeae.SlimeAEPlugin
 api-version: '1.16'
 authors: [Ddggdd135]
 softdepend:
   - InfinityExpansion
   - FluffyMachines
+  - GuizhanLibPlugin
 depend:
   - Slimefun
-  - GuizhanLibPlugin
   - CMILib
   - GuguSlimefunLib
 
