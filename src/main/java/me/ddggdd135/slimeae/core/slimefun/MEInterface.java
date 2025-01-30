@@ -73,7 +73,6 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
 
             if (!SlimefunUtils.isItemSimilar(setting, itemStack, true, false)) {
                 if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
-                continue;
             }
 
             int amount = 0;
