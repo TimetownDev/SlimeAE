@@ -8,13 +8,12 @@ import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+
+import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ReflectionUtils;
 
 public abstract class DatabaseController<TData> {
@@ -105,5 +104,36 @@ public abstract class DatabaseController<TData> {
 
     public void delete() {
         executeSql("DELETE FROM " + getTableName());
+    }
+
+    public void submitWriteTask(TData data, Runnable runnable) {
+        Queue<Runnable> queue;
+        synchronized(scheduledWriteTasks) {
+            if (scheduledWriteTasks.containsKey(data)) {
+                queue = scheduledWriteTasks.get(data);
+                queue.add(runnable);
+            } else {
+                queue = new ConcurrentLinkedQueue<>();
+                scheduledWriteTasks.put(data, queue);
+                writeExecutor.submit(() -> {
+                    Queue<Runnable> tasks;
+                    synchronized (scheduledWriteTasks) {
+                        tasks = scheduledWriteTasks.remove(data);
+                    }
+                    while (!tasks.isEmpty()) {
+                        Runnable next = tasks.remove();
+                        try {
+                            next.run();
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, e.getMessage());
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public void cancelWriteTask(TData data) {
+        scheduledWriteTasks.remove(data);
     }
 }

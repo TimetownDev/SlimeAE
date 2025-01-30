@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
@@ -12,7 +13,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     public StorageCellDataController() {
         super(MEStorageCellCache.class);
-        cache = new HashMap<>();
+        cache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -102,36 +103,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         });
     }
 
-    public void submitWriteTask(MEStorageCellCache data, Runnable runnable) {
-        Queue<Runnable> queue;
-        synchronized(scheduledWriteTasks) {
-            if (scheduledWriteTasks.containsKey(data)) {
-                queue = scheduledWriteTasks.get(data);
-                queue.add(runnable);
-            } else {
-                queue = new ConcurrentLinkedQueue<>();
-                scheduledWriteTasks.put(data, queue);
-                writeExecutor.submit(() -> {
-                    Queue<Runnable> tasks;
-                    synchronized (scheduledWriteTasks) {
-                        tasks = scheduledWriteTasks.remove(data);
-                    }
-                    while (!tasks.isEmpty()) {
-                        Runnable next = tasks.remove();
-                        try {
-                            next.run();
-                        } catch (Exception e) {
-                            logger.log(Level.WARNING, e.getMessage());
-                        }
-                    }
-                });
-            }
-        }
-    }
 
-    public void cancelWriteTask(MEStorageCellCache data) {
-        scheduledWriteTasks.remove(data);
-    }
 
     protected long getItemHash(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir() || itemStack.getAmount() == 0) return 0;
