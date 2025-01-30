@@ -14,7 +14,6 @@ import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
@@ -43,7 +42,8 @@ public class MEStorageCellCache implements IStorage {
             nbtItem.setUUID(MEItemStorageCell.UUID_KEY, uuid);
         } else {
             uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
-            if (getMEStorageCellCache(uuid) != null) return new ResultWithItem<>(getMEStorageCellCache(uuid), itemStack);
+            if (getMEStorageCellCache(uuid) != null)
+                return new ResultWithItem<>(getMEStorageCellCache(uuid), itemStack);
         }
 
         return SlimeAEPlugin.getStorageCellDataController().loadData(nbtItem.getItem());

@@ -70,7 +70,7 @@ public abstract class DatabaseController<TData> {
     }
 
     public List<Map<String, String>> execQuery(String sql) {
-        try(Connection conn = ds.getConnection()) {
+        try (Connection conn = ds.getConnection()) {
             return execQuery(conn, sql);
         } catch (SQLException e) {
             logger.log(Level.WARNING, "An exception thrown while executing sql: " + e.getMessage());

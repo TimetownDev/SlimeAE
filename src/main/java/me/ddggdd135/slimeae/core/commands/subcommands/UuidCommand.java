@@ -60,10 +60,11 @@ public class UuidCommand extends SubCommand {
                 return false;
             }
             player.getInventory().setItemInMainHand(data.getItemStack());
-            TextComponent textComponent = Component.text(
-                            CMIChatColor.translate("&eUUID: " + data.getResult().getUuid().toString()))
+            TextComponent textComponent = Component.text(CMIChatColor.translate(
+                            "&eUUID: " + data.getResult().getUuid().toString()))
                     .clickEvent(ClickEvent.clickEvent(
-                            ClickEvent.Action.COPY_TO_CLIPBOARD, data.getResult().getUuid().toString()))
+                            ClickEvent.Action.COPY_TO_CLIPBOARD,
+                            data.getResult().getUuid().toString()))
                     .hoverEvent(HoverEvent.showText(Component.text(CMIChatColor.translate("&e点击复制"))));
             commandSender.sendMessage(textComponent);
         }

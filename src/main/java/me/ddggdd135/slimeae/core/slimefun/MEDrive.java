@@ -118,7 +118,8 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 if (networkInfo == null) return true;
                 StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
                 if (itemStack != null) {
-                    storageCollection.removeStorage(MEItemStorageCell.getStorage(itemStack).getResult());
+                    storageCollection.removeStorage(
+                            MEItemStorageCell.getStorage(itemStack).getResult());
                 }
                 return true;
             });
