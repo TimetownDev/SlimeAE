@@ -42,7 +42,8 @@ public class CleardataCommand extends SubCommand {
         }
         if (args.length == 1) {
             if (!(commandSender instanceof Player player)) {
-                commandSender.sendMessage(getUsage());
+                commandSender.sendMessage(CMIChatColor.translate("&e用法:" + getUsage()));
+                return false;
             } else {
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack.getType().isAir()) {
