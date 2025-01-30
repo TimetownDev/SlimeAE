@@ -73,34 +73,24 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     public void updateAsync(MEStorageCellCache data) {
         cancelWriteTask(data);
-        submitWriteTask(data, () -> {
-            update(data);
-        });
+        submitWriteTask(data, () -> update(data));
     }
 
     public void updateAsync(MEStorageCellCache data, ItemStack itemStack, int amount, boolean insert) {
-        submitWriteTask(data, () -> {
-            update(data, itemStack, amount, insert);
-        });
+        submitWriteTask(data, () -> update(data, itemStack, amount, insert));
     }
 
     public void deleteAsync(MEStorageCellCache data) {
         cancelWriteTask(data);
-        submitWriteTask(data, () -> {
-            delete(data);
-        });
+        submitWriteTask(data, () -> delete(data));
     }
 
     public void deleteAsync(UUID uuid) {
-        submitWriteTask(null, () -> {
-            delete(uuid);
-        });
+        submitWriteTask(null, () -> delete(uuid));
     }
 
     public void deleteAsync(MEStorageCellCache data, ItemStack itemStack) {
-        submitWriteTask(data, () -> {
-            delete(data, itemStack);
-        });
+        submitWriteTask(data, () -> delete(data, itemStack));
     }
 
 

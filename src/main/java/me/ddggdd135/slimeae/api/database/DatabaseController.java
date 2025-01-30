@@ -114,6 +114,7 @@ public abstract class DatabaseController<TData> {
                 queue.add(runnable);
             } else {
                 queue = new ConcurrentLinkedQueue<>();
+                queue.add(runnable);
                 scheduledWriteTasks.put(data, queue);
                 writeExecutor.submit(() -> {
                     Queue<Runnable> tasks;

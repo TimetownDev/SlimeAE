@@ -26,21 +26,11 @@ public class MEStorageCellCache implements IStorage {
     public MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
         NBTItem nbtItem = new NBTItem(itemStack, true);
-        NBTCompoundList nbt = nbtItem.getCompoundList(MEItemStorageCell.ITEM_STORAGE_KEY);
         size = MEItemStorageCell.getSize(itemStack);
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
             storages = new CreativeItemIntegerMap();
         else {
-            if (nbt != null) {
-                storages = ItemUtils.toStorage(nbt);
-                for (ItemStack key : storages.keySet()) {
-                    stored += storages.get(key);
-                }
-
-                nbt.clear();
-            } else {
-                storages = new HashMap<>();
-            }
+            storages = new ConcurrentHashMap<>();
         }
         if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray))
             nbtItem.setUUID(MEItemStorageCell.UUID_KEY, UUID.randomUUID());
