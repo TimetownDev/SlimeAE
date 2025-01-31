@@ -13,12 +13,10 @@ depend:
   - CMILib
   - GuguSlimefunLib
 
-
 commands:
   SlimeAE:
     description: "SlimeAE基本命令"
     aliases: ae
-
 
 permissions:
   slimeae.cleardata:
