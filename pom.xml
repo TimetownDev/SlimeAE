@@ -165,5 +165,12 @@
             <version>2.2.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.ytdd9527</groupId>
+            <artifactId>NetworksExpansion</artifactId>
+            <version>4e10d9b0e3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/NetworksExpansion.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
