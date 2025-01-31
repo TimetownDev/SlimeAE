@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae.utils;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.sefiraat.networks.slimefun.network.NetworkQuantumStorage;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -31,6 +32,7 @@ import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
 import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
 import me.ddggdd135.slimeae.integrations.networks.QuantumStorage;
+import me.ddggdd135.slimeae.integrations.networksexpansion.DrawerStorage;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -338,6 +340,11 @@ public class ItemUtils {
                     || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
                     return new QuantumStorage(block);
+                }
+            }
+            if (SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
+                    return new DrawerStorage(block);
                 }
             }
         }

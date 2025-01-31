@@ -8,12 +8,12 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class ItemStorage implements IStorage {
-    @NonNull private Map<ItemStack, Integer> storage = new HashMap<>();
+    @Nonnull
+    private Map<ItemStack, Integer> storage = new HashMap<>();
 
-    private void trim(@NonNull ItemStack template) {
+    private void trim(@Nonnull ItemStack template) {
         if (storage.containsKey(template) && storage.get(template) == 0) {
             storage.remove(template);
         }
@@ -21,20 +21,20 @@ public class ItemStorage implements IStorage {
 
     public ItemStorage() {}
 
-    public ItemStorage(@NonNull ItemStack... itemStacks) {
+    public ItemStorage(@Nonnull ItemStack... itemStacks) {
         storage = ItemUtils.getAmounts(itemStacks);
     }
 
-    public ItemStorage(@NonNull IStorage storage) {
+    public ItemStorage(@Nonnull IStorage storage) {
         this(storage.getStorage());
     }
 
-    public ItemStorage(@NonNull Map<ItemStack, Integer> items) {
+    public ItemStorage(@Nonnull Map<ItemStack, Integer> items) {
         storage = new HashMap<>(items);
     }
 
     @Override
-    public void pushItem(@Nonnull @NonNull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = itemStack.asOne();
             if (storage.containsKey(template)) {
@@ -49,7 +49,7 @@ public class ItemStorage implements IStorage {
         }
     }
 
-    public void addItem(@NonNull ItemStack[] itemStacks) {
+    public void addItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = itemStack.asOne();
             if (storage.containsKey(template)) {
@@ -68,13 +68,13 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    public boolean contains(@Nonnull @NonNull ItemRequest[] requests) {
+    public boolean contains(@Nonnull ItemRequest[] requests) {
         return ItemUtils.contains(storage, requests);
     }
 
-    @Nonnull
     @Override
-    @NonNull public ItemStack[] tryTakeItem(@Nonnull @NonNull ItemRequest[] requests) {
+    @Nonnull
+    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storage.containsKey(request.getTemplate())) {
@@ -95,7 +95,8 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    @NonNull public Map<ItemStack, Integer> getStorage() {
+    @Nonnull
+    public Map<ItemStack, Integer> getStorage() {
         return new HashMap<>(storage);
     }
 
