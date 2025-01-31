@@ -28,7 +28,6 @@ import org.bukkit.inventory.ItemStack;
  */
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
-    public static final String ITEM_STORAGE_KEY = "item_storage";
     public static final String SERVER_UUID_KEY = "server_uuid";
     private int size;
 

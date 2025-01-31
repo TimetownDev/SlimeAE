@@ -27,6 +27,9 @@ permissions:
   slimeae.uuid:
     description: "获取此存储元件的UUID"
     default: op
+  slimeae.applyuuid:
+    description: "修改此存储元件的UUID"
+    default: op
   slimeae.viewitems:
     description: "查看存储元件中的物品"
     default: op
