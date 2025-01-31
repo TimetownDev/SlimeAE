@@ -9,10 +9,7 @@ import me.ddggdd135.slimeae.api.database.StorageCellDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.SlimeAECommand;
-import me.ddggdd135.slimeae.core.commands.subcommands.CleardataCommand;
-import me.ddggdd135.slimeae.core.commands.subcommands.HelpCommand;
-import me.ddggdd135.slimeae.core.commands.subcommands.UuidCommand;
-import me.ddggdd135.slimeae.core.commands.subcommands.ViewitemsCommand;
+import me.ddggdd135.slimeae.core.commands.subcommands.*;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
@@ -103,6 +100,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         slimeAECommand.addSubCommand(new HelpCommand());
         slimeAECommand.addSubCommand(new CleardataCommand());
+        slimeAECommand.addSubCommand(new ApplyUUIDCommand());
         slimeAECommand.addSubCommand(new UuidCommand());
         slimeAECommand.addSubCommand(new ViewitemsCommand());
 
