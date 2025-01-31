@@ -342,7 +342,7 @@ public class ItemUtils {
                     return new QuantumStorage(block);
                 }
             }
-            if (SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
                     return new DrawerStorage(block);
                 }
