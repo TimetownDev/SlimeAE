@@ -1,18 +1,14 @@
 package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCellDataController extends DatabaseController<MEStorageCellCache> {
-    private final Map<ItemStack, Long> cache;
-
     public StorageCellDataController() {
         super(MEStorageCellCache.class);
-        cache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -95,14 +91,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
     protected long getItemHash(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir() || itemStack.getAmount() == 0) return 0;
 
-        if (cache.containsKey(itemStack)) {
-            return cache.get(itemStack);
-        }
-
-        long hash = SerializeUtils.getItemHash(itemStack);
-        cache.put(itemStack, hash);
-
-        return hash;
+        return SerializeUtils.getItemHash(itemStack);
     }
 
     public ResultWithItem<MEStorageCellCache> loadData(ItemStack itemStack) {
