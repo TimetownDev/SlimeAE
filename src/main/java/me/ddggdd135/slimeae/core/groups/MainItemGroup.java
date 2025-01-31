@@ -39,7 +39,7 @@ public class MainItemGroup extends FlexItemGroup {
     @Override
     @ParametersAreNonnullByDefault
     public void open(Player p, PlayerProfile profile, SlimefunGuideMode mode) {
-        final ChestMenu chestMenu = new ChestMenu("&a能源与运用");
+        final ChestMenu chestMenu = new ChestMenu(item.getItemMeta().getDisplayName());
 
         for (int slot : HEADER) {
             chestMenu.addItem(slot, ChestMenuUtils.getBackground(), (player1, i1, itemStack, clickAction) -> false);
