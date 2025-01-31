@@ -115,7 +115,7 @@ public class QuantumStorage implements IStorage {
     public int getTier(@Nonnull ItemStack itemStack) {
         ItemStack storedItem = quantumCache.getItemStack();
         if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
-            return 2000;
+            return 1000;
         }
 
         return 0;
