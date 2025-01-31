@@ -121,6 +121,7 @@ public class SlimefunAEItems {
                     "",
                     "{#3366ff>}将方块的存储接入AE网络{#33ccf3<}",
                     "&e支持蓬松桶和无尽存储单元",
+                    "&e支持网络量子存储和网络抽屉",
                     "&e不支持原版容器"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&fME合成终端"));
