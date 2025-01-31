@@ -47,7 +47,7 @@ public class QuantumStorage implements IStorage {
         if (!isReadOnly && blockMenu != null && quantumCache != null && quantumCache.getAmount() > 0) {
             int stored = (int) quantumCache.getAmount();
             int size = quantumCache.getLimit();
-            if (stored >= size) return;
+            if (stored >= size && !quantumCache.isVoidExcess()) return;
             ItemStack storedItem = quantumCache.getItemStack();
             for (ItemStack itemStack : itemStacks) {
                 if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
@@ -56,8 +56,10 @@ public class QuantumStorage implements IStorage {
                     itemStack.setAmount(itemStack.getAmount() - toAdd);
                 }
             }
-            quantumCache.setAmount(stored);
-            NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+            if (!(stored > size)) {
+                quantumCache.setAmount(stored);
+                NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+            }
         }
     }
 
