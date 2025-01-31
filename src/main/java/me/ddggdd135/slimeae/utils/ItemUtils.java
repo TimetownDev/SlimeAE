@@ -521,8 +521,8 @@ public class ItemUtils {
             return null;
         }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        //下面这一行太花费性能
-        //if (block.getBlockData().getMaterial().isAir()) return null;
+        // 下面这一行太花费性能
+        // if (block.getBlockData().getMaterial().isAir()) return null;
         if (inv != null) {
             int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
             if (outputSlots == null) return null;
