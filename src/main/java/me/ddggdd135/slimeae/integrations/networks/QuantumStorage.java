@@ -14,13 +14,11 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class QuantumStorage implements IStorage {
     private QuantumCache quantumCache;
-    private BlockMenu blockMenu;
     private Block block;
     private boolean isReadOnly;
 
@@ -36,7 +34,6 @@ public class QuantumStorage implements IStorage {
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
         if (blockData != null
                 && SlimefunItem.getById(blockData.getSfId()) instanceof NetworkQuantumStorage networkQuantumStorage) {
-            blockMenu = blockData.getBlockMenu();
             quantumCache = NetworkQuantumStorage.getCaches().get(block.getLocation());
         }
         this.isReadOnly = isReadOnly;
@@ -44,7 +41,7 @@ public class QuantumStorage implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        if (!isReadOnly && blockMenu != null && quantumCache != null && quantumCache.getAmount() > 0) {
+        if (!isReadOnly && quantumCache != null && quantumCache.getAmount() > 0) {
             int stored = (int) quantumCache.getAmount();
             int size = quantumCache.getLimit();
             if (stored >= size && !quantumCache.isVoidExcess()) return;
@@ -65,7 +62,7 @@ public class QuantumStorage implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        if (blockMenu == null || quantumCache == null || quantumCache.getAmount() <= 0) return false;
+        if (quantumCache == null || quantumCache.getAmount() <= 0) return false;
         int stored = (int) (quantumCache.getAmount() - 1);
         ItemStack storedItem = quantumCache.getItemStack();
         boolean toReturn = true;
@@ -77,10 +74,10 @@ public class QuantumStorage implements IStorage {
         return toReturn;
     }
 
-    @Nonnull
     @Override
+    @Nonnull
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (blockMenu == null || quantumCache == null || quantumCache.getAmount() <= 0) return new ItemStack[0];
+        if (quantumCache == null || quantumCache.getAmount() <= 0) return new ItemStack[0];
         int stored = (int) (quantumCache.getAmount() - 1);
         ItemStack storedItem = quantumCache.getItemStack();
         ItemStorage toReturn = new ItemStorage();
@@ -99,9 +96,10 @@ public class QuantumStorage implements IStorage {
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Integer> getStorage() {
+    @Nonnull
+    public Map<ItemStack, Integer> getStorage() {
         Map<ItemStack, Integer> storage = new HashMap<>();
-        if (blockMenu == null || quantumCache == null || quantumCache.getAmount() <= 0) return storage;
+        if (quantumCache == null || quantumCache.getAmount() <= 0) return storage;
         storage.put(quantumCache.getItemStack().asOne(), (int) (quantumCache.getAmount() - 1));
         return storage;
     }
