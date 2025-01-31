@@ -18,6 +18,8 @@ import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
+import me.ddggdd135.slimeae.integrations.NetworksExpansionIntegration;
+import me.ddggdd135.slimeae.integrations.NetworksIntegration;
 import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
 import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
@@ -37,6 +39,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private int slimefunTickCount;
     private final InfinityIntegration infinityIntegration = new InfinityIntegration();
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
+    private final NetworksIntegration networksIntegration = new NetworksIntegration();
+    private final NetworksExpansionIntegration networksExpansionIntegration = new NetworksExpansionIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
@@ -81,6 +85,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已支持");
         if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已支持");
+        if (networksIntegration.isLoaded()) getLogger().info("网络已支持");
+        if (networksExpansionIntegration.isLoaded()) getLogger().info("网络拓展已支持");
 
         storageCellDataController.init();
 
@@ -177,6 +183,24 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static FluffyMachinesIntegration getFluffyMachinesIntegration() {
         return getInstance().fluffyMachinesIntegration;
+    }
+
+    /**
+     * 获取网络集成实例
+     * @return 网络集成实例
+     */
+    @Nonnull
+    public static NetworksIntegration getNetworksIntegration() {
+        return getInstance().networksIntegration;
+    }
+
+    /**
+     * 获取网络拓展集成实例
+     * @return 网络拓展集成实例
+     */
+    @Nonnull
+    public static NetworksExpansionIntegration getNetworksExpansionIntegration() {
+        return getInstance().networksExpansionIntegration;
     }
 
     @Nonnull
