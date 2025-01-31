@@ -4,7 +4,7 @@ SlimeAE是一个Slimefun附属插件，可以创建一个复杂的物品存储�
 
 ## 下载
 
-[![构建状态](https://builds.guizhanss.com/api/badge/TimetownDev/SlimeAE/master/latest)](https://builds.guizhanss.com/TimetownDev/SkumeAE/master)
+[![构建状态](https://builds.guizhanss.com/api/badge/TimetownDev/SlimeAE/master/latest)](https://builds.guizhanss.com/TimetownDev/SlimeAE/master)
 
 ## Wiki / 文档
 
