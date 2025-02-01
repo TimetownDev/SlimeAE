@@ -40,6 +40,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final NetworksIntegration networksIntegration = new NetworksIntegration();
     private final NetworksExpansionIntegration networksExpansionIntegration = new NetworksExpansionIntegration();
     private final TranscEndenceIntegration transcEndenceIntegration = new TranscEndenceIntegration();
+    private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
@@ -90,6 +91,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (networksIntegration.isLoaded()) getLogger().info("网络已支持");
         if (networksExpansionIntegration.isLoaded()) getLogger().info("网络拓展已支持");
         if (transcEndenceIntegration.isLoaded()) getLogger().info("末地科技已支持");
+        if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已支持");
 
         storageCellDataController.init();
 
@@ -213,6 +215,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static TranscEndenceIntegration getTranscEndenceIntegration() {
         return getInstance().transcEndenceIntegration;
+    }
+
+    /**
+     * 获取jeg集成实例
+     * @return jeg集成实例
+     */
+    @Nonnull
+    public static JustEnoughGuideIntegration getJustEnoughGuideIntegration() {
+        return getInstance().justEnoughGuideIntegration;
     }
 
     @Nonnull

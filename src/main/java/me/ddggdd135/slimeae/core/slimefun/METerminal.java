@@ -1,5 +1,7 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.balugaq.jeg.api.groups.SearchGroup;
+import com.balugaq.jeg.implementation.JustEnoughGuide;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -13,11 +15,7 @@ import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -173,6 +171,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public void updateGui(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
+        if (!blockMenu.hasViewer()) return;
 
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) {
@@ -192,16 +191,28 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         // 过滤和排序逻辑
         List<Map.Entry<ItemStack, Integer>> items = new ArrayList<>(storage.entrySet());
         if (!filter.isEmpty()) {
-            items.removeIf(x -> {
-                String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-                if (itemType.startsWith(filter)) {
-                    return false;
-                }
-                String name = CMIChatColor.stripColor(
-                        ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+            if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
+                items.removeIf(x -> {
+                    String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
+                    if (itemType.startsWith(filter)) {
+                        return false;
+                    }
+                    String name = CMIChatColor.stripColor(
+                            ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
-                return !name.contains(filter);
-            });
+                    return !name.contains(filter);
+                });
+            else {
+                Player player = (Player) blockMenu.getInventory().getViewers().get(0);
+                boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
+                SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
+                List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
+                items.removeIf(x -> {
+                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
+                    if (slimefunItem == null) return true;
+                    return !slimefunItems.contains(slimefunItem);
+                });
+            }
         }
 
         if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);

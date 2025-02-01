@@ -2,6 +2,9 @@ package me.ddggdd135.slimeae.core.commands.subcommands;
 
 import static me.ddggdd135.slimeae.core.slimefun.METerminal.*;
 
+import com.balugaq.jeg.api.groups.SearchGroup;
+import com.balugaq.jeg.implementation.JustEnoughGuide;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
@@ -12,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.*;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
@@ -207,16 +211,28 @@ public class ViewitemsCommand extends SubCommand {
         // 过滤和排序逻辑
         List<Map.Entry<ItemStack, Integer>> items = new ArrayList<>(storage.entrySet());
         if (!filter.isEmpty()) {
-            items.removeIf(x -> {
-                String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-                if (itemType.startsWith(filter)) {
-                    return false;
-                }
-                String name = CMIChatColor.stripColor(
-                        ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+            if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
+                items.removeIf(x -> {
+                    String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
+                    if (itemType.startsWith(filter)) {
+                        return false;
+                    }
+                    String name = CMIChatColor.stripColor(
+                            ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
 
-                return !name.contains(filter);
-            });
+                    return !name.contains(filter);
+                });
+            else {
+                Player player = (Player) menu.getInventory().getViewers().get(0);
+                boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
+                SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
+                List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
+                items.removeIf(x -> {
+                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
+                    if (slimefunItem == null) return true;
+                    return !slimefunItems.contains(slimefunItem);
+                });
+            }
         }
 
         if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);
