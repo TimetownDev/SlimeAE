@@ -150,7 +150,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
-                for (int slot : CARD_SLOTS) {
+                for (int slot : getCardSlots()) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
@@ -205,7 +205,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
                 (player, i, itemStack, clickAction) -> false);
 
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
         }
     }
@@ -243,7 +243,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 getDownSlot(),
                 (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.DOWN));
 
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);

@@ -231,7 +231,7 @@ public class MolecularAssembler extends TickingBlock
         preset.addItem(OUTPUT_SLOT, MenuItems.Empty, (player, i, itemStack, clickAction) -> false);
 
         // 添加卡槽位的点击处理
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
         }
     }
@@ -239,7 +239,7 @@ public class MolecularAssembler extends TickingBlock
     @Override
     public void newInstance(BlockMenu menu, Block block) {
         // 初始化卡槽位
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
@@ -256,7 +256,7 @@ public class MolecularAssembler extends TickingBlock
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
-                for (int slot : CARD_SLOTS) {
+                for (int slot : getCardSlots()) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR

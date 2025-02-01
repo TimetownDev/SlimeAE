@@ -135,7 +135,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                     }
                 }
 
-                for (int slot : CARD_SLOTS) {
+                for (int slot : getCardSlots()) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
@@ -167,7 +167,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
         for (int slot : PATTERN_SLOTS) {
             preset.addMenuClickHandler(slot, ItemUtils.getPatternSlotClickHandler());
         }
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
         }
     }
@@ -184,7 +184,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) menu.replaceExistingItem(slot, MenuItems.Pattern);
         }
-        for (int slot : CARD_SLOTS) {
+        for (int slot : getCardSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
