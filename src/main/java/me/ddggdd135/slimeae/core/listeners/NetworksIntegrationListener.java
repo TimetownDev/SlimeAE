@@ -12,6 +12,7 @@ import java.util.Set;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
+import me.ddggdd135.slimeae.integrations.networks.StorageToBarrelWrapper;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -54,8 +55,14 @@ public class NetworksIntegrationListener implements Listener {
                 if (networkInfo == null) return;
                 Set<BarrelIdentity> barrelIdentities =
                         networksExpansionSwitch.wrapIStorageAsBarrelIdentities(location, networkInfo.getStorage());
-                if (e.isInputAble()) root.getInputAbleBarrels().addAll(barrelIdentities);
-                if (e.isOutputAble()) root.getOutputAbleBarrels().addAll(barrelIdentities);
+                if (e.isInputAble()) {
+                    root.getInputAbleBarrels().removeIf(x -> x instanceof StorageToBarrelWrapper);
+                    root.getInputAbleBarrels().addAll(barrelIdentities);
+                }
+                if (e.isOutputAble()) {
+                    root.getOutputAbleBarrels().removeIf(x -> x instanceof StorageToBarrelWrapper);
+                    root.getOutputAbleBarrels().addAll(barrelIdentities);
+                }
                 return;
             }
         }
