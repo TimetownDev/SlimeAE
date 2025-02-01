@@ -8,16 +8,20 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCollection implements IStorage {
-    private final List<IStorage> storages;
+    private final Set<IStorage> storages;
     private final Map<ItemStack, IStorage> takeCache;
     private final Map<ItemStack, IStorage> pushCache;
     private final Set<ItemStack> notIncluded;
 
     public StorageCollection(@Nonnull IStorage... storages) {
-        this.storages = new ArrayList<>(List.of(storages));
+        this.storages = new HashSet<>(List.of(storages));
         this.takeCache = new HashMap<>();
         this.pushCache = new HashMap<>();
         this.notIncluded = new HashSet<>();
+    }
+
+    public Set<IStorage> getStorages() {
+        return storages;
     }
 
     public void addStorage(@Nullable IStorage storage) {

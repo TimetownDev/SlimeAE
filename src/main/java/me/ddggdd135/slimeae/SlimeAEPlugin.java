@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
+import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
 import me.ddggdd135.slimeae.integrations.InfinityIntegration;
@@ -82,6 +83,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
         Bukkit.getPluginManager().registerEvents(new NetworkListener(), this);
+        if (networksExpansionIntegration.isLoaded())
+            Bukkit.getPluginManager().registerEvents(new NetworksIntegrationListener(), this);
 
         if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已支持");
         if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已支持");
