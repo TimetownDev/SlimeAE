@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,7 +18,12 @@ public class StorageToBarrelWrapper extends BarrelIdentity {
     protected final IStorage storage;
 
     public StorageToBarrelWrapper(@Nonnull Location location, @Nonnull IStorage storage, @Nonnull ItemStack itemStack) {
-        super(location, itemStack, storage.getStorage().getOrDefault(itemStack, 0), BarrelType.UNKNOWN);
+        super(
+                location,
+                itemStack,
+                NetworkUtils.<Integer>doAntiNetworksTask(
+                        storage, x -> x.getStorage().getOrDefault(itemStack, 0)),
+                BarrelType.UNKNOWN);
         this.storage = storage;
     }
 

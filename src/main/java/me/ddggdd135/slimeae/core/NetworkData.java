@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.*;
+import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 
@@ -54,10 +55,16 @@ public class NetworkData {
         info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
 
         StorageCollection networkStorage = new StorageCollection();
+        boolean hasNetworksStorage = false;
         for (Location location : info.getChildren()) {
             if (!AllStorageObjects.containsKey(location)) continue;
             IMEStorageObject slimefunItem = AllStorageObjects.get(location);
             IStorage storage = slimefunItem.getStorage(location.getBlock());
+            if (storage instanceof NetworksStorage) {
+                if (hasNetworksStorage) continue;
+
+                hasNetworksStorage = true;
+            }
             if (storage != null) networkStorage.addStorage(storage);
         }
         info.setStorage(networkStorage);

@@ -7,11 +7,11 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.interfaces.IMEController;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
-import me.ddggdd135.slimeae.api.interfaces.IMEObject;
-import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
+import me.ddggdd135.slimeae.api.StorageCollection;
+import me.ddggdd135.slimeae.api.interfaces.*;
+import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -57,5 +57,18 @@ public class NetworkUtils {
         Set<Location> result = new HashSet<>();
         scan(block, result);
         return result;
+    }
+
+    public static <T> T doAntiNetworksTask(IStorage storage, Function<IStorage, T> function) {
+        if (storage instanceof NetworksStorage) return null;
+        if (storage instanceof StorageCollection storageCollection) {
+            StorageCollection tmp =
+                    new StorageCollection(storageCollection.getStorages().toArray(IStorage[]::new));
+            tmp.getStorages().removeIf(x -> x instanceof NetworksStorage);
+
+            return function.apply(tmp);
+        }
+
+        return function.apply(storage);
     }
 }
