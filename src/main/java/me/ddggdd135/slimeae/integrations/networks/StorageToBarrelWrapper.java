@@ -4,7 +4,6 @@ import io.github.sefiraat.networks.network.barrel.BarrelType;
 import io.github.sefiraat.networks.network.stackcaches.BarrelIdentity;
 import io.github.sefiraat.networks.network.stackcaches.ItemRequest;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,47 +31,29 @@ public class StorageToBarrelWrapper extends BarrelIdentity {
         if (itemRequest.getItemStack() == null
                 || itemRequest.getItemStack().getType().isAir()) return null;
         if (!SlimefunUtils.isItemSimilar(getItemStack(), itemRequest.getItemStack(), true, false)) return null;
-        Set<NetworksStorage> banned = new HashSet<>();
+        IStorage tmp = storage;
         if (storage instanceof StorageCollection storageCollection) {
-            Set<IStorage> storages = storageCollection.getStorages();
-            storages.removeIf(x -> {
-                if (x instanceof NetworksStorage networksStorage) {
-                    banned.add(networksStorage);
-                    return true;
-                }
-
-                return false;
-            });
+            tmp = new StorageCollection(storageCollection.getStorages().toArray(IStorage[]::new));
+            Set<IStorage> storages = ((StorageCollection) tmp).getStorages();
+            storages.removeIf(x -> x instanceof NetworksStorage);
         }
 
-        ItemStack[] itemStacks = storage.tryTakeItem(new me.ddggdd135.slimeae.api.ItemRequest(
+        ItemStack[] itemStacks = tmp.tryTakeItem(new me.ddggdd135.slimeae.api.ItemRequest(
                 itemRequest.getItemStack(),
                 Math.min(itemRequest.getItemStack().getMaxStackSize(), itemRequest.getAmount())));
-        if (storage instanceof StorageCollection storageCollection) {
-            storageCollection.getStorages().addAll(banned);
-        }
         if (itemStacks.length == 1) return itemStacks[0];
         return null;
     }
 
     @Override
     public void depositItemStack(ItemStack[] itemStacks) {
-        Set<NetworksStorage> banned = new HashSet<>();
+        IStorage tmp = storage;
         if (storage instanceof StorageCollection storageCollection) {
-            Set<IStorage> storages = storageCollection.getStorages();
-            storages.removeIf(x -> {
-                if (x instanceof NetworksStorage networksStorage) {
-                    banned.add(networksStorage);
-                    return true;
-                }
-
-                return false;
-            });
+            tmp = new StorageCollection(storageCollection.getStorages().toArray(IStorage[]::new));
+            Set<IStorage> storages = ((StorageCollection) tmp).getStorages();
+            storages.removeIf(x -> x instanceof NetworksStorage);
         }
-        storage.pushItem(itemStacks);
-        if (storage instanceof StorageCollection storageCollection) {
-            storageCollection.getStorages().addAll(banned);
-        }
+        tmp.pushItem(itemStacks);
     }
 
     @Override
