@@ -172,5 +172,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/NetworksExpansion.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>me.sfiguz7.transcendence</groupId>
+            <artifactId>TranscEndence</artifactId>
+            <version>2352cccd7b</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/TranscEndence.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

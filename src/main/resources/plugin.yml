@@ -9,6 +9,7 @@ softdepend:
   - FluffyMachines
   - Networks
   - Networks-Changed
+  - TranscEndence
   - GuizhanLibPlugin
 depend:
   - Slimefun

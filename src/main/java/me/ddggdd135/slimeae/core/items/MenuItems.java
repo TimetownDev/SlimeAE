@@ -2,6 +2,8 @@ package me.ddggdd135.slimeae.core.items;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
+import java.util.ArrayList;
+import java.util.List;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import org.bukkit.Material;
@@ -33,26 +35,34 @@ public class MenuItems {
             "_AE_MN_PUSH_BACK_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l点击将物品返回ME网络"));
     public static final ItemStack CRAFT_ITEM =
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
-    public static final ItemStack CRAFTING_TABLE = new CustomItemStack(
-            Material.CRAFTING_TABLE,
-            "&e工作台配方",
-            "",
-            "&e支持以下合成配方:",
-            "&e  - 原版工作台",
-            "&b  - 增强型工作台",
-            "&d  - 魔法工作台",
-            "&6  - 盔甲锻造台",
-            "&e  - 冶炼炉",
-            "&a  - 压缩机",
-            "&7  - 磨石",
-            "&5  - 榨汁机",
-            "&6  - 矿物粉碎机",
-            "&f  - 压力机",
-            "&7> 单击切换为流程配方");
+    public static final ItemStack CRAFTING_TABLE;
     public static final ItemStack COOKING = new CustomItemStack(Material.FURNACE, "&e流程配方", "", "&7> 单击切换为工作台配方");
     public static final SlimefunItemStack ACCEPT = new SlimefunItemStack(
             "_AE_MN_ACCEPT_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l确认"));
     public static final SlimefunItemStack CANCEL = new SlimefunItemStack(
             "_AE_MN_CANCEL_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&c&l取消"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
+
+    static {
+        List<String> CRAFTING_TABLE_LORE = new ArrayList<>(List.of(
+                "",
+                "&e支持以下合成配方:",
+                "&e  - 原版工作台",
+                "&b  - 增强型工作台",
+                "&d  - 魔法工作台",
+                "&6  - 盔甲锻造台",
+                "&e  - 冶炼炉",
+                "&a  - 压缩机",
+                "&7  - 磨石",
+                "&5  - 榨汁机",
+                "&6  - 矿物粉碎机",
+                "&f  - 压力机"));
+
+        if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
+            CRAFTING_TABLE_LORE.add("{#299482}  - 纳米工作台");
+        }
+
+        CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
+        CRAFTING_TABLE = new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", CRAFTING_TABLE_LORE);
+    }
 }

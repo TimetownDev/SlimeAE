@@ -5,8 +5,10 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
+import me.sfiguz7.transcendence.lists.TERecipeType;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.CookingRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -77,5 +79,9 @@ public class RecipeUtils {
         SUPPORTED_RECIPE_TYPES.add(RecipeType.JUICER);
         SUPPORTED_RECIPE_TYPES.add(RecipeType.ORE_CRUSHER);
         SUPPORTED_RECIPE_TYPES.add(RecipeType.PRESSURE_CHAMBER);
+
+        if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.add(TERecipeType.NANOBOT_CRAFTER);
+        }
     }
 }

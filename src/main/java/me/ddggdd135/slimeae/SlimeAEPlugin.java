@@ -17,10 +17,7 @@ import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
-import me.ddggdd135.slimeae.integrations.FluffyMachinesIntegration;
-import me.ddggdd135.slimeae.integrations.InfinityIntegration;
-import me.ddggdd135.slimeae.integrations.NetworksExpansionIntegration;
-import me.ddggdd135.slimeae.integrations.NetworksIntegration;
+import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
 import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
@@ -42,6 +39,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
     private final NetworksIntegration networksIntegration = new NetworksIntegration();
     private final NetworksExpansionIntegration networksExpansionIntegration = new NetworksExpansionIntegration();
+    private final TranscEndenceIntegration transcEndenceIntegration = new TranscEndenceIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
@@ -91,6 +89,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已支持");
         if (networksIntegration.isLoaded()) getLogger().info("网络已支持");
         if (networksExpansionIntegration.isLoaded()) getLogger().info("网络拓展已支持");
+        if (transcEndenceIntegration.isLoaded()) getLogger().info("末地科技已支持");
 
         storageCellDataController.init();
 
@@ -205,6 +204,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworksExpansionIntegration getNetworksExpansionIntegration() {
         return getInstance().networksExpansionIntegration;
+    }
+
+    /**
+     * 获取末地科技集成实例
+     * @return 末地科技集成实例
+     */
+    @Nonnull
+    public static TranscEndenceIntegration getTranscEndenceIntegration() {
+        return getInstance().transcEndenceIntegration;
     }
 
     @Nonnull
