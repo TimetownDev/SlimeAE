@@ -113,7 +113,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         addItemHandler(onBlockBreak());
     }
 
-    private BlockBreakHandler onBlockBreak() {
+    protected BlockBreakHandler onBlockBreak() {
         return new SimpleBlockBreakHandler() {
 
             @Override

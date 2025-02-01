@@ -5,6 +5,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Arrays;
 import java.util.Objects;
@@ -184,5 +186,24 @@ public class MEPatternTerminal extends METerminal {
             toOut = Pattern.setRecipe(toOut, recipe);
         }
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+    }
+
+    @Override
+    protected BlockBreakHandler onBlockBreak() {
+        return new SimpleBlockBreakHandler() {
+
+            @Override
+            public void onBlockBreak(@Nonnull Block b) {
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
+
+                if (blockMenu != null) {
+                    blockMenu.dropItems(b.getLocation(), getInputSlot());
+                    blockMenu.dropItems(b.getLocation(), getCraftSlots());
+                    blockMenu.dropItems(b.getLocation(), getCraftOutputSlots());
+                    blockMenu.dropItems(b.getLocation(), getPatternSlot());
+                    blockMenu.dropItems(b.getLocation(), getPatternOutputSlot());
+                }
+            }
+        };
     }
 }
