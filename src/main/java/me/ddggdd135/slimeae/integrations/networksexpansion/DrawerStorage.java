@@ -7,7 +7,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,10 +66,8 @@ public class DrawerStorage implements IStorage {
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
         if (data == null) return new ItemStack[0];
-        io.github.sefiraat.networks.network.stackcaches.ItemRequest[] networksRequests = Arrays.stream(requests)
-                .map(x ->
-                        new io.github.sefiraat.networks.network.stackcaches.ItemRequest(x.getTemplate(), x.getAmount()))
-                .toArray(io.github.sefiraat.networks.network.stackcaches.ItemRequest[]::new);
+        io.github.sefiraat.networks.network.stackcaches.ItemRequest[] networksRequests =
+                SlimeAEPlugin.getNetworksIntegration().asNetworkRequests(requests);
         ItemStorage storage = new ItemStorage();
         for (io.github.sefiraat.networks.network.stackcaches.ItemRequest request : networksRequests) {
             ItemStack itemStack = data.requestItem(request);

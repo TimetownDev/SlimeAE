@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.core.items;
 
+import io.github.sefiraat.networks.slimefun.NetworkSlimefunItems;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
@@ -121,6 +122,7 @@ public class SlimefunAEItems {
                     "",
                     "{#3366ff>}将方块的存储接入AE网络{#33ccf3<}",
                     "&e支持蓬松桶和无尽存储单元",
+                    "&e支持网络量子存储和网络抽屉",
                     "&e不支持原版容器"));
     public static final SlimefunItemStack ME_CRAFTING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&fME合成终端"));
@@ -135,6 +137,9 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
             "ME_ENERGY_ACCEPTOR",
             new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器", "", "&c现在它还没用 敬请期待"));
+    public static final SlimefunItemStack NETWORKS_EXPANSION_SWITCH = new SlimefunItemStack(
+            "NETWORKS_EXPANSION_SWITCH",
+            new AdvancedCustomItemStack(Material.MAGENTA_GLAZED_TERRACOTTA, "&a网络交换机", "", "&c用它将AE网络和网络拓展连接"));
 
     // MATERIAL
     public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
@@ -502,6 +507,23 @@ public class SlimefunAEItems {
                             new ItemStack(Material.LAPIS_LAZULI)
                         })
                 .register(plugin);
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded())
+            new NetworksExpansionSwitch(
+                            SlimefunAEItemGroups.MACHINE,
+                            NETWORKS_EXPANSION_SWITCH,
+                            RecipeType.ENHANCED_CRAFTING_TABLE,
+                            new ItemStack[] {
+                                new ItemStack(Material.IRON_INGOT),
+                                new ItemStack(Material.GLASS),
+                                new ItemStack(Material.IRON_INGOT),
+                                ME_INTERFACE,
+                                NetworkSlimefunItems.NETWORK_CONTROLLER.getItem(),
+                                ME_INTERFACE,
+                                new ItemStack(Material.IRON_INGOT),
+                                new ItemStack(Material.GLASS),
+                                new ItemStack(Material.IRON_INGOT)
+                            })
+                    .register(plugin);
         // Materials
 
         SlimefunItem crystal_certus_quartz = new SlimefunItem(
