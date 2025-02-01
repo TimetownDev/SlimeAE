@@ -21,8 +21,7 @@ public class NetworkUtils {
         for (BlockFace blockFace : Valid_Faces) {
             Location testLocation = block.getLocation().add(blockFace.getDirection());
             if (blocks.contains(testLocation)) continue;
-            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)
-                    && !testLocation.getBlock().getType().isAir()) {
+            if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) {
                 blocks.add(testLocation);
                 scan(testLocation.getBlock(), blocks);
             } else {
