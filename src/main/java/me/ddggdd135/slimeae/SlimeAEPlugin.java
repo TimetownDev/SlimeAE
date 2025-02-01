@@ -60,7 +60,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         Bukkit.getConsoleSender().sendMessage("############################################");
         Bukkit.getConsoleSender()
                 .sendMessage(CMIChatColor.translate("               &aSlime&dAE &f- &a粘液&dAE              "));
-        Bukkit.getConsoleSender().sendMessage(" 作者: JWJUN233233 测试: Zombie_2333,HolderSea");
+        Bukkit.getConsoleSender().sendMessage(" 作者: JWJUN233233 测试: Zombie_2333,balugaq");
         Bukkit.getConsoleSender().sendMessage("############################################");
         tryUpdate();
 

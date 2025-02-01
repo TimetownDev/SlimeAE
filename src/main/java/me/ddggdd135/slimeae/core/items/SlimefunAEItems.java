@@ -34,7 +34,7 @@ public class SlimefunAEItems {
             "AE_DEBUGGER1", "6e3818350104939ea10e184c25c60193e6d409c431ea92b6af3a91a745112bbc", "&e测试者 &cZombie_2333");
 
     public static final SlimefunItemStack DEBUGGER2 = new SlimefunItemStack(
-            "AE_DEBUGGER2", "fe85ac40d1952d4a4a8faa123fa0dd496dc080c7bf777f1eacd962cf8cd4d322", "&e测试者 &1HolderSea");
+            "AE_DEBUGGER2", "73112785f64d814103931505ace00048c087337785550c99a67449c392b39772", "&e测试者 &6balugaq");
 
     // CABLE
     public static final SlimefunItemStack ME_GLASS_CABLE = new SlimefunItemStack(
