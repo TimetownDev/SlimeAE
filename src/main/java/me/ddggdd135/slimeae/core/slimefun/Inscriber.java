@@ -5,12 +5,12 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import javax.annotation.Nonnull;
-import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
+import me.ddggdd135.slimeae.api.abstracts.AEMachineBlock;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class Inscriber extends AbstractMachineBlock {
+public class Inscriber extends AEMachineBlock {
     public Inscriber(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
