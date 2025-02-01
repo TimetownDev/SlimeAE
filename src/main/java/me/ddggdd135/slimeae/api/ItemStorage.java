@@ -51,6 +51,7 @@ public class ItemStorage implements IStorage {
 
     public void addItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
+            if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
             if (storage.containsKey(template)) {
                 int amount = storage.get(template);
