@@ -127,7 +127,7 @@ public class MEExportBus extends MEBus {
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
         super.init(preset);
-        for (int slot : Setting_Slots) {
+        for (int slot : getSettingSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
         }
     }
@@ -136,7 +136,7 @@ public class MEExportBus extends MEBus {
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
-        for (int slot : Setting_Slots) {
+        for (int slot : getSettingSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir())
                 ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
@@ -188,5 +188,9 @@ public class MEExportBus extends MEBus {
             52,
             53 // 移除45,46,47用于卡槽
         };
+    }
+
+    public int[] getSettingSlots() {
+        return Setting_Slots;
     }
 }

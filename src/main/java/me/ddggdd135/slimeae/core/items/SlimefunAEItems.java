@@ -12,6 +12,7 @@ import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
+import me.ddggdd135.slimeae.core.slimefun.tools.MemoryCard;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -296,6 +297,11 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(
                     Version.getCurrent().isEqualOrHigher(Version.v1_20_R1) ? Material.PRISMARINE_SHARD : Material.PAPER,
                     "{#33ccf3}编码样板"));
+
+    // TOOLS
+    public static final SlimefunItemStack MEMORY_CARD = new SlimefunItemStack(
+            "MEMORY_CARD",
+            new AdvancedCustomItemStack(Material.PAPER, "&e内存卡", "", "&e复制ME设备的设置", "", "&eShift右键 复制设置", "&e右键 应用设置"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
@@ -908,6 +914,17 @@ public class SlimefunAEItems {
                 .register(plugin);
         new MECreativeItemStorageCell(
                         SlimefunAEItemGroups.CELL, ME_CREATIVE_ITEM_STORAGE_CELL, RecipeType.NULL, new ItemStack[0])
+                .register(plugin);
+        // TOOLS
+
+        new MemoryCard(SlimefunAEItemGroups.TOOL, MEMORY_CARD, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    LOGIC_PROCESSOR,
+                    new ItemStack(Material.IRON_INGOT),
+                    new ItemStack(Material.IRON_INGOT),
+                    new ItemStack(Material.GOLD_INGOT),
+                    new ItemStack(Material.REDSTONE),
+                    new ItemStack(Material.GOLD_INGOT)
+                })
                 .register(plugin);
     }
 }

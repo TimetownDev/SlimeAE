@@ -22,6 +22,7 @@ public class SlimefunAEItemGroups {
             Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ,
             "{#Fuchsia_Pink}材料");
     public static final ItemStack CELL_CURSOR = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件");
+    public static final ItemStack TOOL_CURSOR = new AdvancedCustomItemStack(Material.BLAZE_ROD, "&e工具");
     public static final MainItemGroup MAIN_ITEM_GROUP =
             new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_CURSOR);
     public static final DummyItemGroup INFO =
@@ -34,6 +35,8 @@ public class SlimefunAEItemGroups {
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), MATERIAL_CURSOR);
     public static final DummyItemGroup CELL =
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), CELL_CURSOR);
+    public static final DummyItemGroup TOOL =
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "tool"), TOOL_CURSOR);
 
     public static void onSetup(SlimeAEPlugin plugin) {
         MAIN_ITEM_GROUP.register(plugin);
@@ -42,10 +45,12 @@ public class SlimefunAEItemGroups {
         MACHINE.register(plugin);
         MATERIAL.register(plugin);
         CELL.register(plugin);
+        TOOL.register(plugin);
         MAIN_ITEM_GROUP.addItemGroup(INFO);
         MAIN_ITEM_GROUP.addItemGroup(CABLE);
         MAIN_ITEM_GROUP.addItemGroup(MACHINE);
         MAIN_ITEM_GROUP.addItemGroup(MATERIAL);
         MAIN_ITEM_GROUP.addItemGroup(CELL);
+        MAIN_ITEM_GROUP.addItemGroup(TOOL);
     }
 }
