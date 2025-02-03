@@ -108,7 +108,7 @@ public class FluffyBarrelStorage implements IStorage {
     public int getTier(@Nonnull ItemStack itemStack) {
         ItemStack storedItem = barrel.getStoredItem(block);
         if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
-            return 1000;
+            return 2000;
         }
 
         return 0;

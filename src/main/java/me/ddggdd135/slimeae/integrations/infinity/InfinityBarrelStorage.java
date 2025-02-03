@@ -103,7 +103,7 @@ public class InfinityBarrelStorage implements IStorage {
         if (meta != null) stored.setItemMeta(meta);
         if (Boolean.TRUE.equals(
                 ReflectionUtils.invokePrivateMethod(cache, "matches", new Class<?>[] {ItemStack.class}, itemStack)))
-            return 1000;
+            return 2000;
 
         return 0;
     }
