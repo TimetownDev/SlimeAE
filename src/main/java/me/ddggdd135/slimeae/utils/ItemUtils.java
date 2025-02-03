@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTContainer;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
@@ -57,6 +58,7 @@ import org.bukkit.persistence.PersistentDataType;
  */
 public class ItemUtils {
     public static final String ITEM_STORAGE = "item_storage";
+    public static final String DISPLAY_ITEM = "display_item";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -721,17 +723,26 @@ public class ItemUtils {
             meta.setLore(lore);
         }
         result.setItemMeta(meta);
+        NBT.modify(result, x -> {
+            x.setBoolean(DISPLAY_ITEM, true);
+        });
         return result;
     }
 
-    @Nullable public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
+    @Nullable public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack, boolean hasLore) {
         ItemStack result = itemStack.asOne();
         ItemMeta meta = result.getItemMeta();
-        List<String> lore = meta.getLore();
-        lore.remove(lore.size() - 1);
-        lore.remove(lore.size() - 1);
-        meta.setLore(lore);
+        if (hasLore) {
+            List<String> lore = meta.getLore();
+            lore.remove(lore.size() - 1);
+            lore.remove(lore.size() - 1);
+            meta.setLore(lore);
+        }
         result.setItemMeta(meta);
+
+        NBT.modify(result, x -> {
+            x.removeKey(DISPLAY_ITEM);
+        });
         return result;
     }
 

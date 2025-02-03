@@ -2,6 +2,9 @@ package me.ddggdd135.slimeae.utils;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,14 +20,24 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 
 public class RecipeUtils {
-    public static final Set<RecipeType> SUPPORTED_RECIPE_TYPES = new HashSet<>();
+    public static final Map<RecipeType, MultiBlockMachine> SUPPORTED_RECIPE_TYPES = new HashMap<>();
 
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
         if (slimefunItem != null) {
-            if (SUPPORTED_RECIPE_TYPES.contains(slimefunItem.getRecipeType())) {
+            if (SUPPORTED_RECIPE_TYPES.containsKey(slimefunItem.getRecipeType())) {
                 return new CraftingRecipe(
                         CraftType.CRAFTING_TABLE, slimefunItem.getRecipe(), slimefunItem.getRecipeOutput());
+            } else {
+                for (Map.Entry<RecipeType, MultiBlockMachine> entry : SUPPORTED_RECIPE_TYPES.entrySet()) {
+                    if (entry.getValue() == null) continue;
+                    for (ItemStack[] input : RecipeType.getRecipeInputList(entry.getValue())) {
+                        ItemStack output = RecipeType.getRecipeOutputList(entry.getValue(), input);
+                        if (SlimefunUtils.isItemSimilar(itemStack, output, true, false)) {
+                            return new CraftingRecipe(CraftType.CRAFTING_TABLE, input, output);
+                        }
+                    }
+                }
             }
 
             return new CraftingRecipe(CraftType.COOKING, slimefunItem.getRecipe(), slimefunItem.getRecipeOutput());
@@ -68,20 +81,90 @@ public class RecipeUtils {
         return null;
     }
 
+    @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack[] input) {
+        for (Map.Entry<RecipeType, MultiBlockMachine> entry : SUPPORTED_RECIPE_TYPES.entrySet()) {
+            if (entry.getValue() == null) continue;
+            in:
+            for (ItemStack[] input1 : RecipeType.getRecipeInputList(entry.getValue())) {
+                for (int i = 0; i < Math.max(input.length, input1.length); i++) {
+                    ItemStack x = null;
+                    ItemStack y = null;
+                    if (input.length > i) {
+                        x = input[i];
+                    }
+                    if (input1.length > i) {
+                        y = input1[i];
+                    }
+                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
+                        continue in;
+                    }
+                }
+
+                return new CraftingRecipe(
+                        CraftType.CRAFTING_TABLE, input1, RecipeType.getRecipeOutputList(entry.getValue(), input1));
+            }
+        }
+
+        Recipe minecraftRecipe =
+                Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
+        if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
+            return new CraftingRecipe(
+                    CraftType.CRAFTING_TABLE,
+                    shapedRecipe.getIngredientMap().values().stream()
+                            .filter(Objects::nonNull)
+                            .map(x -> new ItemStack(x.getType(), x.getAmount()))
+                            .toArray(ItemStack[]::new),
+                    new ItemStack(
+                            shapedRecipe.getResult().getType(),
+                            shapedRecipe.getResult().getAmount()));
+        }
+        if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
+            return new CraftingRecipe(
+                    CraftType.CRAFTING_TABLE,
+                    Arrays.stream(shapelessRecipe.getIngredientList().toArray(new ItemStack[0]))
+                            .filter(Objects::nonNull)
+                            .map(x -> new ItemStack(x.getType(), x.getAmount()))
+                            .toArray(ItemStack[]::new),
+                    new ItemStack(
+                            shapelessRecipe.getResult().getType(),
+                            shapelessRecipe.getResult().getAmount()));
+        }
+        if (minecraftRecipe instanceof CookingRecipe cookingRecipe)
+            return new CraftingRecipe(
+                    CraftType.COOKING,
+                    new ItemStack[] {
+                        new ItemStack(
+                                cookingRecipe.getInput().getType(),
+                                cookingRecipe.getInput().getAmount())
+                    },
+                    new ItemStack(
+                            cookingRecipe.getResult().getType(),
+                            cookingRecipe.getResult().getAmount()));
+
+        return null;
+    }
+
     static {
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.ENHANCED_CRAFTING_TABLE);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.MAGIC_WORKBENCH);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.ARMOR_FORGE);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.SMELTERY);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.ANCIENT_ALTAR);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.COMPRESSOR);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.GRIND_STONE);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.JUICER);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.ORE_CRUSHER);
-        SUPPORTED_RECIPE_TYPES.add(RecipeType.PRESSURE_CHAMBER);
+        SUPPORTED_RECIPE_TYPES.put(RecipeType.ENHANCED_CRAFTING_TABLE, (MultiBlockMachine)
+                SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.MAGIC_WORKBENCH, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.MAGIC_WORKBENCH));
+        SUPPORTED_RECIPE_TYPES.put(RecipeType.ARMOR_FORGE, null);
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.SMELTERY, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.SMELTERY));
+        SUPPORTED_RECIPE_TYPES.put(RecipeType.ANCIENT_ALTAR, null);
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.COMPRESSOR, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.COMPRESSOR));
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.GRIND_STONE, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.GRIND_STONE));
+        SUPPORTED_RECIPE_TYPES.put(RecipeType.JUICER, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.JUICER));
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.ORE_CRUSHER, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.ORE_CRUSHER));
+        SUPPORTED_RECIPE_TYPES.put(RecipeType.PRESSURE_CHAMBER, (MultiBlockMachine)
+                SlimefunItem.getByItem(SlimefunItems.PRESSURE_CHAMBER));
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
-            SUPPORTED_RECIPE_TYPES.add(TERecipeType.NANOBOT_CRAFTER);
+            SUPPORTED_RECIPE_TYPES.put(TERecipeType.NANOBOT_CRAFTER, null);
         }
     }
 }

@@ -7,38 +7,32 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 
 public class MECraftingTerminal extends METerminal {
     public MECraftingTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -192,75 +186,40 @@ public class MECraftingTerminal extends METerminal {
         if (blockMenu == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) return;
-        if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
-            for (HumanEntity viewer : blockMenu.getInventory().getViewers()) {
-                viewer.sendMessage(
-                        CMIChatColor.translate("&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
-            }
-            return;
-        }
-        ItemStack matched = matchItem(block);
-        if (matched == null || matched.getType().isAir()) return;
+        CraftingRecipe recipe = matchRecipe(block);
+        if (recipe == null) return;
         IStorage networkStorage = info.getStorage();
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(matched);
-        if (slimefunItem != null) {
-            ItemStack[] recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
-            for (int i = 0; i < 9; i++) {
-                ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
-                if (itemStack == null || itemStack.getType().isAir()) continue;
-                itemStack.setAmount(itemStack.getAmount() - recipe[i].getAmount());
-                if (itemStack.getAmount() == 0) {
-                    ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(recipe[i], recipe[i].getAmount()));
-                    if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
-                }
-            }
-        } else {
-            List<ItemStack> craftingSlots = new ArrayList<>();
-            for (int slot : getCraftSlots()) {
-                craftingSlots.add(blockMenu.getItemInSlot(slot));
-            }
-            Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
-            if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
-                for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
-                    if (itemStack == null || itemStack.getType().isAir()) continue;
-                    ItemStack backup = itemStack.clone();
-                    itemStack.setAmount(itemStack.getAmount() - 1);
-                    if (itemStack.getAmount() == 0) {
-                        ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(backup, 1));
-                        if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
-                    }
-                }
+        ItemStack[] input = recipe.getInput();
+        for (int i = 0; i < input.length; i++) {
+            ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+            itemStack.setAmount(itemStack.getAmount() - input[i].getAmount());
+            if (itemStack.getAmount() == 0) {
+                ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(input[i], input[i].getAmount()));
+                if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
             }
         }
     }
 
     @Nullable public ItemStack matchItem(@Nonnull Block block) {
+        CraftingRecipe recipe = matchRecipe(block);
+
+        if (recipe == null || recipe.getOutput().length != 1) return null;
+        return recipe.getOutput()[0].clone();
+    }
+
+    public CraftingRecipe matchRecipe(@Nonnull Block block) {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (inv == null) return null;
-        List<ItemStack> craftingSlots = new ArrayList<>();
+
+        ItemStack[] inputs;
+        List<ItemStack> inputList = new ArrayList<>();
         for (int slot : getCraftSlots()) {
-            craftingSlots.add(inv.getItemInSlot(slot));
-        }
-        ItemStack matched = null;
-        recipe:
-        for (SlimefunItem slimefunItem : Slimefun.getRegistry().getEnabledSlimefunItems().stream()
-                .filter(x -> x.getRecipeType() == RecipeType.ENHANCED_CRAFTING_TABLE)
-                .toList()) {
-            ItemStack[] recipe = Arrays.copyOf(slimefunItem.getRecipe(), 9);
-            for (int i = 0; i < 9; i++) {
-                ItemStack craftingSlot = craftingSlots.get(i);
-                ItemStack recipeItem = recipe[i];
-                if (!SlimefunUtils.isItemSimilar(craftingSlot, recipeItem, true, true)) continue recipe;
-            }
-            matched = slimefunItem.getRecipeOutput();
+            inputList.add(inv.getItemInSlot(slot));
         }
 
-        if (matched == null) {
-            Recipe recipe = Bukkit.getCraftingRecipe(craftingSlots.toArray(new ItemStack[0]), block.getWorld());
-            if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) matched = recipe.getResult();
-        }
-        return matched;
+        inputs = inputList.toArray(ItemStack[]::new);
+        return RecipeUtils.getRecipe(inputs);
     }
 
     @Override

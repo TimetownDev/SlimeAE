@@ -155,8 +155,7 @@ public class ViewitemsCommand extends SubCommand {
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
                                 && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
-                            ItemStack template =
-                                    ItemUtils.getDisplayItem(itemStack).clone();
+                            ItemStack template = ItemUtils.getDisplayItem(itemStack, true);
                             template.setAmount(template.getMaxStackSize());
                             if (clickAction.isShiftClicked()
                                     && InvUtils.fits(
