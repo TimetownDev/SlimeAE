@@ -7,9 +7,8 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
-import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.api.SubCommand;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import org.bukkit.command.Command;
@@ -57,12 +56,11 @@ public class ApplyUUIDCommand extends SubCommand {
                 return false;
             }
 
-            ResultWithItem<MEStorageCellCache> data = MEItemStorageCell.getStorage(itemStack);
+            MEStorageCellCache data = MEItemStorageCell.getStorage(itemStack);
             if (data == null) {
                 commandSender.sendMessage(CMIChatColor.translate("&e你确定你拿着存储元件？"));
                 return false;
             }
-            player.getInventory().setItemInMainHand(data.getItemStack());
 
             UUID uuid;
             try {
@@ -73,10 +71,9 @@ public class ApplyUUIDCommand extends SubCommand {
             }
 
             itemStack = player.getInventory().getItemInMainHand();
-            NBTItem nbtItem = new NBTItem(itemStack);
-            nbtItem.setUUID(UUID_KEY, uuid);
-
-            player.getInventory().setItemInMainHand(nbtItem.getItem());
+            NBT.modify(itemStack, x -> {
+                x.setUUID(UUID_KEY, uuid);
+            });
             commandSender.sendMessage(CMIChatColor.translate("&e修改成功"));
         }
         return false;

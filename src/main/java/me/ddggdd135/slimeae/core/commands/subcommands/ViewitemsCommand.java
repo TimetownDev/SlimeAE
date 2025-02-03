@@ -72,14 +72,11 @@ public class ViewitemsCommand extends SubCommand {
                 return false;
             }
 
-            ResultWithItem<MEStorageCellCache> result = MEItemStorageCell.getStorage(itemStack);
-            if (result == null) {
+            MEStorageCellCache data = MEItemStorageCell.getStorage(itemStack);
+            if (data == null) {
                 commandSender.sendMessage(CMIChatColor.translate("&e你确定你拿着存储元件？"));
                 return false;
             }
-
-            MEStorageCellCache data = result.getResult();
-            player.getInventory().setItemInMainHand(result.getItemStack());
 
             filterCache.put(data.getUuid(), "");
             sortCache.put(data.getUuid(), 0);

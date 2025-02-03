@@ -11,9 +11,10 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompound;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBT;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -36,17 +37,18 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
     }
 
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
-        NBTItem nbtItem = new NBTItem(itemStack);
-        if (!nbtItem.hasTag("recipe", NBTType.NBTTagCompound)) return null;
-        NBTCompound compound = nbtItem.getOrCreateCompound("recipe");
-        return new CraftingRecipe(
-                compound.getEnum("crafting_type", CraftType.class),
-                compound.getItemStackArray("input"),
-                compound.getItemStackArray("output"));
+        return NBT.get(itemStack, x -> {
+            if (!x.hasTag("recipe", NBTType.NBTTagCompound)) return null;
+            ReadableNBT compound = x.getCompound("recipe");
+            return new CraftingRecipe(
+                    compound.getEnum("crafting_type", CraftType.class),
+                    compound.getItemStackArray("input"),
+                    compound.getItemStackArray("output"));
+        });
     }
 
     @Nonnull
-    public static ItemStack setRecipe(@Nonnull ItemStack itemStack, @Nonnull CraftingRecipe recipe) {
+    public static void setRecipe(@Nonnull ItemStack itemStack, @Nonnull CraftingRecipe recipe) {
         ItemMeta meta = itemStack.getItemMeta();
         List<String> lore = new ArrayList<>();
         lore.add("&a输入");
@@ -64,13 +66,13 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
         itemStack.setItemMeta(meta);
         // 先clone meta 不然nbt修改后因为bug会导致名称丢失
 
-        NBTItem nbtItem = new NBTItem(itemStack);
-        if (nbtItem.hasTag("recipe")) nbtItem.removeKey("recipe");
-        NBTCompound compound = nbtItem.getOrCreateCompound("recipe");
-        compound.setEnum("crafting_type", recipe.getCraftType());
-        compound.setItemStackArray("input", recipe.getInput());
-        compound.setItemStackArray("output", recipe.getOutput());
-        nbtItem.setUUID("uuid", UUID.randomUUID());
-        return nbtItem.getItem();
+        NBT.modify(itemStack, x -> {
+            if (x.hasTag("recipe")) x.removeKey("recipe");
+            ReadWriteNBT compound = x.getOrCreateCompound("recipe");
+            compound.setEnum("crafting_type", recipe.getCraftType());
+            compound.setItemStackArray("input", recipe.getInput());
+            compound.setItemStackArray("output", recipe.getOutput());
+            x.setUUID("uuid", UUID.randomUUID());
+        });
     }
 }

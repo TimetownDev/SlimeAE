@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -30,28 +30,33 @@ public class MEStorageCellCache implements IStorage {
         else {
             storages = new ConcurrentHashMap<>();
         }
-        NBTItem nbtItem = new NBTItem(itemStack);
-        uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
+        uuid = NBT.get(itemStack, x -> {
+            return x.getUUID(MEItemStorageCell.UUID_KEY);
+        });
         cache.put(uuid, this);
     }
 
-    @Nullable public static ResultWithItem<MEStorageCellCache> getMEStorageCellCache(@Nonnull ItemStack itemStack) {
-        ResultWithItem<Boolean> isCurrentServerResult = MEItemStorageCell.isCurrentServer(itemStack);
-        if (!isCurrentServerResult.getResult()) {
+    @Nullable public static MEStorageCellCache getMEStorageCellCache(@Nonnull ItemStack itemStack) {
+        if (!MEItemStorageCell.isCurrentServer(itemStack)) {
             return null;
         }
-        itemStack = isCurrentServerResult.getItemStack();
-        NBTItem nbtItem = new NBTItem(itemStack);
+
         UUID uuid = UUID.randomUUID();
-        if (!nbtItem.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray)) {
-            nbtItem.setUUID(MEItemStorageCell.UUID_KEY, uuid);
+        if (!NBT.get(itemStack, x -> {
+            return x.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray);
+        })) {
+            UUID finalUuid = uuid;
+            NBT.modify(itemStack, x -> {
+                x.setUUID(MEItemStorageCell.UUID_KEY, finalUuid);
+            });
         } else {
-            uuid = nbtItem.getUUID(MEItemStorageCell.UUID_KEY);
-            if (getMEStorageCellCache(uuid) != null)
-                return new ResultWithItem<>(getMEStorageCellCache(uuid), itemStack);
+            uuid = NBT.get(itemStack, x -> {
+                return x.getUUID(MEItemStorageCell.UUID_KEY);
+            });
+            if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
         }
 
-        return SlimeAEPlugin.getStorageCellDataController().loadData(nbtItem.getItem());
+        return SlimeAEPlugin.getStorageCellDataController().loadData(itemStack);
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(UUID uuid) {

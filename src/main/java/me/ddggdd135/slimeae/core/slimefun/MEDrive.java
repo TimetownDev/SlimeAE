@@ -15,7 +15,6 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
-import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -54,12 +53,9 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         ItemStack itemStack = blockMenu.getItemInSlot(slot);
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
-                                && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                            ResultWithItem<Boolean> result = MEItemStorageCell.isCurrentServer(itemStack);
-                            blockMenu.replaceExistingItem(slot, result.getItemStack());
-                            if (result.getResult())
-                                blockMenu.replaceExistingItem(
-                                        slot, MEItemStorageCell.updateLore(result.getItemStack()));
+                                && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+                                && MEItemStorageCell.isCurrentServer(itemStack)) {
+                            blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
                         }
                     }
                     blockMenu.dropItems(b.getLocation(), MEItemStorageCell_Slots);
@@ -78,12 +74,10 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             if (itemStack != null
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                ResultWithItem<Boolean> isCurrentServerResult = MEItemStorageCell.isCurrentServer(itemStack);
-                if (!isCurrentServerResult.getResult()) continue;
-                ResultWithItem<MEStorageCellCache> result =
-                        MEItemStorageCell.getStorage(isCurrentServerResult.getItemStack());
-                blockMenu.replaceExistingItem(slot, result.getItemStack());
-                storageCollection.addStorage(result.getResult());
+                if (!MEItemStorageCell.isCurrentServer(itemStack)) continue;
+                MEStorageCellCache result = MEItemStorageCell.getStorage(itemStack);
+
+                storageCollection.addStorage(result);
             }
         }
         return storageCollection;
@@ -115,20 +109,17 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 ItemStack itemStack = menu.getItemInSlot(i);
                 if (itemStack != null
                         && !itemStack.getType().isAir()
-                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                    ResultWithItem<Boolean> isCurrentServerResult = MEItemStorageCell.isCurrentServer(itemStack);
-                    menu.replaceExistingItem(slot, isCurrentServerResult.getItemStack());
-                    if (!isCurrentServerResult.getResult()) return true;
-                    isCurrentServerResult.setItemStack(
-                            MEItemStorageCell.updateLore(isCurrentServerResult.getItemStack()));
+                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+                        && MEItemStorageCell.isCurrentServer(itemStack)) {
+
+                    itemStack = MEItemStorageCell.updateLore(itemStack);
                     NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                     if (networkInfo == null) return true;
                     StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
-                    ResultWithItem<MEStorageCellCache> result =
-                            MEItemStorageCell.getStorage(isCurrentServerResult.getItemStack());
+                    MEStorageCellCache result = MEItemStorageCell.getStorage(itemStack);
                     if (result != null) {
-                        storageCollection.removeStorage(result.getResult());
-                        menu.replaceExistingItem(slot, result.getItemStack());
+                        storageCollection.removeStorage(result);
+                        menu.replaceExistingItem(slot, itemStack);
                     }
                 }
                 return true;
@@ -144,11 +135,9 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack != null
                     && !itemStack.getType().isAir()
-                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell) {
-                ResultWithItem<Boolean> isCurrentServerResult = MEItemStorageCell.isCurrentServer(itemStack);
-                blockMenu.replaceExistingItem(slot, isCurrentServerResult.getItemStack());
-                if (!isCurrentServerResult.getResult()) continue;
-                blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(isCurrentServerResult.getItemStack()));
+                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+                    && MEItemStorageCell.isCurrentServer(itemStack)) {
+                blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
                 blockMenu.markDirty();
                 Slimefun.getDatabaseManager()
                         .getBlockDataController()

@@ -160,7 +160,7 @@ public class MEPatternTerminal extends METerminal {
                             .filter(Objects::nonNull)
                             .filter(x -> !x.getType().isAir())
                             .toArray(ItemStack[]::new));
-            toOut = Pattern.setRecipe(toOut, recipe);
+            Pattern.setRecipe(toOut, recipe);
         } else {
             ItemStack[] inputs;
             List<ItemStack> inputList = new ArrayList<>();
@@ -183,7 +183,7 @@ public class MEPatternTerminal extends METerminal {
             }
             toOut.setAmount(1);
             in.subtract();
-            toOut = Pattern.setRecipe(toOut, recipe);
+            Pattern.setRecipe(toOut, recipe);
         }
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }

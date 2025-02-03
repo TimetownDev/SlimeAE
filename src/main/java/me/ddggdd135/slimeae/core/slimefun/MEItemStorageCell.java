@@ -15,10 +15,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.GuguSlimefunLib;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
-import me.ddggdd135.slimeae.api.ResultWithItem;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -52,10 +51,10 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         } else return meItemStorageCell.getSize();
     }
 
-    @Nullable public static ResultWithItem<MEStorageCellCache> getStorage(@Nonnull ItemStack itemStack) {
+    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
         if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
-            return new ResultWithItem<>(new MEStorageCellCache(itemStack), itemStack);
+            return new MEStorageCellCache(itemStack);
         return MEStorageCellCache.getMEStorageCellCache(itemStack);
     }
 
@@ -68,8 +67,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         //        list.addAll(ItemUtils.toNBT(getStorage(itemStack).getStorage()));
         //        nbtItem.applyNBT(itemStack);
 
-        SlimeAEPlugin.getStorageCellDataController()
-                .updateAsync(getStorage(itemStack).getResult());
+        SlimeAEPlugin.getStorageCellDataController().updateAsync(getStorage(itemStack));
     }
 
     /**
@@ -79,9 +77,8 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
      */
     public static ItemStack updateLore(@Nonnull ItemStack itemStack) {
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return itemStack;
-        ResultWithItem<MEStorageCellCache> result = MEStorageCellCache.getMEStorageCellCache(itemStack);
-        MEStorageCellCache meStorageCellCache = result.getResult();
-        ItemStack toReturn = result.getItemStack();
+        MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
+        ItemStack toReturn = itemStack.clone();
         List<String> lores = new ArrayList<>();
         List<Map.Entry<ItemStack, Integer>> storages = meStorageCellCache.getStorage().entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
@@ -100,19 +97,21 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     }
 
     @Nonnull
-    public static ResultWithItem<UUID> getServerUUID(@Nonnull ItemStack itemStack) {
-        NBTItem nbtItem = new NBTItem(itemStack);
-        UUID uuid = nbtItem.getUUID(SERVER_UUID_KEY);
+    public static UUID getServerUUID(@Nonnull ItemStack itemStack) {
+        UUID uuid = NBT.get(itemStack, x -> {
+            return x.getUUID(SERVER_UUID_KEY);
+        });
         if (uuid == null) {
-            nbtItem.setUUID(SERVER_UUID_KEY, GuguSlimefunLib.getServerUUID());
-            return new ResultWithItem<>(GuguSlimefunLib.getServerUUID(), nbtItem.getItem());
+            NBT.modify(itemStack, x -> {
+                x.setUUID(SERVER_UUID_KEY, GuguSlimefunLib.getServerUUID());
+            });
+            return GuguSlimefunLib.getServerUUID();
         }
 
-        return new ResultWithItem<>(uuid, itemStack);
+        return uuid;
     }
 
-    public static ResultWithItem<Boolean> isCurrentServer(@Nonnull ItemStack itemStack) {
-        ResultWithItem<UUID> result = getServerUUID(itemStack);
-        return new ResultWithItem<>(result.getResult().equals(GuguSlimefunLib.getServerUUID()), result.getItemStack());
+    public static boolean isCurrentServer(@Nonnull ItemStack itemStack) {
+        return getServerUUID(itemStack).equals(GuguSlimefunLib.getServerUUID());
     }
 }
