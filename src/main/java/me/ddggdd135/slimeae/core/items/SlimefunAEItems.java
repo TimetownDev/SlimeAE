@@ -74,6 +74,16 @@ public class SlimefunAEItems {
                     "&fME驱动器",
                     "",
                     "{#3366ff>}用于放置ME存储元件{#33ccf3<}"));
+    public static final SlimefunItemStack ME_IO_PORT = new SlimefunItemStack(
+            "ME_IO_PORT",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                            ? Material.CHISELED_BOOKSHELF
+                            : Material.BOOKSHELF,
+                    "&fME IO端口",
+                    "",
+                    "{#3366ff>}将物品存储元件里的物品输入至ME网络{#33ccf3<}",
+                    "{#3366ff>}或者将ME网络里的物品输出至物品元件{#33ccf3<}"));
     public static final SlimefunItemStack MOLECULAR_ASSEMBLER = new SlimefunItemStack(
             "MOLECULAR_ASSEMBLER",
             new AdvancedCustomItemStack(
@@ -369,6 +379,18 @@ public class SlimefunAEItems {
                     ME_GLASS_CABLE,
                     new ItemStack(Material.IRON_INGOT),
                     ENGINEERING_PROCESSOR,
+                    new ItemStack(Material.IRON_INGOT)
+                })
+                .register(plugin);
+        new MEIOPort(SlimefunAEItemGroups.MACHINE, ME_IO_PORT, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    new ItemStack(Material.GLASS),
+                    new ItemStack(Material.GLASS),
+                    new ItemStack(Material.GLASS),
+                    ME_DRIVE,
+                    ME_GLASS_CABLE,
+                    ME_DRIVE,
+                    new ItemStack(Material.IRON_INGOT),
+                    LOGIC_PROCESSOR,
                     new ItemStack(Material.IRON_INGOT)
                 })
                 .register(plugin);

@@ -21,10 +21,17 @@ public class MenuItems {
             "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}升级卡槽位"));
 
     public static final SlimefunItemStack PAGE_PREVIOUS_STACK = new SlimefunItemStack(
-            "_AE_MN_PAGE_PREVIOUS_STACK_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&b上一页"));
+            "_AE_MN_PAGE_PREVIOUS_STACK_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&c上一页"));
 
     public static final SlimefunItemStack PAGE_NEXT_STACK = new SlimefunItemStack(
-            "_AE_MN_PAGE_NEXT_STACK_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&c下一页"));
+            "_AE_MN_PAGE_NEXT_STACK_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a下一页"));
+    public static final SlimefunItemStack INPUT_MODE = new SlimefunItemStack(
+            "_AE_MN_INPUT_MODE_",
+            new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a输入模式", "", "&e左侧存储元件的物品将会输入AE网络"));
+
+    public static final SlimefunItemStack OUTPUT_MODE = new SlimefunItemStack(
+            "_AE_MN_OUTPUT_MODE_",
+            new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&a输出模式", "", "&eAE网络中的物品将会输出到左侧存储元件"));
 
     public static final SlimefunItemStack CHANGE_SORT_STACK = new SlimefunItemStack(
             "_AE_MN_CHANGE_SORT_STACK_", new AdvancedCustomItemStack(Material.BLUE_STAINED_GLASS_PANE, "&e更改排序方式"));

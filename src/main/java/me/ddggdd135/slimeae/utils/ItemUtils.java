@@ -184,7 +184,7 @@ public class ItemUtils {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
             if (storage.containsKey(template)) {
-                storage.put(template, storage.get(itemStack) + itemStack.getAmount());
+                storage.put(template, storage.get(template) + itemStack.getAmount());
             } else {
                 storage.put(template, itemStack.getAmount());
             }

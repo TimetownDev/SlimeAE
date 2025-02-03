@@ -34,5 +34,10 @@ public class AccelerationCard extends Card {
             // 额外调用一次onMEBusTick来加速处理
             meBus.onMEBusTick(block, item, data);
         }
+
+        // 处理ME IO端口
+        if (item instanceof MEIOPort meioPort) {
+            meioPort.onMEIOPortTick(block, item, data);
+        }
     }
 }
