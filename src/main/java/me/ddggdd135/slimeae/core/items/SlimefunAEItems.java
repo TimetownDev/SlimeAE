@@ -14,6 +14,7 @@ import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.core.slimefun.tools.MemoryCard;
 import me.ddggdd135.slimeae.core.slimefun.tools.WirelessTerminal;
+import me.ddggdd135.slimeae.core.slimefun.tools.Wrench;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -325,6 +326,12 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack WIRELESS_TERMINAL = new SlimefunItemStack(
             "WIRELESS_TERMINAL",
             new AdvancedCustomItemStack(Material.ITEM_FRAME, "{#Sky_Blue}无线终端", "", "&e便捷的访问AE网络", "&e需要使用ME安全终端进行绑定"));
+    public static final SlimefunItemStack CERTUS_QUARTZ_WRENCH = new SlimefunItemStack(
+            "CERTUS_QUARTZ_WRENCH",
+            new AdvancedCustomItemStack(Material.DIAMOND_HOE, "{#Zumthor}赛特斯石英扳手", "", "&e手持扳手右键可将大部分AE设备拆卸为掉落物形式"));
+    public static final SlimefunItemStack QUARTZ_WRENCH = new SlimefunItemStack(
+            "QUARTZ_WRENCH",
+            new AdvancedCustomItemStack(Material.IRON_HOE, "&f下界石英扳手", "", "&e手持扳手右键可将大部分AE设备拆卸为掉落物形式"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
@@ -1017,6 +1024,34 @@ public class SlimefunAEItems {
                             null,
                             SlimefunItems.CARBONADO_EDGED_CAPACITOR
                         })
+                .register(plugin);
+        new Wrench(
+                        SlimefunAEItemGroups.TOOL,
+                        CERTUS_QUARTZ_WRENCH,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            CRYSTAL_CERTUS_QUARTZ,
+                            null,
+                            CRYSTAL_CERTUS_QUARTZ,
+                            null,
+                            CRYSTAL_CERTUS_QUARTZ,
+                            null,
+                            CRYSTAL_CERTUS_QUARTZ,
+                            null,
+                            CRYSTAL_CERTUS_QUARTZ
+                        })
+                .register(plugin);
+        new Wrench(SlimefunAEItemGroups.TOOL, QUARTZ_WRENCH, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    new ItemStack(Material.QUARTZ),
+                    null,
+                    new ItemStack(Material.QUARTZ),
+                    null,
+                    new ItemStack(Material.QUARTZ),
+                    null,
+                    new ItemStack(Material.QUARTZ),
+                    null,
+                    new ItemStack(Material.QUARTZ)
+                })
                 .register(plugin);
     }
 }
