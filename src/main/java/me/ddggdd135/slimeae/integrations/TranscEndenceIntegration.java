@@ -4,8 +4,15 @@ import me.ddggdd135.slimeae.api.interfaces.Integration;
 import org.bukkit.Bukkit;
 
 public class TranscEndenceIntegration implements Integration {
+    private boolean cache = false;
+    private boolean isCached = false;
+
     @Override
     public boolean isLoaded() {
-        return Bukkit.getPluginManager().isPluginEnabled("TranscEndence");
+        if (!isCached) {
+            cache = Bukkit.getPluginManager().isPluginEnabled("TranscEndence");
+            isCached = true;
+        }
+        return cache;
     }
 }

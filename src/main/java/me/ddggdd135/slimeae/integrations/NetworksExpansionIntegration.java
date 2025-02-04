@@ -11,18 +11,23 @@ import me.ddggdd135.slimeae.integrations.networks.StorageToBarrelWrapper;
 import org.bukkit.Bukkit;
 
 public class NetworksExpansionIntegration implements Integration {
+    private boolean cache = false;
+    private boolean isCached = false;
+
     @Override
     public boolean isLoaded() {
-        if (Bukkit.getPluginManager().isPluginEnabled("Networks")) {
-            try {
-                Class.forName("com.ytdd9527.networksexpansion.utils.JavaUtil");
-                return true;
-            } catch (ClassNotFoundException e) {
-                return false;
+        if (!isCached) {
+            if (Bukkit.getPluginManager().isPluginEnabled("Networks")) {
+                try {
+                    Class.forName("com.ytdd9527.networksexpansion.utils.JavaUtil");
+                    cache = true;
+                } catch (ClassNotFoundException e) {
+                    cache = false;
+                }
             }
+            isCached = true;
         }
-
-        return false;
+        return cache;
     }
 
     public <T> T doBannedTask(NetworkRoot root, Function<NetworkRoot, T> action) {

@@ -6,21 +6,26 @@ import me.ddggdd135.slimeae.api.interfaces.Integration;
 import org.bukkit.Bukkit;
 
 public class NetworksIntegration implements Integration {
+    private boolean cache = false;
+    private boolean isCached = false;
+
     @Override
     public boolean isLoaded() {
-        if (Bukkit.getPluginManager().isPluginEnabled("Networks-Changed")) {
-            return true;
-        }
-        if (Bukkit.getPluginManager().isPluginEnabled("Networks")) {
-            try {
-                Class.forName("com.ytdd9527.networksexpansion.utils.JavaUtil");
-                return false;
-            } catch (ClassNotFoundException e) {
-                return true;
+        if (!isCached) {
+            if (Bukkit.getPluginManager().isPluginEnabled("Networks-Changed")) {
+                cache = true;
             }
+            if (Bukkit.getPluginManager().isPluginEnabled("Networks")) {
+                try {
+                    Class.forName("com.ytdd9527.networksexpansion.utils.JavaUtil");
+                    cache = true;
+                } catch (ClassNotFoundException e) {
+                    cache = false;
+                }
+            }
+            isCached = true;
         }
-
-        return false;
+        return cache;
     }
 
     public ItemRequest[] asNetworkRequests(me.ddggdd135.slimeae.api.ItemRequest[] requests) {
