@@ -115,21 +115,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
     }
 
     @Override
-    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {
-        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-        if (blockMenu == null) return;
-
-        ItemStack setting = blockMenu.getItemInSlot(getSettingSlot());
-        if (setting == null || setting.getType().isAir()) return;
-
-        SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
-        if (data == null) return;
-        SlimefunItem slimefunItem = SlimefunItem.getById(data.getSfId());
-        if (slimefunItem == null) return;
-
-        tickCards(block, slimefunItem, data);
-        onMEIOPortTick(block, slimefunItem, data);
-    }
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
     @Nonnull
     private BlockBreakHandler onBlockBreak() {
@@ -212,5 +198,22 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
     public int getSettingSlot() {
         return 13;
+    }
+
+    @Override
+    public void onNetworkTimeConsumingTick(Block block, NetworkInfo networkInfo) {
+        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return;
+
+        ItemStack setting = blockMenu.getItemInSlot(getSettingSlot());
+        if (setting == null || setting.getType().isAir()) return;
+
+        SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
+        if (data == null) return;
+        SlimefunItem slimefunItem = SlimefunItem.getById(data.getSfId());
+        if (slimefunItem == null) return;
+
+        tickCards(block, slimefunItem, data);
+        onMEIOPortTick(block, slimefunItem, data);
     }
 }

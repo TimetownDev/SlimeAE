@@ -18,4 +18,6 @@ public interface IMEObject {
     void onNetworkUpdate(Block block, NetworkInfo networkInfo);
 
     void onNetworkTick(Block block, NetworkInfo networkInfo);
+
+    default void onNetworkTimeConsumingTick(Block block, NetworkInfo networkInfo) {}
 }

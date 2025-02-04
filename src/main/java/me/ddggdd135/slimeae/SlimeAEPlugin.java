@@ -22,6 +22,7 @@ import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
 import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
 import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
+import me.ddggdd135.slimeae.tasks.NetworkTimeConsumingTask;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -45,6 +46,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
     private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
+    private final NetworkTimeConsumingTask networkTimeConsumingTask = new NetworkTimeConsumingTask();
     private final SlimeAECommand slimeAECommand = new SlimeAECommand();
 
     @Override
@@ -108,6 +110,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         networkTicker.start(this);
         networkChecker.start(this);
         networkRefresher.start(this);
+        networkTimeConsumingTask.start(this);
 
         slimeAECommand.addSubCommand(new HelpCommand());
         slimeAECommand.addSubCommand(new CleardataCommand());
@@ -244,6 +247,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkRefreshTask getNetworkRefresher() {
         return getInstance().networkRefresher;
+    }
+
+    @Nonnull
+    public static NetworkTimeConsumingTask getNetworkTimeConsumingTask() {
+        return getInstance().networkTimeConsumingTask;
     }
 
     @Nonnull
