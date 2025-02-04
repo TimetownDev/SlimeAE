@@ -267,7 +267,7 @@ public class AutoCraftingSession {
                     && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                 CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                 device.finishCrafting(deviceBlock);
-                itemCache.addItem(finished.getOutput());
+                if (finished != null) itemCache.addItem(finished.getOutput());
                 running--;
             }
         }
