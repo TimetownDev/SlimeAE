@@ -133,7 +133,7 @@ public class StorageCollection implements IStorage {
             ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
             for (ItemStack itemStack : itemStacks) {
                 if (itemStack != null && !itemStack.getType().isAir()) {
-                    takeCache.put(itemStack, storage);
+                    takeCache.put(itemStack.asOne(), storage);
                 }
             }
             rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
