@@ -321,35 +321,35 @@ public class ItemUtils {
     @Nullable public static IStorage getStorage(
             @Nonnull Block block, boolean checkNetwork, boolean isReadOnly, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        if (slimefunBlockData == null) return null;
         SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
 
-        if (slimefunBlockData != null) {
-            if (checkNetwork && slimefunItem instanceof IMEObject) {
-                if (!(slimefunItem instanceof MEInterface)) return null;
-                else isReadOnly = true;
-            }
-            if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
-                    return new InfinityBarrelStorage(block);
-                }
-            }
-            if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
-                    return new FluffyBarrelStorage(block);
-                }
-            }
-            if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
-                    || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
-                    return new QuantumStorage(block);
-                }
-            }
-            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
-                    return new DrawerStorage(block);
-                }
+        if (checkNetwork && slimefunItem instanceof IMEObject) {
+            if (!(slimefunItem instanceof MEInterface)) return null;
+            else isReadOnly = true;
+        }
+        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                return new InfinityBarrelStorage(block);
             }
         }
+        if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                return new FluffyBarrelStorage(block);
+            }
+        }
+        if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
+                || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
+                return new QuantumStorage(block);
+            }
+        }
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
+            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
+                return new DrawerStorage(block);
+            }
+        }
+
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return null;
         if (inv != null) {
