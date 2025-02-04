@@ -6,7 +6,6 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -14,7 +13,6 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -52,9 +50,7 @@ public class MEExportBus extends MEBus {
 
         for (int slot : Setting_Slots) {
             ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
-            if (setting == null
-                    || setting.getType().isAir()
-                    || SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
+            if (setting == null || setting.getType().isAir()) {
                 continue;
             }
 
@@ -83,12 +79,6 @@ public class MEExportBus extends MEBus {
         if (inv == null) return;
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(data.getLocation());
         if (info == null) return;
-        for (int slot : Setting_Slots) {
-            ItemStack setting = inv.getItemInSlot(slot);
-            if (setting == null || setting.getType().isAir()) {
-                ItemUtils.setSettingItem(inv.getInventory(), slot, MenuItems.Setting);
-            }
-        }
 
         onExport(data.getLocation().getBlock());
     }
@@ -127,20 +117,12 @@ public class MEExportBus extends MEBus {
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
         super.init(preset);
-        for (int slot : getSettingSlots()) {
-            preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
-        }
     }
 
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
-        for (int slot : getSettingSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir())
-                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
-        }
     }
 
     @Override
