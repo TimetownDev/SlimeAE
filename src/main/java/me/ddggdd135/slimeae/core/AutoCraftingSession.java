@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -28,15 +29,13 @@ import me.ddggdd135.slimeae.utils.KeyValuePair;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 public class AutoCraftingSession {
-    public static NamespacedKey CRAFTING_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "auto_crafting");
+    public static final String CRAFTING_KEY = "auto_crafting";
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final int count;
@@ -321,7 +320,6 @@ public class AutoCraftingSession {
                                 .toArray(String[]::new));
             }
             ItemMeta meta = itemStack.getItemMeta();
-            meta.getPersistentDataContainer().set(CRAFTING_KEY, PersistentDataType.BOOLEAN, true);
             List<String> lore = meta.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
@@ -329,6 +327,9 @@ public class AutoCraftingSession {
             if (i == 0 && running != 0) lore.add("&a合成中 &e" + running);
             meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
+            NBT.modify(itemStack, x -> {
+                x.setBoolean(CRAFTING_KEY, true);
+            });
             menu.addItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
@@ -348,9 +349,11 @@ public class AutoCraftingSession {
                 }
             }
             ItemMeta meta = itemStack.getItemMeta();
-            meta.getPersistentDataContainer().set(CRAFTING_KEY, PersistentDataType.BOOLEAN, true);
             meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
+            NBT.modify(itemStack, x -> {
+                x.setBoolean(CRAFTING_KEY, true);
+            });
             menu.addItem(maxSize - 1, itemStack);
         }
 

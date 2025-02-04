@@ -7,16 +7,13 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import me.ddggdd135.slimeae.utils.BlockUtils;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class Wrench extends SlimefunItem {
@@ -32,17 +29,8 @@ public class Wrench extends SlimefunItem {
             if (slimefunBlockData == null) return;
             if (!SUPPORTED_BLOCK_ID.contains(slimefunBlockData.getSfId())) return;
 
-            BlockBreakEvent breakEvent = new BlockBreakEvent(block, e.getPlayer());
-            Bukkit.getPluginManager().callEvent(breakEvent);
-            if (!breakEvent.isCancelled()) {
-                Slimefun.getDatabaseManager().getBlockDataController().removeBlock(block.getLocation());
-                block.setType(Material.AIR);
-            }
+            BlockUtils.breakBlock(block, e.getPlayer());
         });
-    }
-
-    public Set<String> getSupportedID() {
-        return SUPPORTED_BLOCK_ID;
     }
 
     static {

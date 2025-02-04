@@ -13,6 +13,7 @@ import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.core.slimefun.tools.MemoryCard;
+import me.ddggdd135.slimeae.core.slimefun.tools.NetworkTool;
 import me.ddggdd135.slimeae.core.slimefun.tools.WirelessTerminal;
 import me.ddggdd135.slimeae.core.slimefun.tools.Wrench;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -328,10 +329,18 @@ public class SlimefunAEItems {
             new AdvancedCustomItemStack(Material.ITEM_FRAME, "{#Sky_Blue}无线终端", "", "&e便捷的访问AE网络", "&e需要使用ME安全终端进行绑定"));
     public static final SlimefunItemStack CERTUS_QUARTZ_WRENCH = new SlimefunItemStack(
             "CERTUS_QUARTZ_WRENCH",
-            new AdvancedCustomItemStack(Material.DIAMOND_HOE, "{#Zumthor}赛特斯石英扳手", "", "&e手持扳手右键可将大部分AE设备拆卸为掉落物形式"));
+            new AdvancedCustomItemStack(Material.DIAMOND_HOE, "{#Zumthor}赛特斯石英扳手", "", "&e右键可将大部分AE设备拆卸为掉落物形式"));
     public static final SlimefunItemStack QUARTZ_WRENCH = new SlimefunItemStack(
             "QUARTZ_WRENCH",
             new AdvancedCustomItemStack(Material.IRON_HOE, "&f下界石英扳手", "", "&e手持扳手右键可将大部分AE设备拆卸为掉落物形式"));
+    public static final SlimefunItemStack NETWORK_TOOL = new SlimefunItemStack(
+            "NETWORK_TOOL",
+            new AdvancedCustomItemStack(
+                    Material.NETHERITE_HOE,
+                    "{#Fuchsia_Pink}网络工具",
+                    "",
+                    "&e右键可查看整个AE网络的各个网络元件",
+                    "&eShift右键可将大部分AE设备拆卸为掉落物形式"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
@@ -509,7 +518,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new METerminal(SlimefunAEItemGroups.MACHINE, ME_TERMINAL, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
-                    new ItemStack(Material.GLASS), FORMATION_CORE, ANNIHILATION_CORE, LOGIC_PROCESSOR
+                    QUARTZ_GLASS, FORMATION_CORE, ANNIHILATION_CORE, LOGIC_PROCESSOR
                 })
                 .register(plugin);
         new MECraftingTerminal(
@@ -1053,5 +1062,13 @@ public class SlimefunAEItems {
                     new ItemStack(Material.QUARTZ)
                 })
                 .register(plugin);
+        new NetworkTool(SlimefunAEItemGroups.TOOL, NETWORK_TOOL, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    CERTUS_QUARTZ_WRENCH, QUARTZ_GLASS, null, CALCULATION_PROCESSOR, new ItemStack(Material.CHEST)
+                })
+                .register(plugin);
+        RecipeType.ENHANCED_CRAFTING_TABLE.register(
+                new ItemStack[] {QUARTZ_WRENCH, QUARTZ_GLASS, null, CALCULATION_PROCESSOR, new ItemStack(Material.CHEST)
+                },
+                NETWORK_TOOL);
     }
 }
