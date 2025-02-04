@@ -56,6 +56,11 @@ public abstract class AEMachineBlock extends AbstractMachineBlock implements ICa
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
+                blockMenu.dropItems(b.getLocation(), getInputSlots());
+                blockMenu.dropItems(b.getLocation(), getOutputSlots());
+
+                getMachineProcessor().endOperation(b);
+
                 for (int slot : CARD_SLOTS) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null

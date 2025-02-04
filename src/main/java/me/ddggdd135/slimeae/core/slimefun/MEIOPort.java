@@ -138,6 +138,10 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
             @Override
             public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
+                if (blockMenu == null) return;
+
+                blockMenu.dropItems(b.getLocation(), getInputSlots());
+                blockMenu.dropItems(b.getLocation(), getOutputSlots());
 
                 for (int slot : getCardSlots()) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
