@@ -28,6 +28,7 @@ public class MemoryCard extends SlimefunItem {
     public MemoryCard(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler((ItemUseHandler) e -> {
+            e.cancel();
             if (e.getClickedBlock().isEmpty()) return;
             Block block = e.getClickedBlock().get();
             SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
@@ -104,8 +105,6 @@ public class MemoryCard extends SlimefunItem {
                 }
                 e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
             }
-
-            e.cancel();
         });
     }
 }

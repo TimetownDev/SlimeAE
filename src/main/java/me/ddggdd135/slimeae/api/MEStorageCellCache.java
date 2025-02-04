@@ -30,9 +30,17 @@ public class MEStorageCellCache implements IStorage {
         else {
             storages = new ConcurrentHashMap<>();
         }
-        uuid = NBT.get(itemStack, x -> {
+        UUID tmp = NBT.get(itemStack, x -> {
             return x.getUUID(MEItemStorageCell.UUID_KEY);
         });
+        if (tmp == null) {
+            tmp = UUID.randomUUID();
+            UUID finalTmp = tmp;
+            NBT.modify(itemStack, x -> {
+                x.setUUID(MEItemStorageCell.UUID_KEY, finalTmp);
+            });
+        }
+        uuid = tmp;
         cache.put(uuid, this);
     }
 
