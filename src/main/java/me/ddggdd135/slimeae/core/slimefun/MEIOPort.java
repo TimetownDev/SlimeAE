@@ -155,10 +155,6 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
         preset.drawBackground(BORDER_SLOTS);
-
-        for (int slot : getCardSlots()) {
-            preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
-        }
     }
 
     @Override
@@ -169,6 +165,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
             }
+            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }
 
         ItemStack setting = menu.getItemInSlot(getSettingSlot());

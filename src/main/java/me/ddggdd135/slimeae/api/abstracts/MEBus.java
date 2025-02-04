@@ -204,10 +204,6 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 getDownSlot(),
                 getDirectionalSlotPane(BlockFace.DOWN, Material.AIR, false),
                 (player, i, itemStack, clickAction) -> false);
-
-        for (int slot : getCardSlots()) {
-            preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
-        }
     }
 
     @Override
@@ -248,6 +244,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
             }
+            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }
     }
 

@@ -167,9 +167,6 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
         for (int slot : PATTERN_SLOTS) {
             preset.addMenuClickHandler(slot, ItemUtils.getPatternSlotClickHandler());
         }
-        for (int slot : getCardSlots()) {
-            preset.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler());
-        }
     }
 
     @Override
@@ -189,6 +186,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                     || menu.getItemInSlot(slot).getType().isAir()) {
                 menu.replaceExistingItem(slot, MenuItems.Card);
             }
+            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }
     }
 

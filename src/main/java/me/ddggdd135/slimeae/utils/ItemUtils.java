@@ -25,6 +25,7 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.abstracts.Card;
+import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -663,7 +664,7 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static ChestMenu.MenuClickHandler getCardSlotClickHandler() {
+    public static ChestMenu.MenuClickHandler getCardSlotClickHandler(@Nonnull Block block) {
         return new ChestMenu.AdvancedMenuClickHandler() {
             @Override
             public boolean onClick(
@@ -688,6 +689,11 @@ public class ItemUtils {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
                 }
+                SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+                if (slimefunBlockData == null) return false;
+                SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+                if (!(slimefunItem instanceof ICardHolder iCardHolder)) return false;
+                ICardHolder.updateCache(block, iCardHolder, slimefunBlockData);
 
                 return false;
             }
