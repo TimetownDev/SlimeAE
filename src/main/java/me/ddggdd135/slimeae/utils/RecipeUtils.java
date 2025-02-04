@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
+import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.sfiguz7.transcendence.lists.TERecipeType;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.CookingRecipe;
@@ -147,6 +148,8 @@ public class RecipeUtils {
     static {
         SUPPORTED_RECIPE_TYPES.put(RecipeType.ENHANCED_CRAFTING_TABLE, (MultiBlockMachine)
                 SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
+        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.CHARGER, null);
+        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.INSCRIBER, null);
         SUPPORTED_RECIPE_TYPES.put(
                 RecipeType.MAGIC_WORKBENCH, (MultiBlockMachine) SlimefunItem.getByItem(SlimefunItems.MAGIC_WORKBENCH));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.ARMOR_FORGE, null);
