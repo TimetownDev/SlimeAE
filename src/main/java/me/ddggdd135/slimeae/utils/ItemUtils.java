@@ -715,8 +715,8 @@ public class ItemUtils {
                 SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
                 if (slimefunBlockData == null) return false;
                 SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
-                if (!(slimefunItem instanceof ICardHolder iCardHolder)) return false;
-                ICardHolder.updateCache(block, iCardHolder, slimefunBlockData);
+                if (!(slimefunItem instanceof ICardHolder)) return false;
+                ICardHolder.cache.remove(block.getLocation());
 
                 return false;
             }
