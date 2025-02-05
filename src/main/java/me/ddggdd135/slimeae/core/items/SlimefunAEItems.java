@@ -604,7 +604,7 @@ public class SlimefunAEItems {
                 CRYSTAL_CERTUS_QUARTZ,
                 SlimefunAERecipeTypes.BLOCK_DESTROY,
                 new ItemStack[] {null, null, null, null, CERTUS_QUARTZ_ORE});
-        crystal_certus_quartz.setRecipeOutput(ItemUtils.createItems(CRYSTAL_CERTUS_QUARTZ, 5)[0]);
+        crystal_certus_quartz.setRecipeOutput(CRYSTAL_CERTUS_QUARTZ.asQuantity(5));
         crystal_certus_quartz.register(plugin);
         CrystalCertusQuartz crystalCertusQuartz = new CrystalCertusQuartz(plugin, CRYSTAL_CERTUS_QUARTZ);
         crystalCertusQuartz.register();

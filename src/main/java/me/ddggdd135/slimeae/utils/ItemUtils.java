@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.*;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -65,20 +64,18 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull ItemStack template, int amount) {
-        List<ItemStack> itemStacks = new ArrayList<>();
+        ItemStack[] itemStacks =
+                new ItemStack[(int) Math.max(1, Math.ceil(amount / (double) template.getMaxStackSize()))];
         int rest = amount;
-        while (true) {
+        for (int i = 0; i < itemStacks.length; i++) {
             if (rest <= template.getMaxStackSize()) {
-                ItemStack itemStack = template.asQuantity(rest);
-                itemStacks.add(itemStack);
-                break;
+                itemStacks[i] = template.asQuantity(rest);
             } else {
                 rest -= template.getMaxStackSize();
-                ItemStack itemStack = template.asQuantity(template.getMaxStackSize());
-                itemStacks.add(itemStack);
+                itemStacks[i] = template.asQuantity(template.getMaxStackSize());
             }
         }
-        return itemStacks.toArray(new ItemStack[0]);
+        return itemStacks;
     }
 
     /**
@@ -89,10 +86,31 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack[] createItems(@Nonnull Map<ItemStack, Integer> storage) {
-        return storage.entrySet().stream()
-                .filter(e -> e.getValue() > 0)
-                .flatMap(e -> Stream.of(createItems(e.getKey(), e.getValue())))
-                .toArray(ItemStack[]::new);
+        int len = 0;
+        for (Map.Entry<ItemStack, Integer> i : storage.entrySet()) {
+            len += (int)
+                    Math.max(1, Math.ceil(i.getValue() / (double) i.getKey().getMaxStackSize()));
+        }
+        ItemStack[] itemStacks = new ItemStack[len];
+
+        int c = 0;
+        for (Map.Entry<ItemStack, Integer> i : storage.entrySet()) {
+            int rest = i.getValue();
+            int l = (int)
+                    Math.max(1, Math.ceil(i.getValue() / (double) i.getKey().getMaxStackSize()));
+            ItemStack template = i.getKey();
+            for (int j = 0; j < l; j++) {
+                if (rest <= template.getMaxStackSize()) {
+                    itemStacks[c] = template.asQuantity(rest);
+                } else {
+                    rest -= template.getMaxStackSize();
+                    itemStacks[c] = template.asQuantity(template.getMaxStackSize());
+                }
+                c++;
+            }
+        }
+
+        return itemStacks;
     }
 
     /**

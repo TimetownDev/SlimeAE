@@ -82,7 +82,7 @@ public class MEStorageCellCache implements IStorage {
     private void trim(@Nonnull ItemStack template) {
         if (storages.containsKey(template) && storages.getOrDefault(template, 0) == 0) {
             storages.remove(template);
-            SlimeAEPlugin.getStorageCellDataController().deleteAsync(this, template);
+            SlimeAEPlugin.getStorageCellDataController().markDirty(this);
         }
     }
 
@@ -104,7 +104,7 @@ public class MEStorageCellCache implements IStorage {
             else toAdd = itemStack.getAmount();
             stored += toAdd;
             storages.put(template, amount + toAdd);
-            SlimeAEPlugin.getStorageCellDataController().updateAsync(this, template, amount + toAdd, amount == 0);
+            SlimeAEPlugin.getStorageCellDataController().markDirty(this);
             itemStack.setAmount(itemStack.getAmount() - toAdd);
             trim(itemStack);
         }
@@ -137,8 +137,7 @@ public class MEStorageCellCache implements IStorage {
                     itemStacks.addAll(List.of(tmp));
                     stored -= request.getAmount();
                     storages.put(request.getTemplate(), amount - request.getAmount());
-                    SlimeAEPlugin.getStorageCellDataController()
-                            .updateAsync(this, request.getTemplate(), amount - request.getAmount(), false);
+                    SlimeAEPlugin.getStorageCellDataController().markDirty(this);
                 } else {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));

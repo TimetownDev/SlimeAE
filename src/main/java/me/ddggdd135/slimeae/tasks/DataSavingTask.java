@@ -1,16 +1,11 @@
 package me.ddggdd135.slimeae.tasks;
 
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.interfaces.IMEObject;
-import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.scheduler.BukkitScheduler;
 
-public class NetworkTimeConsumingTask implements Runnable {
+public class DataSavingTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
     private boolean running = false;
@@ -18,7 +13,7 @@ public class NetworkTimeConsumingTask implements Runnable {
     private volatile boolean paused = false;
 
     public void start(@Nonnull SlimeAEPlugin plugin) {
-        this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
+        this.tickRate = SlimeAEPlugin.getInstance().getConfig().getInt("auto-save-period", 300) * 20;
 
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
         scheduler.runTaskTimerAsynchronously(plugin, this, tickRate, tickRate);
@@ -41,24 +36,15 @@ public class NetworkTimeConsumingTask implements Runnable {
             }
 
             running = true;
-            // Run our ticker code
+
             if (!halted) {
-
-                Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
-
-                for (NetworkInfo networkInfo : allNetworkData) {
-                    networkInfo.getChildren().forEach(x -> {
-                        IMEObject slimefunItem =
-                                SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
-                        if (slimefunItem == null) return;
-                        slimefunItem.onNetworkTimeConsumingTick(x.getBlock(), networkInfo);
-                    });
-                }
+                SlimeAEPlugin.getStorageCellDataController().saveAllAsync();
+                SlimeAEPlugin.getInstance().getLogger().info("开始保存ME存储元件数据");
             }
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()
                     .getLogger()
-                    .log(Level.SEVERE, x, () -> "An Exception was caught while ticking Networks for SlimeAE");
+                    .log(Level.SEVERE, x, () -> "An Exception was caught while saving data for SlimeAE");
         } finally {
             reset();
         }

@@ -1,11 +1,14 @@
 package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.api.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCellDataController extends DatabaseController<MEStorageCellCache> {
+    public final Set<MEStorageCellCache> needSave = new HashSet<>();
+
     public StorageCellDataController() {
         super(MEStorageCellCache.class);
     }
@@ -22,6 +25,13 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
                 + "item_base64 TEXT, "
                 + "amount BIGINT"
                 + ");");
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void shutdown() {
+        saveAllAsync();
+        super.shutdown();
     }
 
     @Override
@@ -113,5 +123,17 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         storageCellCache.updateStored(stored);
 
         return storageCellCache;
+    }
+
+    public void markDirty(MEStorageCellCache data) {
+        needSave.add(data);
+    }
+
+    public void saveAllAsync() {
+        Set<MEStorageCellCache> diff = new HashSet<>(needSave);
+        needSave.clear();
+        for (MEStorageCellCache data : diff) {
+            updateAsync(data);
+        }
     }
 }

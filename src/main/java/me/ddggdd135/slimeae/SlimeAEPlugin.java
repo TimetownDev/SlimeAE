@@ -19,10 +19,7 @@ import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.integrations.*;
-import me.ddggdd135.slimeae.tasks.NetworkCheckTask;
-import me.ddggdd135.slimeae.tasks.NetworkRefreshTask;
-import me.ddggdd135.slimeae.tasks.NetworkTickerTask;
-import me.ddggdd135.slimeae.tasks.NetworkTimeConsumingTask;
+import me.ddggdd135.slimeae.tasks.*;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -47,6 +44,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
     private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
     private final NetworkTimeConsumingTask networkTimeConsumingTask = new NetworkTimeConsumingTask();
+    private final DataSavingTask dataSavingTask = new DataSavingTask();
     private final SlimeAECommand slimeAECommand = new SlimeAECommand();
 
     @Override
@@ -111,6 +109,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         networkChecker.start(this);
         networkRefresher.start(this);
         networkTimeConsumingTask.start(this);
+        dataSavingTask.start(this);
 
         slimeAECommand.addSubCommand(new HelpCommand());
         slimeAECommand.addSubCommand(new CleardataCommand());
@@ -252,6 +251,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkTimeConsumingTask getNetworkTimeConsumingTask() {
         return getInstance().networkTimeConsumingTask;
+    }
+
+    @Nonnull
+    public static DataSavingTask getDataSavingTask() {
+        return getInstance().dataSavingTask;
     }
 
     @Nonnull
