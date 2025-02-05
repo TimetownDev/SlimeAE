@@ -117,11 +117,11 @@ public class AutoCraftingSession {
                 int need = in.get(template) * count;
 
                 if (amount >= need) {
-                    storage.tryTakeItem(new ItemRequest(template, need));
+                    storage.tryTakeItem(new ItemRequest(template, need, true));
                 } else {
                     int remainingNeed = need - amount;
                     if (amount > 0) {
-                        storage.tryTakeItem(new ItemRequest(template, amount));
+                        storage.tryTakeItem(new ItemRequest(template, amount, true));
                     }
 
                     // 尝试合成缺少的材料
@@ -274,7 +274,7 @@ public class AutoCraftingSession {
 
         Set<ItemStack> toPush = new HashSet<>(itemCache.getStorage().keySet());
         for (ItemStack itemStack : toPush) {
-            ItemStack[] items = itemCache.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE));
+            ItemStack[] items = itemCache.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
             networkStorage.pushItem(items);
             items = Arrays.stream(items).filter(x -> x.getAmount() != 0).toArray(ItemStack[]::new);
             itemCache.pushItem(items);

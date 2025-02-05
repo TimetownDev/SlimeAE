@@ -163,7 +163,7 @@ public class ItemUtils {
     public static ItemRequest[] createRequests(@Nonnull Map<ItemStack, Integer> itemStacks) {
         List<ItemRequest> requests = new ArrayList<>();
         for (ItemStack itemStack : itemStacks.keySet()) {
-            requests.add(new ItemRequest(itemStack, itemStacks.get(itemStack)));
+            requests.add(new ItemRequest(itemStack, itemStacks.get(itemStack), true));
         }
         return requests.toArray(new ItemRequest[0]);
     }
@@ -253,13 +253,10 @@ public class ItemUtils {
      * @param storage 要清理的存储映射
      */
     public static void trim(@Nonnull Map<ItemStack, Integer> storage) {
-        List<ItemStack> toRemove = new ArrayList<>();
-        for (ItemStack itemStack : storage.keySet()) {
-            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0)
-                toRemove.add(itemStack);
-        }
-        for (ItemStack itemStack : toRemove) {
-            storage.remove(itemStack);
+        for (Iterator<Map.Entry<ItemStack, Integer>> it = storage.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ItemStack, Integer> data = it.next();
+            ItemStack itemStack = data.getKey();
+            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0) it.remove();
         }
     }
 
@@ -363,7 +360,7 @@ public class ItemUtils {
         }
 
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        if (block.getBlockData().getMaterial().isAir()) return null;
+
         if (inv != null) {
             boolean finalIsReadOnly = isReadOnly;
             return new IStorage() {
@@ -553,8 +550,6 @@ public class ItemUtils {
             return null;
         }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-        // 下面这一行太花费性能
-        // if (block.getBlockData().getMaterial().isAir()) return null;
         if (inv != null) {
             int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
             if (outputSlots == null) return null;

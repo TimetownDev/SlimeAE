@@ -6,9 +6,14 @@ public class ItemRequest {
     private ItemStack template;
     private int amount;
 
-    public ItemRequest(ItemStack template, int amount) {
-        this.template = template.asOne();
+    public ItemRequest(ItemStack template, int amount, boolean unsafe) {
+        if (unsafe) this.template = template;
+        else this.template = template.asOne();
         this.amount = amount;
+    }
+
+    public ItemRequest(ItemStack template, int amount) {
+        this(template, amount, false);
     }
 
     public ItemStack getTemplate() {

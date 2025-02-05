@@ -72,7 +72,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     }
 
                     ItemStack target = meStorageCellCache.getStorage().keySet().toArray(ItemStack[]::new)[0];
-                    ItemStack[] tmp = meStorageCellCache.tryTakeItem(new ItemRequest(target, 10240));
+                    ItemStack[] tmp = meStorageCellCache.tryTakeItem(new ItemRequest(target, 10240, true));
                     networkStorage.pushItem(tmp);
                     tmp = ItemUtils.trimItems(tmp);
                     meStorageCellCache.pushItem(tmp);
@@ -99,7 +99,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 if (networkStorage.getStorage().isEmpty()) return;
 
                 ItemStack target = networkStorage.getStorage().keySet().toArray(ItemStack[]::new)[0];
-                ItemStack[] tmp = networkStorage.tryTakeItem(new ItemRequest(target, 10240));
+                ItemStack[] tmp = networkStorage.tryTakeItem(new ItemRequest(target, 10240, true));
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);
                 networkStorage.pushItem(tmp);
