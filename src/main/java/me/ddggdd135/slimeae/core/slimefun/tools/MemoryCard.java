@@ -11,11 +11,13 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.core.slimefun.MEExportBus;
 import me.ddggdd135.slimeae.core.slimefun.MEInterface;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -24,6 +26,7 @@ import org.bukkit.inventory.ItemStack;
 public class MemoryCard extends SlimefunItem {
     public static final String DIRECTION_KEY = "direction";
     public static final String OUTPUTS_KEY = "outputs";
+    public static final String TYPE_KEY = "type";
 
     public MemoryCard(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -66,8 +69,15 @@ public class MemoryCard extends SlimefunItem {
                         x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
                     });
                 }
+                NBT.modify(e.getItem(), x -> {
+                    x.setString(TYPE_KEY, slimefunItem.getId());
+                });
                 e.getPlayer().sendMessage(CMIChatColor.translate("&e成功存储了方块设置"));
             } else {
+                String id = NBT.get(e.getItem(), x -> {
+                    return x.getString(TYPE_KEY);
+                });
+                if (!id.equals(slimefunItem.getId())) return;
                 if (slimefunItem instanceof MEBus meBus) {
                     BlockFace blockFace = NBT.get(e.getItem(), x -> {
                         return x.getEnum(DIRECTION_KEY, BlockFace.class);
@@ -86,6 +96,13 @@ public class MemoryCard extends SlimefunItem {
                         });
 
                         if (itemStacks == null) return;
+                        if (!ItemUtils.contains(
+                                e.getPlayer().getInventory(),
+                                IntStream.rangeClosed(0, 35).toArray(),
+                                itemStacks)) {
+                            e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
+                            return;
+                        }
 
                         for (int i = 0; i < meExportBus.getSettingSlots().length; i++) {
                             blockMenu.replaceExistingItem(meExportBus.getSettingSlots()[i], itemStacks[i]);

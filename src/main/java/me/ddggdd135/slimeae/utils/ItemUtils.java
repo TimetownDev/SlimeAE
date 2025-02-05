@@ -262,10 +262,33 @@ public class ItemUtils {
         return true;
     }
 
+    public static boolean contains(Inventory inv, int[] slots, ItemStack[] itemStacks) {
+        Map<ItemStack, Integer> toTake = getAmounts(itemStacks);
+
+        for (ItemStack itemStack : toTake.keySet()) {
+            if (toTake.get(itemStack) > getItemAmount(inv, slots, itemStack)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static int getItemAmount(BlockMenu blockMenu, int[] slots, ItemStack itemStack) {
         int founded = 0;
         for (int slot : slots) {
             ItemStack item = blockMenu.getItemInSlot(slot);
+            if (item == null || item.getType().isAir()) continue;
+            if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
+                founded += item.getAmount();
+            }
+        }
+        return founded;
+    }
+
+    public static int getItemAmount(Inventory inv, int[] slots, ItemStack itemStack) {
+        int founded = 0;
+        for (int slot : slots) {
+            ItemStack item = inv.getItem(slot);
             if (item == null || item.getType().isAir()) continue;
             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                 founded += item.getAmount();
