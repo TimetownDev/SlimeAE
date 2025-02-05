@@ -65,17 +65,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         Bukkit.getConsoleSender().sendMessage("############################################");
         tryUpdate();
 
-        // 保存默认配置
-        saveDefaultConfig();
-
-        // 重载网络配置
-        NetworkInfo.reloadConfig();
-
-        // 重载矿石生成配置
-        SlimefunBlockPopulator.reloadConfig();
-
-        // 重载合成卡冷却时间配置
-        CraftingCard.reloadConfig();
+        reloadConfig0();
 
         // Plugin startup logic
         SlimefunAEItemGroups.onSetup(this);
@@ -111,9 +101,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         networkTimeConsumingTask.start(this);
         dataSavingTask.start(this);
 
-        slimeAECommand.addSubCommand(new HelpCommand());
-        slimeAECommand.addSubCommand(new CleardataCommand());
         slimeAECommand.addSubCommand(new ApplyUUIDCommand());
+        slimeAECommand.addSubCommand(new CleardataCommand());
+        slimeAECommand.addSubCommand(new HelpCommand());
+        slimeAECommand.addSubCommand(new ReloadCommand());
+        slimeAECommand.addSubCommand(new SavedataCommand());
         slimeAECommand.addSubCommand(new UuidCommand());
         slimeAECommand.addSubCommand(new ViewitemsCommand());
 
@@ -261,5 +253,21 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static SlimeAECommand getSlimeAECommand() {
         return getInstance().slimeAECommand;
+    }
+
+    public void reloadConfig0() {
+        // 保存默认配置
+        saveDefaultConfig();
+
+        reloadConfig();
+
+        // 重载网络配置
+        NetworkInfo.reloadConfig();
+
+        // 重载矿石生成配置
+        SlimefunBlockPopulator.reloadConfig();
+
+        // 重载合成卡冷却时间配置
+        CraftingCard.reloadConfig();
     }
 }

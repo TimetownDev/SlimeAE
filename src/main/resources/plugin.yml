@@ -23,14 +23,20 @@ commands:
     aliases: ae
 
 permissions:
+  slimeae.applyuuid:
+    description: "修改此存储元件的UUID"
+    default: op
   slimeae.cleardata:
     description: "清空存储元件的数据"
     default: op
+  slimeae.reload:
+    description: "重新加载配置文件"
+    default: op
+  slimeae.savedata:
+    description: "保存AE数据"
+    default: op
   slimeae.uuid:
     description: "获取此存储元件的UUID"
-    default: op
-  slimeae.applyuuid:
-    description: "修改此存储元件的UUID"
     default: op
   slimeae.viewitems:
     description: "查看存储元件中的物品"
