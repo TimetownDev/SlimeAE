@@ -18,9 +18,9 @@ public class NetworksIntegration implements Integration {
             if (Bukkit.getPluginManager().isPluginEnabled("Networks")) {
                 try {
                     Class.forName("com.ytdd9527.networksexpansion.utils.JavaUtil");
-                    cache = true;
-                } catch (ClassNotFoundException e) {
                     cache = false;
+                } catch (ClassNotFoundException e) {
+                    cache = true;
                 }
             }
             isCached = true;
