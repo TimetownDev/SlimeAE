@@ -15,12 +15,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTCompoundList;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTContainer;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
@@ -58,13 +54,13 @@ import org.bukkit.persistence.PersistentDataType;
  * 提供了一系列处理物品堆、存储和显示的实用方法
  */
 public class ItemUtils {
-    public static final String ITEM_STORAGE = "item_storage";
     public static final String DISPLAY_ITEM = "display_item";
+
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
      * @param template 模板物品
-     * @param amount 总数量
+     * @param amount   总数量
      * @return 物品堆数组，每个物品堆不超过最大堆叠数
      */
     @Nonnull
@@ -134,7 +130,7 @@ public class ItemUtils {
     /**
      * 检查存储中是否包含所有请求的物品
      *
-     * @param storage 物品存储
+     * @param storage  物品存储
      * @param requests 物品请求数组
      * @return 是否包含所有请求的物品
      */
@@ -193,6 +189,20 @@ public class ItemUtils {
         return storage;
     }
 
+    @Nonnull
+    public static Map<ItemStack, Integer> getAmounts(@Nonnull ItemRequest[] requests) {
+        Map<ItemStack, Integer> storage = new HashMap<>();
+        for (ItemRequest request : requests) {
+            ItemStack template = request.getTemplate();
+            if (storage.containsKey(template)) {
+                storage.put(template, storage.get(template) + request.getAmount());
+            } else {
+                storage.put(template, request.getAmount());
+            }
+        }
+        return storage;
+    }
+
     /**
      * 从源存储中移除指定的物品
      *
@@ -204,11 +214,12 @@ public class ItemUtils {
     public static Map<ItemStack, Integer> takeItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toTake) {
         Map<ItemStack, Integer> storage = new HashMap<>(source);
-        for (ItemStack itemStack : toTake.keySet()) {
+        for (Map.Entry<ItemStack, Integer> data : toTake.entrySet()) {
+            ItemStack itemStack = data.getKey();
             if (storage.containsKey(itemStack)) {
-                storage.put(itemStack, storage.get(itemStack) - toTake.get(itemStack));
+                storage.put(itemStack, storage.get(itemStack) - data.getValue());
             } else {
-                storage.put(itemStack, -toTake.get(itemStack));
+                storage.put(itemStack, -data.getValue());
             }
         }
         return storage;
@@ -218,18 +229,19 @@ public class ItemUtils {
      * 向源存储中添加物品
      *
      * @param source 源存储
-     * @param toAdd 要添加的物品及数量
+     * @param toAdd  要添加的物品及数量
      * @return 更新后的存储映射
      */
     @Nonnull
     public static Map<ItemStack, Integer> addItems(
             @Nonnull Map<ItemStack, Integer> source, @Nonnull Map<ItemStack, Integer> toAdd) {
         Map<ItemStack, Integer> storage = new HashMap<>(source);
-        for (ItemStack itemStack : toAdd.keySet()) {
+        for (Map.Entry<ItemStack, Integer> data : toAdd.entrySet()) {
+            ItemStack itemStack = data.getKey();
             if (storage.containsKey(itemStack)) {
-                storage.put(itemStack, storage.get(itemStack) + toAdd.get(itemStack));
+                storage.put(itemStack, storage.get(itemStack) + data.getValue());
             } else {
-                storage.put(itemStack, toAdd.get(itemStack));
+                storage.put(itemStack, data.getValue());
             }
         }
         return storage;
@@ -297,30 +309,6 @@ public class ItemUtils {
         return founded;
     }
 
-    @Nonnull
-    public static Map<ItemStack, Integer> toStorage(@Nonnull NBTCompoundList nbt) {
-        Map<ItemStack, Integer> result = new ItemHashMap<>();
-        for (ReadWriteNBT compound : nbt) {
-            ItemStack itemStack = compound.getItemStack("item");
-            int amount = compound.getInteger("amount");
-            result.put(itemStack, amount);
-        }
-        return result;
-    }
-
-    @Nonnull
-    public static NBTCompoundList toNBT(@Nonnull Map<ItemStack, Integer> storage) {
-        NBTContainer container = new NBTContainer();
-        NBTCompoundList list = container.getCompoundList("item_storage");
-        for (ItemStack itemStack : storage.keySet()) {
-            ReadWriteNBT compound = new NBTContainer();
-            compound.setItemStack("item", itemStack);
-            compound.setInteger("amount", storage.get(itemStack));
-            list.addCompound(compound);
-        }
-        return list;
-    }
-
     @Nullable public static IStorage getStorage(@Nonnull Block block) {
         return getStorage(block, true);
     }
@@ -336,9 +324,9 @@ public class ItemUtils {
     /**
      * 获取方块菜单中指定槽位的物品存储
      *
-     * @param block 目标方块
+     * @param block        目标方块
      * @param checkNetwork 是否检查网络
-     * @param isReadOnly 是否只读
+     * @param isReadOnly   是否只读
      * @param allowVanilla 是否允许原版容器
      * @return 存储接口，如果无法获取则返回null
      */
@@ -408,10 +396,11 @@ public class ItemUtils {
                 public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return new ItemStack[0];
-                    Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
+                    Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();
 
-                    for (ItemStack itemStack : amounts.keySet()) {
+                    for (Map.Entry<ItemStack, Integer> data : amounts.entrySet()) {
+                        ItemStack itemStack = data.getKey();
                         int[] outputSlots = blockMenu
                                 .getPreset()
                                 .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, itemStack);
@@ -420,15 +409,15 @@ public class ItemUtils {
                             ItemStack item = blockMenu.getItemInSlot(slot);
                             if (item == null || item.getType().isAir()) continue;
                             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                                if (item.getAmount() > amounts.get(itemStack)) {
-                                    found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
-                                    int rest = item.getAmount() - amounts.get(itemStack);
+                                if (item.getAmount() > data.getValue()) {
+                                    found.addItem(itemStack, data.getValue());
+                                    int rest = item.getAmount() - data.getValue();
                                     item.setAmount(rest);
                                     break;
                                 } else {
-                                    found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
+                                    found.addItem(itemStack, item.getAmount());
                                     blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
-                                    int rest = amounts.get(itemStack) - item.getAmount();
+                                    int rest = data.getValue() - item.getAmount();
                                     if (rest != 0) amounts.put(itemStack, rest);
                                     else break;
                                 }
@@ -487,21 +476,23 @@ public class ItemUtils {
                 @Override
                 public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
                     ItemStack[] items = getVanillaItemStacks(block);
-                    Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
+                    Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();
 
-                    for (ItemStack itemStack : amounts.keySet()) {
+                    for (Map.Entry<ItemStack, Integer> data : amounts.entrySet()) {
+                        ItemStack itemStack = data.getKey();
+
                         for (ItemStack item : items) {
                             if (item == null || item.getType().isAir()) continue;
                             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                                if (item.getAmount() > amounts.get(itemStack)) {
-                                    found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
-                                    int rest = item.getAmount() - amounts.get(itemStack);
+                                if (item.getAmount() > data.getValue()) {
+                                    found.addItem(itemStack, data.getValue());
+                                    int rest = item.getAmount() - data.getValue();
                                     item.setAmount(rest);
                                     break;
                                 } else {
-                                    found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-                                    int rest = amounts.get(itemStack) - item.getAmount();
+                                    found.addItem(itemStack, item.getAmount());
+                                    int rest = data.getValue() - item.getAmount();
                                     item.setAmount(0);
                                     if (rest != 0) amounts.put(itemStack, rest);
                                     else break;
@@ -731,12 +722,13 @@ public class ItemUtils {
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, int amount) {
         return createDisplayItem(itemStack, amount, true);
     }
+
     /**
      * 创建用于显示的物品堆
      *
      * @param itemStack 原始物品堆
-     * @param amount 显示数量
-     * @param addLore 是否添加描述
+     * @param amount    显示数量
+     * @param addLore   是否添加描述
      * @return 用于显示的物品堆
      */
     @Nonnull
@@ -789,5 +781,32 @@ public class ItemUtils {
         } else {
             return ItemStackHelper.getName(itemStack);
         }
+    }
+
+    public static ItemStack[] takeItems(Inventory inventory, int[] slots, ItemRequest[] requests) {
+        ItemStack[] items = Arrays.stream(slots).mapToObj(inventory::getItem).toArray(ItemStack[]::new);
+        Map<ItemStack, Integer> amounts = ItemUtils.getAmounts(requests);
+        ItemStorage found = new ItemStorage();
+
+        for (ItemStack itemStack : amounts.keySet()) {
+            for (ItemStack item : items) {
+                if (item == null || item.getType().isAir()) continue;
+                if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
+                    if (item.getAmount() > amounts.get(itemStack)) {
+                        found.addItem(itemStack, amounts.get(itemStack));
+                        int rest = item.getAmount() - amounts.get(itemStack);
+                        item.setAmount(rest);
+                        break;
+                    } else {
+                        found.addItem(itemStack, item.getAmount());
+                        int rest = amounts.get(itemStack) - item.getAmount();
+                        item.setAmount(0);
+                        if (rest != 0) amounts.put(itemStack, rest);
+                        else break;
+                    }
+                }
+            }
+        }
+        return found.toItemStacks();
     }
 }

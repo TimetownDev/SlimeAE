@@ -104,6 +104,11 @@ public class MemoryCard extends SlimefunItem {
                             return;
                         }
 
+                        ItemUtils.takeItems(
+                                e.getPlayer().getInventory(),
+                                IntStream.rangeClosed(0, 35).toArray(),
+                                ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
+                        blockMenu.dropItems(block.getLocation(), meExportBus.getSettingSlots());
                         for (int i = 0; i < meExportBus.getSettingSlots().length; i++) {
                             blockMenu.replaceExistingItem(meExportBus.getSettingSlots()[i], itemStacks[i]);
                         }

@@ -64,6 +64,17 @@ public class ItemStorage implements IStorage {
         }
     }
 
+    public void addItem(@Nonnull Map<ItemStack, Integer> storage) {
+        this.storage = ItemUtils.addItems(this.storage, storage);
+    }
+
+    public void addItem(@Nonnull ItemStack itemStack, int amount) {
+        ItemStack template = itemStack.asOne();
+        int a = storage.getOrDefault(template, 0);
+        a += amount;
+        storage.put(template, a);
+    }
+
     public void addItem(@Nonnull ItemStack itemStack) {
         addItem(new ItemStack[] {itemStack});
     }
