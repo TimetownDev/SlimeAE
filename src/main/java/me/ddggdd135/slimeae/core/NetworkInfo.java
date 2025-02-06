@@ -28,6 +28,7 @@ public class NetworkInfo implements IDisposable {
     private final Set<Location> craftingHolders = new HashSet<>();
     private final Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
+    private IStorage storageNoNetworks = new StorageCollection();
     private final Set<AutoCraftingSession> craftingSessions = new HashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tmpStorage = new ItemStorage();
@@ -84,6 +85,15 @@ public class NetworkInfo implements IDisposable {
 
     public void setStorage(@Nonnull IStorage storage) {
         this.storage = storage;
+    }
+
+    @Nonnull
+    public IStorage getStorageNoNetworks() {
+        return storageNoNetworks;
+    }
+
+    public void setStorageNoNetworks(@Nonnull IStorage storage) {
+        this.storageNoNetworks = storage;
     }
 
     @Override

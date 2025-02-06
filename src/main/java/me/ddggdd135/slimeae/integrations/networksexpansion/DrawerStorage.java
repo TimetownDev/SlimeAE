@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -96,5 +97,17 @@ public class DrawerStorage implements IStorage {
         }
 
         return -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DrawerStorage that)) return false;
+        return Objects.equals(data.getId(), that.data.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return data.getId();
     }
 }

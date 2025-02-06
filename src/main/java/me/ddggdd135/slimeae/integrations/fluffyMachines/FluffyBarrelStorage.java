@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
@@ -111,5 +112,17 @@ public class FluffyBarrelStorage implements IStorage {
         if (itemStack.getType() == storedItem.getType()) return 2000;
 
         return -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FluffyBarrelStorage that)) return false;
+        return Objects.equals(block.getLocation(), that.block.getLocation());
+    }
+
+    @Override
+    public int hashCode() {
+        return block.getLocation().hashCode();
     }
 }

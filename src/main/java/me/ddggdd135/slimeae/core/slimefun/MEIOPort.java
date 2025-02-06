@@ -10,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
@@ -71,7 +72,10 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         return;
                     }
 
-                    ItemStack target = meStorageCellCache.getStorage().keySet().toArray(ItemStack[]::new)[0];
+                    ItemStack target = meStorageCellCache.getStorage().entrySet().stream()
+                            .filter(x -> x.getValue() > 0)
+                            .map(Map.Entry::getKey)
+                            .toArray(ItemStack[]::new)[0];
                     ItemStack[] tmp = meStorageCellCache.tryTakeItem(new ItemRequest(target, 10240, true));
                     networkStorage.pushItem(tmp);
                     tmp = ItemUtils.trimItems(tmp);
@@ -98,7 +102,10 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
                 if (networkStorage.getStorage().isEmpty()) return;
 
-                ItemStack target = networkStorage.getStorage().keySet().toArray(ItemStack[]::new)[0];
+                ItemStack target = networkStorage.getStorage().entrySet().stream()
+                        .filter(x -> x.getValue() > 0)
+                        .map(Map.Entry::getKey)
+                        .toArray(ItemStack[]::new)[0];
                 ItemStack[] tmp = networkStorage.tryTakeItem(new ItemRequest(target, 10240, true));
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);

@@ -18,7 +18,6 @@ public class NetworkData {
     public final Map<Location, IMEController> AllControllers = new ConcurrentHashMap<>();
     public final Map<Location, IMEStorageObject> AllStorageObjects = new ConcurrentHashMap<>();
     public final Map<Location, IMECraftHolder> AllCraftHolders = new ConcurrentHashMap<>();
-    public final Set<Location> BannedScanSet = new HashSet<>();
 
     @Nullable public NetworkInfo getNetworkInfo(Location location) {
         NetworkInfo re = null;
@@ -54,21 +53,25 @@ public class NetworkData {
 
         info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
 
-        StorageCollection networkStorage = new StorageCollection();
-        boolean hasNetworksStorage = false;
+        StorageCollection storageNoNetworks = new StorageCollection();
+        NetworksStorage networksStorage = null;
         for (Location location : info.getChildren()) {
             if (!AllStorageObjects.containsKey(location)) continue;
             IMEStorageObject slimefunItem = AllStorageObjects.get(location);
             IStorage storage = slimefunItem.getStorage(location.getBlock());
-            if (storage instanceof NetworksStorage) {
-                if (hasNetworksStorage) continue;
+            if (storage instanceof NetworksStorage networksStorage1) {
+                if (networksStorage != null) continue;
 
-                hasNetworksStorage = true;
+                networksStorage = networksStorage1;
+                continue;
             }
-            if (storage != null) networkStorage.addStorage(storage);
+            if (storage != null) storageNoNetworks.addStorage(storage);
         }
-        networkStorage.addStorage(info.getTempStorage());
-        info.setStorage(networkStorage);
+        storageNoNetworks.addStorage(info.getTempStorage());
+        info.setStorageNoNetworks(storageNoNetworks);
+        StorageCollection storageCollection = new StorageCollection(storageNoNetworks);
+        storageCollection.addStorage(networksStorage);
+        info.setStorage(storageCollection);
 
         info.getCraftingHolders().clear();
         for (Location location : info.getChildren()) {

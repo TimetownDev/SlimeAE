@@ -53,8 +53,8 @@ public class NetworksIntegrationListener implements Listener {
             if (slimefunItem instanceof NetworksExpansionSwitch networksExpansionSwitch) {
                 NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(location);
                 if (networkInfo == null) return;
-                Set<BarrelIdentity> barrelIdentities =
-                        networksExpansionSwitch.wrapIStorageAsBarrelIdentities(location, networkInfo.getStorage());
+                Set<BarrelIdentity> barrelIdentities = networksExpansionSwitch.wrapIStorageAsBarrelIdentities(
+                        location, networkInfo.getStorageNoNetworks());
                 if (e.isInputAble()) {
                     root.getInputAbleBarrels().removeIf(x -> x instanceof StorageToBarrelWrapper);
                     root.getInputAbleBarrels().addAll(barrelIdentities);

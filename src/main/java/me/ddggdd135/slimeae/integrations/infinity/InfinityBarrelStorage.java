@@ -7,12 +7,14 @@ import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +22,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class InfinityBarrelStorage implements IStorage {
     private StorageCache cache;
+    private Location location;
     private boolean isReadOnly;
 
     public InfinityBarrelStorage(@Nonnull Block block) {
@@ -33,6 +36,7 @@ public class InfinityBarrelStorage implements IStorage {
             cache = storageUnit.getCache(block.getLocation());
         }
         this.isReadOnly = isReadOnly;
+        this.location = block.getLocation();
     }
 
     @Override
@@ -96,5 +100,17 @@ public class InfinityBarrelStorage implements IStorage {
         if (cache.material() == itemStack.getType()) return 2000;
 
         return -1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InfinityBarrelStorage that)) return false;
+        return Objects.equals(location, that.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return location.hashCode();
     }
 }

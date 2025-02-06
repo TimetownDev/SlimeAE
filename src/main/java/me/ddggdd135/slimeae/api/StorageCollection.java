@@ -16,10 +16,13 @@ public class StorageCollection implements IStorage {
     private final Set<ItemStack> notIncluded;
 
     public StorageCollection(@Nonnull IStorage... storages) {
-        this.storages = new HashSet<>(List.of(storages));
+        this.storages = new HashSet<>();
         this.takeCache = new HashMap<>();
         this.pushCache = new HashMap<>();
         this.notIncluded = new HashSet<>();
+        for (IStorage storage : storages) {
+            addStorage(storage);
+        }
     }
 
     public Set<IStorage> getStorages() {
@@ -28,11 +31,23 @@ public class StorageCollection implements IStorage {
 
     public void addStorage(@Nullable IStorage storage) {
         if (storage == null) return;
+        if (storage instanceof StorageCollection storageCollection) {
+            storages.addAll(storageCollection.getStorages());
+            return;
+        }
         storages.add(storage);
         notIncluded.clear();
     }
 
     public boolean removeStorage(@Nonnull IStorage storage) {
+        if (storage instanceof StorageCollection storageCollection) {
+            boolean result = false;
+            for (IStorage iStorage : storageCollection.getStorages()) {
+                result |= removeStorage(iStorage);
+            }
+
+            return result;
+        }
         Map.Entry<ItemStack, IStorage> toRemove = null;
         for (Map.Entry<ItemStack, IStorage> entry : takeCache.entrySet()) {
             if (entry.getValue() == storage) {
