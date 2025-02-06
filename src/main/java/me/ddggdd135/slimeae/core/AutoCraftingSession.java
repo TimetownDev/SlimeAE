@@ -232,7 +232,7 @@ public class AutoCraftingSession {
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
-                    tempStorage.addItem(finished.getOutput());
+                    tempStorage.addItem(finished.getOutput(), true);
                     running--;
                 }
             }
@@ -267,7 +267,7 @@ public class AutoCraftingSession {
                     && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                 CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                 device.finishCrafting(deviceBlock);
-                if (finished != null) tempStorage.addItem(finished.getOutput());
+                if (finished != null) tempStorage.addItem(finished.getOutput(), true);
                 running--;
             }
         }

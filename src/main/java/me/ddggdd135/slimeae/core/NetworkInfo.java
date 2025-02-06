@@ -70,12 +70,14 @@ public class NetworkInfo implements IDisposable {
     public NetworkInfo(@Nonnull Location controller) {
         this.controller = controller;
         autoCraftingMenu.setSize(54);
+        tmpStorage.setReadonly(true);
     }
 
     public NetworkInfo(@Nonnull Location controller, @Nonnull Set<Location> children) {
         this.controller = controller;
         this.children = children;
         autoCraftingMenu.setSize(54);
+        tmpStorage.setReadonly(true);
     }
 
     @Nonnull

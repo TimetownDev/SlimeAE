@@ -51,7 +51,11 @@ public class ItemStorage implements IStorage {
     }
 
     public void addItem(@Nonnull ItemStack[] itemStacks) {
-        if (isReadonly) return;
+        addItem(itemStacks, false);
+    }
+
+    public void addItem(@Nonnull ItemStack[] itemStacks, boolean force) {
+        if (isReadonly && !force) return;
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
@@ -63,12 +67,20 @@ public class ItemStorage implements IStorage {
     }
 
     public void addItem(@Nonnull Map<ItemStack, Long> storage) {
-        if (isReadonly) return;
+        addItem(storage, false);
+    }
+
+    public void addItem(@Nonnull Map<ItemStack, Long> storage, boolean force) {
+        if (isReadonly && !force) return;
         this.storage = ItemUtils.addItems(this.storage, storage);
     }
 
     public void addItem(@Nonnull ItemStack itemStack, long amount) {
-        if (isReadonly) return;
+        addItem(itemStack, amount, false);
+    }
+
+    public void addItem(@Nonnull ItemStack itemStack, long amount, boolean force) {
+        if (isReadonly && !force) return;
         ItemStack template = itemStack.asOne();
         long a = storage.getOrDefault(template, 0L);
         a += amount;
@@ -76,7 +88,11 @@ public class ItemStorage implements IStorage {
     }
 
     public void addItem(@Nonnull ItemStack itemStack) {
-        if (isReadonly) return;
+        addItem(itemStack, false);
+    }
+
+    public void addItem(@Nonnull ItemStack itemStack, boolean force) {
+        if (isReadonly && !force) return;
         addItem(new ItemStack[] {itemStack});
     }
 
