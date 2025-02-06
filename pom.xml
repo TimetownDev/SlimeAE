@@ -141,9 +141,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.mooy1</groupId>
+            <groupId>com.github.JWJUN233233</groupId>
             <artifactId>InfinityExpansion</artifactId>
-            <version>90e11bc</version>
+            <version>9fb38dfd1e</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
