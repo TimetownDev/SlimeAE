@@ -67,6 +67,7 @@ public class NetworkData {
             }
             if (storage != null) networkStorage.addStorage(storage);
         }
+        networkStorage.addStorage(info.getTempStorage());
         info.setStorage(networkStorage);
 
         info.getCraftingHolders().clear();

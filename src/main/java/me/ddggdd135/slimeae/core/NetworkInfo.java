@@ -10,6 +10,7 @@ import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
+import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.StorageCollection;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -22,13 +23,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class NetworkInfo implements IDisposable {
-    private Location controller;
+    private final Location controller;
     private Set<Location> children = new HashSet<>();
-    private Set<Location> craftingHolders = new HashSet<>();
-    private Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
+    private final Set<Location> craftingHolders = new HashSet<>();
+    private final Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
-    private Set<AutoCraftingSession> craftingSessions = new HashSet<>();
+    private final Set<AutoCraftingSession> craftingSessions = new HashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
+    private final ItemStorage tmpStorage = new ItemStorage();
 
     // 缓存配置值
     private static int maxCraftingSessions;
@@ -45,8 +47,8 @@ public class NetworkInfo implements IDisposable {
 
     // 重载配置
     public static void reloadConfig() {
-        maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-sessions", 8);
-        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 4096);
+        maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-sessions", 32);
+        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 32768);
     }
 
     // 静态初始化块,在类加载时加载配置
@@ -137,11 +139,12 @@ public class NetworkInfo implements IDisposable {
         return null;
     }
 
+    @Nonnull
     public Set<AutoCraftingSession> getCraftingSessions() {
         return craftingSessions;
     }
 
-    public void openAutoCraftingSessionsMenu(Player player) {
+    public void openAutoCraftingSessionsMenu(@Nonnull Player player) {
         updateAutoCraftingMenu();
         autoCraftingMenu.open(player);
     }
@@ -188,5 +191,10 @@ public class NetworkInfo implements IDisposable {
             i++;
         }
         autoCraftingMenu.getContents();
+    }
+
+    @Nonnull
+    public ItemStorage getTempStorage() {
+        return tmpStorage;
     }
 }

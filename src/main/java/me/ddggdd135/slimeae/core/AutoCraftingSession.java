@@ -40,7 +40,6 @@ public class AutoCraftingSession {
     private final NetworkInfo info;
     private final int count;
     private final List<KeyValuePair<CraftingRecipe, Integer>> craftingSteps;
-    private final ItemStorage itemCache = new ItemStorage();
     private int running = 0;
     private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
@@ -190,6 +189,7 @@ public class AutoCraftingSession {
                 .toArray(Location[]::new);
 
         IStorage networkStorage = info.getStorage();
+        ItemStorage tempStorage = info.getTempStorage();
         if (!networkStorage.contains(ItemUtils.createRequests(
                         ItemUtils.getAmounts(next.getKey().getInput())))
                 && running <= 0) {
@@ -232,7 +232,7 @@ public class AutoCraftingSession {
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
-                    itemCache.addItem(finished.getOutput());
+                    tempStorage.addItem(finished.getOutput());
                     running--;
                 }
             }
@@ -267,17 +267,9 @@ public class AutoCraftingSession {
                     && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
                 CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                 device.finishCrafting(deviceBlock);
-                if (finished != null) itemCache.addItem(finished.getOutput());
+                if (finished != null) tempStorage.addItem(finished.getOutput());
                 running--;
             }
-        }
-
-        Set<ItemStack> toPush = new HashSet<>(itemCache.getStorage().keySet());
-        for (ItemStack itemStack : toPush) {
-            ItemStack[] items = itemCache.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
-            networkStorage.pushItem(items);
-            items = Arrays.stream(items).filter(x -> x.getAmount() != 0).toArray(ItemStack[]::new);
-            itemCache.pushItem(items);
         }
 
         menu.getContents();
