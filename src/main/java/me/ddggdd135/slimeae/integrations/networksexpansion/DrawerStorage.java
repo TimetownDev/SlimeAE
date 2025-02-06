@@ -2,10 +2,7 @@ package me.ddggdd135.slimeae.integrations.networksexpansion;
 
 import com.balugaq.netex.api.data.ItemContainer;
 import com.balugaq.netex.api.data.StorageUnitData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +28,7 @@ public class DrawerStorage implements IStorage {
         if (!SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded())
             throw new RuntimeException("NetworksExpansion is not loaded");
         this.block = block;
-        SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
-        if (blockData != null && SlimefunItem.getById(blockData.getSfId()) instanceof NetworksDrawer networksDrawer) {
-            data = NetworksDrawer.getStorageData(block.getLocation());
-        }
+        data = NetworksDrawer.getStorageData(block.getLocation());
         this.isReadOnly = isReadOnly;
     }
 
@@ -101,6 +95,6 @@ public class DrawerStorage implements IStorage {
             }
         }
 
-        return 0;
+        return -1;
     }
 }

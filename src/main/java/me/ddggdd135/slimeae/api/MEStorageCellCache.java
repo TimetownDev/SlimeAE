@@ -180,9 +180,9 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public int getTier(@Nonnull ItemStack itemStack) {
-        if (storages.containsKey(itemStack)) return 200;
+        if (storages.containsKey(itemStack)) return 1000;
 
-        return 0;
+        return -1;
     }
 
     public UUID getUuid() {

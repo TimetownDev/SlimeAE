@@ -1,5 +1,7 @@
 package me.ddggdd135.slimeae.api;
 
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,27 +67,24 @@ public class StorageCollection implements IStorage {
                 storage.pushItem(itemStack);
             }
         }
-        ItemStack[] finalItemStacks = itemStacks;
-        List<IStorage> sorted = new ArrayList<>(storages.stream()
-                .sorted(Comparator.comparing(
-                        x -> {
-                            int tierx = 0;
-                            for (ItemStack itemStack : finalItemStacks) {
-                                tierx += x.getTier(itemStack);
-                            }
 
-                            return tierx;
-                        },
-                        Integer::compare))
-                .toList());
-        Collections.reverse(sorted);
+        List<IStorage> sorted = new ArrayList<>(storages);
+        Reference2IntMap<IStorage> tierMap = new Reference2IntOpenHashMap<>();
+
+        // 计算每个 storage 的 tier 并缓存结果
+        for (IStorage storage : sorted) {
+            int totalTier = Arrays.stream(itemStacks).mapToInt(storage::getTier).sum();
+            tierMap.put(storage, totalTier);
+        }
+
+        // 移除 tier 小于 0 的 storage
+        sorted.removeIf(storage -> tierMap.getInt(storage) < 0);
+
+        // 根据缓存的 tier 排序
+        sorted.sort(Comparator.comparingInt(tierMap::getInt).reversed());
+
         for (IStorage storage : sorted) {
             storage.pushItem(itemStacks);
-            for (ItemStack itemStack : itemStacks) {
-                if (itemStack.getAmount() == 0 && !itemStack.getType().isAir()) {
-                    pushCache.put(itemStack.asOne(), storage);
-                }
-            }
             itemStacks = ItemUtils.trimItems(itemStacks);
             if (itemStacks.length == 0) return;
         }

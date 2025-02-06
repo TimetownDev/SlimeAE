@@ -763,7 +763,8 @@ public class ItemUtils {
         return result;
     }
 
-    @Nullable public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack, boolean hasLore) {
+    @Nonnull
+    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack, boolean hasLore) {
         ItemStack result = itemStack.asOne();
         ItemMeta meta = result.getItemMeta();
         if (hasLore) {

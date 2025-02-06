@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -11,10 +12,13 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemStorage implements IStorage {
     @Nonnull
-    private Map<ItemStack, Integer> storage = new HashMap<>();
+    private Map<ItemStack, Integer> storage = new ConcurrentHashMap<>();
 
-    private void trim(@Nonnull ItemStack template) {
-        if (storage.containsKey(template) && storage.get(template) == 0) {
+    private boolean isReadonly;
+
+    private void trim(@Nonnull ItemStack itemStack) {
+        ItemStack template = itemStack.asOne();
+        if (storage.getOrDefault(template, 0) == 0) {
             storage.remove(template);
         }
     }
@@ -35,40 +39,36 @@ public class ItemStorage implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
+        if (isReadonly) return;
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = itemStack.asOne();
-            if (storage.containsKey(template)) {
-                int amount = storage.get(template);
-                amount += itemStack.getAmount();
-                storage.put(template, amount);
-            } else {
-                storage.put(template, itemStack.getAmount());
-            }
+            int amount = storage.getOrDefault(template, 0);
+            amount += itemStack.getAmount();
+            storage.put(template, amount);
             itemStack.setAmount(0);
             trim(itemStack);
         }
     }
 
     public void addItem(@Nonnull ItemStack[] itemStacks) {
+        if (isReadonly) return;
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
-            if (storage.containsKey(template)) {
-                int amount = storage.get(template);
-                amount += itemStack.getAmount();
-                storage.put(template, amount);
-            } else {
-                storage.put(template, itemStack.getAmount());
-            }
+            int amount = storage.getOrDefault(template, 0);
+            amount += itemStack.getAmount();
+            storage.put(template, amount);
             trim(itemStack);
         }
     }
 
     public void addItem(@Nonnull Map<ItemStack, Integer> storage) {
+        if (isReadonly) return;
         this.storage = ItemUtils.addItems(this.storage, storage);
     }
 
     public void addItem(@Nonnull ItemStack itemStack, int amount) {
+        if (isReadonly) return;
         ItemStack template = itemStack.asOne();
         int a = storage.getOrDefault(template, 0);
         a += amount;
@@ -76,6 +76,7 @@ public class ItemStorage implements IStorage {
     }
 
     public void addItem(@Nonnull ItemStack itemStack) {
+        if (isReadonly) return;
         addItem(new ItemStack[] {itemStack});
     }
 
@@ -89,21 +90,19 @@ public class ItemStorage implements IStorage {
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
-            if (storage.containsKey(request.getTemplate())) {
-                int amount = storage.get(request.getTemplate());
-                if (amount >= request.getAmount()) {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
-                    itemStacks.addAll(List.of(tmp));
-                    storage.put(request.getTemplate(), amount - request.getAmount());
-                } else {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
-                    itemStacks.addAll(List.of(tmp));
-                    storage.put(request.getTemplate(), 0);
-                }
-                trim(request.getTemplate());
+            int amount = storage.getOrDefault(request.getTemplate(), 0);
+            if (amount >= request.getAmount()) {
+                ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
+                itemStacks.addAll(List.of(tmp));
+                storage.put(request.getTemplate(), amount - request.getAmount());
+            } else {
+                ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
+                itemStacks.addAll(List.of(tmp));
+                storage.put(request.getTemplate(), 0);
             }
+            trim(request.getTemplate());
         }
-        return itemStacks.toArray(new ItemStack[0]);
+        return itemStacks.toArray(ItemStack[]::new);
     }
 
     @Override
@@ -117,13 +116,16 @@ public class ItemStorage implements IStorage {
         return 0;
     }
 
-    @Override
-    public boolean canHasEmptySlots() {
-        return false;
-    }
-
     @Nonnull
     public ItemStack[] toItemStacks() {
         return ItemUtils.createItems(storage);
+    }
+
+    public void setReadonly(boolean readonly) {
+        isReadonly = readonly;
+    }
+
+    public boolean isReadonly() {
+        return isReadonly;
     }
 }
