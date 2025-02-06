@@ -231,7 +231,7 @@ public class ViewitemsCommand extends SubCommand {
             }
         }
 
-        if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);
+        if (storage instanceof CreativeItemMap) items.sort(MATERIAL_SORT);
         else items.sort(METerminal.int2Sort(sortCache.get(data.getUuid())));
 
         // 计算分页

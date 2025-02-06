@@ -11,14 +11,14 @@ import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class CreativeItemIntegerMap implements Map<ItemStack, Long> {
+public class CreativeItemMap implements Map<ItemStack, Long> {
     public static final Set<ItemStack> allItemStacks;
     public static final Set<Map.Entry<ItemStack, Long>> allAmount;
     public static final long amount = 64 * 1024;
 
-    public CreativeItemIntegerMap(@Nonnull Map<ItemStack, Long> items) {}
+    public CreativeItemMap(@Nonnull Map<ItemStack, Long> items) {}
 
-    public CreativeItemIntegerMap() {}
+    public CreativeItemMap() {}
 
     public int size() {
         return 0;

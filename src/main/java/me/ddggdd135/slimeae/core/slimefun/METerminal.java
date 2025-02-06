@@ -23,7 +23,7 @@ import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.CreativeItemIntegerMap;
+import me.ddggdd135.slimeae.api.CreativeItemMap;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -215,7 +215,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             }
         }
 
-        if (storage instanceof CreativeItemIntegerMap) items.sort(MATERIAL_SORT);
+        if (storage instanceof CreativeItemMap) items.sort(MATERIAL_SORT);
         else items.sort(getSort(block));
 
         // 计算分页

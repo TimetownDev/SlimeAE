@@ -25,8 +25,7 @@ public class MEStorageCellCache implements IStorage {
     public MEStorageCellCache(ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
         size = MEItemStorageCell.getSize(itemStack);
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
-            storages = new CreativeItemIntegerMap();
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) storages = new CreativeItemMap();
         else {
             storages = new ConcurrentHashMap<>();
         }
@@ -88,7 +87,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        if (storages instanceof CreativeItemIntegerMap) {
+        if (storages instanceof CreativeItemMap) {
             for (ItemStack itemStack : itemStacks) {
                 itemStack.setAmount(0);
             }
@@ -112,7 +111,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        if (storages instanceof CreativeItemIntegerMap) return true;
+        if (storages instanceof CreativeItemMap) return true;
 
         for (ItemRequest request : requests) {
             if (!storages.containsKey(request.getTemplate())
@@ -124,7 +123,7 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (storages instanceof CreativeItemIntegerMap) {
+        if (storages instanceof CreativeItemMap) {
             return ItemUtils.createItems(requests);
         }
 
@@ -152,7 +151,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Long> getStorage() {
-        if (storages instanceof CreativeItemIntegerMap) return storages;
+        if (storages instanceof CreativeItemMap) return storages;
         return new HashMap<>(storages);
     }
 

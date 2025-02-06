@@ -165,7 +165,7 @@ public class StorageCollection implements IStorage {
         Map<ItemStack, Long> result = new HashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Long> tmp = storage.getStorage();
-            if (tmp instanceof CreativeItemIntegerMap) return tmp;
+            if (tmp instanceof CreativeItemMap) return tmp;
             for (ItemStack itemStack : tmp.keySet()) {
                 if (result.containsKey(itemStack)) {
                     result.put(itemStack, result.get(itemStack) + tmp.get(itemStack));
