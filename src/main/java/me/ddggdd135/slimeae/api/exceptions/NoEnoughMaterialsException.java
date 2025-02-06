@@ -5,14 +5,14 @@ import javax.annotation.Nonnull;
 import org.bukkit.inventory.ItemStack;
 
 public class NoEnoughMaterialsException extends RuntimeException {
-    private final Map<ItemStack, Integer> missingMaterials;
+    private final Map<ItemStack, Long> missingMaterials;
 
-    public NoEnoughMaterialsException(@Nonnull Map<ItemStack, Integer> missingMaterials) {
+    public NoEnoughMaterialsException(@Nonnull Map<ItemStack, Long> missingMaterials) {
         this.missingMaterials = missingMaterials;
     }
 
     @Nonnull
-    public Map<ItemStack, Integer> getMissingMaterials() {
+    public Map<ItemStack, Long> getMissingMaterials() {
         return missingMaterials;
     }
 }

@@ -63,7 +63,7 @@ public interface IStorage {
      * @return 物品到数量的映射
      */
     @Nonnull
-    Map<ItemStack, Integer> getStorage();
+    Map<ItemStack, Long> getStorage();
 
     /**
      * 获取存储中的空槽位数量

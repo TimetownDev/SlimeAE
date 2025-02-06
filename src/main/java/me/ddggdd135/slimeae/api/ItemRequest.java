@@ -4,15 +4,15 @@ import org.bukkit.inventory.ItemStack;
 
 public class ItemRequest {
     private ItemStack template;
-    private int amount;
+    private long amount;
 
-    public ItemRequest(ItemStack template, int amount, boolean unsafe) {
+    public ItemRequest(ItemStack template, long amount, boolean unsafe) {
         if (unsafe) this.template = template;
         else this.template = template.asOne();
         this.amount = amount;
     }
 
-    public ItemRequest(ItemStack template, int amount) {
+    public ItemRequest(ItemStack template, long amount) {
         this(template, amount, false);
     }
 
@@ -24,11 +24,11 @@ public class ItemRequest {
         this.template = template.asOne();
     }
 
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 }

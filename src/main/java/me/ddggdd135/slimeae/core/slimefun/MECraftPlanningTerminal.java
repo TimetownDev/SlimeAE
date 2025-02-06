@@ -111,7 +111,7 @@ public class MECraftPlanningTerminal extends METerminal {
                         player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
                     } catch (NoEnoughMaterialsException e) {
                         player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
-                        for (Map.Entry<ItemStack, Integer> entry :
+                        for (Map.Entry<ItemStack, Long> entry :
                                 e.getMissingMaterials().entrySet()) {
                             String itemName = ItemUtils.getItemName(entry.getKey());
                             player.sendMessage(

@@ -176,7 +176,7 @@ public class NetworkInfo implements IDisposable {
             ItemStack itemStack;
             if (itemStacks.length == 1) {
                 itemStack = itemStacks[0].clone();
-                itemStack.setAmount(Math.min(64, session.getCount()));
+                itemStack.setAmount((int) Math.min(64, session.getCount()));
             } else {
                 itemStack = new AdvancedCustomItemStack(
                         Material.BARREL,
@@ -184,7 +184,7 @@ public class NetworkInfo implements IDisposable {
                         Arrays.stream(itemStacks)
                                 .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
                                 .toArray(String[]::new));
-                itemStack.setAmount(Math.min(64, session.getCount()));
+                itemStack.setAmount((int) Math.min(64, session.getCount()));
             }
             ItemMeta meta = itemStack.getItemMeta();
             List<String> lore = meta.getLore();

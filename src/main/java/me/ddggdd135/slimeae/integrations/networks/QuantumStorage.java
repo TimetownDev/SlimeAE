@@ -83,7 +83,7 @@ public class QuantumStorage implements IStorage {
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
             if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
-                int toTake = Math.min(stored, request.getAmount());
+                long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
                     toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
@@ -97,10 +97,10 @@ public class QuantumStorage implements IStorage {
 
     @Override
     @Nonnull
-    public Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> storage = new HashMap<>();
+    public Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> storage = new HashMap<>();
         if (quantumCache == null || quantumCache.getAmount() <= 0) return storage;
-        storage.put(quantumCache.getItemStack().asOne(), (int) (quantumCache.getAmount() - 1));
+        storage.put(quantumCache.getItemStack().asOne(), quantumCache.getAmount() - 1);
         return storage;
     }
 

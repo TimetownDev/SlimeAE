@@ -65,9 +65,9 @@ public class InfinityBarrelStorage implements IStorage {
         for (ItemRequest request : requests) {
             if (cache.matches(request.getTemplate())) {
                 int amount = cache.amount() - 1;
-                int toTake = Math.min(amount, request.getAmount());
+                long toTake = Math.min(amount, request.getAmount());
                 if (toTake != 0) {
-                    cache.amount(amount + 1 - toTake);
+                    cache.amount((int) (amount + 1 - toTake));
                     toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
                 }
             }
@@ -76,8 +76,8 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> storage = new HashMap<>();
+    public @Nonnull Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> storage = new HashMap<>();
         Material material = cache.material();
         ItemMeta meta = cache.meta();
 
@@ -85,7 +85,7 @@ public class InfinityBarrelStorage implements IStorage {
         ItemStack itemStack = new ItemStack(material);
         if (meta != null) itemStack.setItemMeta(meta);
 
-        storage.put(itemStack.asOne(), cache.amount() - 1);
+        storage.put(itemStack.asOne(), (long) (cache.amount() - 1));
         return storage;
     }
 

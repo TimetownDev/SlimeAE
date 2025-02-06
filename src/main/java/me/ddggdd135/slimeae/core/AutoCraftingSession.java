@@ -38,14 +38,14 @@ public class AutoCraftingSession {
     public static final String CRAFTING_KEY = "auto_crafting";
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
-    private final int count;
-    private final List<KeyValuePair<CraftingRecipe, Integer>> craftingSteps;
+    private final long count;
+    private final List<KeyValuePair<CraftingRecipe, Long>> craftingSteps;
     private int running = 0;
     private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
 
-    public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, int count) {
+    public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         //        ItemStorage storage = new ItemStorage();
         //        storage.addItem(
         //                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ),
@@ -77,16 +77,16 @@ public class AutoCraftingSession {
         return info;
     }
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 
     @Nonnull
-    public List<KeyValuePair<CraftingRecipe, Integer>> getCraftingSteps() {
+    public List<KeyValuePair<CraftingRecipe, Long>> getCraftingSteps() {
         return craftingSteps;
     }
 
-    private List<KeyValuePair<CraftingRecipe, Integer>> match(CraftingRecipe recipe, int count, ItemStorage storage) {
+    private List<KeyValuePair<CraftingRecipe, Long>> match(CraftingRecipe recipe, long count, ItemStorage storage) {
         if (!craftingPath.add(recipe)) {
             throw new IllegalStateException("检测到循环依赖的合成配方");
         }
@@ -95,10 +95,10 @@ public class AutoCraftingSession {
             if (!info.getRecipes().contains(recipe)) {
                 // 记录直接缺少的材料
                 ItemStorage missing = new ItemStorage();
-                Map<ItemStack, Integer> in = ItemUtils.getAmounts(recipe.getInput());
+                Map<ItemStack, Long> in = ItemUtils.getAmounts(recipe.getInput());
                 for (ItemStack template : in.keySet()) {
-                    int amount = storage.getStorage().getOrDefault(template, 0);
-                    int need = in.get(template) * count;
+                    long amount = storage.getStorage().getOrDefault(template, 0L);
+                    long need = in.get(template) * count;
                     if (amount < need) {
                         missing.addItem(ItemUtils.createItems(template, need - amount));
                     }
@@ -106,19 +106,19 @@ public class AutoCraftingSession {
                 throw new NoEnoughMaterialsException(missing.getStorage());
             }
 
-            List<KeyValuePair<CraftingRecipe, Integer>> result = new ArrayList<>();
+            List<KeyValuePair<CraftingRecipe, Long>> result = new ArrayList<>();
             ItemStorage missing = new ItemStorage();
-            Map<ItemStack, Integer> in = ItemUtils.getAmounts(recipe.getInput());
+            Map<ItemStack, Long> in = ItemUtils.getAmounts(recipe.getInput());
 
             // 遍历所需材料
             for (ItemStack template : in.keySet()) {
-                int amount = storage.getStorage().getOrDefault(template, 0);
-                int need = in.get(template) * count;
+                long amount = storage.getStorage().getOrDefault(template, 0L);
+                long need = in.get(template) * count;
 
                 if (amount >= need) {
                     storage.tryTakeItem(new ItemRequest(template, need, true));
                 } else {
-                    int remainingNeed = need - amount;
+                    long remainingNeed = need - amount;
                     if (amount > 0) {
                         storage.tryTakeItem(new ItemRequest(template, amount, true));
                     }
@@ -130,18 +130,18 @@ public class AutoCraftingSession {
                         continue;
                     }
 
-                    Map<ItemStack, Integer> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
-                    Map<ItemStack, Integer> input = ItemUtils.getAmounts(craftingRecipe.getInput());
+                    Map<ItemStack, Long> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
+                    Map<ItemStack, Long> input = ItemUtils.getAmounts(craftingRecipe.getInput());
 
                     // 计算需要合成多少次
-                    int out = output.get(template) - input.getOrDefault(template, 0);
-                    int countToCraft = (int) Math.ceil(remainingNeed / (double) out);
+                    long out = output.get(template) - input.getOrDefault(template, 0L);
+                    long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
 
                     try {
                         result.addAll(match(craftingRecipe, countToCraft, storage));
                     } catch (NoEnoughMaterialsException e) {
                         // 合并子合成缺少的材料
-                        for (Map.Entry<ItemStack, Integer> entry :
+                        for (Map.Entry<ItemStack, Long> entry :
                                 e.getMissingMaterials().entrySet()) {
                             missing.addItem(ItemUtils.createItems(entry.getKey(), entry.getValue()));
                         }
@@ -172,7 +172,7 @@ public class AutoCraftingSession {
 
     public void moveNext(int maxDevices) {
         if (!hasNext()) return;
-        KeyValuePair<CraftingRecipe, Integer> next = craftingSteps.get(0);
+        KeyValuePair<CraftingRecipe, Long> next = craftingSteps.get(0);
         boolean doCraft = !isCancelling;
         if (running == 0 && isCancelling) info.getCraftingSessions().remove(this);
         if (next.getValue() <= 0) {
@@ -287,8 +287,8 @@ public class AutoCraftingSession {
 
     public void refreshGUI(int maxSize, boolean cancelButton) {
         if (cancelButton) maxSize--;
-        List<KeyValuePair<CraftingRecipe, Integer>> process = getCraftingSteps();
-        List<KeyValuePair<CraftingRecipe, Integer>> process2 = new ArrayList<>();
+        List<KeyValuePair<CraftingRecipe, Long>> process = getCraftingSteps();
+        List<KeyValuePair<CraftingRecipe, Long>> process2 = new ArrayList<>();
         if (process.size() > maxSize - 1) {
             process2 = process.subList(maxSize, process.size());
             process = process.subList(0, maxSize);
@@ -298,7 +298,7 @@ public class AutoCraftingSession {
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
         for (int i = 0; i < process.size(); i++) {
-            KeyValuePair<CraftingRecipe, Integer> item = process.get(i);
+            KeyValuePair<CraftingRecipe, Long> item = process.get(i);
             ItemStack[] itemStacks = item.getKey().getOutput();
             ItemStack itemStack;
             if (itemStacks.length == 1) {
@@ -328,7 +328,7 @@ public class AutoCraftingSession {
         if (!process2.isEmpty()) {
             ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
             List<String> lore = new ArrayList<>();
-            for (KeyValuePair<CraftingRecipe, Integer> item : process2) {
+            for (KeyValuePair<CraftingRecipe, Long> item : process2) {
                 SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
                 if (slimefunItem != null) {
                     lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "

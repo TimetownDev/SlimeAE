@@ -42,12 +42,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class METerminal extends TickingBlock implements IMEObject, InventoryBlock {
-    public static final Comparator<Map.Entry<ItemStack, Integer>> ALPHABETICAL_SORT = Comparator.comparing(
+    public static final Comparator<Map.Entry<ItemStack, Long>> ALPHABETICAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
             Collator.getInstance(Locale.CHINA)::compare);
 
-    public static final Comparator<Map.Entry<ItemStack, Integer>> NUMERICAL_SORT = Map.Entry.comparingByValue();
-    public static final Comparator<Map.Entry<ItemStack, Integer>> MATERIAL_SORT = Comparator.comparing(
+    public static final Comparator<Map.Entry<ItemStack, Long>> NUMERICAL_SORT = Map.Entry.comparingByValue();
+    public static final Comparator<Map.Entry<ItemStack, Long>> MATERIAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> itemStackIntegerEntry.getKey().getType().ordinal(), Integer::compare);
     public static final String PAGE_KEY = "page";
     public static final String SORT_KEY = "sort";
@@ -139,7 +139,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         StorageCacheUtils.setData(block.getLocation(), PAGE_KEY, String.valueOf(value));
     }
 
-    public Comparator<Map.Entry<ItemStack, Integer>> getSort(Block block) {
+    public Comparator<Map.Entry<ItemStack, Long>> getSort(Block block) {
         String value = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
         if (value == null) return ALPHABETICAL_SORT;
         return int2Sort(Integer.parseInt(value));
@@ -183,13 +183,13 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         }
 
         IStorage networkStorage = info.getStorage();
-        Map<ItemStack, Integer> storage = networkStorage.getStorage();
+        Map<ItemStack, Long> storage = networkStorage.getStorage();
 
         // 获取过滤器
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
 
         // 过滤和排序逻辑
-        List<Map.Entry<ItemStack, Integer>> items = new ArrayList<>(storage.entrySet());
+        List<Map.Entry<ItemStack, Long>> items = new ArrayList<>(storage.entrySet());
         if (!filter.isEmpty()) {
             if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
                 items.removeIf(x -> {
@@ -236,7 +236,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 blockMenu.replaceExistingItem(slot, MenuItems.Empty);
                 continue;
             }
-            Map.Entry<ItemStack, Integer> entry = items.get(i + startIndex);
+            Map.Entry<ItemStack, Long> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
 
             if (itemStack == null || itemStack.getType().isAir()) {
@@ -372,7 +372,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 
-    public static Comparator<Map.Entry<ItemStack, Integer>> int2Sort(int id) {
+    public static Comparator<Map.Entry<ItemStack, Long>> int2Sort(int id) {
         if (id == 0) return ALPHABETICAL_SORT;
         if (id == 1) return NUMERICAL_SORT;
         if (id == 2) return MATERIAL_SORT;

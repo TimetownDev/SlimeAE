@@ -81,7 +81,7 @@ public class FluffyBarrelStorage implements IStorage {
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
             if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
-                int toTake = Math.min(stored, request.getAmount());
+                long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
                     toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
@@ -93,10 +93,10 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> storage = new HashMap<>();
+    public @Nonnull Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> storage = new HashMap<>();
         if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return storage;
-        storage.put(barrel.getStoredItem(block).asOne(), barrel.getStored(block) - 1);
+        storage.put(barrel.getStoredItem(block).asOne(), (long) (barrel.getStored(block) - 1));
         return storage;
     }
 

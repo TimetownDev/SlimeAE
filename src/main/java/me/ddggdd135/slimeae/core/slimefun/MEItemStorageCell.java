@@ -80,11 +80,11 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
         ItemStack toReturn = itemStack.clone();
         List<String> lores = new ArrayList<>();
-        List<Map.Entry<ItemStack, Integer>> storages = meStorageCellCache.getStorage().entrySet().stream()
+        List<Map.Entry<ItemStack, Long>> storages = meStorageCellCache.getStorage().entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
                 .toList();
         int lines = 0;
-        for (Map.Entry<ItemStack, Integer> entry : storages) {
+        for (Map.Entry<ItemStack, Long> entry : storages) {
             if (lines >= 8) {
                 lores.add(CMIChatColor.translate("&e------还有" + (storages.size() - lines) + "项------"));
                 break;

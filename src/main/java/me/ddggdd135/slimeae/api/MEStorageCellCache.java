@@ -17,9 +17,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
-    private final Map<ItemStack, Integer> storages;
-    private int stored;
-    private final int size;
+    private final Map<ItemStack, Long> storages;
+    private long stored;
+    private final long size;
     private final UUID uuid;
 
     public MEStorageCellCache(ItemStack itemStack) {
@@ -71,16 +71,16 @@ public class MEStorageCellCache implements IStorage {
         return cache.getOrDefault(uuid, null);
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public int getStored() {
+    public long getStored() {
         return stored;
     }
 
     private void trim(@Nonnull ItemStack template) {
-        if (storages.containsKey(template) && storages.getOrDefault(template, 0) == 0) {
+        if (storages.containsKey(template) && storages.getOrDefault(template, 0L) == 0) {
             storages.remove(template);
             SlimeAEPlugin.getStorageCellDataController().markDirty(this);
         }
@@ -98,14 +98,14 @@ public class MEStorageCellCache implements IStorage {
             if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                     || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) continue;
             ItemStack template = itemStack.asOne();
-            int amount = storages.getOrDefault(template, 0);
-            int toAdd;
+            long amount = storages.getOrDefault(template, 0L);
+            long toAdd;
             if (stored + itemStack.getAmount() > size) toAdd = size - stored;
             else toAdd = itemStack.getAmount();
             stored += toAdd;
             storages.put(template, amount + toAdd);
             SlimeAEPlugin.getStorageCellDataController().markDirty(this);
-            itemStack.setAmount(itemStack.getAmount() - toAdd);
+            itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
             trim(itemStack);
         }
     }
@@ -116,7 +116,7 @@ public class MEStorageCellCache implements IStorage {
 
         for (ItemRequest request : requests) {
             if (!storages.containsKey(request.getTemplate())
-                    || storages.getOrDefault(request.getTemplate(), 0) < request.getAmount()) return false;
+                    || storages.getOrDefault(request.getTemplate(), 0L) < request.getAmount()) return false;
         }
         return true;
     }
@@ -131,7 +131,7 @@ public class MEStorageCellCache implements IStorage {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
             if (storages.containsKey(request.getTemplate())) {
-                int amount = storages.get(request.getTemplate());
+                long amount = storages.get(request.getTemplate());
                 if (amount >= request.getAmount()) {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
                     itemStacks.addAll(List.of(tmp));
@@ -142,7 +142,7 @@ public class MEStorageCellCache implements IStorage {
                     ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
                     itemStacks.addAll(List.of(tmp));
                     stored -= storages.get(request.getTemplate());
-                    storages.put(request.getTemplate(), 0);
+                    storages.put(request.getTemplate(), 0L);
                 }
                 trim(request.getTemplate());
             }
@@ -151,12 +151,12 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Integer> getStorage() {
+    public @Nonnull Map<ItemStack, Long> getStorage() {
         if (storages instanceof CreativeItemIntegerMap) return storages;
         return new HashMap<>(storages);
     }
 
-    public Map<ItemStack, Integer> getSourceStorage() {
+    public Map<ItemStack, Long> getSourceStorage() {
         return storages;
     }
 
@@ -189,7 +189,7 @@ public class MEStorageCellCache implements IStorage {
         return uuid;
     }
 
-    public void updateStored(int stored) {
+    public void updateStored(long stored) {
         this.stored = stored;
     }
 }

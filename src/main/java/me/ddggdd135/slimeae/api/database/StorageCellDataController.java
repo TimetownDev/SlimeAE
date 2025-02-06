@@ -44,7 +44,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
         cancelWriteTask(data);
         delete(data);
 
-        for (Map.Entry<ItemStack, Integer> entry : data.getStorage().entrySet()) {
+        for (Map.Entry<ItemStack, Long> entry : data.getStorage().entrySet()) {
             executeSql("INSERT INTO " + getTableName() + " (uuid, item_hash, item_base64, amount) VALUES ('"
                     + data.getUuid().toString() + "', '" + getItemHash(entry.getKey()) + "', '"
                     + SerializeUtils.object2String(entry.getKey()) + "', " + entry.getValue() + ");");
@@ -105,13 +105,13 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     public MEStorageCellCache loadData(ItemStack itemStack) {
         MEStorageCellCache storageCellCache = new MEStorageCellCache(itemStack);
-        Map<ItemStack, Integer> storage = storageCellCache.getSourceStorage();
-        int stored = 0;
+        Map<ItemStack, Long> storage = storageCellCache.getSourceStorage();
+        long stored = 0;
         List<Map<String, String>> data = execQuery("SELECT * FROM " + getTableName() + " WHERE uuid = '"
                 + storageCellCache.getUuid().toString() + "';");
         for (Map<String, String> itemData : data) {
             ItemStack item = (ItemStack) SerializeUtils.string2Object(itemData.get("item_base64"));
-            int amount = Integer.parseInt(itemData.get("amount"));
+            long amount = Long.parseLong(itemData.get("amount"));
             if (storage.containsKey(itemStack)) {
                 amount += storage.get(item);
             }

@@ -11,12 +11,12 @@ import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class CreativeItemIntegerMap implements Map<ItemStack, Integer> {
+public class CreativeItemIntegerMap implements Map<ItemStack, Long> {
     public static final Set<ItemStack> allItemStacks;
-    public static final Set<Map.Entry<ItemStack, Integer>> allAmount;
-    public static final int amount = 64 * 1024;
+    public static final Set<Map.Entry<ItemStack, Long>> allAmount;
+    public static final long amount = 64 * 1024;
 
-    public CreativeItemIntegerMap(@Nonnull Map<ItemStack, Integer> items) {}
+    public CreativeItemIntegerMap(@Nonnull Map<ItemStack, Long> items) {}
 
     public CreativeItemIntegerMap() {}
 
@@ -36,23 +36,23 @@ public class CreativeItemIntegerMap implements Map<ItemStack, Integer> {
         return value instanceof ItemStack;
     }
 
-    public Integer get(Object key) {
+    public Long get(Object key) {
         return amount;
     }
 
-    public Integer put(ItemStack key, Integer value) {
+    public Long put(ItemStack key, Long value) {
         return amount;
     }
 
-    public Integer remove(Object key) {
+    public Long remove(Object key) {
         if (key instanceof ItemStack) {
             return amount;
         } else {
-            return 0;
+            return 0L;
         }
     }
 
-    public void putAll(@Nonnull Map<? extends ItemStack, ? extends Integer> m) {}
+    public void putAll(@Nonnull Map<? extends ItemStack, ? extends Long> m) {}
 
     public void clear() {}
 
@@ -62,16 +62,16 @@ public class CreativeItemIntegerMap implements Map<ItemStack, Integer> {
     }
 
     @Nonnull
-    public Collection<Integer> values() {
+    public Collection<Long> values() {
         return new HashSet<>();
     }
 
     @Nonnull
-    public Set<Map.Entry<ItemStack, Integer>> entrySet() {
+    public Set<Map.Entry<ItemStack, Long>> entrySet() {
         return allAmount;
     }
 
-    public static final class Entry implements Map.Entry<ItemStack, Integer> {
+    public static final class Entry implements Map.Entry<ItemStack, Long> {
         private final ItemStack key;
 
         @Override
@@ -80,12 +80,12 @@ public class CreativeItemIntegerMap implements Map<ItemStack, Integer> {
         }
 
         @Override
-        public Integer getValue() {
+        public Long getValue() {
             return amount;
         }
 
         @Override
-        public Integer setValue(Integer value) {
+        public Long setValue(Long value) {
             return amount;
         }
 

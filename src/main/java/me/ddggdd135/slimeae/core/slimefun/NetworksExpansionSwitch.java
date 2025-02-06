@@ -56,7 +56,7 @@ public class NetworksExpansionSwitch extends NetworkObject implements IMEStorage
             return new HashSet<>();
         }
 
-        Map<ItemStack, Integer> itemMap = storage.getStorage();
+        Map<ItemStack, Long> itemMap = storage.getStorage();
 
         Set<BarrelIdentity> result = new HashSet<>();
         for (ItemStack itemStack : itemMap.keySet()) {

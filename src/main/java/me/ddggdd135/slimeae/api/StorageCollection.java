@@ -107,7 +107,7 @@ public class StorageCollection implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Integer> storage = getStorage();
+        Map<ItemStack, Long> storage = getStorage();
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getTemplate())) return false;
             if (!ItemUtils.contains(storage, request)) {
@@ -121,7 +121,7 @@ public class StorageCollection implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Integer> rest = new HashMap<>();
+        Map<ItemStack, Long> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
@@ -132,7 +132,7 @@ public class StorageCollection implements IStorage {
             }
         }
         ItemUtils.trim(rest);
-        for (Map.Entry<ItemStack, Integer> entry : rest.entrySet()) {
+        for (Map.Entry<ItemStack, Long> entry : rest.entrySet()) {
             if (takeCache.containsKey(entry.getKey())) {
                 IStorage storage = takeCache.get(entry.getKey());
                 ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
@@ -161,10 +161,10 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> result = new HashMap<>();
+    public @Nonnull Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> result = new HashMap<>();
         for (IStorage storage : storages) {
-            Map<ItemStack, Integer> tmp = storage.getStorage();
+            Map<ItemStack, Long> tmp = storage.getStorage();
             if (tmp instanceof CreativeItemIntegerMap) return tmp;
             for (ItemStack itemStack : tmp.keySet()) {
                 if (result.containsKey(itemStack)) {

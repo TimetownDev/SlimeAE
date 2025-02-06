@@ -45,8 +45,8 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
         for (ItemRequest request : requests) {
             if (!SlimefunUtils.isItemSimilar(request.getTemplate(), barrelIdentity.getItemStack(), true, false))
                 continue;
-            int amount = request.getAmount();
-            int rest = (int) barrelIdentity.getAmount();
+            long amount = request.getAmount();
+            long rest = barrelIdentity.getAmount();
             if (rest > amount) {
                 rest -= amount;
                 barrelIdentity.setAmount(rest);
@@ -63,11 +63,11 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
 
     @Override
     @Nonnull
-    public Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> map = new HashMap<>();
+    public Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> map = new HashMap<>();
         ItemStack itemStack = barrelIdentity.getItemStack();
         if (itemStack != null && !itemStack.getType().isAir()) {
-            map.put(itemStack.asOne(), (int) barrelIdentity.getAmount() - 1);
+            map.put(itemStack.asOne(), barrelIdentity.getAmount() - 1);
         }
 
         return map;

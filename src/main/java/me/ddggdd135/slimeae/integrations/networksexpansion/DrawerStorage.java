@@ -73,11 +73,11 @@ public class DrawerStorage implements IStorage {
 
     @Override
     @Nonnull
-    public Map<ItemStack, Integer> getStorage() {
-        Map<ItemStack, Integer> storage = new HashMap<>();
+    public Map<ItemStack, Long> getStorage() {
+        Map<ItemStack, Long> storage = new HashMap<>();
         if (data == null) return storage;
         for (ItemContainer itemContainer : data.getStoredItems()) {
-            storage.put(itemContainer.getSample(), itemContainer.getAmount());
+            storage.put(itemContainer.getSample(), (long) itemContainer.getAmount());
         }
 
         return storage;
