@@ -16,13 +16,21 @@ public interface IStorage {
      */
     void pushItem(@Nonnull ItemStack[] itemStacks);
 
+    // 添加boolean
+//    default void pushItem(@Nonnull ItemStack itemStack) {
+//        pushItem(new ItemStack[] {itemStack});
+//    }
+
     /**
      * 将单个物品推送到存储中
+     *
      * @param itemStack 要存储的物品
+     * @return
      */
     default void pushItem(@Nonnull ItemStack itemStack) {
         pushItem(new ItemStack[] {itemStack});
     }
+
 
     /**
      * 检查是否包含指定的物品请求
@@ -63,7 +71,7 @@ public interface IStorage {
      * @return 物品到数量的映射
      */
     @Nonnull
-    Map<ItemStack, Long> getStorage();
+    Map<ItemStack, Integer> getStorage();
 
     /**
      * 获取存储中的空槽位数量
