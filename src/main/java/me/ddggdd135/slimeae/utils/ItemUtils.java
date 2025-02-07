@@ -138,6 +138,7 @@ public class ItemUtils {
     public static ItemStack[] trimItems(@Nonnull ItemStack[] itemStacks) {
         List<ItemStack> itemStackList = new ArrayList<>();
         for (ItemStack itemStack : itemStacks) {
+            if (itemStack == null || itemStack.getType().isAir()) continue;
             if (itemStack.getAmount() > 0) {
                 itemStackList.add(itemStack);
             }

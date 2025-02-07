@@ -21,6 +21,7 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -169,7 +170,18 @@ public class MEPatternTerminal extends METerminal {
             }
 
             inputs = inputList.toArray(ItemStack[]::new);
-            CraftingRecipe recipe = RecipeUtils.getRecipe(inputs);
+
+            ItemStack[] outputs;
+            List<ItemStack> outputList = new ArrayList<>();
+            for (int slot : getCraftOutputSlots()) {
+                outputList.add(blockMenu.getItemInSlot(slot));
+            }
+
+            outputs = outputList.toArray(ItemStack[]::new);
+
+            CraftingRecipe recipe;
+            if (ItemUtils.trimItems(outputs).length != 0) recipe = RecipeUtils.getRecipe(inputs, outputs);
+            else recipe = RecipeUtils.getRecipe(inputs);
 
             if (recipe == null) return;
             for (int i = 0; i < getCraftSlots().length; i++) {

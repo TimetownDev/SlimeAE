@@ -190,10 +190,11 @@ public class MECraftingTerminal extends METerminal {
         if (recipe == null) return;
         IStorage networkStorage = info.getStorage();
         ItemStack[] input = recipe.getInput();
-        for (int i = 0; i < input.length; i++) {
+        for (int i = 0; i < getCraftSlots().length; i++) {
             ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
             if (itemStack == null || itemStack.getType().isAir()) continue;
-            itemStack.setAmount(itemStack.getAmount() - input[i].getAmount());
+            if (input.length > i) itemStack.setAmount(itemStack.getAmount() - input[i].getAmount());
+            else itemStack.setAmount(itemStack.getAmount() - 1);
             if (itemStack.getAmount() == 0) {
                 ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(input[i], input[i].getAmount()));
                 if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
@@ -219,7 +220,7 @@ public class MECraftingTerminal extends METerminal {
         }
 
         inputs = inputList.toArray(ItemStack[]::new);
-        return RecipeUtils.getRecipe(inputs);
+        return RecipeUtils.getRecipe(inputs, RecipeUtils.CRAFTING_TABLE_TYPES);
     }
 
     @Override
