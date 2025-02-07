@@ -75,56 +75,56 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     public int[] getBackgroundSlots() {
         return new int[] {
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            13,
-            14,
-            16,
-            17,
-            18,
-            19,
-            21,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            31,
-            32,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            48,
-            49,
-            50,
-            51,
-            52,
-            53 // 移除45,46,47用于卡槽
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                13,
+                14,
+                16,
+                17,
+                18,
+                19,
+                21,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                31,
+                32,
+                34,
+                35,
+                36,
+                37,
+                38,
+                39,
+                40,
+                41,
+                42,
+                43,
+                44,
+                48,
+                49,
+                50,
+                51,
+                52,
+                53 // 移除45,46,47用于卡槽
         };
     }
 
     private final BlockFace[] FACES = {
-        BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
+            BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
 
     private final String dataKey = "direction";
@@ -329,7 +329,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         }
     }
 
-    private void updateGui(SlimefunBlockData data) {
+    void updateGui(SlimefunBlockData data) {
         BlockMenu blockMenu = data.getBlockMenu();
         if (blockMenu == null || !blockMenu.hasViewer()) {
             return;

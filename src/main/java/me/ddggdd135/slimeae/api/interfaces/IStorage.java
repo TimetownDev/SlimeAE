@@ -27,9 +27,8 @@ public interface IStorage {
      * @param itemStack 要存储的物品
      * @return
      */
-    default boolean pushItem(@Nonnull ItemStack itemStack) {
+    default void pushItem(@Nonnull ItemStack itemStack) {
         pushItem(new ItemStack[] {itemStack});
-        return false;
     }
 
 
