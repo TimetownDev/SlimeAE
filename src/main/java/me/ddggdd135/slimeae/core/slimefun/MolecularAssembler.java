@@ -262,6 +262,7 @@ public class MolecularAssembler extends TickingBlock
 
                 CraftingOperation operation = processor.getOperation(b);
                 if (operation == null) return;
+                processor.endOperation(b);
 
                 for (ItemStack itemStack : operation.getRecipe().getInput()) {
                     b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
