@@ -5,10 +5,9 @@ import static me.ddggdd135.slimeae.api.interfaces.IMEObject.Valid_Faces;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import java.util.ArrayDeque;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import org.bukkit.Location;
@@ -17,18 +16,16 @@ import org.bukkit.block.BlockFace;
 
 public class NetworkUtils {
     public static void scan(Block block, Set<Location> blocks) {
-        Queue<Location> queue = new ArrayDeque<>();
-        queue.add(block.getLocation());
-        wh:
-        while (!queue.isEmpty()) {
-            Location next = queue.remove();
+        Stack<Location> stack = new Stack<>();
+        stack.push(block.getLocation());
+        while (!stack.empty()) {
+            Location next = stack.pop();
             for (BlockFace blockFace : Valid_Faces) {
-                Location testLocation = next.add(blockFace.getDirection());
+                Location testLocation = next.clone().add(blockFace.getDirection());
                 if (blocks.contains(testLocation)) continue;
                 if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) {
                     blocks.add(testLocation);
-                    queue.add(testLocation);
-                    continue wh;
+                    stack.push(testLocation);
                 } else {
                     SlimefunBlockData blockData = StorageCacheUtils.getBlock(testLocation);
                     if (blockData == null) {
@@ -51,8 +48,7 @@ public class NetworkUtils {
                             SlimeAEPlugin.getNetworkData().AllCraftHolders.put(testLocation, IMECraftHolder);
                         }
 
-                        queue.add(testLocation);
-                        continue wh;
+                        stack.push(testLocation);
                     }
                 }
             }

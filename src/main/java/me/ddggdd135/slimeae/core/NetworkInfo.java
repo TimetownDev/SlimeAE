@@ -9,6 +9,7 @@ import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.StorageCollection;
@@ -24,12 +25,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class NetworkInfo implements IDisposable {
     private final Location controller;
-    private Set<Location> children = new HashSet<>();
-    private final Set<Location> craftingHolders = new HashSet<>();
+    private Set<Location> children = new ConcurrentHashSet<>();
+    private final Set<Location> craftingHolders = new ConcurrentHashSet<>();
     private final Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private IStorage storageNoNetworks = new StorageCollection();
-    private final Set<AutoCraftingSession> craftingSessions = new HashSet<>();
+    private final Set<AutoCraftingSession> craftingSessions = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tmpStorage = new ItemStorage();
 
