@@ -6,20 +6,18 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public abstract class AdvancedMEBus extends MEBus {
 
@@ -45,9 +43,7 @@ public abstract class AdvancedMEBus extends MEBus {
     @Override
     @Deprecated
     public BlockFace getDirection(BlockMenu blockMenu) {
-        return getDirections(blockMenu.getLocation()).stream()
-                .findFirst()
-                .orElse(BlockFace.SELF);
+        return getDirections(blockMenu.getLocation()).stream().findFirst().orElse(BlockFace.SELF);
     }
 
     public Set<BlockFace> getDirections(Location loc) {
@@ -80,7 +76,7 @@ public abstract class AdvancedMEBus extends MEBus {
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         Location loc = block.getLocation();
         if (!MULTI_DIRECTION_MAP.containsKey(loc)) {
-            //Set<BlockFace> directions = ConcurrentHashMap.newKeySet();
+            // Set<BlockFace> directions = ConcurrentHashMap.newKeySet();
             Set<BlockFace> directions = new ConcurrentSkipListSet<>();
             String dirData = StorageCacheUtils.getData(loc, DATA_KEY_DIRECTIONS);
             if (dirData != null && !dirData.isEmpty()) {
@@ -131,6 +127,6 @@ public abstract class AdvancedMEBus extends MEBus {
 
     private static final Map<Location, Set<BlockFace>> MULTI_DIRECTION_MAP = new ConcurrentHashMap<>();
     private final BlockFace[] FACES = {
-            BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
+        BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
 }

@@ -17,9 +17,9 @@ public interface IStorage {
     void pushItem(@Nonnull ItemStack[] itemStacks);
 
     // 添加boolean
-//    default void pushItem(@Nonnull ItemStack itemStack) {
-//        pushItem(new ItemStack[] {itemStack});
-//    }
+    //    default void pushItem(@Nonnull ItemStack itemStack) {
+    //        pushItem(new ItemStack[] {itemStack});
+    //    }
 
     /**
      * 将单个物品推送到存储中
@@ -30,7 +30,6 @@ public interface IStorage {
     default void pushItem(@Nonnull ItemStack itemStack) {
         pushItem(new ItemStack[] {itemStack});
     }
-
 
     /**
      * 检查是否包含指定的物品请求

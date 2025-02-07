@@ -6,10 +6,12 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
-import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -19,10 +21,6 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.util.Set;
 
 public class MEAdvancedExportBus extends AdvancedMEBus {
 
@@ -58,8 +56,9 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
                     continue;
                 }
 
-                int[] inputSlots =
-                        targetInv.getPreset().getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
+                int[] inputSlots = targetInv
+                        .getPreset()
+                        .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
                 if (inputSlots == null || inputSlots.length == 0) continue;
 
                 if (targetInv.fits(setting, inputSlots)) {
@@ -71,6 +70,7 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
             }
         }
     }
+
     @Override
     public boolean isSynchronized() {
         return false;
