@@ -71,6 +71,7 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
     @Override
     @Nullable public IStorage getStorage(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+        if (blockMenu == null) return null;
         BlockFace blockFace = getDirection(blockMenu);
         if (blockFace == BlockFace.SELF) return null;
         Block b = block.getRelative(blockFace);
