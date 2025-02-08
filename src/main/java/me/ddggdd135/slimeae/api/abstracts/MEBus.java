@@ -14,6 +14,7 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -282,13 +283,16 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
             final ItemStack displayStack = new CustomItemStack(
                     blockMaterial, "&8设置朝向 " + blockFace.name() + " (" + CMIMaterial.get(blockMaterial) + ")");
             final ItemMeta itemMeta = displayStack.getItemMeta();
+            List<String> lores = new ArrayList<>();
+            lores.add("{#e4ed32}左键点击: &8设置朝向");
+            lores.add("{#e4ed32}Shift+左键点击: &8打开目标方块");
             if (active) {
                 itemMeta.addEnchant(Enchantment.LUCK, 1, true);
                 itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                lores.add("");
+                lores.add("&c已设置朝向此容器!");
             }
-            itemMeta.setLore(List.of(
-                    CMIChatColor.translate("{#e4ed32}左键点击: &8设置朝向"),
-                    CMIChatColor.translate("{#e4ed32}Shift+左键点击: &8打开目标方块")));
+            itemMeta.setLore(CMIChatColor.translate(lores));
             displayStack.setItemMeta(itemMeta);
             return displayStack;
         } else {
