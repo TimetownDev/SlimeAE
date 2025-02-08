@@ -1,6 +1,6 @@
 package me.ddggdd135.slimeae.core.commands.subcommands;
 
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.*;
+import static me.ddggdd135.slimeae.core.slimefun.terminals.METerminal.*;
 
 import com.balugaq.jeg.api.groups.SearchGroup;
 import com.balugaq.jeg.implementation.JustEnoughGuide;
@@ -19,7 +19,7 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.*;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
-import me.ddggdd135.slimeae.core.slimefun.METerminal;
+import me.ddggdd135.slimeae.core.slimefun.terminals.METerminal;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;

@@ -1,6 +1,6 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
-import static me.ddggdd135.slimeae.core.slimefun.METerminal.ALPHABETICAL_SORT;
+import static me.ddggdd135.slimeae.core.slimefun.terminals.METerminal.ALPHABETICAL_SORT;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
