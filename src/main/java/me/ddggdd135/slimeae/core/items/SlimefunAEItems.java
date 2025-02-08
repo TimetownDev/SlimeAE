@@ -228,6 +228,9 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ME_SECURITY_TERMINAL = new SlimefunItemStack(
             "ME_SECURITY_TERMINAL",
             new AdvancedCustomItemStack(Material.ENDER_CHEST, "&fME安全终端", "", "{#3366ff>}用于连接无线终端{#33ccf3<}"));
+    public static final SlimefunItemStack ME_CLEANER = new SlimefunItemStack(
+            "ME_CLEANER",
+            new AdvancedCustomItemStack(Material.OBSERVER, "&fME清除器", "", "{#3366ff>}用于清除ME存储元件中多余的物品{#33ccf3<}"));
     public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
             "ME_ENERGY_ACCEPTOR",
             new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器", "", "&c现在它还没用 敬请期待"));
@@ -746,6 +749,17 @@ public class SlimefunAEItems {
                             ENGINEERING_PROCESSOR,
                             new ItemStack(Material.IRON_INGOT)
                         })
+                .register(plugin);
+        new MECleaner(SlimefunAEItemGroups.MACHINE, ME_CLEANER, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    null,
+                    ME_INTERFACE,
+                    null,
+                    new ItemStack(Material.IRON_INGOT),
+                    SlimefunItems.PORTABLE_DUSTBIN,
+                    new ItemStack(Material.IRON_INGOT),
+                    null,
+                    LOGIC_PROCESSOR,
+                })
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,

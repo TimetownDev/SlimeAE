@@ -17,6 +17,10 @@ networks-expansion-switch:
   allow-networks-to-ae: true
   allow-ae-to-networks: false
 
+# ME清除器设置
+me-cleaner:
+  default: 131072
+
 # 世界生成设置
 world-gen:
   # 是否启用矿石生成

@@ -19,6 +19,7 @@ import me.ddggdd135.slimeae.core.listeners.CardListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
+import me.ddggdd135.slimeae.core.slimefun.MECleaner;
 import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.*;
@@ -275,5 +276,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载网络交换机配置
         NetworksExpansionSwitch.reloadConfig();
+
+        // 重载ME清除器配置
+        MECleaner.reloadConfig();
     }
 }
