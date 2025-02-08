@@ -181,7 +181,7 @@ public class MEStorageCellCache implements IStorage {
     public int getTier(@Nonnull ItemStack itemStack) {
         if (storages.containsKey(itemStack)) return 1000;
 
-        return -1;
+        return 0;
     }
 
     public UUID getUuid() {
