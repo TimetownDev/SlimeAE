@@ -28,7 +28,7 @@ public abstract class AdvancedMEBus extends MEBus {
     }
 
     @Override
-    public void setDirection(BlockMenu blockMenu, BlockFace blockFace) {
+    public void setDirection(BlockMenu blockMenu, @Nonnull BlockFace blockFace) {
         Location loc = blockMenu.getLocation().clone();
         Set<BlockFace> directions = getDirections(loc);
         if (directions.contains(blockFace)) {
