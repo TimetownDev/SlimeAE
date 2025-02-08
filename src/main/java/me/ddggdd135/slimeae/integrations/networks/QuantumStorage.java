@@ -32,8 +32,7 @@ public class QuantumStorage implements IStorage {
             throw new RuntimeException("Networks is not loaded");
         this.block = block;
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
-        if (blockData != null
-                && SlimefunItem.getById(blockData.getSfId()) instanceof NetworkQuantumStorage networkQuantumStorage) {
+        if (blockData != null && SlimefunItem.getById(blockData.getSfId()) instanceof NetworkQuantumStorage) {
             quantumCache = NetworkQuantumStorage.getCaches().get(block.getLocation());
         }
         this.isReadOnly = isReadOnly;
@@ -111,10 +110,10 @@ public class QuantumStorage implements IStorage {
 
     @Override
     public int getTier(@Nonnull ItemStack itemStack) {
+        if (quantumCache == null || quantumCache.getAmount() <= 0) return -1;
         ItemStack storedItem = quantumCache.getItemStack();
-        if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
-            return 1000;
-        }
+        if (storedItem == null || storedItem.getType().isAir()) return -1;
+        if (storedItem.getType() == itemStack.getType()) return 2000;
 
         return 0;
     }
