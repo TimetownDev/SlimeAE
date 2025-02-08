@@ -18,6 +18,7 @@ import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.CardListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
+import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
 import me.ddggdd135.slimeae.core.slimefun.MECleaner;
 import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
@@ -49,10 +50,12 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final NetworkTimeConsumingTask networkTimeConsumingTask = new NetworkTimeConsumingTask();
     private final DataSavingTask dataSavingTask = new DataSavingTask();
     private final SlimeAECommand slimeAECommand = new SlimeAECommand();
+    private PinnedManager pinnedManager;
 
     @Override
     public void onEnable() {
         instance = this;
+        pinnedManager = new PinnedManager();
 
         if (!getServer().getPluginManager().isPluginEnabled("GuizhanLibPlugin")) {
             getLogger().log(Level.SEVERE, "本插件需要 鬼斩前置库插件(GuizhanLibPlugin) 才能运行!");
@@ -257,6 +260,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static SlimeAECommand getSlimeAECommand() {
         return getInstance().slimeAECommand;
+    }
+
+    @Nonnull
+    public static PinnedManager getPinnedManager() {
+        return getInstance().pinnedManager;
     }
 
     public void reloadConfig0() {

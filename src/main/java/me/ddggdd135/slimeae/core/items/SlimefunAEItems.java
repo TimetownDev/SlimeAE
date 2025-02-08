@@ -421,6 +421,9 @@ public class SlimefunAEItems {
                     "",
                     "&e右键可查看整个AE网络的各个网络元件",
                     "&eShift右键可将大部分AE设备拆卸为掉落物形式"));
+    public static final SlimefunItemStack AE_TERMINAL_TOPPER = new SlimefunItemStack(
+            "AE_TERMINAL_TOPPER",
+            new AdvancedCustomItemStack(Material.ENDER_EYE, "&e置顶器", "", "&2&l用于在终端中置顶物品", "&6用法: 在终端中拿起此物品，在显示物品上点击"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
@@ -1276,5 +1279,21 @@ public class SlimefunAEItems {
                 new ItemStack[] {QUARTZ_WRENCH, QUARTZ_GLASS, null, CALCULATION_PROCESSOR, new ItemStack(Material.CHEST)
                 },
                 NETWORK_TOOL);
+        new SlimefunItem(
+                        SlimefunAEItemGroups.TOOL,
+                        AE_TERMINAL_TOPPER,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ME_GLASS_CABLE,
+                            CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                            ME_GLASS_CABLE,
+                            CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                            CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                            CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                            ME_GLASS_CABLE,
+                            CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                            ME_GLASS_CABLE
+                        })
+                .register(plugin);
     }
 }

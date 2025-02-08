@@ -18,13 +18,8 @@ public class SerializeUtils {
     @Nonnull
     public static String object2String(@Nullable Object object) {
         if (object instanceof ItemStack itemStack) {
-            for (SlimefunItem slimefunItem : Slimefun.getRegistry().getAllSlimefunItems()) {
-                if (slimefunItem.getItem().asOne().equals(itemStack.asOne())) return "SLIMEFUN_" + slimefunItem.getId();
-            }
-            Material material = itemStack.getType();
-            if (material.isAir()) return "VANILLA_AIR";
-
-            if (new ItemStack(material).equals(itemStack)) return "VANILLA_" + material;
+            String id = getId(itemStack);
+            if (id != null) return id;
         }
         var stream = new ByteArrayOutputStream();
         try (var bs = new BukkitObjectOutputStream(stream)) {
@@ -66,5 +61,17 @@ public class SerializeUtils {
     public static long getItemHash(ItemStack itemStack) {
         NBTItem nbtItem = new NBTItem(itemStack);
         return itemStack.getType().hashCode() * 33L + nbtItem.hashCode();
+    }
+
+    @Nullable public static String getId(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return "VANILLA_AIR";
+        for (SlimefunItem slimefunItem : Slimefun.getRegistry().getAllSlimefunItems()) {
+            if (slimefunItem.getItem().asOne().equals(itemStack.asOne())) return "SLIMEFUN_" + slimefunItem.getId();
+        }
+        Material material = itemStack.getType();
+
+        if (new ItemStack(material).equals(itemStack)) return "VANILLA_" + material;
+
+        return null;
     }
 }

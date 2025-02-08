@@ -136,7 +136,7 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack[] trimItems(@Nonnull ItemStack[] itemStacks) {
-        List<ItemStack> itemStackList = new ArrayList<>();
+        List<ItemStack> itemStackList = new ArrayList<>(itemStacks.length);
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             if (itemStack.getAmount() > 0) {
@@ -753,6 +753,21 @@ public class ItemUtils {
      */
     @Nonnull
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, long amount, boolean addLore) {
+        return createDisplayItem(itemStack, amount, addLore, false);
+    }
+
+    /**
+     * 创建用于显示的物品堆
+     *
+     * @param itemStack     原始物品堆
+     * @param amount        显示数量
+     * @param addLore       是否添加描述
+     * @param addPinnedLore 是否添加置顶提示
+     * @return 用于显示的物品堆
+     */
+    @Nonnull
+    public static ItemStack createDisplayItem(
+            @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore) {
         ItemStack result = new ItemStack(itemStack.getType());
         ItemMeta meta = itemStack.getItemMeta();
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
@@ -760,8 +775,9 @@ public class ItemUtils {
             List<String> lore = meta.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
-            lore.add(CMIChatColor.translate("&e物品数量 " + amount));
-            meta.setLore(lore);
+            lore.add("&e物品数量 " + amount);
+            if (addPinnedLore) lore.add("&e===已置顶===");
+            meta.setLore(CMIChatColor.translate(lore));
         }
         result.setItemMeta(meta);
         NBT.modify(result, x -> {
@@ -776,6 +792,7 @@ public class ItemUtils {
         ItemMeta meta = result.getItemMeta();
         if (hasLore) {
             List<String> lore = meta.getLore();
+            if (lore.get(lore.size() - 1).contains("===已置顶===")) lore.remove(lore.size() - 1);
             lore.remove(lore.size() - 1);
             lore.remove(lore.size() - 1);
             meta.setLore(lore);
