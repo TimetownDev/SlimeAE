@@ -349,32 +349,34 @@ public class ItemUtils {
     @Nullable public static IStorage getStorage(
             @Nonnull Block block, boolean checkNetwork, boolean isReadOnly, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
-        if (slimefunBlockData == null) return null;
-        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (slimefunBlockData != null) {
+            SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
 
-        if (checkNetwork && slimefunItem instanceof IMEObject) {
-            if (!(slimefunItem instanceof MEInterface)) return null;
-            else isReadOnly = true;
-        }
-        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
-                return new InfinityBarrelStorage(block);
+
+            if (checkNetwork && slimefunItem instanceof IMEObject) {
+                if (!(slimefunItem instanceof MEInterface)) return null;
+                else isReadOnly = true;
             }
-        }
-        if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
-                return new FluffyBarrelStorage(block);
+            if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                    return new InfinityBarrelStorage(block);
+                }
             }
-        }
-        if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
-                || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
-                return new QuantumStorage(block);
+            if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                    return new FluffyBarrelStorage(block);
+                }
             }
-        }
-        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-            if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
-                return new DrawerStorage(block);
+            if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
+                    || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
+                    return new QuantumStorage(block);
+                }
+            }
+            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
+                    return new DrawerStorage(block);
+                }
             }
         }
 
@@ -562,6 +564,10 @@ public class ItemUtils {
     }
 
     @Nullable public static ItemStack getItemStack(@Nonnull Block block, boolean checkNetwork) {
+        return getItemStack(block, checkNetwork, false);
+    }
+
+    @Nullable public static ItemStack getItemStack(@Nonnull Block block, boolean checkNetwork, boolean allowVanilla) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (checkNetwork
                 && slimefunBlockData != null
@@ -577,12 +583,13 @@ public class ItemUtils {
                 if (item == null || item.getType().isAir()) continue;
                 return item;
             }
-            //        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container) {
-            //            ItemStack[] items = getVanillaItemStacks(block);
-            //            for (ItemStack itemStack : items) {
-            //                if (itemStack != null && !itemStack.getType().isAir()) return itemStack;
-            //            }
+        } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container) {
+            ItemStack[] items = getVanillaItemStacks(block);
+            for (ItemStack itemStack : items) {
+                if (itemStack != null && !itemStack.getType().isAir()) return itemStack;
+            }
         }
+
         return null;
     }
 

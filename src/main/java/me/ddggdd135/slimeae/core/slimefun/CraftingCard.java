@@ -14,6 +14,7 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.core.AutoCraftingSession;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.ddggdd135.slimeae.core.slimefun.buses.MEExportBus;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Bukkit;

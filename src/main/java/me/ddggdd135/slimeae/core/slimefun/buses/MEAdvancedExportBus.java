@@ -1,4 +1,4 @@
-package me.ddggdd135.slimeae.core.slimefun;
+package me.ddggdd135.slimeae.core.slimefun.buses;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;

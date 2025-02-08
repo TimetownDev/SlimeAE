@@ -1,4 +1,4 @@
-package me.ddggdd135.slimeae.core.slimefun;
+package me.ddggdd135.slimeae.core.slimefun.buses;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
@@ -48,7 +48,7 @@ public class MEExportBus extends MEBus {
 
         IStorage networkStorage = info.getStorage();
 
-        for (int slot : Setting_Slots) {
+        for (int slot : getSettingSlots()) {
             ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
             if (setting == null || setting.getType().isAir()) {
                 continue;
