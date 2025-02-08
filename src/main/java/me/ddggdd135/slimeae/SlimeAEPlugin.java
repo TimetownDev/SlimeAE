@@ -19,6 +19,7 @@ import me.ddggdd135.slimeae.core.listeners.CardListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
+import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.*;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
@@ -271,5 +272,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载合成卡冷却时间配置
         CraftingCard.reloadConfig();
+
+        // 重载网络交换机配置
+        NetworksExpansionSwitch.reloadConfig();
     }
 }

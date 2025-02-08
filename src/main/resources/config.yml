@@ -12,6 +12,11 @@ auto-crafting:
   # 合成卡冷却时间(tick)
   crafting-card-cooldown: 200
 
+# 网络交换机设置
+networks-expansion-switch:
+  allow-networks-to-ae: true
+  allow-ae-to-networks: false
+
 # 世界生成设置
 world-gen:
   # 是否启用矿石生成

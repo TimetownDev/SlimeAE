@@ -40,6 +40,7 @@ public class NetworksIntegrationListener implements Listener {
 
     @EventHandler
     public void onNetworkRootLocateStorage(NetworkRootLocateStorageEvent e) {
+        if (!NetworksExpansionSwitch.isAllowAE2Networks()) return;
         if (!(e.getStorageType() == StorageType.BARREL)) {
             return;
         }

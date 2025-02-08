@@ -11,11 +11,8 @@ import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 
 public class SlimefunBlockPopulator extends BlockPopulator {
-
-    // 缓存配置值
     private static boolean enableOreGen;
 
-    // 重载配置的方法
     public static void reloadConfig() {
         enableOreGen = SlimeAEPlugin.getInstance().getConfig().getBoolean("world-gen.enable-ore-gen", true);
     }

@@ -34,11 +34,9 @@ public class NetworkInfo implements IDisposable {
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tmpStorage = new ItemStorage();
 
-    // 缓存配置值
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
 
-    // 从配置文件获取最大值
     public static int getMaxCraftingSessions() {
         return maxCraftingSessions;
     }
