@@ -125,6 +125,7 @@ public class StorageCollection implements IStorage {
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
+            if (notIncluded.contains(request.getTemplate())) continue;
             if (rest.containsKey(request.getTemplate())) {
                 rest.put(request.getTemplate(), rest.get(request.getTemplate()) + request.getAmount());
             } else {
