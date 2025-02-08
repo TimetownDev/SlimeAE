@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
+import me.ddggdd135.slimeae.core.listeners.CardListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.slimefun.CraftingCard;
@@ -72,6 +73,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         SlimefunAEItems.onSetup(this);
 
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
+        Bukkit.getPluginManager().registerEvents(new CardListener(), this);
         Bukkit.getPluginManager().registerEvents(new NetworkListener(), this);
         if (networksExpansionIntegration.isLoaded())
             Bukkit.getPluginManager().registerEvents(new NetworksIntegrationListener(), this);
