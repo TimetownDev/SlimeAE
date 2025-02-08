@@ -367,7 +367,7 @@ public class ItemUtils {
                 }
             }
             if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
-                    || SlimeAEPlugin.getNetworksIntegration().isLoaded()) {
+                    || SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
                     return new QuantumStorage(block);
                 }
