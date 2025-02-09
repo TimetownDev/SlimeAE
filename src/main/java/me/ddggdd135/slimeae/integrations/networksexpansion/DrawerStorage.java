@@ -91,7 +91,7 @@ public class DrawerStorage implements IStorage {
     @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         for (ItemContainer itemContainer : data.getStoredItems()) {
-            if (SlimefunUtils.isItemSimilar(itemStack, itemContainer.getSample(), true, false)) {
+            if (itemStack.getType() == itemContainer.getSample().getType()) {
                 return 3000;
             }
         }
