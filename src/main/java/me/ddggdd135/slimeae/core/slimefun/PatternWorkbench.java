@@ -34,7 +34,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
     }
 
     public int[] getBorderSlots() {
-        return new int[] {30, 31, 32, 33, 34, 35, 39, 40, 44, 48, 49, 50, 51, 52, 53};
+        return new int[] {30, 31, 32, 33, 34, 35, 40, 44, 48, 49, 50, 51, 52, 53};
     }
 
     @Override
@@ -67,6 +67,10 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         return 43;
     }
 
+    public int getAllSupportedRecipeSlot() {
+        return 39;
+    }
+
     @Override
     public void init(@Nonnull BlockMenuPreset preset) {
         for (int slot : getBorderSlots()) {
@@ -80,6 +84,9 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         }
 
         preset.addItem(getCraftButtonSlot(), MenuItems.CRAFT_ITEM);
+
+        preset.addItem(getAllSupportedRecipeSlot(), MenuItems.PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE);
+        preset.addMenuClickHandler(getAllSupportedRecipeSlot(), ChestMenuUtils.getEmptyClickHandler());
     }
 
     @Override

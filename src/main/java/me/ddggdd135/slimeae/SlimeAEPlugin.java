@@ -43,6 +43,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final NetworksExpansionIntegration networksExpansionIntegration = new NetworksExpansionIntegration();
     private final TranscEndenceIntegration transcEndenceIntegration = new TranscEndenceIntegration();
     private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
+    private final GalactifunIntegration galactifunIntegration = new GalactifunIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
@@ -83,12 +84,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (networksExpansionIntegration.isLoaded())
             Bukkit.getPluginManager().registerEvents(new NetworksIntegrationListener(), this);
 
-        if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已支持");
-        if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已支持");
-        if (networksIntegration.isLoaded()) getLogger().info("网络已支持");
-        if (networksExpansionIntegration.isLoaded()) getLogger().info("网络拓展已支持");
-        if (transcEndenceIntegration.isLoaded()) getLogger().info("末地科技已支持");
-        if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已支持");
+        if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已接入");
+        if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已接入");
+        if (networksIntegration.isLoaded()) getLogger().info("网络已接入");
+        if (networksExpansionIntegration.isLoaded()) getLogger().info("网络拓展已接入");
+        if (transcEndenceIntegration.isLoaded()) getLogger().info("末地科技已接入");
+        if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已接入");
+        if (galactifunIntegration.isLoaded()) getLogger().info("星系已接入");
 
         storageCellDataController.init();
 
@@ -225,6 +227,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static JustEnoughGuideIntegration getJustEnoughGuideIntegration() {
         return getInstance().justEnoughGuideIntegration;
+    }
+
+    /**
+     * 获取星系集成实例
+     * @return 星系集成实例
+     */
+    @Nonnull
+    public static GalactifunIntegration getGalactifunIntegration() {
+        return getInstance().galactifunIntegration;
     }
 
     @Nonnull

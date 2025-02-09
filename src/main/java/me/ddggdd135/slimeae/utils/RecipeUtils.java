@@ -1,5 +1,7 @@
 package me.ddggdd135.slimeae.utils;
 
+import io.github.addoncommunity.galactifun.base.BaseItems;
+import io.github.addoncommunity.galactifun.base.items.AssemblyTable;
 import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlock;
 import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlockRecipe;
 import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
@@ -417,6 +419,11 @@ public class RecipeUtils {
         if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
             LARGE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
+        }
+
+        if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(AssemblyTable.TYPE, SlimefunItem.getByItem(BaseItems.ASSEMBLY_TABLE));
+            LARGE_TYPES.put(AssemblyTable.TYPE, SlimefunItem.getByItem(BaseItems.ASSEMBLY_TABLE));
         }
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {

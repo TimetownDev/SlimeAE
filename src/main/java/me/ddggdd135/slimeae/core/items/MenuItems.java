@@ -43,6 +43,7 @@ public class MenuItems {
     public static final ItemStack CRAFT_ITEM =
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
     public static final ItemStack CRAFTING_TABLE;
+    public static final ItemStack PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE;
     public static final ItemStack COOKING = new CustomItemStack(Material.FURNACE, "&e流程配方", "", "&7> 单击切换为工作台配方");
     public static final SlimefunItemStack ACCEPT = new SlimefunItemStack(
             "_AE_MN_ACCEPT_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l确认"));
@@ -71,12 +72,37 @@ public class MenuItems {
                 "&5  - 榨汁机",
                 "&6  - 矿物粉碎机",
                 "&f  - 压力机"));
+        List<String> PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE = new ArrayList<>(List.of(
+                "",
+                "&e支持以下合成配方:",
+                "&b  - 增强型工作台",
+                "&e  - 充能器",
+                "&7  - 压印机",
+                "&d  - 魔法工作台",
+                "&6  - 盔甲锻造台",
+                "&e  - 冶炼炉",
+                "&a  - 压缩机",
+                "&7  - 磨石",
+                "&5  - 榨汁机",
+                "&6  - 矿物粉碎机",
+                "&f  - 压力机"));
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
             CRAFTING_TABLE_LORE.add("{#299482}  - 纳米工作台");
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("{#299482}  - 纳米工作台");
+        }
+
+        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&7  - 无尽工作台");
+        }
+
+        if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&f  - 星系装配台");
         }
 
         CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
         CRAFTING_TABLE = new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", CRAFTING_TABLE_LORE);
+        PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE = new AdvancedCustomItemStack(
+                Material.RESPAWN_ANCHOR, "&e所有支持的配方", PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE);
     }
 }

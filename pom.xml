@@ -185,5 +185,12 @@
             <version>44fecd8d71</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.SlimefunGuguProject</groupId>
+            <artifactId>Galactifun</artifactId>
+            <version>c9005283c8</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Galactifun.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
