@@ -62,7 +62,7 @@ public class NetworkTickerTask implements Runnable {
                             Slimefun.runSync(() -> {
                                 session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
                             });
-                        } else session.moveNext(512);
+                        } else session.moveNext(1024);
                     }
                     networkInfo.updateAutoCraftingMenu();
                 }

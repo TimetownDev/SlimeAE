@@ -216,8 +216,8 @@ public class AutoCraftingSession {
                     continue;
                 }
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
-                if (running > maxDevices) return;
-                if (doCraft
+                if (running <= maxDevices
+                        && doCraft
                         && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
                                 ItemUtils.getAmounts(next.getKey().getInput())))) {
