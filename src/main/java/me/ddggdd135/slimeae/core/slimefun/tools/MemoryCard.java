@@ -148,6 +148,8 @@ public class MemoryCard extends SlimefunItem {
                             blockMenu.replaceExistingItem(meAdvancedExportBus.getSettingSlots()[i], itemStacks[i]);
                         }
                     }
+
+                    return;
                 }
                 if (slimefunItem instanceof MEBus meBus) {
                     BlockFace blockFace = NBT.get(e.getItem(), x -> {
@@ -184,6 +186,8 @@ public class MemoryCard extends SlimefunItem {
                             blockMenu.replaceExistingItem(meExportBus.getSettingSlots()[i], itemStacks[i]);
                         }
                     }
+
+                    return;
                 }
                 if (slimefunItem instanceof MEInterface meInterface) {
                     ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
@@ -195,6 +199,8 @@ public class MemoryCard extends SlimefunItem {
                     for (int i = 0; i < meInterface.getSettingSlots().length; i++) {
                         blockMenu.replaceExistingItem(meInterface.getSettingSlots()[i], itemStacks[i]);
                     }
+
+                    return;
                 }
                 e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
             }
