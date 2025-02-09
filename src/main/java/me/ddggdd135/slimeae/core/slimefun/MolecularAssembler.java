@@ -34,60 +34,6 @@ import org.bukkit.inventory.ItemStack;
 public class MolecularAssembler extends TickingBlock
         // 如果不是TickingBlock的话 玩家不打开一次方块就没法自动合成 奇怪的bug
         implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
-    private static final int[] BORDER_SLOTS = {
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8, // 第一行
-        9,
-        10,
-        14,
-        15,
-        16,
-        17, // 第二行边框和空格
-        18,
-        19,
-        25,
-        26, // 第三行边框和空格
-        27,
-        28,
-        32,
-        33,
-        34,
-        35, // 第四行边框和空格
-        36,
-        37,
-        38,
-        39,
-        40,
-        41,
-        42,
-        43,
-        44, // 第五行
-        48,
-        49,
-        50,
-        51,
-        52,
-        53 // 最后一行
-    };
-
-    private static final int[] INPUT_SLOTS = {
-        11, 12, 13,
-        20, 21, 22,
-        29, 30, 31
-    };
-
-    private static final int PROGRESS_SLOT = 23;
-    private static final int OUTPUT_SLOT = 24;
-
-    private static final int[] CARD_SLOTS = {45, 46, 47 // 左下角的3个卡槽位
-    };
 
     private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
 
@@ -114,21 +60,21 @@ public class MolecularAssembler extends TickingBlock
         tickCards(block, SlimefunItem.getById(slimefunBlockData.getSfId()), slimefunBlockData);
         CraftingOperation operation = processor.getOperation(block);
         if (operation == null) {
-            for (int slot : INPUT_SLOTS) {
+            for (int slot : getCraftingInputSlots()) {
                 menu.replaceExistingItem(slot, MenuItems.Empty);
             }
-            menu.replaceExistingItem(PROGRESS_SLOT, ChestMenuUtils.getBackground());
-            menu.replaceExistingItem(OUTPUT_SLOT, MenuItems.Empty);
+            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
+            menu.replaceExistingItem(getOutputSlot(), MenuItems.Empty);
             return;
         }
         ItemStack[] input = operation.getRecipe().getInput();
         for (int i = 0; i < input.length; i++) {
             if (input[i] == null || input[i].getType().isAir()) continue;
-            ItemUtils.setSettingItem(menu.getInventory(), INPUT_SLOTS[i], input[i]);
+            ItemUtils.setSettingItem(menu.getInventory(), getInputSlots()[i], input[i]);
         }
 
         if (isFinished(block)) {
-            menu.replaceExistingItem(PROGRESS_SLOT, ChestMenuUtils.getBackground());
+            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
             return;
         }
 
@@ -138,7 +84,7 @@ public class MolecularAssembler extends TickingBlock
         int maxProgress = operation.getTotalTicks();
 
         menu.replaceExistingItem(
-                PROGRESS_SLOT,
+                getProgressSlot(),
                 new CustomItemStack(
                         Material.GREEN_STAINED_GLASS_PANE,
                         "&a进度: &e" + progress + "&7/&e" + maxProgress,
@@ -147,7 +93,7 @@ public class MolecularAssembler extends TickingBlock
         ItemStack[] output = operation.getRecipe().getOutput();
         if (output.length > 0) {
             ItemStack displayItem = output[0].clone();
-            menu.replaceExistingItem(OUTPUT_SLOT, displayItem);
+            menu.replaceExistingItem(getOutputSlot(), displayItem);
         }
     }
 
@@ -186,8 +132,8 @@ public class MolecularAssembler extends TickingBlock
     public void finishCrafting(@Nonnull Block block) {
         BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
         if (menu != null) {
-            menu.replaceExistingItem(PROGRESS_SLOT, ChestMenuUtils.getBackground());
-            menu.replaceExistingItem(OUTPUT_SLOT, null);
+            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
+            menu.replaceExistingItem(getOutputSlot(), null);
         }
         processor.endOperation(block);
     }
@@ -213,22 +159,83 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     public int[] getCardSlots() {
-        return CARD_SLOTS;
+        return new int[] {45, 46, 47};
+    }
+
+    public int getProgressSlot() {
+        return 23;
+    }
+
+    public int[] getCraftingInputSlots() {
+        return new int[] {
+            11, 12, 13,
+            20, 21, 22,
+            29, 30, 31
+        };
+    }
+
+    public int getOutputSlot() {
+        return 24;
+    }
+
+    public int[] getBorderSlots() {
+        return new int[] {
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8, // 第一行
+            9,
+            10,
+            14,
+            15,
+            16,
+            17, // 第二行边框和空格
+            18,
+            19,
+            25,
+            26, // 第三行边框和空格
+            27,
+            28,
+            32,
+            33,
+            34,
+            35, // 第四行边框和空格
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44, // 第五行
+            48,
+            49,
+            50,
+            51,
+            52,
+            53 // 最后一行
+        };
     }
 
     @Override
     public void init(BlockMenuPreset preset) {
-        for (int slot : BORDER_SLOTS) {
+        for (int slot : getBorderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
 
-        for (int slot : INPUT_SLOTS) {
+        for (int slot : getCraftingInputSlots()) {
             preset.addItem(slot, MenuItems.Empty, ChestMenuUtils.getEmptyClickHandler());
         }
 
-        preset.addItem(PROGRESS_SLOT, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(getProgressSlot(), ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
 
-        preset.addItem(OUTPUT_SLOT, MenuItems.Empty, (player, i, itemStack, clickAction) -> false);
+        preset.addItem(getOutputSlot(), MenuItems.Empty, (player, i, itemStack, clickAction) -> false);
     }
 
     @Override

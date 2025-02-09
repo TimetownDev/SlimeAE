@@ -34,8 +34,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CookingAllocator extends MEBus implements IMECraftDevice {
-    private Map<Block, CraftingRecipe> recipeMap = new HashMap<>();
-    private Set<Block> running = new HashSet<>();
+    private final Map<Block, CraftingRecipe> recipeMap = new HashMap<>();
+    private final Set<Block> running = new HashSet<>();
 
     public CookingAllocator(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);

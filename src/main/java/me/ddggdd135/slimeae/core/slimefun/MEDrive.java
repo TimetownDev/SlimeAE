@@ -25,11 +25,6 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
-    public static final int[] Boarder_Slots = new int[] {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 33, 34, 35, 36, 37, 38,
-        42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53
-    };
-    public static final int[] MEItemStorageCell_Slots = new int[] {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
 
     public MEDrive(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -49,7 +44,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (blockMenu != null) {
-                    for (int slot : MEItemStorageCell_Slots) {
+                    for (int slot : getMEItemStorageCellSlots()) {
                         ItemStack itemStack = blockMenu.getItemInSlot(slot);
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
@@ -58,7 +53,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                             blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
                         }
                     }
-                    blockMenu.dropItems(b.getLocation(), MEItemStorageCell_Slots);
+                    blockMenu.dropItems(b.getLocation(), getMEItemStorageCellSlots());
                 }
             }
         };
@@ -69,7 +64,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return null;
         StorageCollection storageCollection = new StorageCollection();
-        for (int slot : MEItemStorageCell_Slots) {
+        for (int slot : getMEItemStorageCellSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack != null
                     && !itemStack.getType().isAir()
@@ -96,7 +91,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     @Override
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
-        for (int slot : Boarder_Slots) {
+        for (int slot : getBoarderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
     }
@@ -104,7 +99,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
-        for (int slot : MEItemStorageCell_Slots) {
+        for (int slot : getMEItemStorageCellSlots()) {
             menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
                 ItemStack itemStack = menu.getItemInSlot(i);
                 if (itemStack != null
@@ -131,7 +126,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
-        for (int slot : MEItemStorageCell_Slots) {
+        for (int slot : getMEItemStorageCellSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack != null
                     && !itemStack.getType().isAir()
@@ -144,5 +139,16 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
             }
         }
+    }
+
+    public int[] getMEItemStorageCellSlots() {
+        return new int[] {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
+    }
+
+    public int[] getBoarderSlots() {
+        return new int[] {
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 33, 34, 35, 36, 37,
+            38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53
+        };
     }
 }

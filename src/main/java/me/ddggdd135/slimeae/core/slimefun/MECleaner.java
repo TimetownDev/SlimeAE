@@ -30,11 +30,6 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock {
-    public static final int[] Boarder_Slots =
-            new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 50, 51, 52, 53};
-    public static final int[] Setting_slots = new int[] {
-        10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 35, 37, 38, 39, 40, 41, 42, 43
-    };
     public static final String AMOUNT_KEY = "amount";
     private static long defaultAmount;
 
@@ -73,7 +68,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         }
         Map<ItemStack, Long> total = storageCells.getStorage();
 
-        for (int slot : Setting_slots) {
+        for (int slot : getSettingSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
@@ -97,7 +92,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
 
     @Override
     public void init(@Nonnull BlockMenuPreset preset) {
-        for (int slot : Boarder_Slots) {
+        for (int slot : getBoarderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
     }
@@ -156,5 +151,16 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
 
     public static void reloadConfig() {
         defaultAmount = SlimeAEPlugin.getInstance().getConfig().getLong("me-cleaner.default", 131072L);
+    }
+
+    public int[] getBoarderSlots() {
+        return new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 50, 51, 52, 53};
+    }
+
+    public int[] getSettingSlots() {
+        return new int[] {
+            10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 35, 37, 38, 39, 40, 41, 42,
+            43
+        };
     }
 }
