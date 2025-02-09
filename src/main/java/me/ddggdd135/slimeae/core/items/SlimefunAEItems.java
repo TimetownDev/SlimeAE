@@ -96,7 +96,8 @@ public class SlimefunAEItems {
                     "&f分子装配室",
                     "",
                     "{#3366ff>}在自动合成中充当原版和粘液合成台{#33ccf3<}",
-                    "{#3366ff>}需要放在ME接口旁边 且只能用于AE的自动合成{#33ccf3<}"));
+                    "{#3366ff>}需要放在ME接口旁边 且只能用于AE的自动合成{#33ccf3<}",
+                    "&a每个AE网络中 每个合成任务最多只会使用1024个合成设备"));
     public static final SlimefunItemStack COOKING_ALLOCATOR = new SlimefunItemStack(
             "COOKING_ALLOCATOR",
             new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器", "", "{#3366ff>}自动合成时将物品放于指定的容器{#33ccf3<}"));
