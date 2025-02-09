@@ -58,7 +58,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
             int settingSlot = slot - 9;
             ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), settingSlot);
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (SlimefunUtils.isItemSimilar(setting, MenuItems.Setting, true, false)) {
+            if (SlimefunUtils.isItemSimilar(setting, MenuItems.SETTING, true, false)) {
                 if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
                 continue;
             }
@@ -122,7 +122,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Pattern, true, false))) {
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.PATTERN, true, false))) {
                         b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
                     }
                 }
@@ -131,7 +131,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Card, true, false))) {
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
                         b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
                     }
                 }
@@ -167,16 +167,16 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
         for (int slot : getSettingSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir())
-                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.Setting);
+                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
         }
         for (int slot : getPatternSlots()) {
             if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) menu.replaceExistingItem(slot, MenuItems.Pattern);
+                    || menu.getItemInSlot(slot).getType().isAir()) menu.replaceExistingItem(slot, MenuItems.PATTERN);
         }
         for (int slot : getCardSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.Card);
+                menu.replaceExistingItem(slot, MenuItems.CARD);
             }
             menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }

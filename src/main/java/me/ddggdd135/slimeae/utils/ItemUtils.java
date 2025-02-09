@@ -636,13 +636,13 @@ public class ItemUtils {
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = getSettingItem(inventory, i);
-                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Setting, true, false)) {
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.SETTING, true, false)) {
                     if (cursor != null && !cursor.getType().isAir()) {
                         setSettingItem(inventory, i, cursor);
                     }
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
-                        inventory.setItem(i, MenuItems.Setting);
+                        inventory.setItem(i, MenuItems.SETTING);
                     } else {
                         setSettingItem(inventory, i, cursor);
                     }
@@ -670,7 +670,7 @@ public class ItemUtils {
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = inventory.getItem(i);
-                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Pattern, true, false)) {
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.PATTERN, true, false)) {
                     if (cursor != null
                             && !cursor.getType().isAir()
                             && SlimefunItem.getByItem(cursor) instanceof Pattern) {
@@ -680,7 +680,7 @@ public class ItemUtils {
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
-                        inventory.setItem(i, MenuItems.Pattern);
+                        inventory.setItem(i, MenuItems.PATTERN);
                     } else if (SlimefunItem.getByItem(cursor) instanceof Pattern) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
@@ -709,7 +709,7 @@ public class ItemUtils {
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = inventory.getItem(i);
-                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.Card, true, false)) {
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.CARD, true, false)) {
                     if (cursor != null && !cursor.getType().isAir() && SlimefunItem.getByItem(cursor) instanceof Card) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
@@ -717,7 +717,7 @@ public class ItemUtils {
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
-                        inventory.setItem(i, MenuItems.Card);
+                        inventory.setItem(i, MenuItems.CARD);
                     } else if (SlimefunItem.getByItem(cursor) instanceof Card) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);

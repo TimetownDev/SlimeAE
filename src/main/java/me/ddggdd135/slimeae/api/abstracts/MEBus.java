@@ -155,7 +155,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Card, true, false))) {
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
                         b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
                     }
                 }
@@ -243,7 +243,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         for (int slot : getCardSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.Card);
+                menu.replaceExistingItem(slot, MenuItems.CARD);
             }
             menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }

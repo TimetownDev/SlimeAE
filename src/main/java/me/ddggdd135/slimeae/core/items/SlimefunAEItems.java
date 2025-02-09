@@ -98,6 +98,13 @@ public class SlimefunAEItems {
                     "{#3366ff>}在自动合成中充当原版和粘液合成台{#33ccf3<}",
                     "{#3366ff>}需要放在ME接口旁边 且只能用于AE的自动合成{#33ccf3<}",
                     "&a每个AE网络中 每个合成任务最多只会使用1024个合成设备"));
+    public static final SlimefunItemStack LARGE_MOLECULAR_ASSEMBLER = new SlimefunItemStack(
+            "LARGE_MOLECULAR_ASSEMBLER",
+            new AdvancedCustomItemStack(
+                    Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.TINTED_GLASS : Material.GLASS,
+                    "&f大型分子装配室",
+                    "",
+                    "{#3366ff>}合成大型配方{#33ccf3<}"));
     public static final SlimefunItemStack COOKING_ALLOCATOR = new SlimefunItemStack(
             "COOKING_ALLOCATOR",
             new AdvancedCustomItemStack(Material.OAK_WOOD, "&f流程分配器", "", "{#3366ff>}自动合成时将物品放于指定的容器{#33ccf3<}"));
@@ -238,6 +245,10 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack NETWORKS_EXPANSION_SWITCH = new SlimefunItemStack(
             "NETWORKS_EXPANSION_SWITCH",
             new AdvancedCustomItemStack(Material.MAGENTA_GLAZED_TERRACOTTA, "&a网络交换机", "", "&c用它将AE网络和网络拓展连接"));
+    public static final SlimefunItemStack PATTERN_WORKBENCH = new SlimefunItemStack(
+            "PATTERN_WORKBENCH",
+            new AdvancedCustomItemStack(
+                    Material.PRISMARINE_BRICKS, "&e样板工作台", "", "&a在里面放入数量对应的配方所需物品和输出 就可以合成样板", "&a支持超大型配方 不支持原版配方"));
 
     // MATERIAL
     public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
@@ -520,6 +531,22 @@ public class SlimefunAEItems {
                             FORMATION_CORE,
                             new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.GLASS),
+                            new ItemStack(Material.IRON_INGOT)
+                        })
+                .register(plugin);
+        new LargeMolecularAssembler(
+                        SlimefunAEItemGroups.MACHINE,
+                        LARGE_MOLECULAR_ASSEMBLER,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.IRON_INGOT),
+                            ANNIHILATION_CORE,
+                            new ItemStack(Material.IRON_INGOT),
+                            MOLECULAR_ASSEMBLER,
+                            MOLECULAR_ASSEMBLER,
+                            MOLECULAR_ASSEMBLER,
+                            new ItemStack(Material.IRON_INGOT),
+                            FORMATION_CORE,
                             new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);
@@ -807,6 +834,12 @@ public class SlimefunAEItems {
                                 new ItemStack(Material.IRON_INGOT)
                             })
                     .register(plugin);
+        new PatternWorkbench(
+                        SlimefunAEItemGroups.MACHINE,
+                        PATTERN_WORKBENCH,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_PATTERN_TERMINAL, ENGINEERING_PROCESSOR, new ItemStack(Material.CHEST)})
+                .register(plugin);
         // Materials
 
         SlimefunItem crystal_certus_quartz = new SlimefunItem(

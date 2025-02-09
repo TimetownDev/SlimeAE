@@ -58,7 +58,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.Card, true, false))) {
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
                         block.getWorld().dropItemNaturally(block.getLocation(), itemStack);
                     }
                 }

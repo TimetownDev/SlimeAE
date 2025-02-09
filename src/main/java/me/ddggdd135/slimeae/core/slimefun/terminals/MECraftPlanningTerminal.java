@@ -40,7 +40,7 @@ public class MECraftPlanningTerminal extends METerminal {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
         for (int slot : getDisplaySlots()) {
-            blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+            blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
             blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());

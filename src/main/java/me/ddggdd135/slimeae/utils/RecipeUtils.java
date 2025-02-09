@@ -1,9 +1,14 @@
 package me.ddggdd135.slimeae.utils;
 
+import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlock;
+import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlockRecipe;
+import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
+import io.github.mooy1.infinityexpansion.items.blocks.InfinityWorkbench;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemStackSnapshot;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
 import javax.annotation.Nonnull;
@@ -28,6 +33,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 public class RecipeUtils {
     public static final Map<RecipeType, SlimefunItem> SUPPORTED_RECIPE_TYPES = new HashMap<>();
     public static final Map<RecipeType, SlimefunItem> CRAFTING_TABLE_TYPES = new HashMap<>();
+    public static final Map<RecipeType, SlimefunItem> LARGE_TYPES = new HashMap<>();
 
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
         return getRecipe(itemStack, SUPPORTED_RECIPE_TYPES);
@@ -38,7 +44,9 @@ public class RecipeUtils {
         if (slimefunItem != null) {
             if (supported.containsKey(slimefunItem.getRecipeType())) {
                 return new CraftingRecipe(
-                        CraftType.CRAFTING_TABLE, slimefunItem.getRecipe(), slimefunItem.getRecipeOutput());
+                        getCraftType(slimefunItem.getRecipeType()),
+                        slimefunItem.getRecipe(),
+                        slimefunItem.getRecipeOutput());
             } else {
                 for (Map.Entry<RecipeType, SlimefunItem> entry : supported.entrySet()) {
                     if (entry.getValue() == null) continue;
@@ -47,7 +55,7 @@ public class RecipeUtils {
                         if (outputs.length != 1) continue;
                         ItemStack output = outputs[0];
                         if (SlimefunUtils.isItemSimilar(itemStack, output, true, false)) {
-                            return new CraftingRecipe(CraftType.CRAFTING_TABLE, input, output);
+                            return new CraftingRecipe(getCraftType(entry.getKey()), input, output);
                         }
                     }
                 }
@@ -111,7 +119,7 @@ public class RecipeUtils {
                     }
                 }
 
-                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input1, getOutputs(entry.getKey(), input1));
+                return new CraftingRecipe(getCraftType(entry.getKey()), input1, getOutputs(entry.getKey(), input1));
             }
         }
 
@@ -188,7 +196,7 @@ public class RecipeUtils {
                     }
                 }
 
-                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input1, output1);
+                return new CraftingRecipe(getCraftType(entry.getKey()), input1, output1);
             }
         }
 
@@ -237,6 +245,29 @@ public class RecipeUtils {
         return null;
     }
 
+    @Nullable public static CraftingRecipe getRecipe(@Nonnull Map<ItemStack, Long> input, @Nullable ItemStack output) {
+        return getRecipe(input, output, SUPPORTED_RECIPE_TYPES);
+    }
+
+    @Nullable public static CraftingRecipe getRecipe(
+            @Nonnull Map<ItemStack, Long> input, @Nullable ItemStack output, Map<RecipeType, SlimefunItem> supported) {
+        for (Map.Entry<RecipeType, SlimefunItem> entry : supported.entrySet()) {
+            if (entry.getValue() == null) continue;
+
+            for (ItemStack[] inputItems : getInputs(entry.getKey())) {
+                Map<ItemStack, Long> input1 = ItemUtils.getAmounts(inputItems);
+                if (!MapUtils.areMapsEqual(input1, input)) continue;
+                ItemStack[] output1 = getOutputs(entry.getKey(), inputItems);
+                if (output1.length != 1) continue;
+                if (!SlimefunUtils.isItemSimilar(output, output1[0], true, false)) continue;
+
+                return new CraftingRecipe(getCraftType(entry.getKey()), inputItems, output1);
+            }
+        }
+
+        return null;
+    }
+
     public static List<ItemStack[]> getInputs(RecipeType recipeType) {
         SlimefunItem slimefunItem = SUPPORTED_RECIPE_TYPES.get(recipeType);
         if (slimefunItem == null) return new ArrayList<>();
@@ -254,6 +285,24 @@ public class RecipeUtils {
             return abstractMachineBlock.getMachineRecipes().stream()
                     .map(MachineRecipe::getInput)
                     .toList();
+        }
+
+        if (slimefunItem instanceof CraftingBlock craftingBlock) {
+            List<CraftingBlockRecipe> recipes = ReflectionUtils.getField(craftingBlock, "recipes");
+            List<ItemStack[]> result = new ArrayList<>(recipes.size());
+            for (CraftingBlockRecipe recipe : recipes) {
+                ItemStackSnapshot[] in = (ItemStackSnapshot[]) recipe.recipe();
+                ItemStack[] re = new ItemStack[in.length];
+                for (int j = 0; j < in.length; j++) {
+                    if (in[j] == null || in[j].getType().isAir()) {
+                        re[j] = null;
+                        continue;
+                    }
+                    re[j] = new ItemStack(in[j]);
+                }
+                result.add(re);
+            }
+            return result;
         }
 
         return new ArrayList<>();
@@ -311,8 +360,40 @@ public class RecipeUtils {
                 return recipe.getOutput();
             }
         }
+        if (slimefunItem instanceof CraftingBlock craftingBlock) {
+            List<CraftingBlockRecipe> recipes = ReflectionUtils.getField(craftingBlock, "recipes");
+            i:
+            for (CraftingBlockRecipe recipe : recipes) {
+                ItemStack[] in = recipe.recipe();
+                for (int i = 0; i < Math.max(in.length, inputs.length); i++) {
+                    ItemStack x = null;
+                    ItemStack y = null;
+                    if (in.length > i) {
+                        x = in[i];
+                    }
+                    if (inputs.length > i) {
+                        y = inputs[i];
+                    }
+                    if (x != null && !x.getType().isAir()) x = new ItemStack(x);
+                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
+                        continue i;
+                    }
+                }
+                ItemStack out = new ItemStack(recipe.output());
+                return new ItemStack[] {out};
+            }
+
+            return new ItemStack[0];
+        }
 
         return new ItemStack[0];
+    }
+
+    public static CraftType getCraftType(@Nonnull RecipeType recipeType) {
+        if (LARGE_TYPES.containsKey(recipeType)) return CraftType.LARGE;
+        if (SUPPORTED_RECIPE_TYPES.containsKey(recipeType)) return CraftType.CRAFTING_TABLE;
+
+        return CraftType.COOKING;
     }
 
     static {
@@ -330,14 +411,16 @@ public class RecipeUtils {
         SUPPORTED_RECIPE_TYPES.put(RecipeType.ORE_CRUSHER, SlimefunItem.getByItem(SlimefunItems.ORE_CRUSHER));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.PRESSURE_CHAMBER, SlimefunItem.getByItem(SlimefunItems.PRESSURE_CHAMBER));
 
-        if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
-            SUPPORTED_RECIPE_TYPES.put(TERecipeType.NANOBOT_CRAFTER, SlimefunItem.getByItem(TEItems.NANOBOT_CRAFTER));
-        }
-
         CRAFTING_TABLE_TYPES.put(
                 RecipeType.ENHANCED_CRAFTING_TABLE, SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
 
+        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
+            LARGE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
+        }
+
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(TERecipeType.NANOBOT_CRAFTER, SlimefunItem.getByItem(TEItems.NANOBOT_CRAFTER));
             CRAFTING_TABLE_TYPES.put(TERecipeType.NANOBOT_CRAFTER, SlimefunItem.getByItem(TEItems.NANOBOT_CRAFTER));
         }
     }

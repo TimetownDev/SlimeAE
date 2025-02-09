@@ -179,7 +179,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         if (info == null) {
             // 清空显示槽
             for (int slot : getDisplaySlots()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
             }
             return;
         }
@@ -249,14 +249,14 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
                 continue;
             }
             Map.Entry<ItemStack, Long> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
 
             if (itemStack == null || itemStack.getType().isAir()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.Empty);
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
                 continue;
             }
 
@@ -338,7 +338,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         });
 
         for (int slot : getDisplaySlots()) {
-            menu.replaceExistingItem(slot, MenuItems.Empty);
+            menu.replaceExistingItem(slot, MenuItems.EMPTY);
             menu.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
                 @Override
                 public boolean onClick(
@@ -354,7 +354,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                     ItemStack itemStack = menu.getItemInSlot(i);
                     if (itemStack != null
                             && !itemStack.getType().isAir()
-                            && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
+                            && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.EMPTY, true, false)) {
                         ItemStack template = ItemUtils.getDisplayItem(itemStack, true);
                         template.setAmount(template.getMaxStackSize());
 

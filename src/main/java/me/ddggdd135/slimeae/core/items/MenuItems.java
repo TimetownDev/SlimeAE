@@ -11,13 +11,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 public class MenuItems {
-    public static final SlimefunItemStack Empty = new SlimefunItemStack(
+    public static final SlimefunItemStack EMPTY = new SlimefunItemStack(
             "_AE_MN_EMPTY_", new AdvancedCustomItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " "));
-    public static final SlimefunItemStack Setting = new SlimefunItemStack(
+    public static final SlimefunItemStack SETTING = new SlimefunItemStack(
             "_AE_MN_SETTING_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}物品设置槽位"));
-    public static final SlimefunItemStack Pattern = new SlimefunItemStack(
+    public static final SlimefunItemStack PATTERN = new SlimefunItemStack(
             "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}编码样板槽位"));
-    public static final SlimefunItemStack Card = new SlimefunItemStack(
+    public static final SlimefunItemStack CARD = new SlimefunItemStack(
             "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}升级卡槽位"));
 
     public static final SlimefunItemStack PAGE_PREVIOUS_STACK = new SlimefunItemStack(
@@ -51,6 +51,8 @@ public class MenuItems {
     public static final SlimefunItemStack ME_SECURITY_TERMINAL_DESCRIPTION = new SlimefunItemStack(
             "_AE_MN_ME_SECURITY_TERMINAL_DESCRIPTION_",
             new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l将无线终端放在上方以绑定"));
+    public static final SlimefunItemStack CRAFTING_OUTPUT_BORDER = new SlimefunItemStack(
+            "_AE_MN_CRAFTING_OUTPUT_BORDER_", new AdvancedCustomItemStack(Material.END_CRYSTAL, "&d配方输出槽"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 
     static {

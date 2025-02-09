@@ -97,7 +97,7 @@ public class MECraftingTerminal extends METerminal {
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu blockMenu, @Nonnull Block block) {
         super.newInstance(blockMenu, block);
-        blockMenu.replaceExistingItem(getCraftOutputSlot(), MenuItems.Empty);
+        blockMenu.replaceExistingItem(getCraftOutputSlot(), MenuItems.EMPTY);
         blockMenu.addMenuClickHandler(getCraftOutputSlot(), new ChestMenu.AdvancedMenuClickHandler() {
             @Override
             public boolean onClick(
@@ -175,7 +175,7 @@ public class MECraftingTerminal extends METerminal {
         if (inv == null) return;
         ItemStack matched = matchItem(block);
         if (matched == null) {
-            inv.replaceExistingItem(getCraftOutputSlot(), MenuItems.Empty);
+            inv.replaceExistingItem(getCraftOutputSlot(), MenuItems.EMPTY);
             return;
         }
         inv.replaceExistingItem(getCraftOutputSlot(), ItemUtils.createDisplayItem(matched, matched.getAmount(), false));

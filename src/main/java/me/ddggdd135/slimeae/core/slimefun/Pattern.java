@@ -50,9 +50,15 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
     @Nonnull
     public static void setRecipe(@Nonnull ItemStack itemStack, @Nonnull CraftingRecipe recipe) {
         ItemMeta meta = itemStack.getItemMeta();
+        ItemStack[] inputs = recipe.getInput();
         List<String> lore = new ArrayList<>();
+        if (recipe.getCraftType() == CraftType.LARGE) {
+            lore.add("&e大型配方");
+            lore.add("");
+            inputs = ItemUtils.createItems(ItemUtils.getAmounts(inputs));
+        }
         lore.add("&a输入");
-        for (ItemStack input : recipe.getInput()) {
+        for (ItemStack input : inputs) {
             if (input == null || input.getType().isAir()) continue;
             lore.add("  &e- &f" + ItemUtils.getItemName(input) + "&f x " + input.getAmount());
         }

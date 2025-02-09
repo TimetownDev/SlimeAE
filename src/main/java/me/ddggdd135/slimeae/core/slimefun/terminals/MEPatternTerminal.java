@@ -164,13 +164,12 @@ public class MEPatternTerminal extends METerminal {
                             .toArray(ItemStack[]::new));
             Pattern.setRecipe(toOut, recipe);
         } else {
-            ItemStack[] inputs;
             List<ItemStack> inputList = new ArrayList<>();
             for (int slot : getCraftSlots()) {
                 inputList.add(blockMenu.getItemInSlot(slot));
             }
 
-            inputs = inputList.toArray(ItemStack[]::new);
+            ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
 
             ItemStack[] outputs;
             List<ItemStack> outputList = new ArrayList<>();
@@ -185,15 +184,7 @@ public class MEPatternTerminal extends METerminal {
             else recipe = RecipeUtils.getRecipe(inputs);
 
             if (recipe == null) return;
-            for (int i = 0; i < getCraftSlots().length; i++) {
-                int slot = getCraftSlots()[i];
-                ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                ItemStack target = recipe.getInput().length - 1 >= i ? recipe.getInput()[i] : null;
-                if (target == null && itemStack != null) return;
-                if (target != null && itemStack == null) return;
-                if (target == null) continue;
-                if (!target.equals(itemStack)) return;
-            }
+
             toOut.setAmount(1);
             in.subtract();
             Pattern.setRecipe(toOut, recipe);

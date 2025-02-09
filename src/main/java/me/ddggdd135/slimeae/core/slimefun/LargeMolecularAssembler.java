@@ -31,7 +31,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class MolecularAssembler extends TickingBlock
+public class LargeMolecularAssembler extends TickingBlock
         // 如果不是TickingBlock的话 玩家不打开一次方块就没法自动合成 奇怪的bug
         implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
 
@@ -46,7 +46,8 @@ public class MolecularAssembler extends TickingBlock
     protected void tick(
             @Nonnull Block block, @Nonnull SlimefunItem slimefunItem, @Nonnull SlimefunBlockData slimefunBlockData) {}
 
-    public MolecularAssembler(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+    public LargeMolecularAssembler(
+            ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this, item.getDisplayName());
         addItemHandler(onBlockBreak());
@@ -70,7 +71,7 @@ public class MolecularAssembler extends TickingBlock
         ItemStack[] input = operation.getRecipe().getInput();
         for (int i = 0; i < input.length; i++) {
             if (input[i] == null || input[i].getType().isAir()) continue;
-            ItemUtils.setSettingItem(menu.getInventory(), getInputSlots()[i], input[i]);
+            ItemUtils.setSettingItem(menu.getInventory(), getCraftingInputSlots()[i], input[i]);
         }
 
         if (isFinished(block)) {
@@ -101,8 +102,8 @@ public class MolecularAssembler extends TickingBlock
     public boolean isSupport(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         return SlimefunItem.getById(
                                 StorageCacheUtils.getBlock(block.getLocation()).getSfId())
-                        instanceof MolecularAssembler
-                && recipe.getCraftType() == CraftType.CRAFTING_TABLE;
+                        instanceof LargeMolecularAssembler
+                && recipe.getCraftType() == CraftType.LARGE;
     }
 
     @Override
@@ -159,74 +160,52 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     public int[] getCardSlots() {
-        return new int[] {45, 46, 47};
+        return new int[] {27, 36, 45};
     }
 
     public int getProgressSlot() {
-        return 23;
+        return 53;
     }
 
     public int[] getCraftingInputSlots() {
         return new int[] {
-            11, 12, 13,
-            20, 21, 22,
-            29, 30, 31
+            1, 2, 3, 4, 5, 6,
+            10, 11, 12, 13, 14, 15,
+            19, 20, 21, 22, 23, 24,
+            28, 29, 30, 31, 32, 33,
+            37, 38, 39, 40, 41, 42,
+            46, 47, 48, 49, 50, 51
         };
     }
 
     public int getOutputSlot() {
-        return 24;
+        return 8;
     }
 
-    public int[] getBorderSlots() {
-        return new int[] {
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8, // 第一行
-            9,
-            10,
-            14,
-            15,
-            16,
-            17, // 第二行边框和空格
-            18,
-            19,
-            25,
-            26, // 第三行边框和空格
-            27,
-            28,
-            32,
-            33,
-            34,
-            35, // 第四行边框和空格
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44, // 第五行
-            48,
-            49,
-            50,
-            51,
-            52,
-            53 // 最后一行
-        };
+    public int[] getBlackBorderSlots() {
+        return new int[] {0, 9, 18};
+    }
+
+    public int[] getBlueBorderSlots() {
+        return new int[] {17, 26, 35, 43, 44, 52};
+    }
+
+    public int[] getOrangeBorderSlots() {
+        return new int[] {7, 16, 25, 34};
     }
 
     @Override
-    public void init(BlockMenuPreset preset) {
-        for (int slot : getBorderSlots()) {
+    public void init(@Nonnull BlockMenuPreset preset) {
+        for (int slot : getBlackBorderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        for (int slot : getOrangeBorderSlots()) {
+            preset.addItem(slot, ChestMenuUtils.getOutputSlotTexture(), ChestMenuUtils.getEmptyClickHandler());
+        }
+
+        for (int slot : getBlueBorderSlots()) {
+            preset.addItem(slot, ChestMenuUtils.getInputSlotTexture(), ChestMenuUtils.getEmptyClickHandler());
         }
 
         for (int slot : getCraftingInputSlots()) {

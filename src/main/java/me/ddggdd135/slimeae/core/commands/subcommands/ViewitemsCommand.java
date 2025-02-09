@@ -138,7 +138,7 @@ public class ViewitemsCommand extends SubCommand {
             });
 
             for (int slot : getDisplaySlots()) {
-                menu.replaceExistingItem(slot, MenuItems.Empty);
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
                 menu.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
                     @Override
                     public boolean onClick(
@@ -151,7 +151,7 @@ public class ViewitemsCommand extends SubCommand {
                         ItemStack itemStack = menu.getItemInSlot(i);
                         if (itemStack != null
                                 && !itemStack.getType().isAir()
-                                && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.Empty, true, false)) {
+                                && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.EMPTY, true, false)) {
                             ItemStack template = ItemUtils.getDisplayItem(itemStack, true);
                             template.setAmount(template.getMaxStackSize());
                             if (clickAction.isShiftClicked()
@@ -254,14 +254,14 @@ public class ViewitemsCommand extends SubCommand {
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
-                menu.replaceExistingItem(slot, MenuItems.Empty);
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
                 continue;
             }
             Map.Entry<ItemStack, Long> entry = items.get(i + startIndex);
             ItemStack itemStack = entry.getKey();
 
             if (itemStack == null || itemStack.getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.Empty);
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
                 continue;
             }
 
