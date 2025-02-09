@@ -74,7 +74,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         return 33;
     }
 
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {
             0,
             1,
@@ -175,10 +175,10 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     @Override
     public void init(@Nonnull BlockMenuPreset preset) {
-        preset.drawBackground(getBackgroundSlots());
+        preset.drawBackground(getBorderSlots());
 
-        if (getOtherBackgroundSlots() != null && getOtherBackgroundStack() != null) {
-            preset.drawBackground(getOtherBackgroundStack(), getOtherBackgroundSlots());
+        if (getOtherBorderSlots() != null && getOtherBorderStack() != null) {
+            preset.drawBackground(getOtherBorderStack(), getOtherBorderSlots());
         }
 
         preset.addItem(
@@ -386,11 +386,11 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         }
     }
 
-    protected @Nullable int[] getOtherBackgroundSlots() {
+    protected @Nullable int[] getOtherBorderSlots() {
         return null;
     }
 
-    @Nullable protected CustomItemStack getOtherBackgroundStack() {
+    @Nullable protected CustomItemStack getOtherBorderStack() {
         return null;
     }
 

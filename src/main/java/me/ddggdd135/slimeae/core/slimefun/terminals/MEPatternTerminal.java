@@ -35,7 +35,7 @@ public class MEPatternTerminal extends METerminal {
     }
 
     @Override
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {0, 1, 3, 5, 12, 13, 14, 21, 23, 30, 31, 32, 34, 35, 39, 41, 48, 49, 50, 51, 52, 53};
     }
 

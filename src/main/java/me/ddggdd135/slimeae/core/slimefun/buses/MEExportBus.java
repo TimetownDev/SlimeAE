@@ -27,8 +27,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
 
-    public static final int[] Setting_Slots = new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
-
     public MEExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         addItemHandler(new SimpleBlockBreakHandler() {
@@ -147,7 +145,7 @@ public class MEExportBus extends MEBus {
     }
 
     @Override
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {
             0,
             1,
@@ -194,6 +192,6 @@ public class MEExportBus extends MEBus {
     }
 
     public int[] getSettingSlots() {
-        return Setting_Slots;
+        return new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
     }
 }

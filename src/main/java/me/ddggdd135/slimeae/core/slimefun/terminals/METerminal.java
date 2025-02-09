@@ -55,7 +55,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public static final String SORT_KEY = "sort";
     public static final String FILTER_KEY = "filter";
 
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {17, 26};
     }
 
@@ -283,7 +283,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     @Override
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
-        for (int slot : getBackgroundSlots()) {
+        for (int slot : getBorderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground());
             preset.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }

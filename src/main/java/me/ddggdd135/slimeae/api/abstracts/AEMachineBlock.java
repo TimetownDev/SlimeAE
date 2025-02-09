@@ -44,6 +44,7 @@ public abstract class AEMachineBlock extends AbstractMachineBlock implements ICa
         addItemHandler(onAEBlockBreak());
     }
 
+    @Override
     public int[] getBorder() {
         return new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 13, 31, 39, 40, 41, 42, 43, 44};
     }

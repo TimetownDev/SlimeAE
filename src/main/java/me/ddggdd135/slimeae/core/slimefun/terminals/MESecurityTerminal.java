@@ -25,7 +25,7 @@ public class MESecurityTerminal extends METerminal {
     }
 
     @Override
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {
             0, 1, 3, 4, 5, 6, 7, 8, 14, 15, 17, 23, 24, 26, 32, 33, 34, 35, 41, 42, 44, 45, 47, 49, 50, 51, 52, 53
         };

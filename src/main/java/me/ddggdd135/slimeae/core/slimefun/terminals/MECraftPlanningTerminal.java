@@ -151,10 +151,10 @@ public class MECraftPlanningTerminal extends METerminal {
                         AutoCraftingSession session = new AutoCraftingSession(info, recipe, amount);
                         session.refreshGUI(45, false);
                         AEMenu menu = session.getMenu();
-                        int[] background = new int[] {45, 46, 48, 49, 50, 52, 53};
+                        int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
                         int acceptSlot = 47;
                         int cancelSlot = 51;
-                        for (int slot1 : background) {
+                        for (int slot1 : borders) {
                             menu.replaceExistingItem(slot1, ChestMenuUtils.getBackground());
                             menu.addMenuClickHandler(slot1, ChestMenuUtils.getEmptyClickHandler());
                         }

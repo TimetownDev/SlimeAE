@@ -130,7 +130,7 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
     }
 
     @Override
-    public int[] getBackgroundSlots() {
+    public int[] getBorderSlots() {
         return new int[] {
             0,
             1,

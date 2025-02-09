@@ -86,7 +86,7 @@ public class ViewitemsCommand extends SubCommand {
             AEMenu menu = new AEMenu("&e存储元件 " + data.getUuid().toString());
             menu.setPlayerInventoryClickable(true);
             menu.setEmptySlotsClickable(true);
-            for (int slot : getBackgroundSlots()) {
+            for (int slot : getBorderSlots()) {
                 menu.addItem(slot, ChestMenuUtils.getBackground());
                 menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
             }
@@ -290,7 +290,7 @@ public class ViewitemsCommand extends SubCommand {
                 .start();
     }
 
-    private int[] getBackgroundSlots() {
+    private int[] getBorderSlots() {
         return new int[] {17, 26};
     }
 
