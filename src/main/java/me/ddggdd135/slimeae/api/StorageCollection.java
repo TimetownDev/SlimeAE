@@ -92,7 +92,10 @@ public class StorageCollection implements IStorage {
 
         // 计算每个 storage 的 tier 并缓存结果
         for (IStorage storage : sorted) {
-            int totalTier = Arrays.stream(itemStacks).mapToInt(storage::getTier).sum();
+            int totalTier = 0;
+            for (ItemStack itemStack : itemStacks) {
+                totalTier += storage.getTier(itemStack);
+            }
             tierMap.put(storage, totalTier);
         }
 

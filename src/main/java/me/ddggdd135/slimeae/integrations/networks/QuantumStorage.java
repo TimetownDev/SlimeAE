@@ -53,7 +53,8 @@ public class QuantumStorage implements IStorage {
             }
             if (!(stored > size)) {
                 quantumCache.setAmount(stored);
-                NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+                // 下面这一行吃性能
+                // NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
             }
         }
     }
@@ -89,7 +90,8 @@ public class QuantumStorage implements IStorage {
             }
         }
         quantumCache.setAmount(stored + 1);
-        NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+        // 下面这一行吃性能
+        // NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
         return toReturn.toItemStacks();
     }
 
