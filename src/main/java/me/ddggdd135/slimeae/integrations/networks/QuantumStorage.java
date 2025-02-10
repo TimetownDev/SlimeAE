@@ -85,7 +85,7 @@ public class QuantumStorage implements IStorage {
                 long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
-                    toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
+                    toReturn.addItem(request.getTemplate(), toTake);
                 }
             }
         }
