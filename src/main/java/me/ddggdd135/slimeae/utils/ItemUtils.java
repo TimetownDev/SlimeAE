@@ -847,4 +847,15 @@ public class ItemUtils {
         }
         return found.toItemStacks();
     }
+
+    @Nonnull
+    public static ItemStack[] removeAll(@Nonnull ItemStack[] itemStacks, @Nonnull Set<ItemStack> toRemove) {
+        List<ItemStack> result = new ArrayList<>(itemStacks.length);
+        for (ItemStack itemStack : itemStacks) {
+            if (toRemove.contains(itemStack.asOne())) continue;
+            result.add(itemStack);
+        }
+
+        return result.toArray(ItemStack[]::new);
+    }
 }
