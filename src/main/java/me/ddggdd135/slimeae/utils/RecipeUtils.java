@@ -1,5 +1,9 @@
 package me.ddggdd135.slimeae.utils;
 
+import com.balugaq.netex.api.data.SuperRecipe;
+import com.ytdd9527.networksexpansion.core.items.machines.AbstractManualCrafter;
+import com.ytdd9527.networksexpansion.implementation.ExpansionItemStacks;
+import com.ytdd9527.networksexpansion.implementation.machines.manual.ExpansionWorkbench;
 import io.github.addoncommunity.galactifun.base.BaseItems;
 import io.github.addoncommunity.galactifun.base.items.AssemblyTable;
 import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
@@ -283,13 +287,11 @@ public class RecipeUtils {
                     .map(MachineRecipe::getInput)
                     .toList();
         }
-
         if (slimefunItem instanceof AbstractMachineBlock abstractMachineBlock) {
             return abstractMachineBlock.getMachineRecipes().stream()
                     .map(MachineRecipe::getInput)
                     .toList();
         }
-
         if (InfinityLibUtils.isCraftingBlock(slimefunItem)) {
             CraftCraftingBlock craftingBlock = new CraftCraftingBlock(slimefunItem);
             List<CraftCraftingBlockRecipe> recipes = craftingBlock.getRecipes();
@@ -307,6 +309,11 @@ public class RecipeUtils {
                 result.add(re);
             }
             return result;
+        }
+        if (slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
+            return abstractManualCrafter.getRecipes().stream()
+                    .map(SuperRecipe::getInput)
+                    .toList();
         }
 
         return new ArrayList<>();
@@ -341,7 +348,6 @@ public class RecipeUtils {
                 return recipe.getOutput();
             }
         }
-
         if (slimefunItem instanceof AbstractMachineBlock abstractMachineBlock) {
             List<MachineRecipe> recipes = abstractMachineBlock.getMachineRecipes();
             i:
@@ -390,6 +396,28 @@ public class RecipeUtils {
 
             return new ItemStack[0];
         }
+        if (slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
+            List<SuperRecipe> recipes = abstractManualCrafter.getRecipes();
+            i:
+            for (SuperRecipe recipe : recipes) {
+                ItemStack[] in = recipe.getInput();
+                for (int i = 0; i < Math.max(in.length, inputs.length); i++) {
+                    ItemStack x = null;
+                    ItemStack y = null;
+                    if (in.length > i) {
+                        x = in[i];
+                    }
+                    if (inputs.length > i) {
+                        y = inputs[i];
+                    }
+                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
+                        continue i;
+                    }
+                }
+
+                return recipe.getOutput();
+            }
+        }
 
         return new ItemStack[0];
     }
@@ -436,6 +464,13 @@ public class RecipeUtils {
 
         if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(ExoticGardenRecipeTypes.KITCHEN, SlimefunItem.getById("KITCHEN"));
+        }
+
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(
+                    ExpansionWorkbench.TYPE, SlimefunItem.getByItem(ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH));
+            CRAFTING_TABLE_TYPES.put(
+                    ExpansionWorkbench.TYPE, SlimefunItem.getByItem(ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH));
         }
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {

@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.core.items;
 
+import com.ytdd9527.networksexpansion.implementation.ExpansionItemStacks;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import java.util.ArrayList;
@@ -107,6 +108,12 @@ public class MenuItems {
         if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()) {
             CRAFTING_TABLE_LORE.add("&e  - 厨房");
             PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&e  - 厨房");
+        }
+
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
+            CRAFTING_TABLE_LORE.add("&e  - " + ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH.getDisplayName());
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add(
+                    "&e  - " + ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH.getDisplayName());
         }
 
         CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
