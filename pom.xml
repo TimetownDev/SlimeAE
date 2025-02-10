@@ -199,5 +199,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/ObsidianExpansion.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.github.SlimefunGuguProject</groupId>
+            <artifactId>ExoticGarden</artifactId>
+            <version>0994db4b6f</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/ExoticGarden.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

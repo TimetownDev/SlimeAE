@@ -4,6 +4,7 @@ import io.github.addoncommunity.galactifun.base.BaseItems;
 import io.github.addoncommunity.galactifun.base.items.AssemblyTable;
 import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
 import io.github.mooy1.infinityexpansion.items.blocks.InfinityWorkbench;
+import io.github.thebusybiscuit.exoticgarden.ExoticGardenRecipeTypes;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
@@ -431,6 +432,10 @@ public class RecipeUtils {
         if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
             LARGE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
+        }
+
+        if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(ExoticGardenRecipeTypes.KITCHEN, SlimefunItem.getById("KITCHEN"));
         }
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {

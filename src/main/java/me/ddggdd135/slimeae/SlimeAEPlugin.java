@@ -45,7 +45,10 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
     private final GalactifunIntegration galactifunIntegration = new GalactifunIntegration();
     private final ObsidianExpansionIntegration obsidianExpansionIntegration = new ObsidianExpansionIntegration();
+    private final ExoticGardenIntegration exoticGardenIntegration = new ExoticGardenIntegration();
+
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
+
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
     private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
@@ -93,6 +96,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已接入");
         if (galactifunIntegration.isLoaded()) getLogger().info("星系已接入");
         if (obsidianExpansionIntegration.isLoaded()) getLogger().info("黑曜石科技已接入");
+        if (exoticGardenIntegration.isLoaded()) getLogger().info("异域花园已接入");
 
         storageCellDataController.init();
 
@@ -247,6 +251,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static ObsidianExpansionIntegration getObsidianExpansionIntegration() {
         return getInstance().obsidianExpansionIntegration;
+    }
+
+    /**
+     * 获取异域花园集成实例
+     * @return 异域花园集成实例
+     */
+    @Nonnull
+    public static ExoticGardenIntegration getExoticGardenIntegration() {
+        return getInstance().exoticGardenIntegration;
     }
 
     @Nonnull

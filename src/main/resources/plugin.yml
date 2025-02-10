@@ -13,6 +13,7 @@ softdepend:
   - JustEnoughGuide
   - Galactifun
   - ObsidianExpansion
+  - ExoticGarden
   - GuizhanLibPlugin
 depend:
   - Slimefun
