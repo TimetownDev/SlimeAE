@@ -12,6 +12,7 @@ softdepend:
   - TranscEndence
   - JustEnoughGuide
   - Galactifun
+  - ObsidianExpansion
   - GuizhanLibPlugin
 depend:
   - Slimefun

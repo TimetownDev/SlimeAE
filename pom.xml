@@ -192,5 +192,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/Galactifun.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.github.SlimefunGuguProject</groupId>
+            <artifactId>ObsidianExpansion</artifactId>
+            <version>72ba142</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/ObsidianExpansion.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

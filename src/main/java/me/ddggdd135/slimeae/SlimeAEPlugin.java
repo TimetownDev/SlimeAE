@@ -44,6 +44,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final TranscEndenceIntegration transcEndenceIntegration = new TranscEndenceIntegration();
     private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
     private final GalactifunIntegration galactifunIntegration = new GalactifunIntegration();
+    private final ObsidianExpansionIntegration obsidianExpansionIntegration = new ObsidianExpansionIntegration();
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
@@ -91,6 +92,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (transcEndenceIntegration.isLoaded()) getLogger().info("末地科技已接入");
         if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已接入");
         if (galactifunIntegration.isLoaded()) getLogger().info("星系已接入");
+        if (obsidianExpansionIntegration.isLoaded()) getLogger().info("黑曜石科技已接入");
 
         storageCellDataController.init();
 
@@ -236,6 +238,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static GalactifunIntegration getGalactifunIntegration() {
         return getInstance().galactifunIntegration;
+    }
+
+    /**
+     * 获取黑曜石科技集成实例
+     * @return 黑曜石科技集成实例
+     */
+    @Nonnull
+    public static ObsidianExpansionIntegration getObsidianExpansionIntegration() {
+        return getInstance().obsidianExpansionIntegration;
     }
 
     @Nonnull

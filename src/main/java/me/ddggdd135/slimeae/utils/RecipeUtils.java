@@ -19,6 +19,8 @@ import me.ddggdd135.slimeae.api.CraftingRecipe;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
+import me.lucasgithuber.obsidianexpansion.Items;
+import me.lucasgithuber.obsidianexpansion.machines.ObsidianForge;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
 import me.sfiguz7.transcendence.lists.TEItems;
@@ -424,6 +426,11 @@ public class RecipeUtils {
         if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(AssemblyTable.TYPE, SlimefunItem.getByItem(BaseItems.ASSEMBLY_TABLE));
             LARGE_TYPES.put(AssemblyTable.TYPE, SlimefunItem.getByItem(BaseItems.ASSEMBLY_TABLE));
+        }
+
+        if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
+            SUPPORTED_RECIPE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
+            LARGE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
         }
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {

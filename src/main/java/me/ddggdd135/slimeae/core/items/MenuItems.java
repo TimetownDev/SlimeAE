@@ -100,6 +100,10 @@ public class MenuItems {
             PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&f  - 星系装配台");
         }
 
+        if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&l&5  - 黑曜石锻造桌");
+        }
+
         CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
         CRAFTING_TABLE = new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", CRAFTING_TABLE_LORE);
         PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE = new AdvancedCustomItemStack(
