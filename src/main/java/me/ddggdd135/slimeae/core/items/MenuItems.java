@@ -94,6 +94,7 @@ public class MenuItems {
         }
 
         if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&6  - 无尽工作台");
             PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&7  - 无尽工作台");
         }
 
