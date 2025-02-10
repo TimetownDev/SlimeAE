@@ -5,6 +5,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
     public PatternWorkbench(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this);
+        addItemHandler(onBlockBreak());
     }
 
     public int[] getCraftSlots() {
@@ -123,5 +126,22 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         Pattern.setRecipe(toOut, recipe);
 
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+    }
+
+    @Nonnull
+    private BlockBreakHandler onBlockBreak() {
+        return new SimpleBlockBreakHandler() {
+
+            @Override
+            public void onBlockBreak(@Nonnull Block b) {
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
+                if (blockMenu == null) return;
+
+                blockMenu.dropItems(b.getLocation(), getCraftSlots());
+                blockMenu.dropItems(b.getLocation(), getCraftOutputSlot());
+                blockMenu.dropItems(b.getLocation(), getPatternSlot());
+                blockMenu.dropItems(b.getLocation(), getPatternOutputSlot());
+            }
+        };
     }
 }
