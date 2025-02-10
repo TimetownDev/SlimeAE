@@ -199,5 +199,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/ObsidianExpansion.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>io.taraxacum</groupId>
+            <artifactId>FinalTECH</artifactId>
+            <version>72ba142</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/FinalTECH.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
