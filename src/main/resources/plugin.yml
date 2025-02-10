@@ -13,8 +13,6 @@ softdepend:
   - JustEnoughGuide
   - Galactifun
   - ObsidianExpansion
-  - FinalTECH
-  - FinalTECH-Changed
   - GuizhanLibPlugin
 depend:
   - Slimefun

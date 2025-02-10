@@ -10,9 +10,6 @@ import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemStackSnapshot;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import io.taraxacum.finaltech.core.interfaces.RecipeItem;
-import io.taraxacum.finaltech.setup.FinalTechItemStacks;
-import io.taraxacum.finaltech.setup.FinalTechRecipeTypes;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -285,11 +282,13 @@ public class RecipeUtils {
                     .map(MachineRecipe::getInput)
                     .toList();
         }
+
         if (slimefunItem instanceof AbstractMachineBlock abstractMachineBlock) {
             return abstractMachineBlock.getMachineRecipes().stream()
                     .map(MachineRecipe::getInput)
                     .toList();
         }
+
         if (InfinityLibUtils.isCraftingBlock(slimefunItem)) {
             CraftCraftingBlock craftingBlock = new CraftCraftingBlock(slimefunItem);
             List<CraftCraftingBlockRecipe> recipes = craftingBlock.getRecipes();
@@ -307,11 +306,6 @@ public class RecipeUtils {
                 result.add(re);
             }
             return result;
-        }
-        if (slimefunItem instanceof RecipeItem recipeItem) {
-            return recipeItem.getMachineRecipes().stream()
-                    .map(MachineRecipe::getInput)
-                    .toList();
         }
 
         return new ArrayList<>();
@@ -346,6 +340,7 @@ public class RecipeUtils {
                 return recipe.getOutput();
             }
         }
+
         if (slimefunItem instanceof AbstractMachineBlock abstractMachineBlock) {
             List<MachineRecipe> recipes = abstractMachineBlock.getMachineRecipes();
             i:
@@ -394,28 +389,6 @@ public class RecipeUtils {
 
             return new ItemStack[0];
         }
-        if (slimefunItem instanceof RecipeItem recipeItem) {
-            List<MachineRecipe> recipes = recipeItem.getMachineRecipes();
-            i:
-            for (MachineRecipe recipe : recipes) {
-                ItemStack[] in = recipe.getInput();
-                for (int i = 0; i < Math.max(in.length, inputs.length); i++) {
-                    ItemStack x = null;
-                    ItemStack y = null;
-                    if (in.length > i) {
-                        x = in[i];
-                    }
-                    if (inputs.length > i) {
-                        y = inputs[i];
-                    }
-                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
-                        continue i;
-                    }
-                }
-
-                return recipe.getOutput();
-            }
-        }
 
         return new ItemStack[0];
     }
@@ -458,16 +431,6 @@ public class RecipeUtils {
         if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
             LARGE_TYPES.put(ObsidianForge.TYPE, SlimefunItem.getByItem(Items.OBSIDIAN_FORGE));
-        }
-
-        if (SlimeAEPlugin.getFinalTECHIntegration().isLoaded()
-                || SlimeAEPlugin.getFinalTECHChangedIntegration().isLoaded()) {
-            SUPPORTED_RECIPE_TYPES.put(
-                    FinalTechRecipeTypes.MATRIX_CRAFTING_TABLE,
-                    SlimefunItem.getByItem(FinalTechItemStacks.MATRIX_CRAFTING_TABLE));
-            LARGE_TYPES.put(
-                    FinalTechRecipeTypes.MATRIX_CRAFTING_TABLE,
-                    SlimefunItem.getByItem(FinalTechItemStacks.MATRIX_CRAFTING_TABLE));
         }
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {

@@ -45,11 +45,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
     private final GalactifunIntegration galactifunIntegration = new GalactifunIntegration();
     private final ObsidianExpansionIntegration obsidianExpansionIntegration = new ObsidianExpansionIntegration();
-    private final FinalTECHIntegration finalTECHIntegration = new FinalTECHIntegration();
-    private final FinalTECHChangedIntegration finalTECHChangedIntegration = new FinalTECHChangedIntegration();
-
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
-
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
     private final NetworkCheckTask networkChecker = new NetworkCheckTask();
     private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
@@ -97,8 +93,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (justEnoughGuideIntegration.isLoaded()) getLogger().info("更好的粘液书已接入");
         if (galactifunIntegration.isLoaded()) getLogger().info("星系已接入");
         if (obsidianExpansionIntegration.isLoaded()) getLogger().info("黑曜石科技已接入");
-        if (finalTECHIntegration.isLoaded()) getLogger().info("乱序技艺已接入");
-        if (finalTECHChangedIntegration.isLoaded()) getLogger().info("乱序技艺改版已接入");
 
         storageCellDataController.init();
 
@@ -253,24 +247,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static ObsidianExpansionIntegration getObsidianExpansionIntegration() {
         return getInstance().obsidianExpansionIntegration;
-    }
-
-    /**
-     * 获取乱序技艺集成实例
-     * @return 乱序技艺集成实例
-     */
-    @Nonnull
-    public static FinalTECHIntegration getFinalTECHIntegration() {
-        return getInstance().finalTECHIntegration;
-    }
-
-    /**
-     * 获取乱序技艺改版集成实例
-     * @return 乱序技艺改版集成实例
-     */
-    @Nonnull
-    public static FinalTECHChangedIntegration getFinalTECHChangedIntegration() {
-        return getInstance().finalTECHChangedIntegration;
     }
 
     @Nonnull
