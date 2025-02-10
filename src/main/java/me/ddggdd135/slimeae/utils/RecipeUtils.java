@@ -2,8 +2,6 @@ package me.ddggdd135.slimeae.utils;
 
 import io.github.addoncommunity.galactifun.base.BaseItems;
 import io.github.addoncommunity.galactifun.base.items.AssemblyTable;
-import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlock;
-import io.github.mooy1.infinityexpansion.infinitylib.machines.CraftingBlockRecipe;
 import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
 import io.github.mooy1.infinityexpansion.items.blocks.InfinityWorkbench;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -289,10 +287,11 @@ public class RecipeUtils {
                     .toList();
         }
 
-        if (slimefunItem instanceof CraftingBlock craftingBlock) {
-            List<CraftingBlockRecipe> recipes = ReflectionUtils.getField(craftingBlock, "recipes");
+        if (InfinityLibUtils.isCraftingBlock(slimefunItem)) {
+            CraftCraftingBlock craftingBlock = new CraftCraftingBlock(slimefunItem);
+            List<CraftCraftingBlockRecipe> recipes = craftingBlock.getRecipes();
             List<ItemStack[]> result = new ArrayList<>(recipes.size());
-            for (CraftingBlockRecipe recipe : recipes) {
+            for (CraftCraftingBlockRecipe recipe : recipes) {
                 ItemStackSnapshot[] in = (ItemStackSnapshot[]) recipe.recipe();
                 ItemStack[] re = new ItemStack[in.length];
                 for (int j = 0; j < in.length; j++) {
@@ -362,10 +361,11 @@ public class RecipeUtils {
                 return recipe.getOutput();
             }
         }
-        if (slimefunItem instanceof CraftingBlock craftingBlock) {
-            List<CraftingBlockRecipe> recipes = ReflectionUtils.getField(craftingBlock, "recipes");
+        if (InfinityLibUtils.isCraftingBlock(slimefunItem)) {
+            CraftCraftingBlock craftingBlock = new CraftCraftingBlock(slimefunItem);
+            List<CraftCraftingBlockRecipe> recipes = craftingBlock.getRecipes();
             i:
-            for (CraftingBlockRecipe recipe : recipes) {
+            for (CraftCraftingBlockRecipe recipe : recipes) {
                 ItemStack[] in = recipe.recipe();
                 for (int i = 0; i < Math.max(in.length, inputs.length); i++) {
                     ItemStack x = null;

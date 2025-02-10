@@ -39,20 +39,17 @@ public class MECraftPlanningTerminal extends METerminal {
     public void updateGui(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
-        for (int slot : getDisplaySlots()) {
-            blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
-            blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
-        }
+
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (info == null) return;
+        if (info == null) {
+            // 清空显示槽
+            for (int slot : getDisplaySlots()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+            }
+            return;
+        }
 
         CraftingRecipe[] recipes = info.getRecipes().toArray(CraftingRecipe[]::new);
-        int page = getPage(block);
-        if (page > Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1) {
-            page = (int) (Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1);
-            if (page < 0) page = 0;
-            setPage(block, page);
-        }
 
         ItemStack[] itemStacks =
                 Arrays.stream(recipes).map(x -> x.getOutput()[0]).toList().toArray(ItemStack[]::new);
@@ -102,14 +99,31 @@ public class MECraftPlanningTerminal extends METerminal {
 
         itemStacks = items.stream().map(Map.Entry::getKey).toArray(ItemStack[]::new);
 
-        for (int i = 0; i < getDisplaySlots().length; i++) {
-            if (itemStacks.length - 1 < i + page * getDisplaySlots().length) break;
+        int page = getPage(block);
+        if (page > Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1) {
+            page = (int) (Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1);
+            if (page < 0) page = 0;
+            setPage(block, page);
+        }
 
-            ItemStack itemStack = itemStacks[i + page * getDisplaySlots().length];
-            CraftingRecipe recipe = recipes[i + page * getDisplaySlots().length];
+        int startIndex = page * getDisplaySlots().length;
+        int endIndex = startIndex + getDisplaySlots().length;
 
-            if (itemStack == null || itemStack.getType().isAir()) continue;
-            int slot = getDisplaySlots()[i];
+        for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
+            int slot = getDisplaySlots()[i + startIndex];
+            if (i + startIndex >= items.size()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                continue;
+            }
+
+            ItemStack itemStack = itemStacks[i + startIndex];
+            CraftingRecipe recipe = recipes[i + startIndex];
+
+            if (itemStack == null || itemStack.getType().isAir()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                continue;
+            }
+
             ItemStack result = ItemUtils.createDisplayItem(itemStack, 1, false, false);
 
             ItemMeta meta = result.getItemMeta();
