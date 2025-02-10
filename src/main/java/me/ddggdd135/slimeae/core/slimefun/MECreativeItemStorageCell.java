@@ -12,5 +12,5 @@ public class MECreativeItemStorageCell extends MEItemStorageCell {
     }
 
     @Override
-    public void setSize(int size) {}
+    public void setSize(long size) {}
 }

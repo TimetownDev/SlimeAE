@@ -28,23 +28,23 @@ import org.bukkit.inventory.ItemStack;
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
     public static final String SERVER_UUID_KEY = "server_uuid";
-    private int size;
+    private long size;
 
     public MEItemStorageCell(
-            ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, int size) {
+            ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, long size) {
         super(itemGroup, item, recipeType, recipe);
         this.size = size;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
-    public static int getSize(@Nonnull ItemStack itemStack) {
+    public static long getSize(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
         if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell)) {
             return 0;
