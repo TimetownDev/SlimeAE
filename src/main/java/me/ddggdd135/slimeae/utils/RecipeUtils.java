@@ -8,6 +8,8 @@ import io.github.addoncommunity.galactifun.base.BaseItems;
 import io.github.addoncommunity.galactifun.base.items.AssemblyTable;
 import io.github.mooy1.infinityexpansion.items.blocks.Blocks;
 import io.github.mooy1.infinityexpansion.items.blocks.InfinityWorkbench;
+import io.github.mooy1.infinityexpansion.items.mobdata.MobData;
+import io.github.mooy1.infinityexpansion.items.mobdata.MobDataInfuser;
 import io.github.thebusybiscuit.exoticgarden.ExoticGardenRecipeTypes;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
@@ -450,6 +452,8 @@ public class RecipeUtils {
         if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
             SUPPORTED_RECIPE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
             LARGE_TYPES.put(InfinityWorkbench.TYPE, SlimefunItem.getByItem(Blocks.INFINITY_FORGE));
+            SUPPORTED_RECIPE_TYPES.put(MobDataInfuser.TYPE, SlimefunItem.getByItem(MobData.INFUSER));
+            LARGE_TYPES.put(MobDataInfuser.TYPE, SlimefunItem.getByItem(MobData.INFUSER));
         }
 
         if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
