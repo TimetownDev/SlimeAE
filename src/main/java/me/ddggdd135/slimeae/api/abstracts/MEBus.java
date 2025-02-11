@@ -265,13 +265,16 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 slimefunItem.getItem(),
                 "&8设置朝向: " + blockFace.name() + " (" + CMIChatColor.stripColor(slimefunItem.getItemName()) + ")");
         final ItemMeta itemMeta = displayStack.getItemMeta();
+        List<String> lores = new ArrayList<>();
+        lores.add("{#e4ed32}左键点击: &8设置朝向");
+        lores.add("{#e4ed32}Shift+左键点击: &8打开目标方块");
         if (active) {
             itemMeta.addEnchant(Enchantment.LUCK, 1, true);
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            lores.add("");
+            lores.add("&c已设置朝向此容器!");
         }
-        itemMeta.setLore(List.of(
-                CMIChatColor.translate("{#e4ed32}左键点击: &8设置朝向"),
-                CMIChatColor.translate("{#e4ed32}Shift+左键点击: &8打开目标方块")));
+        itemMeta.setLore(CMIChatColor.translate(lores));
         displayStack.setItemMeta(itemMeta);
         return displayStack;
     }
