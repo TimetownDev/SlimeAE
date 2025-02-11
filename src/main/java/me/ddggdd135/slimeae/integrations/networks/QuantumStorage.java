@@ -118,4 +118,8 @@ public class QuantumStorage implements IStorage {
 
         return 0;
     }
+
+    public void sync() {
+        NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+    }
 }
