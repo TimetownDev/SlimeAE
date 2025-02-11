@@ -109,6 +109,12 @@ public class MECraftPlanningTerminal extends METerminal {
         int startIndex = page * getDisplaySlots().length;
         int endIndex = startIndex + getDisplaySlots().length;
 
+        if (startIndex == endIndex) {
+            for (int slot : getDisplaySlots()) {
+                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+            }
+        }
+
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             int slot = getDisplaySlots()[i + startIndex];
             if (i + startIndex >= items.size()) {

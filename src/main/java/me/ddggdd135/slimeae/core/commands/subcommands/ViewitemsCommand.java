@@ -251,6 +251,12 @@ public class ViewitemsCommand extends SubCommand {
         int startIndex = page * getDisplaySlots().length;
         int endIndex = Math.min(startIndex + getDisplaySlots().length, items.size());
 
+        if (startIndex == endIndex) {
+            for (int slot : getDisplaySlots()) {
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
+            }
+        }
+
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
