@@ -324,7 +324,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         CraftingCard.reloadConfig();
 
         // 重载网络交换机配置
-        NetworksExpansionSwitch.reloadConfig();
+        if (networksExpansionIntegration.isLoaded()) NetworksExpansionSwitch.reloadConfig();
 
         // 重载ME清除器配置
         MECleaner.reloadConfig();
