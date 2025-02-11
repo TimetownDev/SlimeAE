@@ -42,6 +42,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>me.ddggdd135.slimeae.libs</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
@@ -205,6 +213,12 @@
             <version>0994db4b6f</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/ExoticGarden.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
