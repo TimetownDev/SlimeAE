@@ -12,11 +12,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Nonnull;
+
+import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class AdvancedMEBus extends MEBus {
@@ -25,6 +31,38 @@ public abstract class AdvancedMEBus extends MEBus {
 
     public AdvancedMEBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
+        createPreset(this);
+        addItemHandler(new BlockPlaceHandler(false) {
+            @Override
+            public void onPlayerPlace(@Nonnull BlockPlaceEvent event) {
+                var block = event.getBlock();
+                Location loc = block.getLocation();
+                var blockData = StorageCacheUtils.getBlock(loc);
+                if (blockData != null) {
+                    Set<BlockFace> directions = new ConcurrentSkipListSet<>();
+                    directions.add(BlockFace.SELF);
+                    saveDirections(loc, directions);
+                }
+            }
+        });
+        addItemHandler(new SimpleBlockBreakHandler() {
+            @Override
+            public void onBlockBreak(@Nonnull Block b) {
+                Location loc = b.getLocation();
+                StorageCacheUtils.removeData(loc, DATA_KEY_DIRECTIONS);
+                MULTI_DIRECTION_MAP.remove(loc);
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(loc);
+                if (blockMenu == null) return;
+                for (int slot : getCardSlots()) {
+                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
+                    if (itemStack != null
+                            && itemStack.getType() != Material.AIR
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
+                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
+                    }
+                }
+            }
+        });
     }
 
     @Override
