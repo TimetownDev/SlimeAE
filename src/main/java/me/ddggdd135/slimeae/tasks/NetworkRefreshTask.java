@@ -53,6 +53,7 @@ public class NetworkRefreshTask implements Runnable {
 
                 for (NetworkInfo networkInfo : allNetworkData) {
                     NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
+                    if (info == null) continue;
                     IStorage tempStorage = info.getTempStorage();
                     Set<ItemStack> toPush =
                             new HashSet<>(tempStorage.getStorage().keySet());

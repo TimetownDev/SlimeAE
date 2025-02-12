@@ -25,6 +25,7 @@ import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.*;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -56,6 +57,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final DataSavingTask dataSavingTask = new DataSavingTask();
     private final SlimeAECommand slimeAECommand = new SlimeAECommand();
     private PinnedManager pinnedManager;
+    private Metrics metrics;
 
     @Override
     public void onEnable() {
@@ -126,10 +128,14 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         getCommand("SlimeAE").setExecutor(slimeAECommand);
         getCommand("SlimeAE").setTabCompleter(slimeAECommand);
+
+        int pluginId = 24737;
+        metrics = new Metrics(this, pluginId);
     }
 
     @Override
     public void onDisable() {
+        metrics.shutdown();
         // Plugin shutdown logic
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().removeIf(x -> x instanceof SlimefunBlockPopulator);
@@ -318,7 +324,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         CraftingCard.reloadConfig();
 
         // 重载网络交换机配置
-        NetworksExpansionSwitch.reloadConfig();
+        if (networksExpansionIntegration.isLoaded()) NetworksExpansionSwitch.reloadConfig();
 
         // 重载ME清除器配置
         MECleaner.reloadConfig();

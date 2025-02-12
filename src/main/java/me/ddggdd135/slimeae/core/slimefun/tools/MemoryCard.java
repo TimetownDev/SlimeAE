@@ -149,6 +149,7 @@ public class MemoryCard extends SlimefunItem {
                         }
                     }
 
+                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
                     return;
                 }
                 if (slimefunItem instanceof MEBus meBus) {
@@ -187,6 +188,7 @@ public class MemoryCard extends SlimefunItem {
                         }
                     }
 
+                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
                     return;
                 }
                 if (slimefunItem instanceof MEInterface meInterface) {
@@ -200,9 +202,9 @@ public class MemoryCard extends SlimefunItem {
                         blockMenu.replaceExistingItem(meInterface.getSettingSlots()[i], itemStacks[i]);
                     }
 
+                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
                     return;
                 }
-                e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
             }
         });
     }

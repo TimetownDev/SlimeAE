@@ -108,6 +108,7 @@ public class DrawerStorage implements IStorage {
 
     @Override
     public int hashCode() {
+        if (data == null) return 0;
         return data.getId();
     }
 }

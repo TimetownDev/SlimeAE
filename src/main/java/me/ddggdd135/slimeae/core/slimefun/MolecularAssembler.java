@@ -67,10 +67,12 @@ public class MolecularAssembler extends TickingBlock
             menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
             return;
         }
+
         ItemStack[] input = operation.getRecipe().getInput();
         for (int i = 0; i < input.length; i++) {
-            if (input[i] == null || input[i].getType().isAir()) continue;
-            ItemUtils.setSettingItem(menu.getInventory(), getInputSlots()[i], input[i]);
+            ItemStack itemStack = input[i];
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+            ItemUtils.setSettingItem(menu.getInventory(), getCraftingInputSlots()[i], itemStack);
         }
 
         if (isFinished(block)) {
