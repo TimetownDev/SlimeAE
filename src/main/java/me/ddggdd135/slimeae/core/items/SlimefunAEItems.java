@@ -914,7 +914,7 @@ public class SlimefunAEItems {
                         SlimefunAEItemGroups.MATERIAL,
                         PRINTED_SILICON,
                         SlimefunAERecipeTypes.INSCRIBER,
-                        new ItemStack[] {SlimefunItems.SILICON})
+                        new ItemStack[] {SlimefunItems.SILICON, new ItemStack(Material.IRON_INGOT)})
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MATERIAL,
