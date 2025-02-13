@@ -162,7 +162,7 @@ public abstract class AdvancedMEBus extends MEBus {
         }
     }
 
-    private static final Map<Location, Set<BlockFace>> MULTI_DIRECTION_MAP = new ConcurrentHashMap<>();
+    protected static final Map<Location, Set<BlockFace>> MULTI_DIRECTION_MAP = new ConcurrentHashMap<>();
     private final BlockFace[] FACES = {
         BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };

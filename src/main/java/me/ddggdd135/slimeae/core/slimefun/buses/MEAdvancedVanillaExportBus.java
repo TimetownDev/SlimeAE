@@ -41,7 +41,7 @@ public class MEAdvancedVanillaExportBus extends MEAdvancedExportBus {
 
         for (BlockFace direction : directions) {
             Block target = block.getRelative(direction);
-            if (!(PaperLib.getBlockState(target, false).getState() instanceof Container container)) return;
+            if (!(PaperLib.getBlockState(target, false).getState() instanceof Container container)) continue;
 
             for (int slot : getSettingSlots()) {
                 ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);

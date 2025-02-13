@@ -71,7 +71,7 @@ public class MemoryCard extends SlimefunItem {
                             x.removeKey(OUTPUTS_KEY);
                         }
                     });
-                if (slimefunItem instanceof MEBus meBus)
+                else if (slimefunItem instanceof MEBus meBus)
                     NBT.modify(e.getItem(), x -> {
                         x.setEnum(DIRECTION_KEY, meBus.getDirection(blockMenu));
                         if (meBus instanceof MEExportBus meExportBus) {
@@ -84,7 +84,7 @@ public class MemoryCard extends SlimefunItem {
                             x.removeKey(OUTPUTS_KEY);
                         }
                     });
-                if (slimefunItem instanceof MEInterface meInterface) {
+                else if (slimefunItem instanceof MEInterface meInterface) {
                     NBT.modify(e.getItem(), x -> {
                         List<ItemStack> items = new ArrayList<>();
                         for (int slot : meInterface.getSettingSlots()) {
@@ -96,6 +96,7 @@ public class MemoryCard extends SlimefunItem {
                 NBT.modify(e.getItem(), x -> {
                     x.setString(TYPE_KEY, slimefunItem.getId());
                 });
+
                 e.getPlayer().sendMessage(CMIChatColor.translate("&e成功存储了方块设置"));
             } else {
                 String id = NBT.get(e.getItem(), x -> {
@@ -118,9 +119,9 @@ public class MemoryCard extends SlimefunItem {
                         return;
                     }
 
-                    advancedMEBus
-                            .getDirections(block.getLocation())
-                            .forEach(x -> advancedMEBus.setDirection(blockMenu, x));
+                    Set<BlockFace> directions = new HashSet<>(advancedMEBus.getDirections(block.getLocation()));
+                    directions.forEach(x -> advancedMEBus.setDirection(blockMenu, x));
+
                     for (BlockFace direction : blockFace) {
                         advancedMEBus.setDirection(blockMenu, direction);
                     }
@@ -148,11 +149,7 @@ public class MemoryCard extends SlimefunItem {
                             blockMenu.replaceExistingItem(meAdvancedExportBus.getSettingSlots()[i], itemStacks[i]);
                         }
                     }
-
-                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
-                    return;
-                }
-                if (slimefunItem instanceof MEBus meBus) {
+                } else if (slimefunItem instanceof MEBus meBus) {
                     BlockFace blockFace = NBT.get(e.getItem(), x -> {
                         return x.getEnum(DIRECTION_KEY, BlockFace.class);
                     });
@@ -187,11 +184,7 @@ public class MemoryCard extends SlimefunItem {
                             blockMenu.replaceExistingItem(meExportBus.getSettingSlots()[i], itemStacks[i]);
                         }
                     }
-
-                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
-                    return;
-                }
-                if (slimefunItem instanceof MEInterface meInterface) {
+                } else if (slimefunItem instanceof MEInterface meInterface) {
                     ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
                         return x.getItemStackArray(OUTPUTS_KEY);
                     });
@@ -201,10 +194,9 @@ public class MemoryCard extends SlimefunItem {
                     for (int i = 0; i < meInterface.getSettingSlots().length; i++) {
                         blockMenu.replaceExistingItem(meInterface.getSettingSlots()[i], itemStacks[i]);
                     }
-
-                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
-                    return;
                 }
+
+                e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
             }
         });
     }
