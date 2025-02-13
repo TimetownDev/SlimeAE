@@ -6,6 +6,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -14,10 +16,13 @@ import me.ddggdd135.slimeae.api.ItemRequest;
 import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +33,26 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
 
     public MEAdvancedExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
+        addItemHandler(new SimpleBlockBreakHandler() {
+            @Override
+            public void onBlockBreak(@Nonnull Block b) {
+                Location loc = b.getLocation();
+                StorageCacheUtils.removeData(loc, DATA_KEY_DIRECTIONS);
+                MULTI_DIRECTION_MAP.remove(loc);
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(loc);
+                if (blockMenu == null) return;
+                for (int slot : getCardSlots()) {
+                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
+                    if (itemStack != null
+                            && itemStack.getType() != Material.AIR
+                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
+                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
+                    }
+                }
+
+                blockMenu.dropItems(b.getLocation(), getSettingSlots());
+            }
+        });
     }
 
     @Override
