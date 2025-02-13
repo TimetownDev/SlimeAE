@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae.api;
 
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,14 +13,12 @@ public class StorageCollection implements IStorage {
     private final Map<ItemStack, IStorage> takeCache;
     private final Map<ItemStack, IStorage> pushCache;
     private final Set<ItemStack> notIncluded;
-    private final Set<ItemStack> full;
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new HashSet<>();
         this.takeCache = new HashMap<>();
         this.pushCache = new HashMap<>();
         this.notIncluded = new HashSet<>();
-        this.full = new HashSet<>();
         for (IStorage storage : storages) {
             addStorage(storage);
         }
@@ -39,7 +36,6 @@ public class StorageCollection implements IStorage {
         }
         storages.add(storage);
         notIncluded.clear();
-        full.clear();
     }
 
     public boolean removeStorage(@Nonnull IStorage storage) {
@@ -78,7 +74,6 @@ public class StorageCollection implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        itemStacks = ItemUtils.removeAll(itemStacks, full);
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = itemStack.asOne();
             if (pushCache.containsKey(template)) {
@@ -87,32 +82,30 @@ public class StorageCollection implements IStorage {
             }
         }
 
-        List<IStorage> sorted = new ArrayList<>(storages);
-        Reference2IntMap<IStorage> tierMap = new Reference2IntOpenHashMap<>();
+        itemStacks = ItemUtils.trimItems(itemStacks);
+        if (itemStacks.length == 0) return;
+
+        List<IStorage> tmp = new ArrayList<>(storages);
+        List<ObjectIntImmutablePair<IStorage>> sorted = new ArrayList<>(tmp.size());
 
         // 计算每个 storage 的 tier 并缓存结果
-        for (IStorage storage : sorted) {
+        for (IStorage storage : tmp) {
             int totalTier = 0;
             for (ItemStack itemStack : itemStacks) {
                 totalTier += storage.getTier(itemStack);
             }
-            tierMap.put(storage, totalTier);
+            if (totalTier < 0) continue;
+            sorted.add(new ObjectIntImmutablePair<>(storage, totalTier));
         }
-
-        // 移除 tier 小于 0 的 storage
-        sorted.removeIf(storage -> tierMap.getInt(storage) < 0);
 
         // 根据缓存的 tier 排序
-        sorted.sort(Comparator.comparingInt(tierMap::getInt).reversed());
+        sorted.sort(Comparator.<ObjectIntImmutablePair<IStorage>>comparingInt(ObjectIntImmutablePair::rightInt)
+                .reversed());
 
-        for (IStorage storage : sorted) {
-            storage.pushItem(itemStacks);
+        for (ObjectIntImmutablePair<IStorage> storage : sorted) {
+            storage.left().pushItem(itemStacks);
             itemStacks = ItemUtils.trimItems(itemStacks);
             if (itemStacks.length == 0) return;
-        }
-
-        for (ItemStack itemStack : itemStacks) {
-            full.add(itemStack.asOne());
         }
     }
 
@@ -160,7 +153,6 @@ public class StorageCollection implements IStorage {
             for (ItemStack itemStack : itemStacks) {
                 if (itemStack != null && !itemStack.getType().isAir()) {
                     takeCache.put(itemStack.asOne(), storage);
-                    full.remove(itemStack.asOne());
                 }
             }
             rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
