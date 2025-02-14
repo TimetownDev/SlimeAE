@@ -9,7 +9,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.abstracts.MEBus;
+import me.ddggdd135.slimeae.api.abstracts.ChainedMEBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -18,14 +18,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEImportBus extends MEBus {
-
+public class MEChainedImportBus extends ChainedMEBus {
     @Override
     public boolean isSynchronized() {
         return false;
     }
 
-    public MEImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+    public MEChainedImportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
@@ -39,13 +38,20 @@ public class MEImportBus extends MEBus {
         if (info == null) return;
         BlockFace current = getDirection(blockMenu);
         if (current == BlockFace.SELF) return;
+
+        int distance = getDistance(block.getLocation());
         Block transportBlock = block.getRelative(current);
-        IStorage networkStorage = info.getStorage();
 
-        ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
-        if (itemStack == null || itemStack.getType().isAir()) return;
+        for (int i = 0; i < distance; i++) {
+            IStorage networkStorage = info.getStorage();
+            if (ItemUtils.getStorage(transportBlock) == null) return;
 
-        networkStorage.pushItem(itemStack);
+            ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+
+            networkStorage.pushItem(itemStack);
+            transportBlock = transportBlock.getRelative(current);
+        }
     }
 
     @Override

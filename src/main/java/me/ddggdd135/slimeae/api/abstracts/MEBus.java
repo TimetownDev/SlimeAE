@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.api.abstracts;
 
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -47,8 +46,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock, ICardHolder {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
-
-    private static final int[] CARD_SLOTS = {45, 46, 47}; // 左下角3个槽位
 
     public int getNorthSlot() {
         return 12;
@@ -398,7 +395,6 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         if (data.getBlockMenu().hasViewer()) updateGui(data);
 
@@ -408,7 +404,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     @Override
     public int[] getCardSlots() {
-        return CARD_SLOTS;
+        return new int[] {45, 46, 47};
     }
 
     public abstract void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data);

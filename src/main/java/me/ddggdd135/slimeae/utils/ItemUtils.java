@@ -739,6 +739,36 @@ public class ItemUtils {
         };
     }
 
+    @Nonnull
+    public static ChestMenu.MenuClickHandler getDistanceSlotClickHandler() {
+        return new ChestMenu.AdvancedMenuClickHandler() {
+            @Override
+            public boolean onClick(
+                    InventoryClickEvent inventoryClickEvent,
+                    Player player,
+                    int i,
+                    ItemStack cursor,
+                    ClickAction clickAction) {
+                Inventory inventory = inventoryClickEvent.getClickedInventory();
+                ItemStack current = inventory.getItem(i);
+                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.DISTANCE, true, false)) {
+                    if (cursor != null && !cursor.getType().isAir()) {
+                        inventory.setItem(i, MenuItems.DISTANCE.asQuantity(cursor.getAmount()));
+                    }
+                } else {
+                    inventory.setItem(i, MenuItems.DISTANCE);
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
+                return false;
+            }
+        };
+    }
+
     public static ItemStack createDisplayItem(@Nonnull ItemStack itemStack, long amount) {
         return createDisplayItem(itemStack, amount, true);
     }

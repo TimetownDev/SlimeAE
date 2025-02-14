@@ -149,6 +149,19 @@ public class SlimefunAEItems {
                             "{#3366ff>}可选择多方向进行输入{#33ccf3<}",
                             "{#3366ff>}抽取指定容器中的物品 支持原版容器{#33ccf3<}")
                     .doGlow());
+    public static final SlimefunItemStack ME_CHAINED_IMPORT_BUS = new SlimefunItemStack(
+            "ME_CHAINED_IMPORT_BUS",
+            new AdvancedCustomItemStack(
+                    Material.LIME_STAINED_GLASS,
+                    "{#Bright_Green}&lME链式输入总线",
+                    "",
+                    "{#3366ff>}工作方向：选择的方向{#33ccf3<}",
+                    "{#3366ff>}检测范围：1-64格[可配置]{#33ccf3<}",
+                    "{#3366ff>}抽取指定容器中的物品 ❗不支持原版容器{#33ccf3<}",
+                    "",
+                    "{#FF5555>}❗ 严格链式连接：{#FF8888<}",
+                    "{#FF5555>}若路径中有阻断/非机器方块{#FF8888<}",
+                    "{#FF5555>}阻断点之后的容器将失效{#FF8888<}"));
     public static final SlimefunItemStack ME_EXPORT_BUS = new SlimefunItemStack(
             "ME_EXPORT_BUS",
             new AdvancedCustomItemStack(
@@ -181,6 +194,19 @@ public class SlimefunAEItems {
                             "{#3366ff>}可选择多方向进行输出{#33ccf3<}",
                             "{#3366ff>}输出指定的物品到指定的容器中 支持原版容器{#33ccf3<}")
                     .doGlow());
+    public static final SlimefunItemStack ME_CHAINED_EXPORT_BUS = new SlimefunItemStack(
+            "ME_CHAINED_EXPORT_BUS",
+            new AdvancedCustomItemStack(
+                    Material.RED_STAINED_GLASS,
+                    "{#Bright_Red}&lME链式输出总线",
+                    "",
+                    "{#3366ff>}工作方向：选择的方向{#33ccf3<}",
+                    "{#3366ff>}检测范围：1-64格[可配置]{#33ccf3<}",
+                    "{#3366ff>}抽取指定容器中的物品 ❗不支持原版容器{#33ccf3<}",
+                    "",
+                    "{#FF5555>}❗ 严格链式连接：{#FF8888<}",
+                    "{#FF5555>}若路径中有阻断/非机器方块{#FF8888<}",
+                    "{#FF5555>}阻断点之后的容器将失效{#FF8888<}"));
     public static final SlimefunItemStack ME_IE_BUS = new SlimefunItemStack(
             "ME_IE_BUS",
             new AdvancedCustomItemStack(
@@ -213,6 +239,19 @@ public class SlimefunAEItems {
                             "{#3366ff>}可选择多方向进行输入输出{#33ccf3<}",
                             "{#3366ff>}同时抽取和输出物品到指定的容器中 支持原版容器{#33ccf3<}")
                     .doGlow());
+    public static final SlimefunItemStack ME_CHAINED_IE_BUS = new SlimefunItemStack(
+            "ME_CHAINED_IE_BUS",
+            new AdvancedCustomItemStack(
+                    Material.YELLOW_STAINED_GLASS,
+                    "{#Starship}&lME链式输入输出总线",
+                    "",
+                    "{#3366ff>}工作方向：选择的方向{#33ccf3<}",
+                    "{#3366ff>}检测范围：1-64格[可配置]{#33ccf3<}",
+                    "{#3366ff>}抽取指定容器中的物品 ❗不支持原版容器{#33ccf3<}",
+                    "",
+                    "{#FF5555>}❗ 严格链式连接：{#FF8888<}",
+                    "{#FF5555>}若路径中有阻断/非机器方块{#FF8888<}",
+                    "{#FF5555>}阻断点之后的容器将失效{#FF8888<}"));
     public static final SlimefunItemStack ME_STORAGE_BUS = new SlimefunItemStack(
             "ME_STORAGE_BUS",
             new AdvancedCustomItemStack(
@@ -657,6 +696,16 @@ public class SlimefunAEItems {
                             new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);
+        new MEChainedImportBus(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CHAINED_IMPORT_BUS,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ME_IMPORT_BUS, LOGIC_PROCESSOR, ME_IMPORT_BUS,
+                            ME_IMPORT_BUS, ME_INTERFACE, ME_IMPORT_BUS,
+                            ME_IMPORT_BUS, LOGIC_PROCESSOR, ME_IMPORT_BUS
+                        })
+                .register(plugin);
         new MEExportBus(
                         SlimefunAEItemGroups.MACHINE,
                         ME_EXPORT_BUS,
@@ -716,6 +765,16 @@ public class SlimefunAEItems {
                             new ItemStack(Material.HOPPER),
                         })
                 .register(plugin);
+        new MEChainedExportBus(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CHAINED_EXPORT_BUS,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ME_EXPORT_BUS, LOGIC_PROCESSOR, ME_EXPORT_BUS,
+                            ME_EXPORT_BUS, ME_INTERFACE, ME_EXPORT_BUS,
+                            ME_EXPORT_BUS, LOGIC_PROCESSOR, ME_EXPORT_BUS
+                        })
+                .register(plugin);
         new MEIEBus(SlimefunAEItemGroups.MACHINE, ME_IE_BUS, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
                     ME_IMPORT_BUS, LOGIC_PROCESSOR, ME_EXPORT_BUS
                 })
@@ -744,6 +803,16 @@ public class SlimefunAEItems {
                             ME_ADVANCED_VANILLA_IMPORT_BUS, LOGIC_PROCESSOR, ME_ADVANCED_VANILLA_EXPORT_BUS,
                             ME_ADVANCED_VANILLA_IMPORT_BUS, ME_VANILLA_IE_BUS, ME_ADVANCED_VANILLA_EXPORT_BUS,
                             ME_ADVANCED_VANILLA_IMPORT_BUS, LOGIC_PROCESSOR, ME_ADVANCED_VANILLA_EXPORT_BUS
+                        })
+                .register(plugin);
+        new MEChainedIEBus(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CHAINED_IE_BUS,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ME_IE_BUS, LOGIC_PROCESSOR, ME_IE_BUS,
+                            ME_IE_BUS, ME_INTERFACE, ME_IE_BUS,
+                            ME_IE_BUS, LOGIC_PROCESSOR, ME_IE_BUS
                         })
                 .register(plugin);
         new MEStorageBus(

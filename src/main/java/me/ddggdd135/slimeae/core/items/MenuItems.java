@@ -19,7 +19,11 @@ public class MenuItems {
     public static final SlimefunItemStack PATTERN = new SlimefunItemStack(
             "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}编码样板槽位"));
     public static final SlimefunItemStack CARD = new SlimefunItemStack(
-            "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}升级卡槽位"));
+            "_AE_MN_CARD_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}升级卡槽位"));
+    public static final SlimefunItemStack DISTANCE = new SlimefunItemStack(
+            "_AE_MN_DISTANCE_",
+            new AdvancedCustomItemStack(
+                    Material.REDSTONE_TORCH, "{#Spring_Green}距离设置", "", "&e用多少数量的物品点击这里 就能将距离设置为多少"));
 
     public static final SlimefunItemStack PAGE_PREVIOUS_STACK = new SlimefunItemStack(
             "_AE_MN_PAGE_PREVIOUS_STACK_", new AdvancedCustomItemStack(Material.RED_STAINED_GLASS_PANE, "&c上一页"));

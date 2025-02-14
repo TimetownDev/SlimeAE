@@ -19,9 +19,12 @@ import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBTList;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBTList;
 import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
+import me.ddggdd135.slimeae.api.abstracts.ChainedMEBus;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.MEInterface;
 import me.ddggdd135.slimeae.core.slimefun.buses.MEAdvancedExportBus;
+import me.ddggdd135.slimeae.core.slimefun.buses.MEChainedExportBus;
 import me.ddggdd135.slimeae.core.slimefun.buses.MEExportBus;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -31,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class MemoryCard extends SlimefunItem {
     public static final String DIRECTION_KEY = "direction";
+    public static final String DISTANCE_KEY = "distance";
     public static final String OUTPUTS_KEY = "outputs";
     public static final String TYPE_KEY = "type";
 
@@ -71,6 +75,20 @@ public class MemoryCard extends SlimefunItem {
                             x.removeKey(OUTPUTS_KEY);
                         }
                     });
+                else if (slimefunItem instanceof ChainedMEBus chainedMEBus)
+                    NBT.modify(e.getItem(), x -> {
+                        x.setEnum(DIRECTION_KEY, chainedMEBus.getDirection(blockMenu));
+                        x.setInteger(DISTANCE_KEY, chainedMEBus.getDistance(block.getLocation()));
+                        if (chainedMEBus instanceof MEChainedExportBus meChainedExportBus) {
+                            List<ItemStack> items = new ArrayList<>();
+                            for (int slot : meChainedExportBus.getSettingSlots()) {
+                                items.add(blockMenu.getItemInSlot(slot));
+                            }
+                            x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
+                        } else {
+                            x.removeKey(OUTPUTS_KEY);
+                        }
+                    });
                 else if (slimefunItem instanceof MEBus meBus)
                     NBT.modify(e.getItem(), x -> {
                         x.setEnum(DIRECTION_KEY, meBus.getDirection(blockMenu));
@@ -102,7 +120,13 @@ public class MemoryCard extends SlimefunItem {
                 String id = NBT.get(e.getItem(), x -> {
                     return x.getString(TYPE_KEY);
                 });
-                if (!id.equals(slimefunItem.getId())) return;
+                if (!id.equals(slimefunItem.getId())) {
+                    SlimefunItem sfItem = SlimefunItem.getById(id);
+                    e.getPlayer()
+                            .sendMessage(CMIChatColor.translate("&e你存储了 " + sfItem.getItemName() + " &e的信息！ 但是你指向的方块是 "
+                                    + slimefunItem.getItemName()));
+                    return;
+                }
                 if (slimefunItem instanceof AdvancedMEBus advancedMEBus) {
                     Set<BlockFace> blockFace = NBT.get(e.getItem(), x -> {
                         ReadableNBTList<String> strings = x.getStringList(DIRECTION_KEY);
@@ -147,6 +171,47 @@ public class MemoryCard extends SlimefunItem {
                         blockMenu.dropItems(block.getLocation(), meAdvancedExportBus.getSettingSlots());
                         for (int i = 0; i < meAdvancedExportBus.getSettingSlots().length; i++) {
                             blockMenu.replaceExistingItem(meAdvancedExportBus.getSettingSlots()[i], itemStacks[i]);
+                        }
+                    }
+                } else if (slimefunItem instanceof ChainedMEBus chainedMEBus) {
+                    BlockFace blockFace = NBT.get(e.getItem(), x -> {
+                        return x.getEnum(DIRECTION_KEY, BlockFace.class);
+                    });
+
+                    if (blockFace == null) {
+                        e.getPlayer().sendMessage(CMIChatColor.translate("&e你还没有存储方块信息！"));
+                        return;
+                    }
+
+                    int distance = NBT.get(e.getItem(), x -> {
+                        return x.getInteger(DISTANCE_KEY);
+                    });
+
+                    chainedMEBus.setDirection(blockMenu, blockFace);
+                    blockMenu.replaceExistingItem(
+                            chainedMEBus.getDistanceSlot(), MenuItems.DISTANCE.asQuantity(distance));
+
+                    if (chainedMEBus instanceof MEChainedExportBus meChainedExportBus) {
+                        ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
+                            return x.getItemStackArray(OUTPUTS_KEY);
+                        });
+
+                        if (itemStacks == null) return;
+                        if (!ItemUtils.contains(
+                                e.getPlayer().getInventory(),
+                                IntStream.rangeClosed(0, 35).toArray(),
+                                itemStacks)) {
+                            e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
+                            return;
+                        }
+
+                        ItemUtils.takeItems(
+                                e.getPlayer().getInventory(),
+                                IntStream.rangeClosed(0, 35).toArray(),
+                                ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
+                        blockMenu.dropItems(block.getLocation(), meChainedExportBus.getSettingSlots());
+                        for (int i = 0; i < meChainedExportBus.getSettingSlots().length; i++) {
+                            blockMenu.replaceExistingItem(meChainedExportBus.getSettingSlots()[i], itemStacks[i]);
                         }
                     }
                 } else if (slimefunItem instanceof MEBus meBus) {
