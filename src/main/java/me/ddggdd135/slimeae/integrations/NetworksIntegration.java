@@ -28,7 +28,7 @@ public class NetworksIntegration implements Integration {
         return cache;
     }
 
-    public ItemRequest[] asNetworkRequests(me.ddggdd135.slimeae.api.ItemRequest[] requests) {
+    public ItemRequest[] asNetworkRequests(me.ddggdd135.slimeae.api.items.ItemRequest[] requests) {
         return Arrays.stream(requests)
                 .map(x -> new io.github.sefiraat.networks.network.stackcaches.ItemRequest(
                         x.getTemplate(), (int) x.getAmount()))

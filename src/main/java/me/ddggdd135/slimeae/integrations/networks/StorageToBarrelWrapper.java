@@ -24,7 +24,7 @@ public class StorageToBarrelWrapper extends BarrelIdentity {
                 || itemRequest.getItemStack().getType().isAir()) return null;
         if (!SlimefunUtils.isItemSimilar(getItemStack(), itemRequest.getItemStack(), true, false)) return null;
 
-        ItemStack[] itemStacks = storage.tryTakeItem(new me.ddggdd135.slimeae.api.ItemRequest(
+        ItemStack[] itemStacks = storage.tryTakeItem(new me.ddggdd135.slimeae.api.items.ItemRequest(
                 itemRequest.getItemStack(),
                 Math.min(itemRequest.getItemStack().getMaxStackSize(), itemRequest.getAmount())));
         if (itemStacks.length == 1) return itemStacks[0];

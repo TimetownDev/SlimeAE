@@ -1,9 +1,8 @@
-package me.ddggdd135.slimeae.api;
+package me.ddggdd135.slimeae.api.autocraft;
 
 import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftingRecipe {

@@ -4,7 +4,7 @@ import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawe
 import io.github.sefiraat.networks.network.NetworkRoot;
 import io.github.sefiraat.networks.network.stackcaches.BarrelIdentity;
 import java.util.*;
-import me.ddggdd135.slimeae.api.StorageCollection;
+import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.integrations.networksexpansion.DrawerStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Location;

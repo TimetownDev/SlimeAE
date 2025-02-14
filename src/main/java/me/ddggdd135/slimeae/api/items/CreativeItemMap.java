@@ -1,4 +1,4 @@
-package me.ddggdd135.slimeae.api;
+package me.ddggdd135.slimeae.api.items;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;

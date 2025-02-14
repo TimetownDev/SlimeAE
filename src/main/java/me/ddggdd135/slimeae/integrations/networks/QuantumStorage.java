@@ -10,9 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.ItemRequest;
-import me.ddggdd135.slimeae.api.ItemStorage;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.ItemRequest;
+import me.ddggdd135.slimeae.api.items.ItemStorage;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 

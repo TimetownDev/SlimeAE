@@ -1,4 +1,4 @@
-package me.ddggdd135.slimeae.api;
+package me.ddggdd135.slimeae.api.items;
 
 import org.bukkit.inventory.ItemStack;
 

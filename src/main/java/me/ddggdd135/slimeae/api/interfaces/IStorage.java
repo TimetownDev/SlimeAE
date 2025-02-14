@@ -2,7 +2,7 @@ package me.ddggdd135.slimeae.api.interfaces;
 
 import java.util.Map;
 import javax.annotation.Nonnull;
-import me.ddggdd135.slimeae.api.ItemRequest;
+import me.ddggdd135.slimeae.api.items.ItemRequest;
 import org.bukkit.inventory.ItemStack;
 
 /**

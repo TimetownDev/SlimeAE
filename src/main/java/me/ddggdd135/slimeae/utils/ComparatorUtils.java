@@ -1,7 +1,7 @@
 package me.ddggdd135.slimeae.utils;
 
 import java.util.Comparator;
-import me.ddggdd135.slimeae.core.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
 import org.bukkit.Location;
 
 public class ComparatorUtils {

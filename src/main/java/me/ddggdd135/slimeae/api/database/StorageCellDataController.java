@@ -2,7 +2,7 @@ package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.slimeae.api.MEStorageCellCache;
+import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
