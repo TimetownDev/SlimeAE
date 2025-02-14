@@ -15,6 +15,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import me.ddggdd135.slimeae.api.blockdata.MEAdvancedBusData;
+import me.ddggdd135.slimeae.api.blockdata.MEAdvancedBusDataAdapter;
+import me.ddggdd135.slimeae.api.interfaces.IBlockData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
@@ -24,11 +29,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-public abstract class AdvancedMEBus extends MEBus {
-
+public abstract class MEAdvancedBus extends MEBus {
     protected static final String DATA_KEY_DIRECTIONS = "directions";
+    private static final MEAdvancedBusDataAdapter adapter = new MEAdvancedBusDataAdapter();
 
-    public AdvancedMEBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+    public MEAdvancedBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this);
         addItemHandler(new BlockPlaceHandler(false) {
@@ -166,4 +171,57 @@ public abstract class AdvancedMEBus extends MEBus {
     private final BlockFace[] FACES = {
         BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
+
+    @Nullable public MEAdvancedBusData getData(@Nonnull Location location) {
+        MEAdvancedBusData data = new MEAdvancedBusData();
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return null;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedBus)) return null;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return null;
+
+        data.setDirections(getDirections(location));
+
+        return data;
+    }
+
+    public void applyData(@Nonnull Location location, @Nullable IBlockData data) {
+        if (!canApplyData(location, data)) return;
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        MEAdvancedBusData meAdvancedBusData = (MEAdvancedBusData) data;
+
+        for (BlockFace blockFace : getDirections(location)) {
+            setDirection(blockMenu, blockFace);
+        }
+
+        for (BlockFace blockFace : meAdvancedBusData.getDirections()) {
+            setDirection(blockMenu, blockFace);
+        }
+    }
+
+    public boolean hasData(@Nonnull Location location) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        return blockMenu != null;
+    }
+
+    public boolean canApplyData(@Nonnull Location location, @Nullable IBlockData blockData) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return false;
+        return blockData instanceof MEAdvancedBusData;
+    }
+
+    @Nonnull
+    public IBlockDataAdapter<?> getAdapter() {
+        return adapter;
+    }
 }

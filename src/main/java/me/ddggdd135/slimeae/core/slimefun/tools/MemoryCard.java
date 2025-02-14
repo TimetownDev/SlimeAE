@@ -9,34 +9,23 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBTList;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBTList;
-import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
-import me.ddggdd135.slimeae.api.abstracts.ChainedMEBus;
-import me.ddggdd135.slimeae.api.abstracts.MEBus;
-import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.slimefun.MEInterface;
-import me.ddggdd135.slimeae.core.slimefun.buses.MEAdvancedExportBus;
-import me.ddggdd135.slimeae.core.slimefun.buses.MEChainedExportBus;
-import me.ddggdd135.slimeae.core.slimefun.buses.MEExportBus;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBT;
+import me.ddggdd135.slimeae.api.interfaces.IBlockData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
+import me.ddggdd135.slimeae.api.interfaces.IDataBlock;
+import me.ddggdd135.slimeae.api.interfaces.IInventoryBlockData;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class MemoryCard extends SlimefunItem {
-    public static final String DIRECTION_KEY = "direction";
-    public static final String DISTANCE_KEY = "distance";
-    public static final String OUTPUTS_KEY = "outputs";
-    public static final String TYPE_KEY = "type";
+    public static final String DATA_KEY = "data";
+    public static final String NAMESPACEDKEY_KEY = "namespacedkey";
 
     public MemoryCard(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -48,220 +37,68 @@ public class MemoryCard extends SlimefunItem {
             if (slimefunBlockData == null) return;
             SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
             if (slimefunItem == null) return;
-            if (!(slimefunItem instanceof MEBus || slimefunItem instanceof MEInterface)) {
-                e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你对着ME总线或ME接口？"));
+            if (!(slimefunItem instanceof IDataBlock iDataBlock)) {
+                e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你对着拥有数据的方块"));
                 return;
             }
             BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
             if (blockMenu == null) return;
             if (!Slimefun.getProtectionManager().hasPermission(e.getPlayer(), block, Interaction.INTERACT_BLOCK))
                 return;
+            IBlockDataAdapter<?> adapter = iDataBlock.getAdapter();
             if (e.getPlayer().isSneaking()) {
-                if (slimefunItem instanceof AdvancedMEBus advancedMEBus)
-                    NBT.modify(e.getItem(), x -> {
-                        ReadWriteNBTList<String> directions = x.getStringList(DIRECTION_KEY);
-                        directions.clear();
-                        for (BlockFace direction : advancedMEBus.getDirections(block.getLocation())) {
-                            directions.add(direction.name());
-                        }
-
-                        if (advancedMEBus instanceof MEAdvancedExportBus meAdvancedExportBus) {
-                            List<ItemStack> items = new ArrayList<>();
-                            for (int slot : meAdvancedExportBus.getSettingSlots()) {
-                                items.add(blockMenu.getItemInSlot(slot));
-                            }
-                            x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
-                        } else {
-                            x.removeKey(OUTPUTS_KEY);
-                        }
-                    });
-                else if (slimefunItem instanceof ChainedMEBus chainedMEBus)
-                    NBT.modify(e.getItem(), x -> {
-                        x.setEnum(DIRECTION_KEY, chainedMEBus.getDirection(blockMenu));
-                        x.setInteger(DISTANCE_KEY, chainedMEBus.getDistance(block.getLocation()));
-                        if (chainedMEBus instanceof MEChainedExportBus meChainedExportBus) {
-                            List<ItemStack> items = new ArrayList<>();
-                            for (int slot : meChainedExportBus.getSettingSlots()) {
-                                items.add(blockMenu.getItemInSlot(slot));
-                            }
-                            x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
-                        } else {
-                            x.removeKey(OUTPUTS_KEY);
-                        }
-                    });
-                else if (slimefunItem instanceof MEBus meBus)
-                    NBT.modify(e.getItem(), x -> {
-                        x.setEnum(DIRECTION_KEY, meBus.getDirection(blockMenu));
-                        if (meBus instanceof MEExportBus meExportBus) {
-                            List<ItemStack> items = new ArrayList<>();
-                            for (int slot : meExportBus.getSettingSlots()) {
-                                items.add(blockMenu.getItemInSlot(slot));
-                            }
-                            x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
-                        } else {
-                            x.removeKey(OUTPUTS_KEY);
-                        }
-                    });
-                else if (slimefunItem instanceof MEInterface meInterface) {
-                    NBT.modify(e.getItem(), x -> {
-                        List<ItemStack> items = new ArrayList<>();
-                        for (int slot : meInterface.getSettingSlots()) {
-                            items.add(blockMenu.getItemInSlot(slot));
-                        }
-                        x.setItemStackArray(OUTPUTS_KEY, items.toArray(ItemStack[]::new));
-                    });
+                IBlockData blockData = iDataBlock.getData(block.getLocation());
+                if (blockData == null) {
+                    e.getPlayer().sendMessage(CMIChatColor.translate("&e这个方块没有数据"));
+                    return;
                 }
+                ReadWriteNBT nbt = adapter.serialize(blockData);
                 NBT.modify(e.getItem(), x -> {
-                    x.setString(TYPE_KEY, slimefunItem.getId());
+                    ReadWriteNBT data = x.getOrCreateCompound(DATA_KEY);
+                    data.clearNBT();
+                    data.mergeCompound(nbt);
+
+                    x.setString(NAMESPACEDKEY_KEY, blockData.getNamespacedKey().asString());
                 });
 
                 e.getPlayer().sendMessage(CMIChatColor.translate("&e成功存储了方块设置"));
             } else {
-                String id = NBT.get(e.getItem(), x -> {
-                    return x.getString(TYPE_KEY);
+                NBT.get(e.getItem(), x -> {
+                    ReadableNBT nbt = x.getCompound(DATA_KEY);
+                    if (nbt == null) {
+                        e.getPlayer().sendMessage(CMIChatColor.translate("&e你还没有存储数据"));
+                        return;
+                    }
+
+                    IBlockData data = adapter.deserialize(nbt);
+
+                    if (!iDataBlock.canApplyData(block.getLocation(), data)) {
+                        e.getPlayer().sendMessage(CMIChatColor.translate("&e无法应用数据"));
+                        return;
+                    }
+
+                    if (data instanceof IInventoryBlockData iInventoryBlockData) {
+                        ItemStack[] itemStacks = iInventoryBlockData.getItemStacks();
+                        if (iInventoryBlockData.needItems()) {
+                            if (!ItemUtils.contains(
+                                    e.getPlayer().getInventory(),
+                                    IntStream.rangeClosed(0, 35).toArray(),
+                                    itemStacks)) {
+                                e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
+                                return;
+                            }
+
+                            ItemUtils.takeItems(
+                                    e.getPlayer().getInventory(),
+                                    IntStream.rangeClosed(0, 35).toArray(),
+                                    ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
+                        }
+                    }
+
+                    iDataBlock.applyData(block.getLocation(), data);
+
+                    e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
                 });
-                if (!id.equals(slimefunItem.getId())) {
-                    SlimefunItem sfItem = SlimefunItem.getById(id);
-                    e.getPlayer()
-                            .sendMessage(CMIChatColor.translate("&e你存储了 " + sfItem.getItemName() + " &e的信息！ 但是你指向的方块是 "
-                                    + slimefunItem.getItemName()));
-                    return;
-                }
-                if (slimefunItem instanceof AdvancedMEBus advancedMEBus) {
-                    Set<BlockFace> blockFace = NBT.get(e.getItem(), x -> {
-                        ReadableNBTList<String> strings = x.getStringList(DIRECTION_KEY);
-                        Set<BlockFace> directions = new HashSet<>();
-                        for (String direction : strings) {
-                            directions.add(BlockFace.valueOf(direction));
-                        }
-
-                        return directions;
-                    });
-
-                    if (blockFace == null) {
-                        e.getPlayer().sendMessage(CMIChatColor.translate("&e你还没有存储方块信息！"));
-                        return;
-                    }
-
-                    Set<BlockFace> directions = new HashSet<>(advancedMEBus.getDirections(block.getLocation()));
-                    directions.forEach(x -> advancedMEBus.setDirection(blockMenu, x));
-
-                    for (BlockFace direction : blockFace) {
-                        advancedMEBus.setDirection(blockMenu, direction);
-                    }
-
-                    if (advancedMEBus instanceof MEAdvancedExportBus meAdvancedExportBus) {
-                        ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
-                            return x.getItemStackArray(OUTPUTS_KEY);
-                        });
-
-                        if (itemStacks == null) return;
-                        if (!ItemUtils.contains(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                itemStacks)) {
-                            e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
-                            return;
-                        }
-
-                        ItemUtils.takeItems(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
-                        blockMenu.dropItems(block.getLocation(), meAdvancedExportBus.getSettingSlots());
-                        for (int i = 0; i < meAdvancedExportBus.getSettingSlots().length; i++) {
-                            blockMenu.replaceExistingItem(meAdvancedExportBus.getSettingSlots()[i], itemStacks[i]);
-                        }
-                    }
-                } else if (slimefunItem instanceof ChainedMEBus chainedMEBus) {
-                    BlockFace blockFace = NBT.get(e.getItem(), x -> {
-                        return x.getEnum(DIRECTION_KEY, BlockFace.class);
-                    });
-
-                    if (blockFace == null) {
-                        e.getPlayer().sendMessage(CMIChatColor.translate("&e你还没有存储方块信息！"));
-                        return;
-                    }
-
-                    int distance = NBT.get(e.getItem(), x -> {
-                        return x.getInteger(DISTANCE_KEY);
-                    });
-
-                    chainedMEBus.setDirection(blockMenu, blockFace);
-                    blockMenu.replaceExistingItem(
-                            chainedMEBus.getDistanceSlot(), MenuItems.DISTANCE.asQuantity(distance));
-
-                    if (chainedMEBus instanceof MEChainedExportBus meChainedExportBus) {
-                        ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
-                            return x.getItemStackArray(OUTPUTS_KEY);
-                        });
-
-                        if (itemStacks == null) return;
-                        if (!ItemUtils.contains(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                itemStacks)) {
-                            e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
-                            return;
-                        }
-
-                        ItemUtils.takeItems(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
-                        blockMenu.dropItems(block.getLocation(), meChainedExportBus.getSettingSlots());
-                        for (int i = 0; i < meChainedExportBus.getSettingSlots().length; i++) {
-                            blockMenu.replaceExistingItem(meChainedExportBus.getSettingSlots()[i], itemStacks[i]);
-                        }
-                    }
-                } else if (slimefunItem instanceof MEBus meBus) {
-                    BlockFace blockFace = NBT.get(e.getItem(), x -> {
-                        return x.getEnum(DIRECTION_KEY, BlockFace.class);
-                    });
-
-                    if (blockFace == null) {
-                        e.getPlayer().sendMessage(CMIChatColor.translate("&e你还没有存储方块信息！"));
-                        return;
-                    }
-
-                    meBus.setDirection(blockMenu, blockFace);
-
-                    if (meBus instanceof MEExportBus meExportBus) {
-                        ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
-                            return x.getItemStackArray(OUTPUTS_KEY);
-                        });
-
-                        if (itemStacks == null) return;
-                        if (!ItemUtils.contains(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                itemStacks)) {
-                            e.getPlayer().sendMessage(CMIChatColor.translate("&e你确定你背包里有足够的物品？"));
-                            return;
-                        }
-
-                        ItemUtils.takeItems(
-                                e.getPlayer().getInventory(),
-                                IntStream.rangeClosed(0, 35).toArray(),
-                                ItemUtils.createRequests(ItemUtils.getAmounts(itemStacks)));
-                        blockMenu.dropItems(block.getLocation(), meExportBus.getSettingSlots());
-                        for (int i = 0; i < meExportBus.getSettingSlots().length; i++) {
-                            blockMenu.replaceExistingItem(meExportBus.getSettingSlots()[i], itemStacks[i]);
-                        }
-                    }
-                } else if (slimefunItem instanceof MEInterface meInterface) {
-                    ItemStack[] itemStacks = NBT.get(e.getItem(), x -> {
-                        return x.getItemStackArray(OUTPUTS_KEY);
-                    });
-
-                    if (itemStacks == null) return;
-
-                    for (int i = 0; i < meInterface.getSettingSlots().length; i++) {
-                        blockMenu.replaceExistingItem(meInterface.getSettingSlots()[i], itemStacks[i]);
-                    }
-                }
-
-                e.getPlayer().sendMessage(CMIChatColor.translate("&e成功应用了方块设置"));
             }
         });
     }

@@ -10,7 +10,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
+import me.ddggdd135.slimeae.api.abstracts.MEAdvancedBus;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -19,7 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEAdvancedImportBus extends AdvancedMEBus {
+public class MEAdvancedImportBus extends MEAdvancedBus {
 
     @Override
     public boolean isSynchronized() {

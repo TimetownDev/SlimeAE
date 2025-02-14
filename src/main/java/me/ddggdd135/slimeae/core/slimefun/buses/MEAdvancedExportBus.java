@@ -10,9 +10,14 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.abstracts.AdvancedMEBus;
+import me.ddggdd135.slimeae.api.abstracts.MEAdvancedBus;
+import me.ddggdd135.slimeae.api.blockdata.MEAdvancedBusDataAdapter;
+import me.ddggdd135.slimeae.api.blockdata.MEAdvancedExportBusData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -27,9 +32,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEAdvancedExportBus extends AdvancedMEBus {
-
-    public static final int[] Setting_Slots = new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
+public class MEAdvancedExportBus extends MEAdvancedBus {
+    private static final MEAdvancedBusDataAdapter adapter = new MEAdvancedBusDataAdapter();
 
     public MEAdvancedExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -75,7 +79,7 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
             BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
             if (targetInv == null) continue;
 
-            for (int slot : Setting_Slots) {
+            for (int slot : getSettingSlots()) {
                 ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
                 if (setting == null || setting.getType().isAir()) {
                     continue;
@@ -202,6 +206,75 @@ public class MEAdvancedExportBus extends AdvancedMEBus {
     }
 
     public int[] getSettingSlots() {
-        return Setting_Slots;
+        return new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
+    }
+
+    @Nullable public MEAdvancedExportBusData getData(@Nonnull Location location) {
+        MEAdvancedExportBusData data = new MEAdvancedExportBusData();
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return null;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedExportBus)) return null;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return null;
+
+        data.setDirections(getDirections(location));
+
+        ItemStack[] itemStacks = new ItemStack[getSettingSlots().length];
+        for (int i = 0; i < getSettingSlots().length; i++) {
+            int slot = getSettingSlots()[i];
+            itemStacks[i] = blockMenu.getItemInSlot(slot);
+        }
+        data.setItemStacks(itemStacks);
+
+        return data;
+    }
+
+    public void applyData(@Nonnull Location location, @Nullable IBlockData data) {
+        if (!canApplyData(location, data)) return;
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        MEAdvancedExportBusData meAdvancedExportBusData = (MEAdvancedExportBusData) data;
+
+        for (BlockFace blockFace : getDirections(location)) {
+            setDirection(blockMenu, blockFace);
+        }
+
+        for (BlockFace blockFace : meAdvancedExportBusData.getDirections()) {
+            setDirection(blockMenu, blockFace);
+        }
+
+        ItemStack[] itemStacks = meAdvancedExportBusData.getItemStacks();
+
+        blockMenu.dropItems(location, getSettingSlots());
+
+        for (int i = 0; i < getSettingSlots().length; i++) {
+            int slot = getSettingSlots()[i];
+            blockMenu.replaceExistingItem(slot, itemStacks[i]);
+        }
+    }
+
+    public boolean hasData(@Nonnull Location location) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedExportBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        return blockMenu != null;
+    }
+
+    public boolean canApplyData(@Nonnull Location location, @Nullable IBlockData blockData) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEAdvancedExportBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return false;
+        return blockData instanceof MEAdvancedExportBusData;
+    }
+
+    @Nonnull
+    public IBlockDataAdapter<?> getAdapter() {
+        return adapter;
     }
 }

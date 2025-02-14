@@ -114,22 +114,23 @@ public abstract class DatabaseController<TData> {
                 queue = new ConcurrentLinkedQueue<>();
                 queue.add(runnable);
                 scheduledWriteTasks.put(data, queue);
-                writeExecutor.submit(() -> {
-                    Queue<Runnable> tasks;
-                    synchronized (scheduledWriteTasks) {
-                        tasks = scheduledWriteTasks.remove(data);
-                    }
-                    while (!tasks.isEmpty()) {
-                        Runnable next = tasks.remove();
-                        try {
-                            next.run();
-                        } catch (Exception e) {
-                            logger.log(Level.WARNING, e.getMessage());
-                        }
-                    }
-                });
             }
         }
+
+        writeExecutor.submit(() -> {
+            Queue<Runnable> tasks;
+            synchronized (scheduledWriteTasks) {
+                tasks = scheduledWriteTasks.remove(data);
+            }
+            while (!tasks.isEmpty()) {
+                Runnable next = tasks.remove();
+                try {
+                    next.run();
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, e.getMessage());
+                }
+            }
+        });
     }
 
     public void cancelWriteTask(TData data) {

@@ -9,9 +9,14 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
+import me.ddggdd135.slimeae.api.blockdata.MEBusDataAdapter;
+import me.ddggdd135.slimeae.api.blockdata.MEExportBusData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockData;
+import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -20,12 +25,14 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
+    private static final MEBusDataAdapter adapter = new MEBusDataAdapter();
 
     public MEExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -193,5 +200,68 @@ public class MEExportBus extends MEBus {
 
     public int[] getSettingSlots() {
         return new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
+    }
+
+    @Nullable public MEExportBusData getData(@Nonnull Location location) {
+        MEExportBusData data = new MEExportBusData();
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return null;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEExportBus)) return null;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return null;
+
+        data.setDirection(getDirection(blockMenu));
+
+        ItemStack[] itemStacks = new ItemStack[getSettingSlots().length];
+        for (int i = 0; i < getSettingSlots().length; i++) {
+            int slot = getSettingSlots()[i];
+            itemStacks[i] = blockMenu.getItemInSlot(slot);
+        }
+        data.setItemStacks(itemStacks);
+
+        return data;
+    }
+
+    public void applyData(@Nonnull Location location, @Nullable IBlockData data) {
+        if (!canApplyData(location, data)) return;
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        MEExportBusData meExportBusData = (MEExportBusData) data;
+
+        setDirection(blockMenu, meExportBusData.getDirection());
+
+        ItemStack[] itemStacks = meExportBusData.getItemStacks();
+
+        blockMenu.dropItems(location, getSettingSlots());
+
+        for (int i = 0; i < getSettingSlots().length; i++) {
+            int slot = getSettingSlots()[i];
+            blockMenu.replaceExistingItem(slot, itemStacks[i]);
+        }
+    }
+
+    public boolean hasData(@Nonnull Location location) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEExportBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        return blockMenu != null;
+    }
+
+    public boolean canApplyData(@Nonnull Location location, @Nullable IBlockData blockData) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
+        if (slimefunBlockData == null) return false;
+        SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+        if (!(slimefunItem instanceof MEExportBus)) return false;
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return false;
+        return blockData instanceof MEExportBusData;
+    }
+
+    @Nonnull
+    public IBlockDataAdapter<?> getAdapter() {
+        return adapter;
     }
 }
