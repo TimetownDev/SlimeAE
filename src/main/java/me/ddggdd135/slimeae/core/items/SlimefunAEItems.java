@@ -668,7 +668,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -684,7 +684,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -697,7 +697,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -735,7 +735,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -751,7 +751,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -766,7 +766,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -786,7 +786,7 @@ public class SlimefunAEItems {
                         new ItemStack[] {ME_VANILLA_IMPORT_BUS, LOGIC_PROCESSOR, ME_VANILLA_EXPORT_BUS})
                 .register(plugin);
         new MEAdvancedIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -796,7 +796,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -806,7 +806,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
