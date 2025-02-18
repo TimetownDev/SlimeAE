@@ -8,7 +8,12 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.Rechargeable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.WeaponUseHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.common.ChatColors;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.bukkit.*;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Ageable;
@@ -17,20 +22,14 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Tag;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EntropyManipulator extends SlimefunItem implements Rechargeable {
 
     private static final float MAX_CAPACITY = 200000.0F;
     private static final float ENERGY_COST = 1600.0F;
-    private static final Location PARTICLE_OFFSET = new Location(null, 0.5, 0.5, 0.5);
 
     private static final Map<Material, Material> HEAT_TRANSFORMATIONS = new HashMap<>();
+
     static {
         HEAT_TRANSFORMATIONS.put(Material.COBBLESTONE, Material.STONE);
         HEAT_TRANSFORMATIONS.put(Material.NETHERRACK, Material.NETHER_BRICKS);
@@ -41,12 +40,11 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable {
         HEAT_TRANSFORMATIONS.put(Material.POTATO, Material.BAKED_POTATO);
 
         HEAT_TRANSFORMATIONS.putAll(
-                Tag.LOGS.getValues().stream()
-                        .collect(Collectors.toMap(k -> k, v -> Material.CHARCOAL))
-        );
+                Tag.LOGS.getValues().stream().collect(Collectors.toMap(k -> k, v -> Material.CHARCOAL)));
     }
 
     private static final Map<Material, Material> COOL_TRANSFORMATIONS = new HashMap<>();
+
     static {
         COOL_TRANSFORMATIONS.put(Material.GRASS_BLOCK, Material.DIRT);
         COOL_TRANSFORMATIONS.put(Material.STONE, Material.COBBLESTONE);
@@ -122,15 +120,13 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable {
     }
 
     private void handleCooling(Block target) {
-        Arrays.stream(BlockFace.values())
-                .map(target::getRelative)
-                .forEach(relative -> {
-                    if (isFluid(relative.getType())) {
-                        handleFluid(relative);
-                    } else {
-                        processSolidCooling(relative);
-                    }
-                });
+        Arrays.stream(BlockFace.values()).map(target::getRelative).forEach(relative -> {
+            if (isFluid(relative.getType())) {
+                handleFluid(relative);
+            } else {
+                processSolidCooling(relative);
+            }
+        });
     }
 
     private boolean isFluid(Material material) {
@@ -224,6 +220,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable {
         }
         return false;
     }
+
     private boolean transformClayToBrick(Block b) {
         b.setType(Material.AIR);
         World world = b.getWorld();
@@ -247,13 +244,10 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable {
         World world = loc.getWorld();
         if (world != null) {
             Location particleLoc = loc.clone().add(0.5, 0.5, 0.5);
-            world.spawnParticle(
-                    particle,
-                    particleLoc,
-                    30, 0.2, 0.2, 0.2, 0.1
-            );
+            world.spawnParticle(particle, particleLoc, 30, 0.2, 0.2, 0.2, 0.1);
         }
     }
+
     private void playSound(Location loc, Sound sound, float volume, float pitch) {
         World world = loc.getWorld();
         if (world != null) {
@@ -264,11 +258,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable {
     private void spawnDefaultSmoke(Location loc) {
         World world = loc.getWorld();
         if (world != null) {
-            world.spawnParticle(
-                    Particle.SMOKE_NORMAL,
-                    loc,
-                    30, 0.2, 0.2, 0.2, 0.1
-            );
+            world.spawnParticle(Particle.SMOKE_NORMAL, loc, 30, 0.2, 0.2, 0.2, 0.1);
         }
     }
 }
