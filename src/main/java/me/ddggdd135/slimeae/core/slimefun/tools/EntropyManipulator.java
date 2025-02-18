@@ -42,6 +42,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
         super(group, item, type, recipe);
         addItemHandler(createItemHandler(), createWeaponHandler());
     }
+
     @Override
     public float getMaxItemCharge(ItemStack item) {
         return MAX_ENERGY;
@@ -282,6 +283,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
         map.putAll(Tag.LOGS.getValues().stream().collect(Collectors.toMap(k -> k, v -> Material.CHARCOAL)));
         return map;
     }
+
     private static Map<Material, Material> createCoolMap() {
         Map<Material, Material> map = new HashMap<>();
         map.put(Material.GRASS_BLOCK, Material.DIRT);
@@ -292,6 +294,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
         map.put(Material.PACKED_ICE, Material.BLUE_ICE);
         return map;
     }
+
     @NotNull @Override
     public List<ItemStack> getDisplayRecipes() {
         List<ItemStack> items = new ArrayList<>();
@@ -361,7 +364,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
         lore.add(ChatColors.color("&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"));
 
         AdvancedCustomItemStack item =
-                new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "{#3366ff>}" + title + "{#33ccf3<}",lore);
+                new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "{#3366ff>}" + title + "{#33ccf3<}", lore);
 
         return item;
     }
