@@ -483,18 +483,18 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack AE_TERMINAL_TOPPER = new SlimefunItemStack(
             "AE_TERMINAL_TOPPER",
             new AdvancedCustomItemStack(Material.ENDER_EYE, "&e置顶器", "", "&2&l用于在终端中置顶物品", "&6用法: 在终端中拿起此物品，在显示物品上点击"));
-//    public static final SlimefunItemStack ENTROPY_MANIPULATOR = new SlimefunItemStack(
-//            "ENTROPY_MANIPULATOR",
-//            new AdvancedCustomItemStack(
-//            Material.IRON_HOE,
-//                    "&6熵变机械臂",
-//                    "&7充满电可处理125个方块",
-//                    "",
-//                    "&a右键 &7- 产生高温效应",
-//                    "&aShift+右键 &7- 产生低温效应",
-//                    "&c攻击命中 &7- 点燃目标生物",
-//                    "",
-//                    "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J" ));
+    //    public static final SlimefunItemStack ENTROPY_MANIPULATOR = new SlimefunItemStack(
+    //            "ENTROPY_MANIPULATOR",
+    //            new AdvancedCustomItemStack(
+    //            Material.IRON_HOE,
+    //                    "&6熵变机械臂",
+    //                    "&7充满电可处理125个方块",
+    //                    "",
+    //                    "&a右键 &7- 产生高温效应",
+    //                    "&aShift+右键 &7- 产生低温效应",
+    //                    "&c攻击命中 &7- 点燃目标生物",
+    //                    "",
+    //                    "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J" ));
     public static final SlimefunItemStack ENTROPY_MANIPULATOR = new SlimefunItemStack(
             "ENTROPY_MANIPULATOR",
             new AdvancedCustomItemStack(
@@ -507,7 +507,8 @@ public class SlimefunAEItems {
                     "&aShift+右键 &7- {#3366ff>}产生低温效应{#33ccf3<}",
                     "&c攻击命中 &7- {#3366ff>}点燃目标生物{#3366ff<}",
                     "",
-                    "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J" ));
+                    "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J"));
+
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
 
@@ -1477,20 +1478,20 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new EntropyManipulator(
-                SlimefunAEItemGroups.TOOL,
-                ENTROPY_MANIPULATOR,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                new ItemStack[] {
-                        CRYSTAL_FLUIX,
-                        ENERGY_CELL,
-                        null,
-                        PRINTED_ENGINEERING_CIRCUIT,
-                        new ItemStack(Material.IRON_INGOT),
-                        null,
-                        null,
-                        null,
-                        new ItemStack(Material.IRON_INGOT)
-                })
+                        SlimefunAEItemGroups.TOOL,
+                        ENTROPY_MANIPULATOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            CRYSTAL_FLUIX,
+                            ENERGY_CELL,
+                            null,
+                            PRINTED_ENGINEERING_CIRCUIT,
+                            new ItemStack(Material.IRON_INGOT),
+                            null,
+                            null,
+                            null,
+                            new ItemStack(Material.IRON_INGOT)
+                        })
                 .register(plugin);
     }
 }
