@@ -19,7 +19,7 @@ public class SlimefunAEItemGroups {
     public static final ItemStack MACHINE_CURSOR =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器");
     public static final ItemStack ADVANCED_MACHINE_CURSOR =
-            new AdvancedCustomItemStack(Material.PURPLE_STAINED_GLASS, "{#9B30FF}高级机器").doGlow();
+            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#FFD700}高级机器").doGlow();
     public static final ItemStack MATERIAL_CURSOR = new AdvancedCustomItemStack(
             Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ,
             "{#Fuchsia_Pink}材料");
