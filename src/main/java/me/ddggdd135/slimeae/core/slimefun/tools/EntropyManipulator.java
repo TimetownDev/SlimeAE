@@ -332,7 +332,7 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
                 "&b▶ &f能量系统",
                 " &8• &e容量: &6200,000J",
                 " &8• &e单次消耗: &61,600J",
-                " &8• &c低能量语音提示",
+                " &8• &c低能量提示",
                 "",
                 "&b▶ &f作用范围",
                 " &8• &7最大距离: &f6格",

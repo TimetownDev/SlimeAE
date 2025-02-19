@@ -497,6 +497,27 @@ public class SlimefunAEItems {
                     "",
                     "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J"));
 
+    public static final SlimefunItemStack CHARGED_STAFF = new SlimefunItemStack(
+            "CHARGED_STAFF",
+            new AdvancedCustomItemStack(
+                    Material.BLAZE_ROD,
+                    "{#33ccf3}&l充能法杖",
+                    "",
+                    "{#3366ff>}⚡ 储能容量: &b8000J{#33aaf7<}",
+                    "{#33aaf7>}❖ 单次消耗: &c300J{#3388ff<}",
+                    "",
+                    "{#ffd700>}⚔ 攻击属性:{#ffa500<}",
+                    "&8➥ {#ff6b6b}3.5❤ &7真实伤害 &8(无视防御)",
+                    "&8➥ {#4ecdc4}10格穿透射线",
+                    "&8➥ {#a855f7}击退",
+                    "",
+                    "{#00cec9>}✦ 使用方式:{#0984e3<}",
+                    "&8➥ {#dfe6e9}右键发射能量束",
+                    "&8➥ {#fd79a8}命中生成粒子",
+                    "&8➥ {#ff7675}电力消耗提示",
+                    "",
+                    "&c&o&8\u21E8 &e\u26A1 &70 / 8000 J"));
+
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
 
@@ -1480,6 +1501,19 @@ public class SlimefunAEItems {
                             null,
                             new ItemStack(Material.IRON_INGOT)
                         })
+                .register(plugin);
+        new ChargedStaff(SlimefunAEItemGroups.TOOL, CHARGED_STAFF, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                    ENERGY_CELL,
+                    null,
+                    null,
+                    null,
+                    new ItemStack(Material.IRON_INGOT),
+                    null,
+                    null,
+                    null,
+                    new ItemStack(Material.IRON_INGOT)
+                })
                 .register(plugin);
     }
 }
