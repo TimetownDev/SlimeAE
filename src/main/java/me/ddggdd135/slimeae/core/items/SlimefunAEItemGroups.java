@@ -18,6 +18,8 @@ public class SlimefunAEItemGroups {
             new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}线缆");
     public static final ItemStack MACHINE_CURSOR =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器");
+    public static final ItemStack ADVANCED_MACHINE_CURSOR =
+            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#FFD700}高级机器").doGlow();
     public static final ItemStack MATERIAL_CURSOR = new AdvancedCustomItemStack(
             Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ,
             "{#Fuchsia_Pink}材料");
@@ -31,6 +33,8 @@ public class SlimefunAEItemGroups {
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "cable"), CABLE_CURSOR);
     public static final DummyItemGroup MACHINE =
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), MACHINE_CURSOR);
+    public static final DummyItemGroup ADVANCED_MACHINE =
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), ADVANCED_MACHINE_CURSOR);
     public static final DummyItemGroup MATERIAL =
             new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), MATERIAL_CURSOR);
     public static final DummyItemGroup CELL =
@@ -43,12 +47,14 @@ public class SlimefunAEItemGroups {
         INFO.register(plugin);
         CABLE.register(plugin);
         MACHINE.register(plugin);
+        ADVANCED_MACHINE.register(plugin);
         MATERIAL.register(plugin);
         CELL.register(plugin);
         TOOL.register(plugin);
         MAIN_ITEM_GROUP.addItemGroup(INFO);
         MAIN_ITEM_GROUP.addItemGroup(CABLE);
         MAIN_ITEM_GROUP.addItemGroup(MACHINE);
+        MAIN_ITEM_GROUP.addItemGroup(ADVANCED_MACHINE);
         MAIN_ITEM_GROUP.addItemGroup(MATERIAL);
         MAIN_ITEM_GROUP.addItemGroup(CELL);
         MAIN_ITEM_GROUP.addItemGroup(TOOL);

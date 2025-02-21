@@ -14,10 +14,7 @@ import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.core.slimefun.buses.*;
 import me.ddggdd135.slimeae.core.slimefun.terminals.*;
-import me.ddggdd135.slimeae.core.slimefun.tools.MemoryCard;
-import me.ddggdd135.slimeae.core.slimefun.tools.NetworkTool;
-import me.ddggdd135.slimeae.core.slimefun.tools.WirelessTerminal;
-import me.ddggdd135.slimeae.core.slimefun.tools.Wrench;
+import me.ddggdd135.slimeae.core.slimefun.tools.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
@@ -114,7 +111,7 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ENERGY_CELL =
             new SlimefunItemStack("ME_ENERGY_CELL", new AdvancedCustomItemStack(Material.AMETHYST_BLOCK, "&f能源元件"));
     public static final SlimefunItemStack INSCRIBER = new SlimefunItemStack(
-            "ME_INSCRIBER", new AdvancedCustomItemStack(Material.ANVIL, "&f压印机", "", "{#3366ff>}用于生产板材{#33ccf3<}"));
+            "ME_INSCRIBER", new AdvancedCustomItemStack(Material.LODESTONE, "&f压印机", "", "{#3366ff>}用于生产板材{#33ccf3<}"));
     public static final SlimefunItemStack CHARGER = new SlimefunItemStack(
             "ME_CHARGER", new AdvancedCustomItemStack(Material.LECTERN, "&f充能器", "", "{#3366ff>}用于制造赛特斯石英{#33ccf3<}"));
     public static final SlimefunItemStack ME_IMPORT_BUS = new SlimefunItemStack(
@@ -486,6 +483,40 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack AE_TERMINAL_TOPPER = new SlimefunItemStack(
             "AE_TERMINAL_TOPPER",
             new AdvancedCustomItemStack(Material.ENDER_EYE, "&e置顶器", "", "&2&l用于在终端中置顶物品", "&6用法: 在终端中拿起此物品，在显示物品上点击"));
+    public static final SlimefunItemStack ENTROPY_MANIPULATOR = new SlimefunItemStack(
+            "ENTROPY_MANIPULATOR",
+            new AdvancedCustomItemStack(
+                    Material.IRON_HOE,
+                    "&6熵变机械臂",
+                    "",
+                    "{#3366ff>}充满电可处理125个方块{#33ccf3<}",
+                    "",
+                    "&a右键 &7- {#3366ff>}产生高温效应{#33ccf3<}",
+                    "&aShift+右键 &7- {#3366ff>}产生低温效应{#33ccf3<}",
+                    "&c攻击命中 &7- {#3366ff>}点燃目标生物{#3366ff<}",
+                    "",
+                    "&c&o&8\u21E8 &e\u26A1 &70 / 200000 J"));
+
+    public static final SlimefunItemStack CHARGED_STAFF = new SlimefunItemStack(
+            "CHARGED_STAFF",
+            new AdvancedCustomItemStack(
+                    Material.BLAZE_ROD,
+                    "{#33ccf3}&l充能法杖",
+                    "",
+                    "{#3366ff>}⚡ 储能容量: &b8000J{#33aaf7<}",
+                    "{#33aaf7>}❖ 单次消耗: &c300J{#3388ff<}",
+                    "",
+                    "{#ffd700>}⚔ 攻击属性:{#ffa500<}",
+                    "&8➥ {#ff6b6b}3.5❤ &7真实伤害 &8(无视防御)",
+                    "&8➥ {#4ecdc4}10格穿透射线",
+                    "&8➥ {#a855f7}击退",
+                    "",
+                    "{#00cec9>}✦ 使用方式:{#0984e3<}",
+                    "&8➥ {#dfe6e9}右键发射能量束",
+                    "&8➥ {#fd79a8}命中生成粒子",
+                    "&8➥ {#ff7675}电力消耗提示",
+                    "",
+                    "&c&o&8\u21E8 &e\u26A1 &70 / 8000 J"));
 
     public static void onSetup(SlimeAEPlugin plugin) {
         // Infos
@@ -668,7 +699,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -684,7 +715,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -697,7 +728,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedImportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_IMPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -735,7 +766,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -751,7 +782,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -766,7 +797,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedExportBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_EXPORT_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -786,7 +817,7 @@ public class SlimefunAEItems {
                         new ItemStack[] {ME_VANILLA_IMPORT_BUS, LOGIC_PROCESSOR, ME_VANILLA_EXPORT_BUS})
                 .register(plugin);
         new MEAdvancedIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -796,7 +827,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEAdvancedVanillaIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_ADVANCED_VANILLA_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -806,7 +837,7 @@ public class SlimefunAEItems {
                         })
                 .register(plugin);
         new MEChainedIEBus(
-                        SlimefunAEItemGroups.MACHINE,
+                        SlimefunAEItemGroups.ADVANCED_MACHINE,
                         ME_CHAINED_IE_BUS,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
@@ -1454,6 +1485,35 @@ public class SlimefunAEItems {
                             CHARGED_CRYSTAL_CERTUS_QUARTZ,
                             ME_GLASS_CABLE
                         })
+                .register(plugin);
+        new EntropyManipulator(
+                        SlimefunAEItemGroups.TOOL,
+                        ENTROPY_MANIPULATOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            CRYSTAL_FLUIX,
+                            ENERGY_CELL,
+                            null,
+                            PRINTED_ENGINEERING_CIRCUIT,
+                            new ItemStack(Material.IRON_INGOT),
+                            null,
+                            null,
+                            null,
+                            new ItemStack(Material.IRON_INGOT)
+                        })
+                .register(plugin);
+        new ChargedStaff(SlimefunAEItemGroups.TOOL, CHARGED_STAFF, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                    CHARGED_CRYSTAL_CERTUS_QUARTZ,
+                    ENERGY_CELL,
+                    null,
+                    null,
+                    null,
+                    new ItemStack(Material.IRON_INGOT),
+                    null,
+                    null,
+                    null,
+                    new ItemStack(Material.IRON_INGOT)
+                })
                 .register(plugin);
     }
 }
