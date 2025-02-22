@@ -27,16 +27,26 @@ public class ReflectionUtils {
             @Nonnull Object... args) {
         try {
             Class<?> clazz = object.getClass();
-            // 获取Method对象
-            Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
 
-            // 设置访问权限为true，允许访问私有方法
-            method.setAccessible(true);
+            while (true) {
+                if (clazz.equals(Object.class)) {
+                    throw new RuntimeException("No such method: " + methodName);
+                }
 
-            // 调用方法
-            return (T) method.invoke(object, args);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("No such method: " + methodName, e);
+                try {
+                    // 获取Method对象
+                    Method method = clazz.getDeclaredMethod(methodName, parameterTypes);
+
+                    // 设置访问权限为true，允许访问私有方法
+                    method.setAccessible(true);
+
+                    // 调用方法
+                    return (T) method.invoke(object, args);
+                } catch (NoSuchMethodException ignored) {
+                }
+
+                clazz = clazz.getSuperclass();
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Illegal access to method: " + methodName, e);
         } catch (InvocationTargetException e) {
