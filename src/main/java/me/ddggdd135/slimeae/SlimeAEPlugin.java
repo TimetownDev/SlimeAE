@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.api.abstracts.MEChainedBus;
 import me.ddggdd135.slimeae.api.database.StorageCellDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -325,6 +326,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载网络交换机配置
         if (networksExpansionIntegration.isLoaded()) NetworksExpansionSwitch.reloadConfig();
+
+        // 重载链式总线配置
+        MEChainedBus.reloadConfig();
 
         // 重载ME清除器配置
         MECleaner.reloadConfig();

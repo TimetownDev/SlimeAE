@@ -12,6 +12,10 @@ auto-crafting:
   # 合成卡冷却时间(tick)
   crafting-card-cooldown: 200
 
+# 链式总线相关设置
+chained-bus:
+  async: true
+
 # 网络交换机设置
 networks-expansion-switch:
   allow-networks-to-ae: true

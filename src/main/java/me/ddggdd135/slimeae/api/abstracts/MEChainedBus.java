@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.blockdata.MEChainedBusData;
 import me.ddggdd135.slimeae.api.blockdata.MEChainedBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IBlockData;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 public abstract class MEChainedBus extends MEBus {
     private static final MEChainedBusDataAdapter adapter = new MEChainedBusDataAdapter();
+    private static boolean async;
 
     public MEChainedBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -62,9 +64,16 @@ public abstract class MEChainedBus extends MEBus {
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
         if (data.getBlockMenu().hasViewer()) updateGui(data);
+        if (async) return;
+
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        if (slimefunBlockData == null) return;
+        tickCards(block, this, slimefunBlockData);
+        onMEBusTick(block, this, slimefunBlockData);
     }
 
     public void onNetworkTimeConsumingTick(Block block, NetworkInfo networkInfo) {
+        if (!async) return;
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (slimefunBlockData == null) return;
         tickCards(block, this, slimefunBlockData);
@@ -168,5 +177,13 @@ public abstract class MEChainedBus extends MEBus {
     @Nonnull
     public IBlockDataAdapter<?> getAdapter() {
         return adapter;
+    }
+
+    public static void reloadConfig() {
+        async = SlimeAEPlugin.getInstance().getConfig().getBoolean("chained-bus.async", true);
+    }
+
+    public static boolean isAsync() {
+        return async;
     }
 }
