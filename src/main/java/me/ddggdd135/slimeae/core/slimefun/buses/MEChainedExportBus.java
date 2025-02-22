@@ -79,13 +79,17 @@ public class MEChainedExportBus extends MEChainedBus {
             for (int slot : getSettingSlots()) {
                 ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
                 if (setting == null || setting.getType().isAir()) {
+                    target = target.getRelative(direction);
                     continue;
                 }
 
                 int[] inputSlots = targetInv
                         .getPreset()
                         .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
-                if (inputSlots == null || inputSlots.length == 0) continue;
+                if (inputSlots == null || inputSlots.length == 0) {
+                    target = target.getRelative(direction);
+                    continue;
+                }
 
                 if (targetInv.fits(setting, inputSlots)) {
                     ItemStack[] taken = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount()));
