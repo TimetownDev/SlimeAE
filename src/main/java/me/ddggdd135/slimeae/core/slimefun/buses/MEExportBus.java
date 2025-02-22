@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
-import me.ddggdd135.slimeae.api.blockdata.MEBusDataAdapter;
 import me.ddggdd135.slimeae.api.blockdata.MEExportBusData;
+import me.ddggdd135.slimeae.api.blockdata.MEExportBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IBlockData;
 import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -32,7 +32,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class MEExportBus extends MEBus {
-    private static final MEBusDataAdapter adapter = new MEBusDataAdapter();
+    private static final MEExportBusDataAdapter adapter = new MEExportBusDataAdapter();
 
     public MEExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
