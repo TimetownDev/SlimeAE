@@ -101,11 +101,6 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         ItemStack storedItem = barrel.getStoredItem(block);
         if (storedItem == null || storedItem.getType().isAir()) return -1;

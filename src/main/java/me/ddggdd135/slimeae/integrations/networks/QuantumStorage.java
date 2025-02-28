@@ -105,11 +105,6 @@ public class QuantumStorage implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         if (quantumCache == null || quantumCache.getAmount() <= 0) return -1;
         ItemStack storedItem = quantumCache.getItemStack();

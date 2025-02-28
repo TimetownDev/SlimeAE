@@ -183,24 +183,6 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        if (canHasEmptySlots()) return 0;
-        int found = 0;
-        for (IStorage storage : storages) {
-            found += storage.getEmptySlots();
-        }
-        return found;
-    }
-
-    @Override
-    public boolean canHasEmptySlots() {
-        for (IStorage storage : storages) {
-            if (storage.canHasEmptySlots()) return true;
-        }
-        return false;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         int tier = Integer.MIN_VALUE;
         for (IStorage storage : storages) {

@@ -73,20 +73,6 @@ public interface IStorage {
     Map<ItemStack, Long> getStorage();
 
     /**
-     * 获取存储中的空槽位数量
-     * @return 可用的空槽位数量
-     */
-    int getEmptySlots();
-
-    /**
-     * 检查存储是否支持空槽位计算
-     * @return 是否支持空槽位计算
-     */
-    default boolean canHasEmptySlots() {
-        return false;
-    }
-
-    /**
      * 获取物品的存储等级
      * @param itemStack 要检查的物品
      * @return 物品的存储等级

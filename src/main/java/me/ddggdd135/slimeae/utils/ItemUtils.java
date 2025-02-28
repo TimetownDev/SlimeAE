@@ -460,11 +460,6 @@ public class ItemUtils {
                     }
                     return storage.getStorage();
                 }
-
-                @Override
-                public int getEmptySlots() {
-                    return 0;
-                }
             };
         } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
@@ -532,26 +527,6 @@ public class ItemUtils {
                         items = chest.getInventory().getContents();
                     }
                     return ItemUtils.getAmounts(items);
-                }
-
-                @Override
-                public int getEmptySlots() {
-                    if (!canHasEmptySlots()) return 0;
-                    else {
-                        Inventory inventory =
-                                ((Chest) PaperLib.getBlockState(block, false).getState()).getBlockInventory();
-                        int slots = 0;
-                        for (int i = 0; i < 27; i++) {
-                            ItemStack itemStack = inventory.getItem(i);
-                            if (itemStack == null || itemStack.getType().isAir()) slots++;
-                        }
-                        return slots;
-                    }
-                }
-
-                @Override
-                public boolean canHasEmptySlots() {
-                    return PaperLib.getBlockState(block, false).getState() instanceof Chest;
                 }
             };
         }

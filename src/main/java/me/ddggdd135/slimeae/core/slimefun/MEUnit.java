@@ -138,22 +138,6 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                 if (blockMenu == null) return new HashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
             }
-
-            @Override
-            public int getEmptySlots() {
-                if (blockMenu == null) return 0;
-                int found = 0;
-                for (int slot : Slots) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack == null || itemStack.getType().isAir()) found += 1;
-                }
-                return found;
-            }
-
-            @Override
-            public boolean canHasEmptySlots() {
-                return true;
-            }
         };
     }
 

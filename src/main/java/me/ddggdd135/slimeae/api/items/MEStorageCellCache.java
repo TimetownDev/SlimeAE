@@ -160,11 +160,6 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

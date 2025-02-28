@@ -74,11 +74,6 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         if (SlimefunUtils.isItemSimilar(itemStack, barrelIdentity.getItemStack(), true, false)) return 2000;
 

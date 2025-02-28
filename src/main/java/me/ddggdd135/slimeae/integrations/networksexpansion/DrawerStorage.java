@@ -84,11 +84,6 @@ public class DrawerStorage implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         for (ItemContainer itemContainer : data.getStoredItems()) {
             if (itemStack.getType() == itemContainer.getWrapper().getType()) {

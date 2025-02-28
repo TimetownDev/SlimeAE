@@ -90,11 +90,6 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
-    @Override
     public int getTier(@Nonnull ItemStack itemStack) {
         if (cache == null || cache.amount() <= 0) return -1;
         if (cache.material() == itemStack.getType()) return 2000;

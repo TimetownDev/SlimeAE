@@ -127,11 +127,6 @@ public class ItemStorage implements IStorage {
         return new HashMap<>(storage);
     }
 
-    @Override
-    public int getEmptySlots() {
-        return 0;
-    }
-
     @Nonnull
     public ItemStack[] toItemStacks() {
         return ItemUtils.createItems(storage);
