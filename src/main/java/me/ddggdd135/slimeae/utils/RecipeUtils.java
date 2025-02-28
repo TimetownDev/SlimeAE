@@ -137,7 +137,7 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    shapedRecipe.getIngredientMap().values().toArray(ItemStack[]::new),
+                    input.clone(),
                     new ItemStack(
                             shapedRecipe.getResult().getType(),
                             shapedRecipe.getResult().getAmount()));
@@ -145,7 +145,7 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
+                    input.clone(),
                     new ItemStack(
                             shapelessRecipe.getResult().getType(),
                             shapelessRecipe.getResult().getAmount()));
@@ -153,11 +153,7 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof CookingRecipe cookingRecipe)
             return new CraftingRecipe(
                     CraftType.COOKING,
-                    new ItemStack[] {
-                        new ItemStack(
-                                cookingRecipe.getInput().getType(),
-                                cookingRecipe.getInput().getAmount())
-                    },
+                    input.clone(),
                     new ItemStack(
                             cookingRecipe.getResult().getType(),
                             cookingRecipe.getResult().getAmount()));
@@ -215,38 +211,21 @@ public class RecipeUtils {
             ItemStack out = new ItemStack(
                     shapedRecipe.getResult().getType(), shapedRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(
-                        CraftType.CRAFTING_TABLE,
-                        shapedRecipe.getIngredientMap().values().toArray(ItemStack[]::new),
-                        output);
+                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input.clone(), output);
         }
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             ItemStack out = new ItemStack(
                     shapelessRecipe.getResult().getType(),
                     shapelessRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(
-                        CraftType.CRAFTING_TABLE,
-                        shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
-                        new ItemStack(
-                                shapelessRecipe.getResult().getType(),
-                                shapelessRecipe.getResult().getAmount()));
+                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input.clone(), out);
         }
         if (minecraftRecipe instanceof CookingRecipe cookingRecipe) {
             ItemStack out = new ItemStack(
                     cookingRecipe.getResult().getType(),
                     cookingRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(
-                        CraftType.COOKING,
-                        new ItemStack[] {
-                            new ItemStack(
-                                    cookingRecipe.getInput().getType(),
-                                    cookingRecipe.getInput().getAmount())
-                        },
-                        new ItemStack(
-                                cookingRecipe.getResult().getType(),
-                                cookingRecipe.getResult().getAmount()));
+                return new CraftingRecipe(CraftType.COOKING, input.clone(), out);
         }
 
         if (output.length == 1) return getRecipe(output[0]);
