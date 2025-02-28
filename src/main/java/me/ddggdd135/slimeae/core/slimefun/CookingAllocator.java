@@ -9,19 +9,18 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
-import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
+import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -29,8 +28,6 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Container;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CookingAllocator extends MEBus implements IMECraftDevice {
@@ -68,7 +65,7 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public boolean isSynchronized() {
-        return true;
+        return false;
     }
 
     @Override
@@ -95,13 +92,8 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
             return InvUtils.fitAll(blockMenu.getInventory(), recipe.getInput(), inputSlots)
                     && InvUtils.fitAll(blockMenu.getInventory(), recipe.getOutput(), outputSlots);
-        } else if (PaperLib.getBlockState(block, false).getState() instanceof Container container) {
-            Inventory inventory = container.getInventory();
-            return InvUtils.fitAll(
-                    inventory,
-                    recipe.getInput(),
-                    IntStream.range(0, inventory.getSize()).toArray());
         }
+
         return false;
     }
 
@@ -124,9 +116,9 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
         CraftingRecipe recipe = recipeMap.get(block);
         block = block.getRelative(getDirection(blockMenu));
-        if (block.getBlockData().getMaterial().isAir()) return false;
-        return ItemUtils.getStorage(block, false, false, true)
-                .contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
+        IStorage storage = ItemUtils.getStorage(block, false, false, true);
+        if (storage == null) return false;
+        return storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
     }
 
     @Override
