@@ -64,25 +64,12 @@ public class MECraftPlanningTerminal extends METerminal {
                 .toList());
         if (!filter.isEmpty()) {
             if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
-                items.removeIf(x -> {
-                    String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-                    if (itemType.startsWith(filter)) {
-                        return false;
-                    }
-                    String name = CMIChatColor.stripColor(
-                            ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
-
-                    return !name.contains(filter);
-                });
+                items.removeIf(x -> doFilterNoJEG(x, filter));
             else {
                 boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
                 SearchGroup group = new SearchGroup(null, player0, filter, isPinyinSearch);
                 List<SlimefunItem> slimefunItems = group.filterItems(player0, filter, isPinyinSearch);
-                items.removeIf(x -> {
-                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
-                    if (slimefunItem == null) return true;
-                    return !slimefunItems.contains(slimefunItem);
-                });
+                items.removeIf(x -> doFilterWithJEG(x, slimefunItems, filter));
             }
         }
 
@@ -116,7 +103,7 @@ public class MECraftPlanningTerminal extends METerminal {
         }
 
         for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
-            int slot = getDisplaySlots()[i + startIndex];
+            int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
                 continue;

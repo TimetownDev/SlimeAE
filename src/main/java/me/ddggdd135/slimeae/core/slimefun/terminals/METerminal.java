@@ -196,25 +196,12 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         List<Map.Entry<ItemStack, Long>> items = new ArrayList<>(storage.entrySet());
         if (!filter.isEmpty()) {
             if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
-                items.removeIf(x -> {
-                    String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-                    if (itemType.startsWith(filter)) {
-                        return false;
-                    }
-                    String name = CMIChatColor.stripColor(
-                            ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
-
-                    return !name.contains(filter);
-                });
+                items.removeIf(x -> doFilterNoJEG(x, filter));
             else {
                 boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
                 SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
                 List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
-                items.removeIf(x -> {
-                    SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
-                    if (slimefunItem == null) return true;
-                    return !slimefunItems.contains(slimefunItem);
-                });
+                items.removeIf(x -> doFilterWithJEG(x, slimefunItems, filter));
             }
         }
 
@@ -413,5 +400,32 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         if (id == 1) return NUMERICAL_SORT;
         if (id == 2) return MATERIAL_SORT;
         return ALPHABETICAL_SORT;
+    }
+
+    protected boolean doFilterNoJEG(Map.Entry<ItemStack, Long> x, String filter) {
+        String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
+        if (itemType.startsWith(filter)) {
+            return false;
+        }
+        String name = CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+
+        return !name.contains(filter);
+    }
+
+    protected boolean doFilterWithJEG(Map.Entry<ItemStack, Long> x, List<SlimefunItem> slimefunItems, String filter) {
+        SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
+        if (slimefunItem == null) return true;
+        if (!slimefunItems.contains(slimefunItem)) {
+            String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
+            if (itemType.startsWith(filter)) {
+                return false;
+            }
+            String name =
+                    CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+
+            return !name.contains(filter);
+        }
+
+        return false;
     }
 }
