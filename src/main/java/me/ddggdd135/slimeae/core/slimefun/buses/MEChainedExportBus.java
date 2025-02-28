@@ -97,9 +97,9 @@ public class MEChainedExportBus extends MEChainedBus {
                         targetInv.pushItem(taken[0], inputSlots);
                     }
                 }
-            }
 
-            target = target.getRelative(direction);
+                target = target.getRelative(direction);
+            }
         }
     }
 
