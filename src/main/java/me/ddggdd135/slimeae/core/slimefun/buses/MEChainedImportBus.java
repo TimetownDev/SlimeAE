@@ -47,7 +47,10 @@ public class MEChainedImportBus extends MEChainedBus {
             if (ItemUtils.getStorage(transportBlock) == null) return;
 
             ItemStack itemStack = ItemUtils.getItemStack(transportBlock);
-            if (itemStack == null || itemStack.getType().isAir()) continue;
+            if (itemStack == null || itemStack.getType().isAir()) {
+                transportBlock = transportBlock.getRelative(current);
+                continue;
+            }
 
             networkStorage.pushItem(itemStack);
             transportBlock = transportBlock.getRelative(current);
