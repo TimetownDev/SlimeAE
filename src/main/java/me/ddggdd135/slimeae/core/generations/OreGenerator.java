@@ -9,6 +9,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.inventory.ItemStack;
 
@@ -88,6 +89,7 @@ public class OreGenerator extends BlockPopulator {
             controller.createBlock(new Location(world, x, y, z), slimefunItem.getId());
         }
 
-        world.setType(x, y, z, item.getType());
+        Block block = world.getBlockAt(x, y, z);
+        block.setType(item.getType(), false);
     }
 }
