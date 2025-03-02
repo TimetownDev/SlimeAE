@@ -5,17 +5,15 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.Card;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
-import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.slimefun.buses.MEExportBus;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.NetworkUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -68,7 +66,7 @@ public class CraftingCard extends Card {
                 int neededAmount = setting.getAmount()
                         - (itemStack == null || itemStack.getType().isAir() ? 0 : itemStack.getAmount());
 
-                doCraft(networkInfo, setting, neededAmount);
+                NetworkUtils.doCraft(networkInfo, setting, neededAmount);
             }
 
             cooldowns.put(loc, currentTick);
@@ -81,7 +79,7 @@ public class CraftingCard extends Card {
                     continue;
                 }
                 if (!networkInfo.getStorage().contains(new ItemRequest(setting, setting.getAmount()))) {
-                    doCraft(networkInfo, setting, setting.getAmount());
+                    NetworkUtils.doCraft(networkInfo, setting, setting.getAmount());
                 }
             }
             cooldowns.put(loc, currentTick);
@@ -101,45 +99,5 @@ public class CraftingCard extends Card {
      */
     public static void reloadConfig() {
         cooldownTicks = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.crafting-card-cooldown", 200);
-    }
-
-    private void doCraft(NetworkInfo networkInfo, ItemStack itemStack, int amount) {
-        // 检查是否已有相同的合成任务
-        boolean hasExistingTask = false;
-        for (AutoCraftingSession session : networkInfo.getCraftingSessions()) {
-            // 检查配方的所有输出物品
-            for (ItemStack output : session.getRecipe().getOutput()) {
-                if (SlimefunUtils.isItemSimilar(output, itemStack, true, false)) {
-                    hasExistingTask = true;
-                    break;
-                }
-            }
-            if (hasExistingTask) break;
-        }
-
-        // 如果没有现有任务且未达到最大任务数，则创建新的合成任务
-        if (!hasExistingTask && networkInfo.getCraftingSessions().size() < NetworkInfo.getMaxCraftingSessions()) {
-            CraftingRecipe recipe = networkInfo.getRecipeFor(itemStack);
-            if (recipe != null) {
-                // 检查配方输出是否包含目标物品
-                boolean hasMatchingOutput = false;
-                for (ItemStack output : recipe.getOutput()) {
-                    if (SlimefunUtils.isItemSimilar(output, itemStack, true, false)) {
-                        hasMatchingOutput = true;
-                        break;
-                    }
-                }
-
-                if (hasMatchingOutput) {
-                    try {
-                        // 创建并启动新的合成任务
-                        AutoCraftingSession session = new AutoCraftingSession(networkInfo, recipe, amount);
-                        session.start();
-                    } catch (Exception e) {
-                        // 忽略合成失败的情况，等待下一次尝试
-                    }
-                }
-            }
-        }
     }
 }

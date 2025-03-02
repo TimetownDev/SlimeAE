@@ -275,6 +275,10 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ME_CLEANER = new SlimefunItemStack(
             "ME_CLEANER",
             new AdvancedCustomItemStack(Material.OBSERVER, "&fME清除器", "", "{#3366ff>}用于清除ME存储元件中多余的物品{#33ccf3<}"));
+    public static final SlimefunItemStack ME_CRAFTING_TRIGGER = new SlimefunItemStack(
+            "ME_CRAFTING_TRIGGER",
+            new AdvancedCustomItemStack(
+                    Material.CRAFTING_TABLE, "&fME合成触发器", "", "{#3366ff>}当AE中物品缺少时, 下发自动合成任务{#33ccf3<}"));
     public static final SlimefunItemStack ENERGY_ACCEPTOR = new SlimefunItemStack(
             "ME_ENERGY_ACCEPTOR",
             new AdvancedCustomItemStack(Material.WHITE_STAINED_GLASS, "&f能源接收器", "", "&c现在它还没用 敬请期待"));
@@ -902,6 +906,22 @@ public class SlimefunAEItems {
                     null,
                     LOGIC_PROCESSOR,
                 })
+                .register(plugin);
+        new MECraftingTrigger(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CRAFTING_TRIGGER,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.CRAFTING_TABLE),
+                            ME_INTERFACE,
+                            new ItemStack(Material.CRAFTING_TABLE),
+                            new ItemStack(Material.IRON_INGOT),
+                            ME_CRAFT_PLANNING_TERMINAL,
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.CRAFTING_TABLE),
+                            LOGIC_PROCESSOR,
+                            new ItemStack(Material.CRAFTING_TABLE)
+                        })
                 .register(plugin);
         new SlimefunItem(
                         SlimefunAEItemGroups.MACHINE,
