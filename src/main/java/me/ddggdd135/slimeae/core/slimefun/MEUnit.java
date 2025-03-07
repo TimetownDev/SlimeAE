@@ -8,11 +8,11 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -135,7 +135,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Override
             public @Nonnull Map<ItemStack, Long> getStorage() {
-                if (blockMenu == null) return new ItemHashMap<>();
+                if (blockMenu == null) return new HashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
             }
         };

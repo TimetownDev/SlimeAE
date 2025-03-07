@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -196,7 +195,7 @@ public class ItemUtils {
      */
     @Nonnull
     public static Map<ItemStack, Long> getAmounts(@Nonnull ItemStack[] itemStacks) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+        Map<ItemStack, Long> storage = new HashMap<>();
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
@@ -211,7 +210,7 @@ public class ItemUtils {
 
     @Nonnull
     public static Map<ItemStack, Long> getAmounts(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+        Map<ItemStack, Long> storage = new HashMap<>();
         for (ItemRequest request : requests) {
             ItemStack template = request.getTemplate();
             if (storage.containsKey(template)) {
@@ -233,7 +232,7 @@ public class ItemUtils {
     @Nonnull
     public static Map<ItemStack, Long> takeItems(
             @Nonnull Map<ItemStack, Long> source, @Nonnull Map<ItemStack, Long> toTake) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>(source);
+        Map<ItemStack, Long> storage = new HashMap<>(source);
         for (Map.Entry<ItemStack, Long> data : toTake.entrySet()) {
             ItemStack itemStack = data.getKey();
             if (storage.containsKey(itemStack)) {
@@ -255,7 +254,7 @@ public class ItemUtils {
     @Nonnull
     public static Map<ItemStack, Long> addItems(
             @Nonnull Map<ItemStack, Long> source, @Nonnull Map<ItemStack, Long> toAdd) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>(source);
+        Map<ItemStack, Long> storage = new HashMap<>(source);
         for (Map.Entry<ItemStack, Long> data : toAdd.entrySet()) {
             ItemStack itemStack = data.getKey();
             if (storage.containsKey(itemStack)) {
@@ -450,10 +449,10 @@ public class ItemUtils {
                 @Nonnull
                 public Map<ItemStack, Long> getStorage() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return new ItemHashMap<>();
+                    if (inv == null) return new HashMap<>();
                     int[] outputSlots =
                             inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
-                    if (outputSlots == null) return new ItemHashMap<>();
+                    if (outputSlots == null) return new HashMap<>();
                     ItemStorage storage = new ItemStorage();
                     for (int slot : outputSlots) {
                         ItemStack itemStack = inv.getItemInSlot(slot);

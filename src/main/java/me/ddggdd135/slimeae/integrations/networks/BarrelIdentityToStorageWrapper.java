@@ -2,10 +2,10 @@ package me.ddggdd135.slimeae.integrations.networks;
 
 import io.github.sefiraat.networks.network.stackcaches.BarrelIdentity;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
@@ -64,7 +64,7 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
     @Override
     @Nonnull
     public Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> map = new ItemHashMap<>();
+        Map<ItemStack, Long> map = new HashMap<>();
         ItemStack itemStack = barrelIdentity.getItemStack();
         if (itemStack != null && !itemStack.getType().isAir()) {
             map.put(itemStack.asOne(), barrelIdentity.getAmount() - 1);

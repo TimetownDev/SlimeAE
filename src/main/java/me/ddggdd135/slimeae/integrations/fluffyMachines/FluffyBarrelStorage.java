@@ -5,10 +5,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -94,7 +94,7 @@ public class FluffyBarrelStorage implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+        Map<ItemStack, Long> storage = new HashMap<>();
         if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return storage;
         storage.put(barrel.getStoredItem(block).asOne(), (long) (barrel.getStored(block) - 1));
         return storage;

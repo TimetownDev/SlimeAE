@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -28,7 +27,7 @@ public class MEStorageCellCache implements IStorage {
         size = MEItemStorageCell.getSize(itemStack);
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) storages = new CreativeItemMap();
         else {
-            storages = new ItemHashMap<>();
+            storages = new ConcurrentHashMap<>();
         }
         UUID tmp = NBT.get(itemStack, x -> {
             return x.getUUID(MEItemStorageCell.UUID_KEY);
@@ -153,7 +152,7 @@ public class MEStorageCellCache implements IStorage {
     @Override
     public @Nonnull Map<ItemStack, Long> getStorage() {
         if (storages instanceof CreativeItemMap) return storages;
-        return new ItemHashMap<>(storages);
+        return new HashMap<>(storages);
     }
 
     public Map<ItemStack, Long> getSourceStorage() {

@@ -4,8 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
-import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -18,9 +16,9 @@ public class StorageCollection implements IStorage {
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new HashSet<>();
-        this.takeCache = new ItemHashMap<>();
-        this.pushCache = new ItemHashMap<>();
-        this.notIncluded = new ItemHashSet();
+        this.takeCache = new HashMap<>();
+        this.pushCache = new HashMap<>();
+        this.notIncluded = new HashSet<>();
         for (IStorage storage : storages) {
             addStorage(storage);
         }
@@ -127,7 +125,7 @@ public class StorageCollection implements IStorage {
     @Nonnull
     @Override
     public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Long> rest = new ItemHashMap<>();
+        Map<ItemStack, Long> rest = new HashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
@@ -169,7 +167,7 @@ public class StorageCollection implements IStorage {
 
     @Override
     public @Nonnull Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> result = new ItemHashMap<>();
+        Map<ItemStack, Long> result = new HashMap<>();
         for (IStorage storage : storages) {
             Map<ItemStack, Long> tmp = storage.getStorage();
             if (tmp instanceof CreativeItemMap) return tmp;
