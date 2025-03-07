@@ -13,6 +13,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
@@ -27,6 +29,7 @@ import me.ddggdd135.slimeae.core.recipes.CraftingOperation;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +39,7 @@ public class MolecularAssembler extends TickingBlock
         implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
 
     private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
+    private final Map<Location, Integer> runningTimes = new HashMap<>();
 
     @Override
     public boolean isSynchronized() {
@@ -59,12 +63,24 @@ public class MolecularAssembler extends TickingBlock
         if (menu == null) return;
         tickCards(block, SlimefunItem.getById(slimefunBlockData.getSfId()), slimefunBlockData);
         CraftingOperation operation = processor.getOperation(block);
+
+        int ticks = runningTimes.computeIfAbsent(block.getLocation(), x -> 0);
+        if (ticks >= 20) {
+            processor.endOperation(block);
+            if (operation == null) return;
+            networkInfo.getTempStorage().addItem(operation.getRecipe().getInput(), true);
+
+            runningTimes.put(block.getLocation(), 0);
+        }
         if (operation == null) {
             for (int slot : getCraftingInputSlots()) {
                 menu.replaceExistingItem(slot, MenuItems.EMPTY);
             }
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
             menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
+
+            runningTimes.put(block.getLocation(), 0);
+
             return;
         }
 
@@ -81,6 +97,9 @@ public class MolecularAssembler extends TickingBlock
         }
 
         operation.addProgress(1);
+
+        ticks++;
+        runningTimes.put(block.getLocation(), ticks);
 
         int progress = operation.getProgress();
         int maxProgress = operation.getTotalTicks();
