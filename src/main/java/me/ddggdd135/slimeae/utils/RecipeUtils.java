@@ -24,6 +24,8 @@ import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
+import me.ddggdd135.slimeae.api.wrappers.CraftCraftingBlock;
+import me.ddggdd135.slimeae.api.wrappers.CraftCraftingBlockRecipe;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.lucasgithuber.obsidianexpansion.Items;

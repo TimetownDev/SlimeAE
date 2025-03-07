@@ -2,7 +2,6 @@ package me.ddggdd135.slimeae.api.database;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
-import com.zaxxer.hikari.HikariDataSource;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
@@ -12,12 +11,13 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.slimeae.api.wrappers.CraftHikariDataSource;
 import me.ddggdd135.slimeae.utils.ReflectionUtils;
 
 public abstract class DatabaseController<TData> {
     protected BlockDataController blockDataController;
     protected IDataSourceAdapter<?> adapter;
-    protected HikariDataSource ds;
+    protected CraftHikariDataSource ds;
     protected final DatabaseThreadFactory threadFactory = new DatabaseThreadFactory();
     protected final Class<TData> clazz;
     protected ExecutorService readExecutor;
@@ -38,7 +38,7 @@ public abstract class DatabaseController<TData> {
     public void init() {
         blockDataController = Slimefun.getDatabaseManager().getBlockDataController();
         adapter = ReflectionUtils.getField(blockDataController, "dataAdapter");
-        ds = ReflectionUtils.getField(adapter, "ds");
+        ds = new CraftHikariDataSource(ReflectionUtils.<Object>getField(adapter, "ds"));
         readExecutor = Executors.newFixedThreadPool(3, threadFactory);
         writeExecutor = Executors.newFixedThreadPool(5, threadFactory);
         callbackExecutor = Executors.newCachedThreadPool(threadFactory);

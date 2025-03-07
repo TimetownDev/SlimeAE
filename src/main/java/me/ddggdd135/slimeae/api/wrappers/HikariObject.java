@@ -1,9 +1,9 @@
-package me.ddggdd135.slimeae.utils;
+package me.ddggdd135.slimeae.api.wrappers;
 
-public class CraftInfinityLibObject {
+public class HikariObject {
     protected Object handle;
 
-    public CraftInfinityLibObject(Object handle) {
+    public HikariObject(Object handle) {
         this.handle = handle;
     }
 

@@ -1,7 +1,8 @@
-package me.ddggdd135.slimeae.utils;
+package me.ddggdd135.slimeae.api.wrappers;
 
 import java.util.ArrayList;
 import java.util.List;
+import me.ddggdd135.slimeae.utils.ReflectionUtils;
 
 public class CraftCraftingBlock extends CraftInfinityLibObject {
     public CraftCraftingBlock(Object handle) {

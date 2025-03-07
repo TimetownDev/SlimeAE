@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae.utils;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,9 +64,10 @@ public class SerializeUtils {
 
     @Nullable public static String getId(@Nullable ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return "VANILLA_AIR";
-        for (SlimefunItem slimefunItem : Slimefun.getRegistry().getAllSlimefunItems()) {
-            if (slimefunItem.getItem().asOne().equals(itemStack.asOne())) return "SLIMEFUN_" + slimefunItem.getId();
-        }
+        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
+        if (slimefunItem != null && slimefunItem.getItem().asOne().equals(itemStack.asOne()))
+            return "SLIMEFUN_" + slimefunItem.getId();
+
         Material material = itemStack.getType();
 
         if (new ItemStack(material).equals(itemStack)) return "VANILLA_" + material;
