@@ -193,6 +193,8 @@ public class MECraftPlanningTerminal extends METerminal {
                             player.sendMessage(
                                     CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
                         }
+                    } catch (Exception e) {
+                        player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
                     }
                 });
                 return false;

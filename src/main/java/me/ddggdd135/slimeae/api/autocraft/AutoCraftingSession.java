@@ -197,9 +197,10 @@ public class AutoCraftingSession {
             try {
                 info.getCraftingSessions().remove(this);
                 new AutoCraftingSession(
-                        info,
-                        recipe,
-                        craftingSteps.get(craftingSteps.size() - 1).getValue());
+                                info,
+                                recipe,
+                                craftingSteps.get(craftingSteps.size() - 1).getValue())
+                        .start();
             } catch (Throwable ignored) {
             }
         }
