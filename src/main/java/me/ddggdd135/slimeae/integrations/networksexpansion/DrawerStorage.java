@@ -4,11 +4,11 @@ import com.balugaq.netex.api.data.ItemContainer;
 import com.balugaq.netex.api.data.StorageUnitData;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -74,7 +74,7 @@ public class DrawerStorage implements IStorage {
     @Override
     @Nonnull
     public Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new HashMap<>();
+        Map<ItemStack, Long> storage = new ItemHashMap<>();
         if (data == null) return storage;
         for (ItemContainer itemContainer : data.getStoredItems()) {
             storage.put(itemContainer.getSample(), (long) itemContainer.getAmount());

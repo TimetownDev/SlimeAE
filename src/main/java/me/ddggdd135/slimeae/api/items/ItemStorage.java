@@ -1,18 +1,17 @@
 package me.ddggdd135.slimeae.api.items;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemStorage implements IStorage {
     @Nonnull
-    private Map<ItemStack, Long> storage = new ConcurrentHashMap<>();
+    private Map<ItemStack, Long> storage = new ItemHashMap<>();
 
     private boolean isReadonly;
 
@@ -34,7 +33,7 @@ public class ItemStorage implements IStorage {
     }
 
     public ItemStorage(@Nonnull Map<ItemStack, Long> items) {
-        storage = new HashMap<>(items);
+        storage = new ItemHashMap<>(items);
     }
 
     @Override
@@ -124,7 +123,7 @@ public class ItemStorage implements IStorage {
     @Override
     @Nonnull
     public Map<ItemStack, Long> getStorage() {
-        return new HashMap<>(storage);
+        return new ItemHashMap<>(storage);
     }
 
     @Nonnull

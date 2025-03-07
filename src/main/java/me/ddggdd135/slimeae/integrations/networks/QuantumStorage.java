@@ -6,9 +6,9 @@ import io.github.sefiraat.networks.network.stackcaches.QuantumCache;
 import io.github.sefiraat.networks.slimefun.network.NetworkQuantumStorage;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -98,7 +98,7 @@ public class QuantumStorage implements IStorage {
     @Override
     @Nonnull
     public Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new HashMap<>();
+        Map<ItemStack, Long> storage = new ItemHashMap<>();
         if (quantumCache == null || quantumCache.getAmount() <= 0) return storage;
         storage.put(quantumCache.getItemStack().asOne(), quantumCache.getAmount() - 1);
         return storage;
