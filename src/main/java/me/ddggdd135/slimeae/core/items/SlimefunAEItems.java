@@ -467,6 +467,10 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack MEMORY_CARD = new SlimefunItemStack(
             "MEMORY_CARD",
             new AdvancedCustomItemStack(Material.PAPER, "&e内存卡", "", "&e复制ME设备的设置", "", "&eShift右键 复制设置", "&e右键 应用设置"));
+    public static final SlimefunItemStack CARD_REPLICATOR = new SlimefunItemStack(
+            "CARD_REPLICATOR",
+            new AdvancedCustomItemStack(
+                    Material.PAPER, "&e升级卡复制器", "", "&e复制ME设备的升级卡设置", "", "&eShift右键 复制设置", "&e右键 应用设置"));
     public static final SlimefunItemStack WIRELESS_TERMINAL = new SlimefunItemStack(
             "WIRELESS_TERMINAL",
             new AdvancedCustomItemStack(Material.ITEM_FRAME, "{#Sky_Blue}无线终端", "", "&e便捷的访问AE网络", "&e需要使用ME安全终端进行绑定"));
@@ -1439,6 +1443,19 @@ public class SlimefunAEItems {
                     new ItemStack(Material.REDSTONE),
                     new ItemStack(Material.GOLD_INGOT)
                 })
+                .register(plugin);
+        new CardReplicator(
+                        SlimefunAEItemGroups.TOOL,
+                        CARD_REPLICATOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            LOGIC_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.GOLD_INGOT),
+                            MEMORY_CARD,
+                            new ItemStack(Material.GOLD_INGOT)
+                        })
                 .register(plugin);
         new WirelessTerminal(
                         SlimefunAEItemGroups.TOOL,
