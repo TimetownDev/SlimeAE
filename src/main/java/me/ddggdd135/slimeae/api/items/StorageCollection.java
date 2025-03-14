@@ -78,10 +78,8 @@ public class StorageCollection implements IStorage {
     public void pushItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) {
             ItemStack template = itemStack.asOne();
-            if (pushCache.containsKey(template)) {
-                IStorage storage = pushCache.get(template);
-                storage.pushItem(itemStack);
-            }
+            IStorage storage = pushCache.get(template);
+            if (storage != null) storage.pushItem(itemStack);
         }
 
         itemStacks = ItemUtils.trimItems(itemStacks);
@@ -132,11 +130,10 @@ public class StorageCollection implements IStorage {
         // init rest
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getTemplate())) continue;
-            if (rest.containsKey(request.getTemplate())) {
-                rest.put(request.getTemplate(), rest.get(request.getTemplate()) + request.getAmount());
-            } else {
-                rest.put(request.getTemplate(), request.getAmount());
-            }
+
+            long amount = rest.computeIfAbsent(request.getTemplate(), x -> 0L);
+            amount += request.getAmount();
+            rest.put(request.getTemplate(), amount);
         }
         ItemUtils.trim(rest);
         for (Map.Entry<ItemStack, Long> entry : rest.entrySet()) {
