@@ -65,12 +65,12 @@ public class MolecularAssembler extends TickingBlock
         CraftingOperation operation = processor.getOperation(block);
 
         int ticks = runningTimes.computeIfAbsent(block.getLocation(), x -> 0);
-        if (ticks >= 20) {
+        if (ticks >= 20 && operation != null) {
             processor.endOperation(block);
-            if (operation == null) return;
             networkInfo.getTempStorage().addItem(operation.getRecipe().getInput(), true);
 
             runningTimes.put(block.getLocation(), 0);
+            return;
         }
         if (operation == null) {
             for (int slot : getCraftingInputSlots()) {
@@ -133,6 +133,7 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
+        runningTimes.put(block.getLocation(), 0);
         processor.startOperation(block, new CraftingOperation(4, recipe));
     }
 
