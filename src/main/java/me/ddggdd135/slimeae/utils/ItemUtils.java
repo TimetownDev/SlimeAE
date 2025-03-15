@@ -25,7 +25,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.slimefun.MEInterface;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
 import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
@@ -354,8 +353,7 @@ public class ItemUtils {
             SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
 
             if (checkNetwork && slimefunItem instanceof IMEObject) {
-                if (!(slimefunItem instanceof MEInterface)) return null;
-                else isReadOnly = true;
+                return null;
             }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
