@@ -252,8 +252,9 @@ public class AutoCraftingSession {
         for (Block deviceBlock : globalDevices) {
             IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                     StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-            if (running > maxDevices) return;
-            if (doCraft
+
+            if (running <= maxDevices
+                    && doCraft
                     && device.canStartCrafting(deviceBlock, next.getKey())
                     && networkStorage.contains(ItemUtils.createRequests(
                             ItemUtils.getAmounts(next.getKey().getInput())))) {
