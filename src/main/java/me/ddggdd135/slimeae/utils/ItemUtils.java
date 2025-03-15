@@ -53,8 +53,8 @@ import org.bukkit.persistence.PersistentDataType;
  * 提供了一系列处理物品堆、存储和显示的实用方法
  */
 public class ItemUtils {
-    public static final String DISPLAY_ITEM = "display_item";
-
+    public static final String DISPLAY_ITEM_KEY = "display_item";
+    public static final String SOURCE_LORE_KEY = "source_lore";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -772,39 +772,40 @@ public class ItemUtils {
     @Nonnull
     public static ItemStack createDisplayItem(
             @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore) {
-        ItemStack result = new ItemStack(itemStack.getType());
-        ItemMeta meta = itemStack.getItemMeta();
+        ItemStack result = itemStack.clone();
+
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         if (addLore) {
-            List<String> lore = meta.getLore();
+            List<String> lore = result.getLore();
             if (lore == null) lore = new ArrayList<>();
+            List<String> finalLore = lore;
+            NBT.modify(itemStack, x -> {
+                x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
+            });
+
             lore.add("");
             lore.add("&e物品数量 " + amount);
             if (addPinnedLore) lore.add("&e===已置顶===");
-            meta.setLore(CMIChatColor.translate(lore));
+            itemStack.setLore(CMIChatColor.translate(lore));
         }
-        result.setItemMeta(meta);
+
         NBT.modify(result, x -> {
-            x.setBoolean(DISPLAY_ITEM, true);
+            x.setBoolean(DISPLAY_ITEM_KEY, true);
         });
         return result;
     }
 
     @Nonnull
-    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack, boolean hasLore) {
+    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
         ItemStack result = itemStack.asOne();
-        ItemMeta meta = result.getItemMeta();
-        if (hasLore) {
-            List<String> lore = meta.getLore();
-            if (lore.get(lore.size() - 1).contains("===已置顶===")) lore.remove(lore.size() - 1);
-            lore.remove(lore.size() - 1);
-            lore.remove(lore.size() - 1);
-            meta.setLore(lore);
-        }
-        result.setItemMeta(meta);
+        List<String> lore = NBT.get(result, x -> {
+            return x.getStringList(SOURCE_LORE_KEY).toListCopy();
+        });
+        result.setLore(lore);
 
         NBT.modify(result, x -> {
-            x.removeKey(DISPLAY_ITEM);
+            x.removeKey(DISPLAY_ITEM_KEY);
+            x.removeKey(SOURCE_LORE_KEY);
         });
         return result;
     }

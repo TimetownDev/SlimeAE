@@ -21,7 +21,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -75,7 +74,7 @@ public class MEExportBus extends MEBus {
         IStorage networkStorage = info.getStorage();
 
         for (int slot : getSettingSlots()) {
-            ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
+            ItemStack setting = blockMenu.getItemInSlot(slot);
             if (setting == null || setting.getType().isAir()) {
                 continue;
             }
