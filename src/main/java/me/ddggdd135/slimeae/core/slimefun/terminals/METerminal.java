@@ -348,7 +348,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                     if (itemStack != null
                             && !itemStack.getType().isAir()
                             && !SlimefunUtils.isItemSimilar(itemStack, MenuItems.EMPTY, true, false)) {
-                        ItemStack template = ItemUtils.getDisplayItem(itemStack, true);
+                        ItemStack template = ItemUtils.getDisplayItem(itemStack);
                         template.setAmount(template.getMaxStackSize());
 
                         if (SlimefunUtils.isItemSimilar(cursor, SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
