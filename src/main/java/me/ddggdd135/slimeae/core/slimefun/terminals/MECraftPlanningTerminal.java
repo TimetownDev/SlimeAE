@@ -51,6 +51,12 @@ public class MECraftPlanningTerminal extends METerminal {
 
         CraftingRecipe[] recipes = info.getRecipes().toArray(CraftingRecipe[]::new);
 
+        // 映射对应的合成表，避免被置顶打乱顺序。
+        HashMap<ItemStack, CraftingRecipe> itemRecipeMap = new HashMap<>();
+        for (CraftingRecipe recipe : recipes) {
+            itemRecipeMap.put(recipe.getOutput()[0], recipe);
+        }
+
         ItemStack[] itemStacks =
                 Arrays.stream(recipes).map(x -> x.getOutput()[0]).toList().toArray(ItemStack[]::new);
         Player player0 = (Player) blockMenu.getInventory().getViewers().get(0);
@@ -84,17 +90,30 @@ public class MECraftPlanningTerminal extends METerminal {
             }
         }
 
-        itemStacks = items.stream().map(Map.Entry::getKey).toArray(ItemStack[]::new);
+        ArrayList<CraftingRecipe> newRecipes = new ArrayList<>();
+        ArrayList<ItemStack> orderedItems = new ArrayList<>();
+        for (Map.Entry<ItemStack, Long> entry : items) {
+            ItemStack item = entry.getKey();
+            if(itemRecipeMap.containsKey(item)) {
+                orderedItems.add(item);
+                newRecipes.add(itemRecipeMap.get(item));
+            }
+        }
+
+        itemStacks = orderedItems.toArray(new ItemStack[0]);
+        recipes = newRecipes.toArray(new CraftingRecipe[0]);
 
         int page = getPage(block);
-        if (page > Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1) {
-            page = (int) (Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1);
-            if (page < 0) page = 0;
+        int totalItems = items.size();
+        int slotPerPage = getDisplaySlots().length;
+        int maxPage = (int) Math.ceil((double) totalItems / slotPerPage) - 1;
+        if(page > maxPage) {
+            page = Math.max(0, maxPage);
             setPage(block, page);
         }
 
-        int startIndex = page * getDisplaySlots().length;
-        int endIndex = startIndex + getDisplaySlots().length;
+        int startIndex = page * slotPerPage;
+        int endIndex = Math.min(startIndex+ slotPerPage, totalItems);
 
         if (startIndex == endIndex) {
             for (int slot : getDisplaySlots()) {
@@ -102,7 +121,7 @@ public class MECraftPlanningTerminal extends METerminal {
             }
         }
 
-        for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
+        for(int i = 0; i < slotPerPage; i++) {
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
@@ -122,6 +141,8 @@ public class MECraftPlanningTerminal extends METerminal {
             ItemMeta meta = result.getItemMeta();
             List<String> lore = new ArrayList<>();
             lore.add("");
+            // Example -> 在 合成计划终端 里添加一些简单的提示以区分相同的输出的配方， 比如铁粒->铁锭，铁块->铁锭，铁粉->铁锭
+            // lore.add(ItemUtils.getItemName(recipe.getInput()[0]));
             lore.add("  &e可合成");
             if (pinnedItems.contains(itemStack.asOne())) lore.add("&e===已置顶===");
             meta.setLore(CMIChatColor.translate(lore));
