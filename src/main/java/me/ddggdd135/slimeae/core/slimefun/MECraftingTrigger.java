@@ -28,7 +28,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class MECraftingTrigger extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
-    private static final int defaultAmount = 64;
+    private static final long defaultAmount = 64L;
 
     @Override
     public boolean isSynchronized() {
@@ -68,11 +68,11 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
             long current = total.getOrDefault(template, 0L);
             if (current >= setting) continue;
 
-            int toCraft = (int) (setting - current);
-            int amount;
+            long toCraft = setting - current;
+            long amount;
             if (toCraft <= 64) amount = toCraft;
             else {
-                amount = (int) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
+                amount = (long) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
             }
             if (amount > toCraft) amount = toCraft;
 
@@ -103,7 +103,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
             player.closeInventory();
             player.sendMessage(ChatColor.YELLOW + "请输入你想要设置的数量");
             ChatUtils.awaitInput(player, msg -> {
-                int amount = Integer.parseInt(msg);
+                long amount = Long.parseLong(msg);
                 if (amount <= 0) {
                     player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
                     return;
@@ -117,17 +117,17 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
         });
     }
 
-    public int getAmount(@Nonnull Location location) {
+    public long getAmount(@Nonnull Location location) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
         if (slimefunBlockData == null) return defaultAmount;
         try {
-            return Integer.parseInt(slimefunBlockData.getData(AMOUNT_KEY));
+            return Long.parseLong(slimefunBlockData.getData(AMOUNT_KEY));
         } catch (Exception ignored) {
             return defaultAmount;
         }
     }
 
-    public void setAmount(@Nonnull Location location, int value) {
+    public void setAmount(@Nonnull Location location, long value) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
         if (slimefunBlockData == null) return;
         slimefunBlockData.setData(AMOUNT_KEY, String.valueOf(value));

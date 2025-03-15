@@ -67,7 +67,7 @@ public class NetworkUtils {
         return result;
     }
 
-    public static void doCraft(@Nonnull NetworkInfo networkInfo, @Nonnull ItemStack itemStack, int amount) {
+    public static void doCraft(@Nonnull NetworkInfo networkInfo, @Nonnull ItemStack itemStack, long amount) {
         // 检查是否已有相同的合成任务
         boolean hasExistingTask = false;
         for (AutoCraftingSession session : networkInfo.getCraftingSessions()) {
