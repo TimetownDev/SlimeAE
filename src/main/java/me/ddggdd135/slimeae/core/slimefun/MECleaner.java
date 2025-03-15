@@ -68,28 +68,16 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         }
         Map<ItemStack, Long> total = storageCells.getStorage();
 
-        int count = 0;
         for (int slot : getSettingSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
-            count++;
+
             long current = total.getOrDefault(template, 0L);
             if (current <= setting) continue;
 
             ItemRequest request = new ItemRequest(template, current - setting, true);
             storageCells.tryTakeItem(request);
-        }
-        if (count == 0) {
-            for (Map.Entry<ItemStack, Long> data : networkStorage.getStorage().entrySet()) {
-                ItemStack template = data.getKey();
-                count++;
-                long current = data.getValue();
-                if (current <= setting) continue;
-
-                ItemRequest request = new ItemRequest(template, current - setting, true);
-                storageCells.tryTakeItem(request);
-            }
         }
     }
 
