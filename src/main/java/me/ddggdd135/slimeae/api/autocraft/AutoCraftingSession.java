@@ -174,7 +174,7 @@ public class AutoCraftingSession {
         if (!hasNext()) return;
         KeyValuePair<CraftingRecipe, Long> next = craftingSteps.get(0);
         boolean doCraft = !isCancelling;
-        if (running == 0 && isCancelling) info.getCraftingSessions().remove(this);
+        if (running <= 0 && isCancelling) info.getCraftingSessions().remove(this);
         if (next.getValue() <= 0) {
             if (running <= 0) {
                 craftingSteps.remove(0);
@@ -227,7 +227,7 @@ public class AutoCraftingSession {
                     device.startCrafting(deviceBlock, next.getKey());
                     running++;
                     next.setValue(next.getValue() - 1);
-                    if (next.getValue() == 0) doCraft = false;
+                    if (next.getValue() <= 0) doCraft = false;
                 } else if (running > 0
                         && device.isFinished(deviceBlock)
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
@@ -263,7 +263,7 @@ public class AutoCraftingSession {
                 device.startCrafting(deviceBlock, next.getKey());
                 running++;
                 next.setValue(next.getValue() - 1);
-                if (next.getValue() == 0) doCraft = false;
+                if (next.getValue() <= 0) doCraft = false;
             } else if (running > 0
                     && device.isFinished(deviceBlock)
                     && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
