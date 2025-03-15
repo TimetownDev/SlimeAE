@@ -23,7 +23,7 @@ public class NetworkTickerTask implements Runnable {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay") / 2;
 
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(plugin, this, tickRate, tickRate);
+        scheduler.runTaskTimerAsynchronously(plugin, this, 100L, tickRate);
     }
 
     private void reset() {
