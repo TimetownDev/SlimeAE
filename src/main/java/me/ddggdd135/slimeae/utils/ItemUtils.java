@@ -777,11 +777,14 @@ public class ItemUtils {
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         if (addLore) {
             List<String> lore = result.getLore();
+            if (lore != null) {
+                List<String> finalLore = lore;
+                NBT.modify(itemStack, x -> {
+                    x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
+                });
+            }
+
             if (lore == null) lore = new ArrayList<>();
-            List<String> finalLore = lore;
-            NBT.modify(itemStack, x -> {
-                x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
-            });
 
             lore.add("");
             lore.add("&e物品数量 " + amount);
@@ -799,7 +802,10 @@ public class ItemUtils {
     public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
         ItemStack result = itemStack.asOne();
         List<String> lore = NBT.get(result, x -> {
-            return x.getStringList(SOURCE_LORE_KEY).toListCopy();
+            if (x.hasTag(SOURCE_LORE_KEY))
+                return x.getStringList(SOURCE_LORE_KEY).toListCopy();
+
+            return null;
         });
         result.setLore(lore);
 
