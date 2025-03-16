@@ -779,7 +779,7 @@ public class ItemUtils {
             List<String> lore = result.getLore();
             if (lore != null) {
                 List<String> finalLore = lore;
-                NBT.modify(itemStack, x -> {
+                NBT.modify(result, x -> {
                     x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
                 });
             }
@@ -789,7 +789,7 @@ public class ItemUtils {
             lore.add("");
             lore.add("&e物品数量 " + amount);
             if (addPinnedLore) lore.add("&e===已置顶===");
-            itemStack.setLore(CMIChatColor.translate(lore));
+            result.setLore(CMIChatColor.translate(lore));
         }
 
         NBT.modify(result, x -> {
