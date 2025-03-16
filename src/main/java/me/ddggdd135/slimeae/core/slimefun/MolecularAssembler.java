@@ -91,15 +91,15 @@ public class MolecularAssembler extends TickingBlock
             ItemUtils.setSettingItem(menu.getInventory(), getCraftingInputSlots()[i], itemStack);
         }
 
+        ticks++;
+        runningTimes.put(block.getLocation(), ticks);
+
         if (isFinished(block)) {
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
             return;
         }
 
         operation.addProgress(1);
-
-        ticks++;
-        runningTimes.put(block.getLocation(), ticks);
 
         int progress = operation.getProgress();
         int maxProgress = operation.getTotalTicks();
