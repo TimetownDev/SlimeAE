@@ -72,10 +72,11 @@ public class MolecularAssembler extends TickingBlock
             runningTimes.put(block.getLocation(), 0);
             return;
         }
+        for (int slot : getCraftingInputSlots()) {
+            menu.replaceExistingItem(slot, MenuItems.EMPTY);
+        }
+
         if (operation == null) {
-            for (int slot : getCraftingInputSlots()) {
-                menu.replaceExistingItem(slot, MenuItems.EMPTY);
-            }
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
             menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
 
@@ -113,8 +114,8 @@ public class MolecularAssembler extends TickingBlock
 
         ItemStack[] output = operation.getRecipe().getOutput();
         if (output.length > 0) {
-            ItemStack displayItem = output[0].clone();
-            menu.replaceExistingItem(getOutputSlot(), displayItem);
+            ItemStack displayItem = output[0];
+            ItemUtils.setSettingItem(menu.getInventory(), getOutputSlot(), displayItem);
         }
     }
 
