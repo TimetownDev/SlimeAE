@@ -94,7 +94,7 @@ public class MECraftPlanningTerminal extends METerminal {
         ArrayList<ItemStack> orderedItems = new ArrayList<>();
         for (Map.Entry<ItemStack, Long> entry : items) {
             ItemStack item = entry.getKey();
-            if(itemRecipeMap.containsKey(item)) {
+            if (itemRecipeMap.containsKey(item)) {
                 orderedItems.add(item);
                 newRecipes.add(itemRecipeMap.get(item));
             }
@@ -107,13 +107,13 @@ public class MECraftPlanningTerminal extends METerminal {
         int totalItems = items.size();
         int slotPerPage = getDisplaySlots().length;
         int maxPage = (int) Math.ceil((double) totalItems / slotPerPage) - 1;
-        if(page > maxPage) {
+        if (page > maxPage) {
             page = Math.max(0, maxPage);
             setPage(block, page);
         }
 
         int startIndex = page * slotPerPage;
-        int endIndex = Math.min(startIndex+ slotPerPage, totalItems);
+        int endIndex = Math.min(startIndex + slotPerPage, totalItems);
 
         if (startIndex == endIndex) {
             for (int slot : getDisplaySlots()) {
@@ -121,7 +121,7 @@ public class MECraftPlanningTerminal extends METerminal {
             }
         }
 
-        for(int i = 0; i < slotPerPage; i++) {
+        for (int i = 0; i < slotPerPage; i++) {
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);

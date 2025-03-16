@@ -217,7 +217,7 @@ public class AutoCraftingSession {
                     continue;
                 }
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
-                if (running <= maxDevices
+                if (running < maxDevices
                         && doCraft
                         && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
@@ -244,6 +244,7 @@ public class AutoCraftingSession {
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+                if (device == null) continue;
                 if (device.isGlobal(deviceBlock)) {
                     globalDevices.add(deviceBlock);
                 }
@@ -252,8 +253,8 @@ public class AutoCraftingSession {
         for (Block deviceBlock : globalDevices) {
             IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                     StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-
-            if (running <= maxDevices
+            if (device == null) continue;
+            if (running < maxDevices
                     && doCraft
                     && device.canStartCrafting(deviceBlock, next.getKey())
                     && networkStorage.contains(ItemUtils.createRequests(
