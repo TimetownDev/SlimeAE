@@ -29,7 +29,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class MECraftPlanningTerminal extends METerminal {
 
@@ -67,10 +66,10 @@ public class MECraftPlanningTerminal extends METerminal {
         int page = fuckPage(block, recipeEntries.size());
 
         // 菜单展示逻辑
-        displayPage(blockMenu, recipeEntries, page, info, block, player);
+        displayPage(blockMenu, recipeEntries, page, info, block);
     }
 
-    private void displayPage(BlockMenu menu, List<RecipeEntry> entries, int page, NetworkInfo info, Block block, Player player) {
+    private void displayPage(BlockMenu menu, List<RecipeEntry> entries, int page, NetworkInfo info, Block block) {
         int slotPerPage = getDisplaySlots().length;
         int start = page * slotPerPage;
         int end = Math.min(start + slotPerPage, entries.size());
@@ -85,12 +84,12 @@ public class MECraftPlanningTerminal extends METerminal {
                 continue;
             }
             RecipeEntry entry = entries.get(entryIndex);
-            setupDisplayItem(menu, slot, entry, info, block, player);
+            setupDisplayItem(menu, slot, entry, info, block);
         }
 
     }
 
-    private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block, Player player) {
+    private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block) {
         ItemStack itemStack = entry.getItemStack().getKey();
         if (itemStack == null || itemStack.getType().isAir()) return;
         CraftingRecipe recipe = entry.getRecipe();
