@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MECraftingTrigger extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
@@ -43,6 +45,15 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
     public MECraftingTrigger(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this);
+        addItemHandler(new SimpleBlockBreakHandler() {
+            @Override
+            public void onBlockBreak(@NotNull Block block) {
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return;
+
+                blockMenu.dropItems(blockMenu.getLocation(), getSettingSlots());
+            }
+        });
     }
 
     @Override
@@ -145,7 +156,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
                 Material.LIME_STAINED_GLASS_PANE,
                 "&c已设置数量" + getAmount(block.getLocation()),
                 "",
-                "&eAE网络中 存储元件中设定物品不会超过这个数量");
+                "&eAE网络中 设定物品不会低于这个数量");
         blockMenu.replaceExistingItem(getInfoSlot(), info);
     }
 

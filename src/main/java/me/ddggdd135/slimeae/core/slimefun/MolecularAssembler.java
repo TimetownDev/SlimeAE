@@ -72,12 +72,14 @@ public class MolecularAssembler extends TickingBlock
             runningTimes.put(block.getLocation(), 0);
             return;
         }
+
+        for (int slot : getCraftingInputSlots()) {
+            menu.replaceExistingItem(slot, MenuItems.EMPTY);
+        }
+        menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
+
         if (operation == null) {
-            for (int slot : getCraftingInputSlots()) {
-                menu.replaceExistingItem(slot, MenuItems.EMPTY);
-            }
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
-            menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
 
             runningTimes.put(block.getLocation(), 0);
 
@@ -91,15 +93,15 @@ public class MolecularAssembler extends TickingBlock
             ItemUtils.setSettingItem(menu.getInventory(), getCraftingInputSlots()[i], itemStack);
         }
 
+        ticks++;
+        runningTimes.put(block.getLocation(), ticks);
+
         if (isFinished(block)) {
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
             return;
         }
 
         operation.addProgress(1);
-
-        ticks++;
-        runningTimes.put(block.getLocation(), ticks);
 
         int progress = operation.getProgress();
         int maxProgress = operation.getTotalTicks();
@@ -113,8 +115,8 @@ public class MolecularAssembler extends TickingBlock
 
         ItemStack[] output = operation.getRecipe().getOutput();
         if (output.length > 0) {
-            ItemStack displayItem = output[0].clone();
-            menu.replaceExistingItem(getOutputSlot(), displayItem);
+            ItemStack displayItem = output[0];
+            ItemUtils.setSettingItem(menu.getInventory(), getOutputSlot(), displayItem);
         }
     }
 

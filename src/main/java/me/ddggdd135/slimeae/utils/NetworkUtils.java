@@ -87,9 +87,12 @@ public class NetworkUtils {
             if (recipe != null) {
                 // 检查配方输出是否包含目标物品
                 boolean hasMatchingOutput = false;
+                int onceAmount = 1;
+
                 for (ItemStack output : recipe.getOutput()) {
                     if (SlimefunUtils.isItemSimilar(output, itemStack, true, false)) {
                         hasMatchingOutput = true;
+                        onceAmount = output.getAmount();
                         break;
                     }
                 }
@@ -97,7 +100,7 @@ public class NetworkUtils {
                 if (hasMatchingOutput) {
                     try {
                         // 创建并启动新的合成任务
-                        AutoCraftingSession session = new AutoCraftingSession(networkInfo, recipe, amount);
+                        AutoCraftingSession session = new AutoCraftingSession(networkInfo, recipe, amount / onceAmount);
                         session.start();
                     } catch (Exception e) {
                         // 忽略合成失败的情况，等待下一次尝试
