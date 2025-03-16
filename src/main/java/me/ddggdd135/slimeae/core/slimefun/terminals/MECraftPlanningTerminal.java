@@ -26,10 +26,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class MECraftPlanningTerminal extends METerminal {
 
@@ -60,14 +60,14 @@ public class MECraftPlanningTerminal extends METerminal {
 
         // 过滤逻辑
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
-        List<RecipeEntry> filteredEntries = filterRecipeEntries(recipeEntries, player, filter);
+        filterRecipeEntries(recipeEntries, player, filter);
 
         // 置顶处理
-        if (filter.isEmpty()) applyPinnedItems(player, filteredEntries);
-        int page = fuckPage(block, filteredEntries.size());
+        if (filter.isEmpty()) applyPinnedItems(player, recipeEntries);
+        int page = fuckPage(block, recipeEntries.size());
 
         // 菜单展示逻辑
-        displayPage(blockMenu, filteredEntries, page, info, block, player);
+        displayPage(blockMenu, recipeEntries, page, info, block, player);
     }
 
     private void displayPage(BlockMenu menu, List<RecipeEntry> entries, int page, NetworkInfo info, Block block, Player player) {
@@ -81,6 +81,7 @@ public class MECraftPlanningTerminal extends METerminal {
 
             if (entryIndex >= end) {
                 menu.replaceExistingItem(slot, MenuItems.EMPTY);
+                menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
                 continue;
             }
             RecipeEntry entry = entries.get(entryIndex);
@@ -90,7 +91,8 @@ public class MECraftPlanningTerminal extends METerminal {
     }
 
     private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block, Player player) {
-        ItemStack itemStack = entry.getItemStack();
+        ItemStack itemStack = entry.getItemStack().getKey();
+        if (itemStack == null || itemStack.getType().isAir()) return;
         CraftingRecipe recipe = entry.getRecipe();
         ItemStack displayItem = ItemUtils.createDisplayItem(itemStack, 1, false, false);
         ItemMeta meta = displayItem.getItemMeta();
@@ -122,16 +124,15 @@ public class MECraftPlanningTerminal extends METerminal {
     }
 
     private void handleItemClick(Player player, RecipeEntry recipeEntry, NetworkInfo info, Block block) {
-
-        if (SlimefunUtils.isItemSimilar(
-                player.getItemOnCursor(), SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
-            ItemStack template = recipeEntry.getItemStack().asOne();
+        if (SlimefunUtils.isItemSimilar(player.getItemOnCursor(), SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
+            ItemStack template = recipeEntry.getItemStack().getKey().asOne();
             PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
             List<ItemStack> pinned = pinnedManager.getPinnedItems(player);
             if (pinned == null) pinned = new ArrayList<>();
             if (!pinned.contains(template)) pinnedManager.addPinned(player, template);
             else pinnedManager.removePinned(player, template);
             updateGui(block);
+            return;
         }
         player.closeInventory();
         player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
@@ -206,65 +207,71 @@ public class MECraftPlanningTerminal extends METerminal {
     private void applyPinnedItems(Player player, List<RecipeEntry> entries) {
         List<ItemStack> pinnedItems = SlimeAEPlugin.getPinnedManager().getPinnedItems(player);
         if (pinnedItems == null || pinnedItems.isEmpty()) return;
+        HashSet<ItemStack> pinnedSet = new HashSet<>(pinnedItems);
 
         ArrayList<RecipeEntry> pinnedEntries = new ArrayList<>();
-        Iterator<RecipeEntry> iterator = entries.iterator();
 
-        while (iterator.hasNext()) {
-            RecipeEntry entry = iterator.next();
-            for (ItemStack pinned : pinnedItems) {
-                if (SlimefunUtils.isItemSimilar(entry.getItemStack(), pinned, true, false)) {
-                    pinnedEntries.add(new RecipeEntry(entry.getItemStack(), entry.getRecipe(), true));
-                    iterator.remove();
-                    break;
-                }
+        for (RecipeEntry entry : entries) {
+            if (pinnedSet.contains(entry.getItemStack().getKey().asOne())) {
+                RecipeEntry pinned = new RecipeEntry(entry.getItemStack().getKey(), entry.getRecipe(), true);
+                pinnedEntries.add(pinned);
             }
         }
+
+        // 仅显示置顶物品，而不再多余显示在原位置。
+        // Iterator<RecipeEntry> iterator = entries.iterator();
+        // while (iterator.hasNext()) {
+        //     RecipeEntry entry = iterator.next();
+        //     if (pinnedSet.contains(entry.getItemStack().getKey().asOne())) {
+        //         RecipeEntry pinned = new RecipeEntry(entry.getItemStack().getKey(), entry.getRecipe(), true);
+        //         pinnedEntries.add(pinned);
+        //         iterator.remove();
+        //     }
+        // }
         entries.addAll(0, pinnedEntries);
     }
 
-    private List<RecipeEntry> filterRecipeEntries(ArrayList<RecipeEntry> entries, Player player, String filter) {
-        if (filter.isEmpty()) return new ArrayList<>();
+    private void filterRecipeEntries(ArrayList<RecipeEntry> entries, Player player, String filter) {
+        if (filter.isEmpty()) return;
         if (SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded()) {
             boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
             SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
             List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
-            return entries.stream()
-                    .filter(entry -> doFilterWithJEG(new AbstractMap.SimpleEntry<>(entry.getItemStack(), 0L), slimefunItems, filter))
-                    .toList();
+            entries.removeIf(entry -> doFilterWithJEG(entry.getItemStack(), slimefunItems, filter));
         } else {
-            return entries.stream()
-                    .filter(entry -> doFilterNoJEG(new AbstractMap.SimpleEntry<>(entry.getItemStack(), 0L), filter))
-                    .toList();
+            entries.removeIf(entry -> doFilterNoJEG(entry.getItemStack(), filter));
         }
     }
 
     private ArrayList<RecipeEntry> createRecipeEntries(Set<CraftingRecipe> recipes) {
         ArrayList<RecipeEntry> entries = new ArrayList<>();
         for (CraftingRecipe recipe : recipes) {
-            ItemStack output = recipe.getInput()[0];
+            ItemStack output = recipe.getOutput()[0];
             entries.add(new RecipeEntry(output, recipe));
         }
         return entries;
     }
 
+    /**
+     * 一个用映射配方和 DisplayItem 的类
+     */
     private static class RecipeEntry {
-        private final ItemStack itemStack;
+        private final AbstractMap.SimpleEntry<ItemStack, Long> itemStack;
         private final CraftingRecipe recipe;
         private boolean isPinned = false;
 
         private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe) {
-            this.itemStack = itemStack;
+            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, 0L);
             this.recipe = recipe;
         }
 
         private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe, boolean isPinned) {
-            this.itemStack = itemStack;
+            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, 0L);
             this.recipe = recipe;
             this.isPinned = isPinned;
         }
 
-        public ItemStack getItemStack() {
+        public AbstractMap.SimpleEntry<ItemStack, Long> getItemStack() {
             return itemStack;
         }
 
