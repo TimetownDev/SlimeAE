@@ -72,13 +72,14 @@ public class MolecularAssembler extends TickingBlock
             runningTimes.put(block.getLocation(), 0);
             return;
         }
+
         for (int slot : getCraftingInputSlots()) {
             menu.replaceExistingItem(slot, MenuItems.EMPTY);
         }
+        menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
 
         if (operation == null) {
             menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
-            menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
 
             runningTimes.put(block.getLocation(), 0);
 
