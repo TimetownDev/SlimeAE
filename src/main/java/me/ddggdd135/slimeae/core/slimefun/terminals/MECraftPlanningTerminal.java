@@ -52,196 +52,60 @@ public class MECraftPlanningTerminal extends METerminal {
             return;
         }
 
-        CraftingRecipe[] recipes = info.getRecipes().toArray(CraftingRecipe[]::new);
-        ArrayList<ItemStack> keyItemArray = new ArrayList<>();
+        Player player = (Player) blockMenu.getInventory().getViewers().get(0);
 
-        // 映射对应的合成表，避免被置顶打乱顺序。
-        HashMap<ItemStack, CraftingRecipe> itemRecipeMap = new HashMap<>();
-        for (CraftingRecipe recipe : recipes) {
-            ItemStack orignalItemStack = recipe.getOutput()[0];
-            ItemStack keyItem = itemSafeClone(orignalItemStack);
-            itemRecipeMap.put(keyItem, recipe);
-            keyItemArray.add(keyItem);
-        }
-        ItemStack[] itemStacks = keyItemArray.toArray(new ItemStack[0]);
+        // 获取合成配方，创建RecipeEntry对象映射配方和item的关系，避免在置顶和搜索时被打乱顺序.
+        Set<CraftingRecipe> recipes = info.getRecipes();
+        ArrayList<RecipeEntry> recipeEntries = createRecipeEntries(recipes);
 
-        Player player0 = (Player) blockMenu.getInventory().getViewers().get(0);
-
-        // 获取过滤器
+        // 过滤逻辑
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
+        List<RecipeEntry> filteredEntries = filterRecipeEntries(recipeEntries, player, filter);
 
-        // 过滤和排序逻辑
-        List<Map.Entry<ItemStack, Long>> items = new ArrayList<>(Arrays.stream(itemStacks)
-                .map(x -> new AbstractMap.SimpleEntry<>(x, 0L))
-                .toList());
-        if (!filter.isEmpty()) {
-            if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
-                items.removeIf(x -> doFilterNoJEG(x, filter));
-            else {
-                boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
-                SearchGroup group = new SearchGroup(null, player0, filter, isPinyinSearch);
-                List<SlimefunItem> slimefunItems = group.filterItems(player0, filter, isPinyinSearch);
-                items.removeIf(x -> doFilterWithJEG(x, slimefunItems, filter));
-            }
-        }
-        // 对配方排序以对应排序后的items
-        ArrayList<CraftingRecipe> orderedRecipe = new ArrayList<>();
-        for (Map.Entry<ItemStack, Long> entry : items) {
-            orderedRecipe.add(itemRecipeMap.get(entry.getKey()));
-        }
+        // 置顶处理
+        if (filter.isEmpty()) applyPinnedItems(player, filteredEntries);
+        int page = fuckPage(block, filteredEntries.size());
 
-        List<ItemStack> storage = List.of(itemStacks);
-        PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
-        List<ItemStack> pinnedItems = pinnedManager.getPinnedItems(player0);
-        if (pinnedItems == null) pinnedItems = new ArrayList<>();
-        final Set<ItemStack> PINNED_IN_PLANNING = Collections.newSetFromMap(new IdentityHashMap<>());
-        if (filter.isEmpty()) {
-            for (ItemStack pinned : pinnedItems) {
-                int index;
-                if((index = storage.indexOf(pinned)) == -1) continue;
-                ItemStack pinnedClone = itemSafeClone(storage.get(index));
-                PINNED_IN_PLANNING.add(pinnedClone);
-                items.add(0, new AbstractMap.SimpleEntry<>(pinnedClone, 0L));
-                orderedRecipe.add(0, itemRecipeMap.get(storage.get(index)));
-//                for (ItemStack item : storage) {
-//                    if (!item.equals(pinned)) continue;
-//                    ItemStack pinnedClone = itemSafeClone(item);
-//                    PINNED_IN_PLANNING.add(pinnedClone);
-//                    items.add(0, new AbstractMap.SimpleEntry<>(pinnedClone, 0L));
-//                    orderedRecipe.add(0, itemRecipeMap.get(item));
-//                }
-            }
-        }
-
-        itemStacks = items.stream().map(Map.Entry::getKey).toArray(ItemStack[]::new);
-
-        int page = getPage(block);
-        if (page > Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1) {
-            page = (int) (Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1);
-            if (page < 0) page = 0;
-            setPage(block, page);
-        }
-
-        int startIndex = page * getDisplaySlots().length;
-        int endIndex = startIndex + getDisplaySlots().length;
-
-        if (startIndex == endIndex) {
-            for (int slot : getDisplaySlots()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
-            }
-        }
-
-        for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
-            int slot = getDisplaySlots()[i];
-            if (i + startIndex >= items.size()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
-                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
-                continue;
-            }
-
-            ItemStack itemStack = itemStacks[i + startIndex];
-            CraftingRecipe recipe = orderedRecipe.get(i + startIndex);
-
-            if (itemStack == null || itemStack.getType().isAir()) {
-                blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
-                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
-                continue;
-            }
-
-            ItemStack result = ItemUtils.createDisplayItem(itemStack, 1, false, false);
-
-            ItemMeta meta = result.getItemMeta();
-            List<String> lore = new ArrayList<>();
-
-            // 添加材料提示用于终端区分多种相同输出的配方。
-            setRecipeLore(recipe, lore);
-
-            lore.add("");
-            lore.add("  &e可合成");
-            if (PINNED_IN_PLANNING.contains(itemStack)) lore.add("&e===已置顶===");
-            meta.setLore(CMIChatColor.translate(lore));
-            result.setItemMeta(meta);
-
-            blockMenu.replaceExistingItem(slot, result);
-            blockMenu.addMenuClickHandler(slot, (player, i1, itemStack12, clickAction) -> {
-                if (SlimefunUtils.isItemSimilar(
-                        player.getItemOnCursor(), SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
-                    ItemStack template = itemStack.asOne();
-                    List<ItemStack> pinned = pinnedManager.getPinnedItems(player);
-                    if (pinned == null) pinned = new ArrayList<>();
-                    if (!pinned.contains(template)) pinnedManager.addPinned(player, template);
-                    else pinnedManager.removePinned(player, template);
-                    updateGui(block);
-                    return false;
-                }
-                player.closeInventory();
-                player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
-                ChatUtils.awaitInput(player, msg -> {
-                    if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
-                    try {
-                        int amount = Integer.parseInt(msg);
-                        if (amount > NetworkInfo.getMaxCraftingAmount()) {
-                            player.sendMessage(CMIChatColor.translate(
-                                    "&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
-                            return;
-                        }
-                        if (amount <= 0) {
-                            player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
-                            return;
-                        }
-
-                        AutoCraftingSession session = new AutoCraftingSession(info, recipe, amount);
-                        session.refreshGUI(45, false);
-                        AEMenu menu = session.getMenu();
-                        int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
-                        int acceptSlot = 47;
-                        int cancelSlot = 51;
-                        for (int slot1 : borders) {
-                            menu.replaceExistingItem(slot1, ChestMenuUtils.getBackground());
-                            menu.addMenuClickHandler(slot1, ChestMenuUtils.getEmptyClickHandler());
-                        }
-                        menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
-                        menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
-                            if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
-                                player.sendMessage(CMIChatColor.translate(
-                                        "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
-                                return false;
-                            }
-                            player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
-                            session.refreshGUI(54);
-                            session.start();
-                            return false;
-                        });
-                        menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
-                        menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
-                            player.closeInventory();
-                            return false;
-                        });
-                        menu.open(player);
-                    } catch (NumberFormatException e) {
-                        player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
-                    } catch (NoEnoughMaterialsException e) {
-                        player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
-                        for (Map.Entry<ItemStack, Long> entry :
-                                e.getMissingMaterials().entrySet()) {
-                            String itemName = ItemUtils.getItemName(entry.getKey());
-                            player.sendMessage(
-                                    CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
-                        }
-                    } catch (Exception e) {
-                        player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
-                    }
-                });
-                return false;
-            });
-        }
+        // 菜单展示逻辑
+        displayPage(blockMenu, filteredEntries, page, info, block, player);
     }
 
-    private static @NotNull ItemStack itemSafeClone(ItemStack orignalItemStack) {
-        ItemStack keyItem = new ItemStack(orignalItemStack.getType());
-        keyItem.setAmount(orignalItemStack.getAmount());
-        keyItem.setItemMeta(orignalItemStack.getItemMeta());
-        return keyItem;
+    private void displayPage(BlockMenu menu, List<RecipeEntry> entries, int page, NetworkInfo info, Block block, Player player) {
+        int slotPerPage = getDisplaySlots().length;
+        int start = page * slotPerPage;
+        int end = Math.min(start + slotPerPage, entries.size());
+
+        for (int i = 0; i < slotPerPage; i++) {
+            int slot = getDisplaySlots()[i];
+            int entryIndex = start + i;
+
+            if (entryIndex >= end) {
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
+                continue;
+            }
+            RecipeEntry entry = entries.get(entryIndex);
+            setupDisplayItem(menu, slot, entry, info, block, player);
+        }
+
+    }
+
+    private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block, Player player) {
+        ItemStack itemStack = entry.getItemStack();
+        CraftingRecipe recipe = entry.getRecipe();
+        ItemStack displayItem = ItemUtils.createDisplayItem(itemStack, 1, false, false);
+        ItemMeta meta = displayItem.getItemMeta();
+        ArrayList<String> lore = new ArrayList<>();
+        setRecipeLore(recipe, lore);
+        lore.add("");
+        lore.add("  &e可合成");
+        if (entry.isPinned()) lore.add("&e===已置顶===");
+        meta.setLore(CMIChatColor.translate(lore));
+        displayItem.setItemMeta(meta);
+        menu.replaceExistingItem(slot, displayItem);
+        menu.addMenuClickHandler(slot, (p, slot1, item, action) -> {
+            handleItemClick(p, entry, info, block);
+            return false;
+        });
     }
 
     private static void setRecipeLore(CraftingRecipe recipe, List<String> lore) {
@@ -254,6 +118,162 @@ public class MECraftPlanningTerminal extends METerminal {
         lore.add("&7材料列表:");
         for (Map.Entry<String, Integer> entry : materialCount.entrySet()) {
             lore.add("  &f" + entry.getKey() + " &ex " + entry.getValue());
+        }
+    }
+
+    private void handleItemClick(Player player, RecipeEntry recipeEntry, NetworkInfo info, Block block) {
+
+        if (SlimefunUtils.isItemSimilar(
+                player.getItemOnCursor(), SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
+            ItemStack template = recipeEntry.getItemStack().asOne();
+            PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
+            List<ItemStack> pinned = pinnedManager.getPinnedItems(player);
+            if (pinned == null) pinned = new ArrayList<>();
+            if (!pinned.contains(template)) pinnedManager.addPinned(player, template);
+            else pinnedManager.removePinned(player, template);
+            updateGui(block);
+        }
+        player.closeInventory();
+        player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
+        ChatUtils.awaitInput(player, msg -> {
+            if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
+            try {
+                int amount = Integer.parseInt(msg);
+                if (amount > NetworkInfo.getMaxCraftingAmount()) {
+                    player.sendMessage(CMIChatColor.translate(
+                            "&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                    return;
+                }
+                if (amount <= 0) {
+                    player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                    return;
+                }
+
+                AutoCraftingSession session = new AutoCraftingSession(info, recipeEntry.getRecipe(), amount);
+                session.refreshGUI(45, false);
+                AEMenu menu = session.getMenu();
+                int[] borders = new int[]{45, 46, 48, 49, 50, 52, 53};
+                int acceptSlot = 47;
+                int cancelSlot = 51;
+                for (int slot1 : borders) {
+                    menu.replaceExistingItem(slot1, ChestMenuUtils.getBackground());
+                    menu.addMenuClickHandler(slot1, ChestMenuUtils.getEmptyClickHandler());
+                }
+                menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
+                menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
+                    if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
+                        player.sendMessage(CMIChatColor.translate(
+                                "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
+                        return false;
+                    }
+                    player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
+                    session.refreshGUI(54);
+                    session.start();
+                    return false;
+                });
+                menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
+                menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
+                    player.closeInventory();
+                    return false;
+                });
+                menu.open(player);
+            } catch (NumberFormatException e) {
+                player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
+            } catch (NoEnoughMaterialsException e) {
+                player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
+                for (Map.Entry<ItemStack, Long> entry :
+                        e.getMissingMaterials().entrySet()) {
+                    String itemName = ItemUtils.getItemName(entry.getKey());
+                    player.sendMessage(
+                            CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                }
+            } catch (Exception e) {
+                player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
+            }
+        });
+    }
+
+    private int fuckPage(Block block, int totalSize) {
+        int page = getPage(block);
+        if (page > Math.ceil((double) totalSize / getDisplaySlots().length) - 1) {
+            page = (int) (Math.ceil((double) totalSize / getDisplaySlots().length) - 1);
+            if (page < 0) page = 0;
+            setPage(block, page);
+        }
+        return page;
+    }
+
+    private void applyPinnedItems(Player player, List<RecipeEntry> entries) {
+        List<ItemStack> pinnedItems = SlimeAEPlugin.getPinnedManager().getPinnedItems(player);
+        if (pinnedItems == null || pinnedItems.isEmpty()) return;
+
+        ArrayList<RecipeEntry> pinnedEntries = new ArrayList<>();
+        Iterator<RecipeEntry> iterator = entries.iterator();
+
+        while (iterator.hasNext()) {
+            RecipeEntry entry = iterator.next();
+            for (ItemStack pinned : pinnedItems) {
+                if (SlimefunUtils.isItemSimilar(entry.getItemStack(), pinned, true, false)) {
+                    pinnedEntries.add(new RecipeEntry(entry.getItemStack(), entry.getRecipe(), true));
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        entries.addAll(0, pinnedEntries);
+    }
+
+    private List<RecipeEntry> filterRecipeEntries(ArrayList<RecipeEntry> entries, Player player, String filter) {
+        if (filter.isEmpty()) return new ArrayList<>();
+        if (SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded()) {
+            boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
+            SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
+            List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
+            return entries.stream()
+                    .filter(entry -> doFilterWithJEG(new AbstractMap.SimpleEntry<>(entry.getItemStack(), 0L), slimefunItems, filter))
+                    .toList();
+        } else {
+            return entries.stream()
+                    .filter(entry -> doFilterNoJEG(new AbstractMap.SimpleEntry<>(entry.getItemStack(), 0L), filter))
+                    .toList();
+        }
+    }
+
+    private ArrayList<RecipeEntry> createRecipeEntries(Set<CraftingRecipe> recipes) {
+        ArrayList<RecipeEntry> entries = new ArrayList<>();
+        for (CraftingRecipe recipe : recipes) {
+            ItemStack output = recipe.getInput()[0];
+            entries.add(new RecipeEntry(output, recipe));
+        }
+        return entries;
+    }
+
+    private static class RecipeEntry {
+        private final ItemStack itemStack;
+        private final CraftingRecipe recipe;
+        private boolean isPinned = false;
+
+        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe) {
+            this.itemStack = itemStack;
+            this.recipe = recipe;
+        }
+
+        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe, boolean isPinned) {
+            this.itemStack = itemStack;
+            this.recipe = recipe;
+            this.isPinned = isPinned;
+        }
+
+        public ItemStack getItemStack() {
+            return itemStack;
+        }
+
+        public CraftingRecipe getRecipe() {
+            return recipe;
+        }
+
+        public boolean isPinned() {
+            return isPinned;
         }
     }
 }
