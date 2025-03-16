@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
-import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -27,14 +26,12 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MECraftPlanningTerminal extends METerminal {
-
-    private final String TASK_RECIPE = "task_recipe";
 
     public MECraftPlanningTerminal(
             ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -56,21 +53,17 @@ public class MECraftPlanningTerminal extends METerminal {
         }
 
         CraftingRecipe[] recipes = info.getRecipes().toArray(CraftingRecipe[]::new);
+        ArrayList<ItemStack> keyItemArray = new ArrayList<>();
 
         // 映射对应的合成表，避免被置顶打乱顺序。
-        HashMap<String, CraftingRecipe> itemRecipeMap = new HashMap<>();
-        ItemStack[] itemStacks = new ItemStack[recipes.length];
-        int index = 0;
+        HashMap<ItemStack, CraftingRecipe> itemRecipeMap = new HashMap<>();
         for (CraftingRecipe recipe : recipes) {
-            ItemStack mItemStack = recipe.getOutput()[0];
-            String key = generateRecipeKey(recipe);
-            itemRecipeMap.put(key, recipe);
-            NBT.modify(mItemStack, x -> {
-                x.setString(TASK_RECIPE, key);
-            });
-            itemStacks[index] = mItemStack;
-            index++;
+            ItemStack orignalItemStack = recipe.getOutput()[0];
+            ItemStack keyItem = itemSafeClone(orignalItemStack);
+            itemRecipeMap.put(keyItem, recipe);
+            keyItemArray.add(keyItem);
         }
+        ItemStack[] itemStacks = keyItemArray.toArray(new ItemStack[0]);
 
         Player player0 = (Player) blockMenu.getInventory().getViewers().get(0);
 
@@ -91,45 +84,46 @@ public class MECraftPlanningTerminal extends METerminal {
                 items.removeIf(x -> doFilterWithJEG(x, slimefunItems, filter));
             }
         }
+        // 对配方排序以对应排序后的items
+        ArrayList<CraftingRecipe> orderedRecipe = new ArrayList<>();
+        for (Map.Entry<ItemStack, Long> entry : items) {
+            orderedRecipe.add(itemRecipeMap.get(entry.getKey()));
+        }
 
+        List<ItemStack> storage = List.of(itemStacks);
         PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
         List<ItemStack> pinnedItems = pinnedManager.getPinnedItems(player0);
         if (pinnedItems == null) pinnedItems = new ArrayList<>();
-        HashSet<ItemStack> pinnedSet = new HashSet<>(pinnedItems);
-
-        ArrayList<CraftingRecipe> newRecipes = new ArrayList<>();
-        List<ItemStack> orderedItems = new ArrayList<>();
-        for (Map.Entry<ItemStack, Long> entry : items) {
-            ItemStack item = entry.getKey();
-            String recipeKey = NBT.get(item, x -> x.hasTag(TASK_RECIPE) ? x.getString(TASK_RECIPE) : "");
-            NBT.modify(item, x -> {
-                x.removeKey(TASK_RECIPE);
-            });
-            if (itemRecipeMap.containsKey(recipeKey)) {
-                if(filter.isEmpty() && pinnedSet.contains(item)) {
-                    orderedItems.add(0, new AbstractMap.SimpleEntry<>(item, 0L).getKey());
-                    newRecipes.add(0, itemRecipeMap.get(recipeKey));
-                    continue;
-                }
-                orderedItems.add(item);
-                newRecipes.add(itemRecipeMap.get(recipeKey));
+        final Set<ItemStack> PINNED_IN_PLANNING = Collections.newSetFromMap(new IdentityHashMap<>());
+        if (filter.isEmpty()) {
+            for (ItemStack pinned : pinnedItems) {
+                int index;
+                if((index = storage.indexOf(pinned)) == -1) continue;
+                ItemStack pinnedClone = itemSafeClone(storage.get(index));
+                PINNED_IN_PLANNING.add(pinnedClone);
+                items.add(0, new AbstractMap.SimpleEntry<>(pinnedClone, 0L));
+                orderedRecipe.add(0, itemRecipeMap.get(storage.get(index)));
+//                for (ItemStack item : storage) {
+//                    if (!item.equals(pinned)) continue;
+//                    ItemStack pinnedClone = itemSafeClone(item);
+//                    PINNED_IN_PLANNING.add(pinnedClone);
+//                    items.add(0, new AbstractMap.SimpleEntry<>(pinnedClone, 0L));
+//                    orderedRecipe.add(0, itemRecipeMap.get(item));
+//                }
             }
         }
 
-        itemStacks = orderedItems.toArray(new ItemStack[0]);
-        recipes = newRecipes.toArray(new CraftingRecipe[0]);
+        itemStacks = items.stream().map(Map.Entry::getKey).toArray(ItemStack[]::new);
 
         int page = getPage(block);
-        int totalItems = itemStacks.length;
-        int slotPerPage = getDisplaySlots().length;
-        int maxPage = (int) Math.ceil((double) totalItems / slotPerPage) - 1;
-        if(page > maxPage) {
-            page = Math.max(0, maxPage);
+        if (page > Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1) {
+            page = (int) (Math.ceil(recipes.length / (double) getDisplaySlots().length) - 1);
+            if (page < 0) page = 0;
             setPage(block, page);
         }
 
-        int startIndex = page * slotPerPage;
-        int endIndex = Math.min(startIndex+ slotPerPage, totalItems);
+        int startIndex = page * getDisplaySlots().length;
+        int endIndex = startIndex + getDisplaySlots().length;
 
         if (startIndex == endIndex) {
             for (int slot : getDisplaySlots()) {
@@ -137,16 +131,16 @@ public class MECraftPlanningTerminal extends METerminal {
             }
         }
 
-        for(int i = 0; i < slotPerPage; i++) {
+        for (int i = 0; i < getDisplaySlots().length && (i + startIndex) < endIndex; i++) {
             int slot = getDisplaySlots()[i];
-            if (i + startIndex >= itemStacks.length) {
+            if (i + startIndex >= items.size()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
                 blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
                 continue;
             }
 
             ItemStack itemStack = itemStacks[i + startIndex];
-            CraftingRecipe recipe = recipes[i + startIndex];
+            CraftingRecipe recipe = orderedRecipe.get(i + startIndex);
 
             if (itemStack == null || itemStack.getType().isAir()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
@@ -159,20 +153,12 @@ public class MECraftPlanningTerminal extends METerminal {
             ItemMeta meta = result.getItemMeta();
             List<String> lore = new ArrayList<>();
 
-            Map<String, Integer> materialCount = new HashMap<>();
-            for (ItemStack stack : recipe.getInput()) {
-                if (stack == null || stack.getType().isAir()) continue;
-                String itemName = ItemUtils.getItemName(stack);
-                materialCount.put(itemName, materialCount.getOrDefault(itemName, 0) + stack.getAmount());
-            }
-            lore.add("&7材料列表:");
-            for (Map.Entry<String, Integer> entry : materialCount.entrySet()) {
-                lore.add("  &f" + entry.getKey() + " &ex " + entry.getValue());
-            }
+            // 添加材料提示用于终端区分多种相同输出的配方。
+            setRecipeLore(recipe, lore);
 
             lore.add("");
             lore.add("  &e可合成");
-            if (pinnedItems.contains(itemStack.asOne())) lore.add("&e===已置顶===");
+            if (PINNED_IN_PLANNING.contains(itemStack)) lore.add("&e===已置顶===");
             meta.setLore(CMIChatColor.translate(lore));
             result.setItemMeta(meta);
 
@@ -251,11 +237,23 @@ public class MECraftPlanningTerminal extends METerminal {
         }
     }
 
-    private String generateRecipeKey(CraftingRecipe recipe) {
-        List<ItemStack> inputs = Arrays.asList(recipe.getInput());
-        inputs.sort(Comparator.comparing(item -> item.getType().name()));
-        return inputs.stream()
-                .map(item -> item.getType().name() + "x" + item.getAmount())
-                .collect(Collectors.joining("_"));
+    private static @NotNull ItemStack itemSafeClone(ItemStack orignalItemStack) {
+        ItemStack keyItem = new ItemStack(orignalItemStack.getType());
+        keyItem.setAmount(orignalItemStack.getAmount());
+        keyItem.setItemMeta(orignalItemStack.getItemMeta());
+        return keyItem;
+    }
+
+    private static void setRecipeLore(CraftingRecipe recipe, List<String> lore) {
+        Map<String, Integer> materialCount = new HashMap<>();
+        for (ItemStack stack : recipe.getInput()) {
+            if (stack == null || stack.getType().isAir()) continue;
+            String itemName = ItemUtils.getItemName(stack);
+            materialCount.put(itemName, materialCount.getOrDefault(itemName, 0) + stack.getAmount());
+        }
+        lore.add("&7材料列表:");
+        for (Map.Entry<String, Integer> entry : materialCount.entrySet()) {
+            lore.add("  &f" + entry.getKey() + " &ex " + entry.getValue());
+        }
     }
 }
