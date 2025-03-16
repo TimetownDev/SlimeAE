@@ -10,6 +10,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.*;
+import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -26,9 +28,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import javax.annotation.Nonnull;
-import java.util.*;
 
 public class MECraftPlanningTerminal extends METerminal {
 
@@ -86,7 +85,6 @@ public class MECraftPlanningTerminal extends METerminal {
             RecipeEntry entry = entries.get(entryIndex);
             setupDisplayItem(menu, slot, entry, info, block);
         }
-
     }
 
     private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block) {
@@ -140,8 +138,8 @@ public class MECraftPlanningTerminal extends METerminal {
             try {
                 int amount = Integer.parseInt(msg);
                 if (amount > NetworkInfo.getMaxCraftingAmount()) {
-                    player.sendMessage(CMIChatColor.translate(
-                            "&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                    player.sendMessage(
+                            CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
                     return;
                 }
                 if (amount <= 0) {
@@ -152,7 +150,7 @@ public class MECraftPlanningTerminal extends METerminal {
                 AutoCraftingSession session = new AutoCraftingSession(info, recipeEntry.getRecipe(), amount);
                 session.refreshGUI(45, false);
                 AEMenu menu = session.getMenu();
-                int[] borders = new int[]{45, 46, 48, 49, 50, 52, 53};
+                int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
                 int acceptSlot = 47;
                 int cancelSlot = 51;
                 for (int slot1 : borders) {
@@ -181,11 +179,9 @@ public class MECraftPlanningTerminal extends METerminal {
                 player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
             } catch (NoEnoughMaterialsException e) {
                 player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
-                for (Map.Entry<ItemStack, Long> entry :
-                        e.getMissingMaterials().entrySet()) {
+                for (Map.Entry<ItemStack, Long> entry : e.getMissingMaterials().entrySet()) {
                     String itemName = ItemUtils.getItemName(entry.getKey());
-                    player.sendMessage(
-                            CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                    player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
                 }
             } catch (Exception e) {
                 player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
