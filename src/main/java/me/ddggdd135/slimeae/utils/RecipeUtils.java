@@ -35,11 +35,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecip
 import me.sfiguz7.transcendence.lists.TEItems;
 import me.sfiguz7.transcendence.lists.TERecipeType;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.CookingRecipe;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 
 public class RecipeUtils {
     public static final Map<RecipeType, SlimefunItem> SUPPORTED_RECIPE_TYPES = new HashMap<>();
@@ -133,6 +129,11 @@ public class RecipeUtils {
                 return new CraftingRecipe(getCraftType(entry.getKey()), input1, getOutputs(entry.getKey(), input1));
             }
         }
+
+        // 校验输入中是否包含粘液物品，粘液物品不应该用原版配方合成
+        boolean inputHasSimi =
+                Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
+        if (inputHasSimi) return null;
 
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
