@@ -56,9 +56,10 @@ public class MECraftPlanningTerminal extends METerminal {
         Set<CraftingRecipe> recipes = info.getRecipes();
         ArrayList<RecipeEntry> recipeEntries = createRecipeEntries(recipes);
 
-        // 过滤逻辑
+        // 过滤逻辑,排序
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
         filterRecipeEntries(recipeEntries, player, filter);
+        recipeEntries.sort(Comparator.comparing(RecipeEntry::getItemStack, getSort(block)));
 
         // 置顶处理
         if (filter.isEmpty()) applyPinnedItems(player, recipeEntries);
