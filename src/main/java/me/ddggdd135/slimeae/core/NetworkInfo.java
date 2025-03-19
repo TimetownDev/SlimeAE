@@ -136,7 +136,11 @@ public class NetworkInfo implements IDisposable {
     public Set<CraftingRecipe> getRecipes() {
         Set<CraftingRecipe> recipes = new HashSet<>();
         for (Location location : craftingHolders) {
-            recipes.addAll(recipeMap.get(location));
+            // fix NullPointException in here
+            Set<CraftingRecipe> recipes1 = recipeMap.get(location);
+            if (null != recipes1) {
+                recipes.addAll(recipes1);
+            }
         }
         return recipes;
     }
