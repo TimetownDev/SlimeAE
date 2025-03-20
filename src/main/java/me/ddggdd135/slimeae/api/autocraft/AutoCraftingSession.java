@@ -35,6 +35,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class AutoCraftingSession {
+    private static final int MAX_LORE_LINES = 15;
+    private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
+
     public static final String CRAFTING_KEY = "auto_crafting";
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
@@ -328,10 +331,16 @@ public class AutoCraftingSession {
             menu.addItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
+        // 优化，防止任务依赖配方过多时 lore 超限
         if (!process2.isEmpty()) {
             ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
-            List<String> lore = new ArrayList<>();
-            for (KeyValuePair<CraftingRecipe, Long> item : process2) {
+
+            ArrayList<String> lore = new ArrayList<>();
+            int maxLines = MAX_LORE_LINES - 1;
+            int displayCount = Math.min(process2.size(), maxLines);
+            int remaining = process2.size() - displayCount;
+
+            for (KeyValuePair<CraftingRecipe, Long> item : process2.subList(0, displayCount)) {
                 SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
                 if (slimefunItem != null) {
                     lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
@@ -342,6 +351,9 @@ public class AutoCraftingSession {
                                     .getTranslatedName() + " x "
                             + item.getKey().getOutput()[0].getAmount());
                 }
+            }
+            if (remaining > 0) {
+                lore.add(CMIChatColor.translate(String.format(MORE_ITEMS_INDICATOR, remaining)));
             }
             ItemMeta meta = itemStack.getItemMeta();
             meta.setLore(CMIChatColor.translate(lore));
