@@ -10,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
@@ -66,7 +67,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         for (IStorage storage : networkStorage.getStorages()) {
             if (storage instanceof MEStorageCellCache) storageCells.addStorage(storage);
         }
-        Map<ItemStack, Long> total = storageCells.getStorage();
+        ItemHashMap<Long> total = storageCells.getStorage();
 
         int count = 0;
         for (int slot : getSettingSlots()) {
@@ -77,7 +78,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
             long current = total.getOrDefault(template, 0L);
             if (current <= setting) continue;
 
-            ItemRequest request = new ItemRequest(template, current - setting, true);
+            ItemRequest request = new ItemRequest(template, current - setting);
             storageCells.tryTakeItem(request);
         }
         if (count == 0) {

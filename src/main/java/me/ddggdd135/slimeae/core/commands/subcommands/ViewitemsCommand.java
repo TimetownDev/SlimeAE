@@ -14,6 +14,8 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.*;
@@ -162,13 +164,15 @@ public class ViewitemsCommand extends SubCommand {
                                             playerInventory,
                                             template,
                                             IntStream.range(0, 36).toArray())) {
-                                playerInventory.addItem(
-                                        data.tryTakeItem(new ItemRequest(template, template.getMaxStackSize())));
+                                playerInventory.addItem(data.tryTakeItem(
+                                                new ItemRequest(new ItemKey(template), template.getMaxStackSize()))
+                                        .toItemStacks());
                             } else if (!clickAction.isShiftClicked()
                                             && cursor.getType().isAir()
                                     || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
                                             && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
-                                ItemStack[] gotten = data.tryTakeItem(new ItemRequest(template, 1));
+                                ItemStack[] gotten = data.tryTakeItem(new ItemRequest(new ItemKey(template), 1))
+                                        .toItemStacks();
                                 if (gotten.length != 0) {
                                     ItemStack newCursor = gotten[0];
                                     newCursor.add(cursor.getAmount());
@@ -202,7 +206,7 @@ public class ViewitemsCommand extends SubCommand {
     }
 
     private void updateGui(AEMenu menu, MEStorageCellCache data) {
-        Map<ItemStack, Long> storage = data.getStorage();
+        ItemHashMap<Long> storage = data.getStorage();
 
         // 获取过滤器
         String filter = filterCache.get(data.getUuid()).toLowerCase(Locale.ROOT);

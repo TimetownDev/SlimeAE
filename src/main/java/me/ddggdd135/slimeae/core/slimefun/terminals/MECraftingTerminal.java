@@ -16,6 +16,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -196,7 +197,9 @@ public class MECraftingTerminal extends METerminal {
             if (input.length > i) itemStack.setAmount(itemStack.getAmount() - input[i].getAmount());
             else itemStack.setAmount(itemStack.getAmount() - 1);
             if (itemStack.getAmount() == 0) {
-                ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(input[i], input[i].getAmount()));
+                ItemStack[] gotten = networkStorage
+                        .tryTakeItem(new ItemRequest(new ItemKey(input[i]), input[i].getAmount()))
+                        .toItemStacks();
                 if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
             }
         }

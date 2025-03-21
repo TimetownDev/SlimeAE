@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -55,11 +56,11 @@ public class NetworkRefreshTask implements Runnable {
                     NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
                     if (info == null) continue;
                     IStorage tempStorage = info.getTempStorage();
-                    Set<ItemStack> toPush =
-                            new HashSet<>(tempStorage.getStorage().keySet());
-                    for (ItemStack itemStack : toPush) {
-                        ItemStack[] items =
-                                tempStorage.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
+                    Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
+                    for (ItemKey key : toPush) {
+                        ItemStack[] items = tempStorage
+                                .tryTakeItem(new ItemRequest(key, Integer.MAX_VALUE))
+                                .toItemStacks();
                         info.getStorage().pushItem(items);
                         items = ItemUtils.trimItems(items);
                         tempStorage.pushItem(items);

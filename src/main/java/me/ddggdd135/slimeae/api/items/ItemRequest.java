@@ -1,27 +1,22 @@
 package me.ddggdd135.slimeae.api.items;
 
-import org.bukkit.inventory.ItemStack;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 
 public class ItemRequest {
-    private ItemStack template;
+    private ItemKey key;
     private long amount;
 
-    public ItemRequest(ItemStack template, long amount, boolean unsafe) {
-        if (unsafe) this.template = template;
-        else this.template = template.asOne();
+    public ItemRequest(ItemKey key, long amount) {
+        this.key = key;
         this.amount = amount;
     }
 
-    public ItemRequest(ItemStack template, long amount) {
-        this(template, amount, false);
+    public ItemKey getKey() {
+        return key;
     }
 
-    public ItemStack getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(ItemStack template) {
-        this.template = template.asOne();
+    public void setKey(ItemKey key) {
+        this.key = key;
     }
 
     public long getAmount() {

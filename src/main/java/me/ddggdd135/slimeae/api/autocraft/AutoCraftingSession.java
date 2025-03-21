@@ -12,7 +12,9 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -95,7 +97,7 @@ public class AutoCraftingSession {
             if (!info.getRecipes().contains(recipe)) {
                 // 记录直接缺少的材料
                 ItemStorage missing = new ItemStorage();
-                Map<ItemStack, Long> in = ItemUtils.getAmounts(recipe.getInput());
+                ItemHashMap<Long> in = ItemUtils.getAmounts(recipe.getInput());
                 for (ItemStack template : in.keySet()) {
                     long amount = storage.getStorage().getOrDefault(template, 0L);
                     long need = in.get(template) * count;
@@ -108,33 +110,33 @@ public class AutoCraftingSession {
 
             List<KeyValuePair<CraftingRecipe, Long>> result = new ArrayList<>();
             ItemStorage missing = new ItemStorage();
-            Map<ItemStack, Long> in = ItemUtils.getAmounts(recipe.getInput());
+            ItemHashMap<Long> in = ItemUtils.getAmounts(recipe.getInput());
 
             // 遍历所需材料
-            for (ItemStack template : in.keySet()) {
-                long amount = storage.getStorage().getOrDefault(template, 0L);
-                long need = in.get(template) * count;
+            for (ItemKey key : in.sourceKeySet()) {
+                long amount = storage.getStorage().getOrDefault(key, 0L);
+                long need = in.getKey(key) * count;
 
                 if (amount >= need) {
-                    storage.tryTakeItem(new ItemRequest(template, need, true));
+                    storage.tryTakeItem(new ItemRequest(key, need));
                 } else {
                     long remainingNeed = need - amount;
                     if (amount > 0) {
-                        storage.tryTakeItem(new ItemRequest(template, amount, true));
+                        storage.tryTakeItem(new ItemRequest(key, amount));
                     }
 
                     // 尝试合成缺少的材料
-                    CraftingRecipe craftingRecipe = getRecipe(template);
+                    CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
                     if (craftingRecipe == null) {
-                        missing.addItem(ItemUtils.createItems(template, remainingNeed));
+                        missing.addItem(ItemUtils.createItems(key.getItemStack(), remainingNeed));
                         continue;
                     }
 
-                    Map<ItemStack, Long> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
-                    Map<ItemStack, Long> input = ItemUtils.getAmounts(craftingRecipe.getInput());
+                    ItemHashMap<Long> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
+                    ItemHashMap<Long> input = ItemUtils.getAmounts(craftingRecipe.getInput());
 
                     // 计算需要合成多少次
-                    long out = output.get(template) - input.getOrDefault(template, 0L);
+                    long out = output.get(key) - input.getOrDefault(key, 0L);
                     long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
 
                     try {

@@ -7,16 +7,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class CreativeItemMap implements Map<ItemStack, Long> {
+public class CreativeItemMap extends ItemHashMap<Long> {
     public static final Set<ItemStack> allItemStacks;
     public static final Set<Map.Entry<ItemStack, Long>> allAmount;
     public static final long amount = 64 * 1024;
 
-    public CreativeItemMap(@Nonnull Map<ItemStack, Long> items) {}
+    public CreativeItemMap(@Nonnull ItemHashMap<Long> items) {}
 
     public CreativeItemMap() {}
 

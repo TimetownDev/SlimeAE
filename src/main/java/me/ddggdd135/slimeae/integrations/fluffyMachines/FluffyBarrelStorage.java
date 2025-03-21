@@ -5,10 +5,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -41,18 +41,16 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull ItemStack itemStack) {
         if (!isReadOnly && blockMenu != null && barrel != null && barrel.getStored(block) > 0) {
             int stored = barrel.getStored(block);
             int size = barrel.getCapacity(block);
             if (stored >= size) return;
             ItemStack storedItem = barrel.getStoredItem(block);
-            for (ItemStack itemStack : itemStacks) {
-                if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
-                    int toAdd = Math.min(size - stored, itemStack.getAmount());
-                    stored += toAdd;
-                    itemStack.setAmount(itemStack.getAmount() - toAdd);
-                }
+            if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
+                int toAdd = Math.min(size - stored, itemStack.getAmount());
+                stored += toAdd;
+                itemStack.setAmount(itemStack.getAmount() - toAdd);
             }
             barrel.setStored(block, stored);
         }
@@ -65,7 +63,7 @@ public class FluffyBarrelStorage implements IStorage {
         ItemStack storedItem = barrel.getStoredItem(block);
         boolean toReturn = true;
         for (ItemRequest request : requests) {
-            if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
+            if (SlimefunUtils.isItemSimilar(request.getKey().getItemStack(), storedItem, true, false)) {
                 toReturn = toReturn && stored >= request.getAmount();
             }
         }
@@ -74,37 +72,37 @@ public class FluffyBarrelStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return new ItemStack[0];
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return new ItemStorage();
         int stored = barrel.getStored(block) - 1;
         ItemStack storedItem = barrel.getStoredItem(block);
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
-            if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
+            if (SlimefunUtils.isItemSimilar(request.getKey().getItemStack(), storedItem, true, false)) {
                 long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
-                    toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
+                    toReturn.addItem(ItemUtils.createItems(request.getKey().getItemStack(), toTake));
                 }
             }
         }
         barrel.setStored(block, stored + 1);
-        return toReturn.toItemStacks();
+        return toReturn;
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public @Nonnull ItemHashMap<Long> getStorage() {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return storage;
         storage.put(barrel.getStoredItem(block).asOne(), (long) (barrel.getStored(block) - 1));
         return storage;
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
+    public int getTier(@Nonnull ItemKey itemStack) {
         ItemStack storedItem = barrel.getStoredItem(block);
         if (storedItem == null || storedItem.getType().isAir()) return -1;
-        if (itemStack.getType() == storedItem.getType()) return 2000;
+        if (itemStack.getItemStack().getType() == storedItem.getType()) return 2000;
 
         return -1;
     }

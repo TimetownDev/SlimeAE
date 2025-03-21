@@ -6,18 +6,20 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCollection implements IStorage {
     private final Set<IStorage> storages;
-    private final Map<ItemStack, IStorage> takeCache;
-    private final Map<ItemStack, IStorage> pushCache;
-    private final Set<ItemStack> notIncluded;
+    private final ItemHashMap<IStorage> takeCache;
+    private final ItemHashMap<IStorage> pushCache;
+    private final ItemHashSet notIncluded;
 
     public StorageCollection(@Nonnull IStorage... storages) {
-        this.storages = new HashSet<>();
+        this.storages = new ConcurrentHashSet<>();
         this.takeCache = new ItemHashMap<>();
         this.pushCache = new ItemHashMap<>();
         this.notIncluded = new ItemHashSet();
@@ -75,25 +77,20 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        for (ItemStack itemStack : itemStacks) {
-            ItemStack template = itemStack.asOne();
-            IStorage storage = pushCache.get(template);
-            if (storage != null) storage.pushItem(itemStack);
-        }
+    public void pushItem(@Nonnull ItemStack itemStack) {
+        ItemKey key = new ItemKey(itemStack);
 
-        itemStacks = ItemUtils.trimItems(itemStacks);
-        if (itemStacks.length == 0) return;
+        IStorage pushStorage = pushCache.getKey(key);
+        if (pushStorage != null) pushStorage.pushItem(itemStack);
+
+        if (itemStack.isEmpty()) return;
 
         List<IStorage> tmp = new ArrayList<>(storages);
         List<ObjectIntImmutablePair<IStorage>> sorted = new ArrayList<>(tmp.size());
 
         // 计算每个 storage 的 tier 并缓存结果
         for (IStorage storage : tmp) {
-            int totalTier = 0;
-            for (ItemStack itemStack : itemStacks) {
-                totalTier += storage.getTier(itemStack);
-            }
+            int totalTier = storage.getTier(key);
             if (totalTier < 0) continue;
             sorted.add(new ObjectIntImmutablePair<>(storage, totalTier));
         }
@@ -103,19 +100,18 @@ public class StorageCollection implements IStorage {
                 .reversed());
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
-            storage.left().pushItem(itemStacks);
-            itemStacks = ItemUtils.trimItems(itemStacks);
-            if (itemStacks.length == 0) return;
+            storage.left().pushItem(itemStack);
+            if (itemStack.isEmpty()) return;
         }
     }
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Long> storage = getStorage();
+        ItemHashMap<Long> storage = getStorage();
         for (ItemRequest request : requests) {
-            if (notIncluded.contains(request.getTemplate())) return false;
+            if (notIncluded.contains(request.getKey())) return false;
             if (!ItemUtils.contains(storage, request)) {
-                notIncluded.add(request.getTemplate());
+                notIncluded.add(request.getKey());
                 return false;
             }
         }
@@ -124,51 +120,49 @@ public class StorageCollection implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Long> rest = new ItemHashMap<>();
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        ItemHashMap<Long> rest = new ItemHashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
         for (ItemRequest request : requests) {
-            if (notIncluded.contains(request.getTemplate())) continue;
+            if (notIncluded.contains(request.getKey())) continue;
 
-            long amount = rest.computeIfAbsent(request.getTemplate(), x -> 0L);
+            long amount = rest.getOrDefault(request.getKey(), 0L);
             amount += request.getAmount();
-            rest.put(request.getTemplate(), amount);
+            rest.putKey(request.getKey(), amount);
         }
         ItemUtils.trim(rest);
         for (Map.Entry<ItemStack, Long> entry : rest.entrySet()) {
             if (takeCache.containsKey(entry.getKey())) {
                 IStorage storage = takeCache.get(entry.getKey());
-                ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
-                rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
-                ItemUtils.trim(rest);
-                found.addItem(itemStacks);
+                ItemStorage itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
+                found.addItem(itemStacks.getStorage());
                 if (rest.keySet().isEmpty()) break;
             }
         }
 
         for (IStorage storage : storages) {
-            ItemStack[] itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
-            for (ItemStack itemStack : itemStacks) {
+            ItemStorage itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
+            for (ItemKey key : itemStacks.getStorage().sourceKeySet()) {
+                ItemStack itemStack = key.getItemStack();
                 if (itemStack != null && !itemStack.getType().isAir()) {
-                    takeCache.put(itemStack.asOne(), storage);
+                    takeCache.putKey(key, storage);
                 }
             }
-            rest = ItemUtils.takeItems(rest, ItemUtils.getAmounts(itemStacks));
-            ItemUtils.trim(rest);
-            found.addItem(itemStacks);
+
+            found.addItem(itemStacks.getStorage());
             if (rest.keySet().isEmpty()) break;
         }
-        notIncluded.addAll(rest.keySet());
+        notIncluded.addAll(rest.sourceKeySet());
 
-        return found.toItemStacks();
+        return found;
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> result = new ItemHashMap<>();
+    public @Nonnull ItemHashMap<Long> getStorage() {
+        ItemHashMap<Long> result = new ItemHashMap<>();
         for (IStorage storage : storages) {
-            Map<ItemStack, Long> tmp = storage.getStorage();
+            ItemHashMap<Long> tmp = storage.getStorage();
             if (tmp instanceof CreativeItemMap) return tmp;
             for (ItemStack itemStack : tmp.keySet()) {
                 if (result.containsKey(itemStack)) {
@@ -182,7 +176,7 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
+    public int getTier(@Nonnull ItemKey itemStack) {
         int tier = Integer.MIN_VALUE;
         for (IStorage storage : storages) {
             tier = Math.max(tier, storage.getTier(itemStack));

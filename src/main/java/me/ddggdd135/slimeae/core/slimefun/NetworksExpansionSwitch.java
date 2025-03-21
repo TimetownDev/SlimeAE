@@ -10,10 +10,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -60,11 +61,11 @@ public class NetworksExpansionSwitch extends NetworkObject implements IMEStorage
             return new HashSet<>();
         }
 
-        Map<ItemStack, Long> itemMap = storage.getStorage();
+        ItemHashMap<Long> itemMap = storage.getStorage();
 
         Set<BarrelIdentity> result = new HashSet<>();
-        for (ItemStack itemStack : itemMap.keySet()) {
-            result.add(new StorageToBarrelWrapper(location, storage, itemStack));
+        for (ItemKey key : itemMap.sourceKeySet()) {
+            result.add(new StorageToBarrelWrapper(location, storage, key));
         }
 
         return result;

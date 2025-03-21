@@ -8,7 +8,6 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -86,13 +85,11 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         return new IStorage() {
             @Override
-            public void pushItem(@Nonnull ItemStack[] itemStacks) {
+            public void pushItem(@Nonnull ItemStack itemStack) {
                 if (blockMenu == null) return;
-                for (ItemStack itemStack : itemStacks) {
-                    ItemStack result = blockMenu.pushItem(itemStack, Slots);
-                    if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
-                    else itemStack.setAmount(0);
-                }
+                ItemStack result = blockMenu.pushItem(itemStack, Slots);
+                if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
+                else itemStack.setAmount(0);
                 blockMenu.markDirty();
             }
 
@@ -104,9 +101,9 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Nonnull
             @Override
-            public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-                if (blockMenu == null) return new ItemStack[0];
-                Map<ItemStack, Long> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
+            public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+                if (blockMenu == null) return new ItemStorage();
+                ItemHashMap<Long> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                 ItemStorage found = new ItemStorage();
 
                 for (ItemStack itemStack : amounts.keySet()) {
@@ -130,11 +127,11 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
                     }
                 }
                 blockMenu.markDirty();
-                return found.toItemStacks();
+                return found;
             }
 
             @Override
-            public @Nonnull Map<ItemStack, Long> getStorage() {
+            public @Nonnull ItemHashMap<Long> getStorage() {
                 if (blockMenu == null) return new ItemHashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
             }

@@ -8,8 +8,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.util.Map;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
@@ -59,7 +59,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
         long setting = getAmount(block.getLocation());
 
         IStorage networkStorage = networkInfo.getStorage();
-        Map<ItemStack, Long> total = networkStorage.getStorage();
+        ItemHashMap<Long> total = networkStorage.getStorage();
 
         for (int slot : getSettingSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);

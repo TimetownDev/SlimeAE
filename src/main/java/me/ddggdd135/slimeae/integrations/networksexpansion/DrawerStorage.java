@@ -5,10 +5,10 @@ import com.balugaq.netex.api.data.StorageUnitData;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -34,9 +34,8 @@ public class DrawerStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        if (!isReadOnly && data != null)
-            data.depositItemStack(itemStacks, NetworksDrawer.isLocked(block.getLocation()));
+    public void pushItem(@Nonnull ItemStack itemStack) {
+        if (!isReadOnly && data != null) data.depositItemStack(itemStack, NetworksDrawer.isLocked(block.getLocation()));
     }
 
     @Override
@@ -46,7 +45,8 @@ public class DrawerStorage implements IStorage {
         for (ItemRequest request : requests) {
             boolean found = false;
             for (ItemContainer itemContainer : items) {
-                if (SlimefunUtils.isItemSimilar(request.getTemplate(), itemContainer.getSample(), true, false)) {
+                if (SlimefunUtils.isItemSimilar(
+                        request.getKey().getItemStack(), itemContainer.getSample(), true, false)) {
                     if (itemContainer.getAmount() < request.getAmount()) return false;
                     found = true;
                     break;
@@ -59,8 +59,8 @@ public class DrawerStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (data == null) return new ItemStack[0];
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        if (data == null) return new ItemStorage();
         io.github.sefiraat.networks.network.stackcaches.ItemRequest[] networksRequests =
                 SlimeAEPlugin.getNetworksIntegration().asNetworkRequests(requests);
         ItemStorage storage = new ItemStorage();
@@ -68,13 +68,13 @@ public class DrawerStorage implements IStorage {
             ItemStack itemStack = data.requestItem(request);
             if (itemStack != null && !itemStack.getType().isAir()) storage.addItem(itemStack);
         }
-        return storage.toItemStacks();
+        return storage;
     }
 
     @Override
     @Nonnull
-    public Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public ItemHashMap<Long> getStorage() {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         if (data == null) return storage;
         for (ItemContainer itemContainer : data.getStoredItems()) {
             storage.put(itemContainer.getSample(), (long) itemContainer.getAmount());
@@ -84,9 +84,9 @@ public class DrawerStorage implements IStorage {
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
+    public int getTier(@Nonnull ItemKey itemStack) {
         for (ItemContainer itemContainer : data.getStoredItems()) {
-            if (itemStack.getType() == itemContainer.getWrapper().getType()) {
+            if (itemStack.getItemStack().getType() == itemContainer.getWrapper().getType()) {
                 return 3000;
             }
         }
