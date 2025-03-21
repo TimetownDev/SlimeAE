@@ -35,7 +35,7 @@ public class SerializeUtils {
             String id = base64Str.substring(9);
             SlimefunItem slimefunItem = SlimefunItem.getById(id);
             if (slimefunItem == null) return null;
-            return new ItemStack(slimefunItem.getItem());
+            return slimefunItem.getItem().clone();
         }
         if (base64Str.startsWith("VANILLA_")) {
             String id = base64Str.substring(8);

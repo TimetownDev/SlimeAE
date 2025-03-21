@@ -149,7 +149,6 @@ public class MEPatternTerminal extends METerminal {
 
         if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true)) {
             toOut.setAmount(1);
-            in.subtract();
             ItemStack[] input = Arrays.stream(getCraftSlots())
                     .mapToObj(blockMenu::getItemInSlot)
                     .filter(Objects::nonNull)
@@ -161,6 +160,7 @@ public class MEPatternTerminal extends METerminal {
                     .filter(x -> !x.getType().isAir())
                     .toArray(ItemStack[]::new);
             if (input.length == 0 || output.length == 0) return;
+            in.subtract();
             CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
             Pattern.setRecipe(toOut, recipe);
         } else {

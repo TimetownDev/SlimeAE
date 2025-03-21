@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
+import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.integrations.networks.QuantumStorage;
@@ -26,7 +27,7 @@ public class NetworkRefreshTask implements Runnable {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
 
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(plugin, this, tickRate, tickRate);
+        scheduler.runTaskTimerAsynchronously(plugin, this, 100L, tickRate);
     }
 
     private void reset() {
@@ -54,7 +55,7 @@ public class NetworkRefreshTask implements Runnable {
                 for (NetworkInfo networkInfo : allNetworkData) {
                     NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
                     if (info == null) continue;
-                    IStorage tempStorage = info.getTempStorage();
+                    ItemStorage tempStorage = info.getTempStorage();
                     Set<ItemStack> toPush =
                             new HashSet<>(tempStorage.getStorage().keySet());
                     for (ItemStack itemStack : toPush) {
@@ -62,7 +63,7 @@ public class NetworkRefreshTask implements Runnable {
                                 tempStorage.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
                         info.getStorage().pushItem(items);
                         items = ItemUtils.trimItems(items);
-                        tempStorage.pushItem(items);
+                        tempStorage.addItem(items, true);
                     }
 
                     StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();

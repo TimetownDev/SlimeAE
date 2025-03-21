@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.Map;
@@ -25,10 +26,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MECraftingTrigger extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
-    private static final int defaultAmount = 64;
+    private static final long defaultAmount = 64L;
 
     @Override
     public boolean isSynchronized() {
@@ -43,6 +45,15 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
     public MECraftingTrigger(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this);
+        addItemHandler(new SimpleBlockBreakHandler() {
+            @Override
+            public void onBlockBreak(@NotNull Block block) {
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return;
+
+                blockMenu.dropItems(blockMenu.getLocation(), getSettingSlots());
+            }
+        });
     }
 
     @Override
@@ -68,11 +79,11 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
             long current = total.getOrDefault(template, 0L);
             if (current >= setting) continue;
 
-            int toCraft = (int) (setting - current);
-            int amount;
+            long toCraft = setting - current;
+            long amount;
             if (toCraft <= 64) amount = toCraft;
             else {
-                amount = (int) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
+                amount = (long) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
             }
             if (amount > toCraft) amount = toCraft;
 
@@ -103,7 +114,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
             player.closeInventory();
             player.sendMessage(ChatColor.YELLOW + "请输入你想要设置的数量");
             ChatUtils.awaitInput(player, msg -> {
-                int amount = Integer.parseInt(msg);
+                long amount = Long.parseLong(msg);
                 if (amount <= 0) {
                     player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
                     return;
@@ -117,17 +128,17 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
         });
     }
 
-    public int getAmount(@Nonnull Location location) {
+    public long getAmount(@Nonnull Location location) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
         if (slimefunBlockData == null) return defaultAmount;
         try {
-            return Integer.parseInt(slimefunBlockData.getData(AMOUNT_KEY));
+            return Long.parseLong(slimefunBlockData.getData(AMOUNT_KEY));
         } catch (Exception ignored) {
             return defaultAmount;
         }
     }
 
-    public void setAmount(@Nonnull Location location, int value) {
+    public void setAmount(@Nonnull Location location, long value) {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
         if (slimefunBlockData == null) return;
         slimefunBlockData.setData(AMOUNT_KEY, String.valueOf(value));
@@ -145,7 +156,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
                 Material.LIME_STAINED_GLASS_PANE,
                 "&c已设置数量" + getAmount(block.getLocation()),
                 "",
-                "&eAE网络中 存储元件中设定物品不会超过这个数量");
+                "&eAE网络中 设定物品不会低于这个数量");
         blockMenu.replaceExistingItem(getInfoSlot(), info);
     }
 

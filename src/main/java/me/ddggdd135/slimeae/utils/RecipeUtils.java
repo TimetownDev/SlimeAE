@@ -35,11 +35,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecip
 import me.sfiguz7.transcendence.lists.TEItems;
 import me.sfiguz7.transcendence.lists.TERecipeType;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.CookingRecipe;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 
 public class RecipeUtils {
     public static final Map<RecipeType, SlimefunItem> SUPPORTED_RECIPE_TYPES = new HashMap<>();
@@ -134,12 +130,17 @@ public class RecipeUtils {
             }
         }
 
+        // 校验输入中是否包含粘液物品，粘液物品不应该用原版配方合成
+        boolean inputHasSimi =
+                Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
+        if (inputHasSimi) return null;
+
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    input.clone(),
+                    getRecipeInputs(shapedRecipe.getChoiceMap().values(), input),
                     new ItemStack(
                             shapedRecipe.getResult().getType(),
                             shapedRecipe.getResult().getAmount()));
@@ -147,7 +148,7 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    input.clone(),
+                    getRecipeInputs(shapelessRecipe.getChoiceList(), input),
                     new ItemStack(
                             shapelessRecipe.getResult().getType(),
                             shapelessRecipe.getResult().getAmount()));
@@ -155,7 +156,11 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof CookingRecipe cookingRecipe)
             return new CraftingRecipe(
                     CraftType.COOKING,
-                    input.clone(),
+                    new ItemStack[] {
+                        new ItemStack(
+                                cookingRecipe.getInput().getType(),
+                                cookingRecipe.getInput().getAmount())
+                    },
                     new ItemStack(
                             cookingRecipe.getResult().getType(),
                             cookingRecipe.getResult().getAmount()));
@@ -213,21 +218,38 @@ public class RecipeUtils {
             ItemStack out = new ItemStack(
                     shapedRecipe.getResult().getType(), shapedRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input.clone(), output);
+                return new CraftingRecipe(
+                        CraftType.CRAFTING_TABLE,
+                        shapedRecipe.getIngredientMap().values().toArray(ItemStack[]::new),
+                        output);
         }
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             ItemStack out = new ItemStack(
                     shapelessRecipe.getResult().getType(),
                     shapelessRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(CraftType.CRAFTING_TABLE, input.clone(), out);
+                return new CraftingRecipe(
+                        CraftType.CRAFTING_TABLE,
+                        shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
+                        new ItemStack(
+                                shapelessRecipe.getResult().getType(),
+                                shapelessRecipe.getResult().getAmount()));
         }
         if (minecraftRecipe instanceof CookingRecipe cookingRecipe) {
             ItemStack out = new ItemStack(
                     cookingRecipe.getResult().getType(),
                     cookingRecipe.getResult().getAmount());
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
-                return new CraftingRecipe(CraftType.COOKING, input.clone(), out);
+                return new CraftingRecipe(
+                        CraftType.COOKING,
+                        new ItemStack[] {
+                            new ItemStack(
+                                    cookingRecipe.getInput().getType(),
+                                    cookingRecipe.getInput().getAmount())
+                        },
+                        new ItemStack(
+                                cookingRecipe.getResult().getType(),
+                                cookingRecipe.getResult().getAmount()));
         }
 
         if (output.length == 1) return getRecipe(output[0]);
@@ -410,6 +432,57 @@ public class RecipeUtils {
         if (SUPPORTED_RECIPE_TYPES.containsKey(recipeType)) return CraftType.CRAFTING_TABLE;
 
         return CraftType.COOKING;
+    }
+
+    /**
+     * 对输入材料和配方进行校验，并给出一个和玩家输入一样的配方矩阵
+     * <pre>
+     * [ 0 1 2 ]
+     * [ 3 4 5 ]
+     * [ 6 7 8 ]
+     * </pre>
+     * @param choices See {@link RecipeChoice}
+     * @param playerInputs 玩家输入的配方顺序
+     * @return 一个数量为1的配方顺序，注意不是原版配方顺序，而是玩家决定的顺序
+     */
+    public static ItemStack[] getRecipeInputs(Collection<RecipeChoice> choices, ItemStack[] playerInputs) {
+        ItemStack[] result = new ItemStack[9];
+        if (choices == null || playerInputs == null || playerInputs.length != 9) {
+            return result;
+        }
+
+        List<RecipeChoice> choiceList =
+                choices.stream().filter(Objects::nonNull).toList();
+        int choiceIndex = 0;
+
+        for (int slot = 0; slot < 9; slot++) {
+            ItemStack input = playerInputs[slot];
+            if (input == null || input.getType().isAir()) continue;
+
+            if (choiceIndex >= choiceList.size()) {
+                // 输入材料比配方材料多
+                return new ItemStack[0];
+            }
+            RecipeChoice choice = choiceList.get(choiceIndex);
+            ItemStack testItem = input.clone();
+            if (choice.test(testItem)) {
+                ItemStack normalized = new ItemStack(testItem.getType(), 1);
+                if (choice instanceof RecipeChoice.ExactChoice) {
+                    normalized.setItemMeta(testItem.getItemMeta());
+                }
+                result[slot] = normalized;
+                choiceIndex++;
+            } else {
+                // 材料不匹配，提前返回
+                return new ItemStack[0];
+            }
+        }
+
+        if (choiceIndex != choiceList.size()) {
+            // 不匹配
+            return new ItemStack[0];
+        }
+        return result;
     }
 
     static {

@@ -74,7 +74,7 @@ public class CraftingCard extends Card {
         // ME输出总线
         if (item instanceof MEExportBus meExportBus) {
             for (int slot : meExportBus.getSettingSlots()) {
-                ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
+                ItemStack setting = blockMenu.getItemInSlot(slot);
                 if (setting == null || setting.getType().isAir()) {
                     continue;
                 }

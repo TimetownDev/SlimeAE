@@ -35,6 +35,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class AutoCraftingSession {
+    private static final int MAX_LORE_LINES = 15;
+    private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
+
     public static final String CRAFTING_KEY = "auto_crafting";
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
@@ -174,7 +177,7 @@ public class AutoCraftingSession {
         if (!hasNext()) return;
         KeyValuePair<CraftingRecipe, Long> next = craftingSteps.get(0);
         boolean doCraft = !isCancelling;
-        if (running == 0 && isCancelling) info.getCraftingSessions().remove(this);
+        if (running <= 0 && isCancelling) info.getCraftingSessions().remove(this);
         if (next.getValue() <= 0) {
             if (running <= 0) {
                 craftingSteps.remove(0);
@@ -217,7 +220,7 @@ public class AutoCraftingSession {
                     continue;
                 }
                 if (!device.isSupport(deviceBlock, next.getKey())) continue;
-                if (running <= maxDevices
+                if (running < maxDevices
                         && doCraft
                         && device.canStartCrafting(deviceBlock, next.getKey())
                         && networkStorage.contains(ItemUtils.createRequests(
@@ -227,7 +230,7 @@ public class AutoCraftingSession {
                     device.startCrafting(deviceBlock, next.getKey());
                     running++;
                     next.setValue(next.getValue() - 1);
-                    if (next.getValue() == 0) doCraft = false;
+                    if (next.getValue() <= 0) doCraft = false;
                 } else if (running > 0
                         && device.isFinished(deviceBlock)
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
@@ -244,6 +247,7 @@ public class AutoCraftingSession {
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+                if (device == null) continue;
                 if (device.isGlobal(deviceBlock)) {
                     globalDevices.add(deviceBlock);
                 }
@@ -252,8 +256,9 @@ public class AutoCraftingSession {
         for (Block deviceBlock : globalDevices) {
             IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
                     StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-            if (running > maxDevices) return;
-            if (doCraft
+            if (device == null) continue;
+            if (running < maxDevices
+                    && doCraft
                     && device.canStartCrafting(deviceBlock, next.getKey())
                     && networkStorage.contains(ItemUtils.createRequests(
                             ItemUtils.getAmounts(next.getKey().getInput())))) {
@@ -262,7 +267,7 @@ public class AutoCraftingSession {
                 device.startCrafting(deviceBlock, next.getKey());
                 running++;
                 next.setValue(next.getValue() - 1);
-                if (next.getValue() == 0) doCraft = false;
+                if (next.getValue() <= 0) doCraft = false;
             } else if (running > 0
                     && device.isFinished(deviceBlock)
                     && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
@@ -326,10 +331,16 @@ public class AutoCraftingSession {
             menu.addItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
+        // 优化，防止任务依赖配方过多时 lore 超限
         if (!process2.isEmpty()) {
             ItemStack itemStack = new AdvancedCustomItemStack(Material.BARREL, "&e&l省略" + process2.size() + "项");
-            List<String> lore = new ArrayList<>();
-            for (KeyValuePair<CraftingRecipe, Long> item : process2) {
+
+            ArrayList<String> lore = new ArrayList<>();
+            int maxLines = MAX_LORE_LINES - 1;
+            int displayCount = Math.min(process2.size(), maxLines);
+            int remaining = process2.size() - displayCount;
+
+            for (KeyValuePair<CraftingRecipe, Long> item : process2.subList(0, displayCount)) {
                 SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
                 if (slimefunItem != null) {
                     lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
@@ -340,6 +351,9 @@ public class AutoCraftingSession {
                                     .getTranslatedName() + " x "
                             + item.getKey().getOutput()[0].getAmount());
                 }
+            }
+            if (remaining > 0) {
+                lore.add(CMIChatColor.translate(String.format(MORE_ITEMS_INDICATOR, remaining)));
             }
             ItemMeta meta = itemStack.getItemMeta();
             meta.setLore(CMIChatColor.translate(lore));

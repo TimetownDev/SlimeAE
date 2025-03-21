@@ -12,7 +12,6 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -44,7 +43,7 @@ public class MEAdvancedVanillaExportBus extends MEAdvancedExportBus {
             if (!(PaperLib.getBlockState(target, false).getState() instanceof Container container)) continue;
 
             for (int slot : getSettingSlots()) {
-                ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
+                ItemStack setting = blockMenu.getItemInSlot(slot);
                 if (setting == null || setting.getType().isAir()) {
                     continue;
                 }

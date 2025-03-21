@@ -25,7 +25,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.slimefun.MEInterface;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
 import me.ddggdd135.slimeae.integrations.fluffyMachines.FluffyBarrelStorage;
 import me.ddggdd135.slimeae.integrations.infinity.InfinityBarrelStorage;
@@ -54,8 +53,8 @@ import org.bukkit.persistence.PersistentDataType;
  * 提供了一系列处理物品堆、存储和显示的实用方法
  */
 public class ItemUtils {
-    public static final String DISPLAY_ITEM = "display_item";
-
+    public static final String DISPLAY_ITEM_KEY = "display_item";
+    public static final String SOURCE_LORE_KEY = "source_lore";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -354,8 +353,7 @@ public class ItemUtils {
             SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
 
             if (checkNetwork && slimefunItem instanceof IMEObject) {
-                if (!(slimefunItem instanceof MEInterface)) return null;
-                else isReadOnly = true;
+                return null;
             }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
                 if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
@@ -774,39 +772,47 @@ public class ItemUtils {
     @Nonnull
     public static ItemStack createDisplayItem(
             @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore) {
-        ItemStack result = new ItemStack(itemStack.getType());
-        ItemMeta meta = itemStack.getItemMeta();
+        ItemStack result = itemStack.clone();
+
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         if (addLore) {
-            List<String> lore = meta.getLore();
+            List<String> lore = result.getLore();
+            if (lore != null) {
+                List<String> finalLore = lore;
+                NBT.modify(result, x -> {
+                    x.getStringList(SOURCE_LORE_KEY).clear();
+                    x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
+                });
+            }
+
             if (lore == null) lore = new ArrayList<>();
+
             lore.add("");
             lore.add("&e物品数量 " + amount);
             if (addPinnedLore) lore.add("&e===已置顶===");
-            meta.setLore(CMIChatColor.translate(lore));
+            result.setLore(CMIChatColor.translate(lore));
         }
-        result.setItemMeta(meta);
+
         NBT.modify(result, x -> {
-            x.setBoolean(DISPLAY_ITEM, true);
+            x.setBoolean(DISPLAY_ITEM_KEY, true);
         });
         return result;
     }
 
     @Nonnull
-    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack, boolean hasLore) {
+    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
         ItemStack result = itemStack.asOne();
-        ItemMeta meta = result.getItemMeta();
-        if (hasLore) {
-            List<String> lore = meta.getLore();
-            if (lore.get(lore.size() - 1).contains("===已置顶===")) lore.remove(lore.size() - 1);
-            lore.remove(lore.size() - 1);
-            lore.remove(lore.size() - 1);
-            meta.setLore(lore);
-        }
-        result.setItemMeta(meta);
+        List<String> lore = NBT.get(result, x -> {
+            if (x.hasTag(SOURCE_LORE_KEY))
+                return x.getStringList(SOURCE_LORE_KEY).toListCopy();
+
+            return null;
+        });
+        result.setLore(lore);
 
         NBT.modify(result, x -> {
-            x.removeKey(DISPLAY_ITEM);
+            x.removeKey(DISPLAY_ITEM_KEY);
+            x.removeKey(SOURCE_LORE_KEY);
         });
         return result;
     }

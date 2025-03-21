@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
@@ -46,6 +48,15 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
     public MECleaner(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
         createPreset(this);
+        addItemHandler(new SimpleBlockBreakHandler() {
+            @Override
+            public void onBlockBreak(@NotNull Block block) {
+                BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
+                if (blockMenu == null) return;
+
+                blockMenu.dropItems(blockMenu.getLocation(), getSettingSlots());
+            }
+        });
     }
 
     @Override
@@ -68,28 +79,16 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         }
         Map<ItemStack, Long> total = storageCells.getStorage();
 
-        int count = 0;
         for (int slot : getSettingSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
-            count++;
+
             long current = total.getOrDefault(template, 0L);
             if (current <= setting) continue;
 
             ItemRequest request = new ItemRequest(template, current - setting, true);
             storageCells.tryTakeItem(request);
-        }
-        if (count == 0) {
-            for (Map.Entry<ItemStack, Long> data : networkStorage.getStorage().entrySet()) {
-                ItemStack template = data.getKey();
-                count++;
-                long current = data.getValue();
-                if (current <= setting) continue;
-
-                ItemRequest request = new ItemRequest(template, current - setting, true);
-                storageCells.tryTakeItem(request);
-            }
         }
     }
 
