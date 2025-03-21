@@ -130,6 +130,11 @@ public class RecipeUtils {
             }
         }
 
+        // 校验输入中是否包含粘液物品，粘液物品不应该用原版配方合成
+        boolean inputHasSimi =
+                Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
+        if (inputHasSimi) return null;
+
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
