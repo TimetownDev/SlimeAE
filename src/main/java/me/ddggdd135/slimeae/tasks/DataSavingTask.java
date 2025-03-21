@@ -8,7 +8,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class DataSavingTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
-    private boolean running = false;
+    private volatile boolean running = false;
 
     private volatile boolean paused = false;
 
