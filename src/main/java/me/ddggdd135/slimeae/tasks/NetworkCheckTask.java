@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -16,7 +17,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class NetworkCheckTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
-    private volatile boolean running = false;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private volatile boolean paused = false;
 
@@ -28,7 +29,7 @@ public class NetworkCheckTask implements Runnable {
     }
 
     private void reset() {
-        running = false;
+        running.set(false);
     }
 
     @Override
@@ -39,11 +40,10 @@ public class NetworkCheckTask implements Runnable {
 
         try {
             // If this method is actually still running... DON'T
-            if (running) {
+            if (!running.compareAndSet(false, true)) {
                 return;
             }
 
-            running = true;
             // Run our ticker code
             if (!halted) {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
