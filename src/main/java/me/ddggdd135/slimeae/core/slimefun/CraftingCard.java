@@ -5,10 +5,14 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.Card;
+import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.slimefun.buses.MEExportBus;
@@ -73,13 +77,21 @@ public class CraftingCard extends Card {
         }
         // ME输出总线
         if (item instanceof MEExportBus meExportBus) {
-            for (int slot : meExportBus.getSettingSlots()) {
-                ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
-                if (setting == null || setting.getType().isAir()) {
+            if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
+                ISettingSlotHolder.updateCache(block, meExportBus, data);
+            List<Pair<ItemKey, Integer>> settings = ISettingSlotHolder.getCache(block.getLocation());
+            for (int i = 0; i < meExportBus.getSettingSlots().length; i++) {
+                Pair<ItemKey, Integer> setting = settings.get(i);
+
+                if (setting == null) {
                     continue;
                 }
-                if (!networkInfo.getStorage().contains(new ItemRequest(setting, setting.getAmount()))) {
-                    NetworkUtils.doCraft(networkInfo, setting, setting.getAmount());
+
+                ItemStack itemStack = setting.getFirstValue().getItemStack();
+                if (!networkInfo
+                        .getStorage()
+                        .contains(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))) {
+                    NetworkUtils.doCraft(networkInfo, itemStack, setting.getSecondValue());
                 }
             }
             cooldowns.put(loc, currentTick);

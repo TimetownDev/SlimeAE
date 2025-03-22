@@ -23,13 +23,12 @@ public class NetworkData {
 
     @Nullable public NetworkInfo getNetworkInfo(Location location) {
         NetworkInfo re = null;
-        Set<NetworkInfo> toDispose = new HashSet<>();
+
         for (NetworkInfo info : AllNetworkData) {
             if (info.getChildren().contains(location)) return info;
             if (info.getController().equals(location)) return info;
         }
 
-        toDispose.forEach(NetworkInfo::dispose);
         return re;
     }
 

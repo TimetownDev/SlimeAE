@@ -14,6 +14,7 @@ import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -78,7 +79,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
             long current = total.getOrDefault(template, 0L);
             if (current <= setting) continue;
 
-            ItemRequest request = new ItemRequest(template, current - setting);
+            ItemRequest request = new ItemRequest(new ItemKey(template), current - setting);
             storageCells.tryTakeItem(request);
         }
         if (count == 0) {
@@ -88,7 +89,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
                 long current = data.getValue();
                 if (current <= setting) continue;
 
-                ItemRequest request = new ItemRequest(template, current - setting, true);
+                ItemRequest request = new ItemRequest(new ItemKey(template), current - setting);
                 storageCells.tryTakeItem(request);
             }
         }

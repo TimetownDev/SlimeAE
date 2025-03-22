@@ -7,16 +7,20 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEChainedBus;
 import me.ddggdd135.slimeae.api.blockdata.MEChainedExportBusData;
 import me.ddggdd135.slimeae.api.blockdata.MEChainedExportBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IBlockData;
 import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
+import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -31,7 +35,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEChainedExportBus extends MEChainedBus {
+public class MEChainedExportBus extends MEChainedBus implements ISettingSlotHolder {
     private final MEChainedExportBusDataAdapter adapter = new MEChainedExportBusDataAdapter();
 
     public MEChainedExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -41,7 +45,6 @@ public class MEChainedExportBus extends MEChainedBus {
             public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
-                blockMenu.dropItems(b.getLocation(), getSettingSlots());
 
                 for (int slot : getCardSlots()) {
                     ItemStack itemStack = blockMenu.getItemInSlot(slot);
@@ -76,17 +79,27 @@ public class MEChainedExportBus extends MEChainedBus {
 
             IStorage networkStorage = info.getStorage();
 
-            for (int slot : getSettingSlots()) {
-                ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), slot);
-                if (setting == null || setting.getType().isAir()) continue;
+            if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
+                ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
+            List<Pair<ItemKey, Integer>> settings = ISettingSlotHolder.getCache(block.getLocation());
+            for (int j = 0; j < getSettingSlots().length; j++) {
+                Pair<ItemKey, Integer> setting = settings.get(j);
+
+                if (setting == null) {
+                    continue;
+                }
+
+                ItemStack itemStack = setting.getFirstValue().getItemStack();
 
                 int[] inputSlots = targetInv
                         .getPreset()
-                        .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, setting);
+                        .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, itemStack);
                 if (inputSlots == null || inputSlots.length == 0) continue;
 
-                if (targetInv.fits(setting, inputSlots)) {
-                    ItemStack[] taken = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount()));
+                if (targetInv.fits(itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
+                    ItemStack[] taken = networkStorage
+                            .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
+                            .toItemStacks();
                     if (taken.length != 0) {
                         targetInv.pushItem(taken[0], inputSlots);
                     }
@@ -153,6 +166,13 @@ public class MEChainedExportBus extends MEChainedBus {
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
+
+        for (int slot : getSettingSlots()) {
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir())
+                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
+            menu.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler(block));
+        }
     }
 
     @Override
@@ -238,12 +258,11 @@ public class MEChainedExportBus extends MEChainedBus {
 
         ItemStack[] itemStacks = meChainedExportBusData.getItemStacks();
 
-        blockMenu.dropItems(location, getSettingSlots());
-
         for (int i = 0; i < getSettingSlots().length; i++) {
             int slot = getSettingSlots()[i];
             blockMenu.replaceExistingItem(slot, itemStacks[i]);
         }
+        ISettingSlotHolder.cache.remove(location);
     }
 
     public boolean hasData(@Nonnull Location location) {

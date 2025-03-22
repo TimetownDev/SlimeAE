@@ -136,7 +136,7 @@ public class AutoCraftingSession {
                     ItemHashMap<Long> input = ItemUtils.getAmounts(craftingRecipe.getInput());
 
                     // 计算需要合成多少次
-                    long out = output.get(key) - input.getOrDefault(key, 0L);
+                    long out = output.getKey(key) - input.getOrDefault(key, 0L);
                     long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
 
                     try {

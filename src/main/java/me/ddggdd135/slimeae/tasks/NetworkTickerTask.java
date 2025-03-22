@@ -59,9 +59,10 @@ public class NetworkTickerTask implements Runnable {
                     for (AutoCraftingSession session : sessions) {
                         if (!session.hasNext()) {
                             networkInfo.getCraftingSessions().remove(session);
-                            Slimefun.runSync(() -> {
-                                session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
-                            });
+                            Slimefun.runSync(() -> session.getMenu()
+                                    .getInventory()
+                                    .getViewers()
+                                    .forEach(HumanEntity::closeInventory));
                         } else session.moveNext(1024);
                     }
                     networkInfo.updateAutoCraftingMenu();

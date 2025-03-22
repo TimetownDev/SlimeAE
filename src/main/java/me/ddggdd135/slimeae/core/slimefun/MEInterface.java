@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.blockdata.MEExportBusData;
@@ -37,7 +39,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
-public class MEInterface extends TickingBlock implements IMECraftHolder, InventoryBlock, ICardHolder, IDataBlock {
+public class MEInterface extends TickingBlock
+        implements IMECraftHolder, InventoryBlock, ICardHolder, IDataBlock, ISettingSlotHolder {
     private static final MEInterfaceDataAdapter adapter = new MEInterfaceDataAdapter();
     public static final BlockFace[] VaildBlockFace = new BlockFace[] {
         BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN
@@ -57,27 +60,34 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
         if (info == null) return;
 
         IStorage networkStorage = info.getStorage();
-        for (int slot : getItemSlots()) {
-            int settingSlot = slot - 9;
-            ItemStack setting = ItemUtils.getSettingItem(blockMenu.getInventory(), settingSlot);
+        if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
+            ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
+        List<Pair<ItemKey, Integer>> settings = ISettingSlotHolder.getCache(block.getLocation());
+        for (int i = 0; i < getItemSlots().length; i++) {
+            int slot = getItemSlots()[i];
+
+            Pair<ItemKey, Integer> setting = settings.get(i);
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (SlimefunUtils.isItemSimilar(setting, MenuItems.SETTING, true, false)) {
-                if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
+
+            if (setting == null) {
+                networkStorage.pushItem(itemStack);
                 continue;
             }
 
-            if (!SlimefunUtils.isItemSimilar(setting, itemStack, true, false)) {
+            ItemStack settingItemStack = setting.getFirstValue().getItemStack();
+
+            if (!SlimefunUtils.isItemSimilar(settingItemStack, itemStack, true, false)) {
                 if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
             }
 
             int amount = 0;
             if (itemStack != null && !itemStack.getType().isAir()) amount = itemStack.getAmount();
-            if (amount == setting.getAmount()) continue;
-            if (amount > setting.getAmount()) {
+            if (amount == setting.getSecondValue()) continue;
+            if (amount > setting.getSecondValue()) {
                 ItemStack toPush = itemStack.clone();
-                toPush.setAmount(amount - setting.getAmount());
+                toPush.setAmount(amount - setting.getSecondValue());
                 networkStorage.pushItem(toPush);
-                itemStack.setAmount(setting.getAmount() + toPush.getAmount());
+                itemStack.setAmount(setting.getSecondValue() + toPush.getAmount());
                 continue;
             }
 
@@ -86,7 +96,9 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
                 newItemStack = itemStack.clone();
                 itemStack.setAmount(0);
             }
-            ItemStack[] received = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount() - amount));
+            ItemStack[] received = networkStorage
+                    .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue() - amount))
+                    .toItemStacks();
             if (received.length != 0) {
                 if (newItemStack != null && !newItemStack.getType().isAir()) {
                     newItemStack.setAmount(amount + received[0].getAmount());
@@ -156,9 +168,6 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
         preset.drawBackground(getBoarderSlots());
-        for (int slot : getSettingSlots()) {
-            preset.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler());
-        }
         for (int slot : getPatternSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getPatternSlotClickHandler());
         }
@@ -171,6 +180,7 @@ public class MEInterface extends TickingBlock implements IMECraftHolder, Invento
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir())
                 ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
+            menu.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler(block));
         }
         for (int slot : getPatternSlots()) {
             if (menu.getItemInSlot(slot) == null

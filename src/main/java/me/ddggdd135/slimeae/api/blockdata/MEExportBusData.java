@@ -29,6 +29,11 @@ public class MEExportBusData extends MEBusData implements IInventoryBlockData {
     }
 
     @Override
+    public boolean needItems() {
+        return false;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

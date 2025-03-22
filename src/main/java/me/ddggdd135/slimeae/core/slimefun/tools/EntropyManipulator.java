@@ -94,9 +94,8 @@ public class EntropyManipulator extends SlimefunItem implements Rechargeable, Re
         if (block.getType() != Material.POTATOES) return false;
 
         Block farmlandBlock = block.getRelative(BlockFace.DOWN);
-        if (!(farmlandBlock.getBlockData() instanceof Farmland)) return false;
+        if (!(farmlandBlock.getBlockData() instanceof Farmland farmland)) return false;
 
-        Farmland farmland = (Farmland) farmlandBlock.getBlockData();
         if (farmland.getMoisture() < 1) {
             showAngryVillagerParticles(block.getLocation());
             return true;
