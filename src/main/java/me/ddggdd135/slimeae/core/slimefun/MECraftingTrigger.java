@@ -166,7 +166,8 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
 
     public int[] getSettingSlots() {
         return new int[] {
-            10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 37, 38, 39, 40, 41, 42, 43
+            10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42,
+            43
         };
     }
 }
