@@ -3,7 +3,6 @@ package me.ddggdd135.slimeae.tasks;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -14,7 +13,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class NetworkTimeConsumingTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
-    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private volatile boolean paused = false;
 
@@ -25,22 +23,13 @@ public class NetworkTimeConsumingTask implements Runnable {
         scheduler.runTaskTimerAsynchronously(plugin, this, 100L, tickRate);
     }
 
-    private void reset() {
-        running.set(false);
-    }
-
     @Override
-    public void run() {
+    public synchronized void run() {
         if (paused) {
             return;
         }
 
         try {
-            // If this method is actually still running... DON'T
-            if (!running.compareAndSet(false, true)) {
-                return;
-            }
-
             // Run our ticker code
             if (!halted) {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
@@ -58,8 +47,6 @@ public class NetworkTimeConsumingTask implements Runnable {
             SlimeAEPlugin.getInstance()
                     .getLogger()
                     .log(Level.SEVERE, x, () -> "An Exception was caught while ticking Networks for SlimeAE");
-        } finally {
-            reset();
         }
     }
 
