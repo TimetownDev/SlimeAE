@@ -61,15 +61,15 @@ public class NetworkTickerTask implements Runnable {
                     NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
                     if (info == null) continue;
 
-                    SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(networkInfo.getController());
-                    if (slimefunBlockData == null) {
-                        networkInfo.dispose();
+                    SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(info.getController());
+                    if (slimefunBlockData == null || !info.getController().isChunkLoaded()) {
+                        info.dispose();
                         continue;
                     }
 
                     SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
                     if (!(slimefunItem instanceof IMEController)) {
-                        networkInfo.dispose();
+                        info.dispose();
                     }
 
                     ItemStorage tempStorage = info.getTempStorage();
@@ -83,7 +83,7 @@ public class NetworkTickerTask implements Runnable {
                         tempStorage.addItem(items, true);
                     }
 
-                    StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
+                    StorageCollection storageCollection = (StorageCollection) info.getStorage();
                     for (IStorage storage : storageCollection.getStorages()) {
                         if (storage instanceof QuantumStorage quantumStorage) {
                             quantumStorage.sync();
@@ -94,7 +94,7 @@ public class NetworkTickerTask implements Runnable {
                         IMEObject imeObject =
                                 SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
                         if (imeObject == null) return;
-                        imeObject.onNetworkTick(x.getBlock(), networkInfo);
+                        imeObject.onNetworkTick(x.getBlock(), info);
                     });
 
                     // tick autoCrafting
