@@ -1,5 +1,8 @@
 package me.ddggdd135.slimeae.tasks;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,9 +11,17 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.ItemRequest;
+import me.ddggdd135.slimeae.api.items.ItemStorage;
+import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.ddggdd135.slimeae.integrations.networks.QuantumStorage;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitScheduler;
 
 public class NetworkTickerTask implements Runnable {
@@ -47,24 +58,56 @@ public class NetworkTickerTask implements Runnable {
             if (!halted) {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
                 for (NetworkInfo networkInfo : allNetworkData) {
-                    new HashSet<>(networkInfo.getChildren()).forEach(x -> {
-                        IMEObject slimefunItem =
+                    NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
+                    if (info == null) continue;
+
+                    SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(networkInfo.getController());
+                    if (slimefunBlockData == null) {
+                        networkInfo.dispose();
+                        continue;
+                    }
+
+                    SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+                    if (!(slimefunItem instanceof IMEController)) {
+                        networkInfo.dispose();
+                    }
+
+                    ItemStorage tempStorage = info.getTempStorage();
+                    Set<ItemStack> toPush =
+                            new HashSet<>(tempStorage.getStorage().keySet());
+                    for (ItemStack itemStack : toPush) {
+                        ItemStack[] items =
+                                tempStorage.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
+                        info.getStorage().pushItem(items);
+                        items = ItemUtils.trimItems(items);
+                        tempStorage.addItem(items, true);
+                    }
+
+                    StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
+                    for (IStorage storage : storageCollection.getStorages()) {
+                        if (storage instanceof QuantumStorage quantumStorage) {
+                            quantumStorage.sync();
+                        }
+                    }
+
+                    new HashSet<>(info.getChildren()).forEach(x -> {
+                        IMEObject imeObject =
                                 SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
-                        if (slimefunItem == null) return;
-                        slimefunItem.onNetworkTick(x.getBlock(), networkInfo);
+                        if (imeObject == null) return;
+                        imeObject.onNetworkTick(x.getBlock(), networkInfo);
                     });
 
                     // tick autoCrafting
-                    Set<AutoCraftingSession> sessions = new HashSet<>(networkInfo.getCraftingSessions());
+                    Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
                     for (AutoCraftingSession session : sessions) {
                         if (!session.hasNext()) {
-                            networkInfo.getCraftingSessions().remove(session);
+                            info.getCraftingSessions().remove(session);
                             Slimefun.runSync(() -> {
                                 session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
                             });
                         } else session.moveNext(1024);
                     }
-                    networkInfo.updateAutoCraftingMenu();
+                    info.updateAutoCraftingMenu();
                 }
             }
         } catch (Exception | LinkageError x) {

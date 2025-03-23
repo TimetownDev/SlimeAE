@@ -52,8 +52,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private final StorageCellDataController storageCellDataController = new StorageCellDataController();
 
     private final NetworkTickerTask networkTicker = new NetworkTickerTask();
-    private final NetworkCheckTask networkChecker = new NetworkCheckTask();
-    private final NetworkRefreshTask networkRefresher = new NetworkRefreshTask();
     private final NetworkTimeConsumingTask networkTimeConsumingTask = new NetworkTimeConsumingTask();
     private final DataSavingTask dataSavingTask = new DataSavingTask();
     private final SlimeAECommand slimeAECommand = new SlimeAECommand();
@@ -114,8 +112,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
                         1,
                         Slimefun.getTickerTask().getTickRate());
         networkTicker.start(this);
-        networkChecker.start(this);
-        networkRefresher.start(this);
         networkTimeConsumingTask.start(this);
         dataSavingTask.start(this);
 
@@ -277,16 +273,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkTickerTask getNetworkTicker() {
         return getInstance().networkTicker;
-    }
-
-    @Nonnull
-    public static NetworkCheckTask getNetworkChecker() {
-        return getInstance().networkChecker;
-    }
-
-    @Nonnull
-    public static NetworkRefreshTask getNetworkRefresher() {
-        return getInstance().networkRefresher;
     }
 
     @Nonnull
