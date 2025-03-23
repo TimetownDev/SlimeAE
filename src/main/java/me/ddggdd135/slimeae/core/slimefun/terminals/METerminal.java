@@ -406,22 +406,28 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     }
 
     protected boolean doFilterNoJEG(Map.Entry<ItemStack, Long> x, String filter) {
-        ItemStack item = x.getKey();
-        String displayName = ItemStackHelper.getDisplayName(item);
+        String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
+        if (itemType.startsWith(filter)) {
+            return false;
+        }
+        String displayName = ItemStackHelper.getDisplayName(x.getKey());
         String cleanName = ChatColor.stripColor(displayName).toLowerCase(Locale.ROOT);
 
-        String pyName = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.INPUT, "");
-        String pyFirstLetter = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.FIRST_LETTER, "");
-        boolean matches = cleanName.contains(filter)
-                || pyName.contains(filter.toLowerCase())
-                || pyFirstLetter.contains(filter.toLowerCase());
-        return !matches;
+        return !cleanName.contains(filter);
     }
 
     protected boolean doFilterWithJEG(Map.Entry<ItemStack, Long> x, List<SlimefunItem> slimefunItems, String filter) {
         ItemStack item = x.getKey();
         if (item.getType().isItem() && SlimefunItem.getOptionalByItem(item).isEmpty()) {
-            return doFilterNoJEG(x, filter);
+            String displayName = ItemStackHelper.getDisplayName(item);
+            String cleanName = ChatColor.stripColor(displayName).toLowerCase(Locale.ROOT);
+
+            String pyName = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.INPUT, "");
+            String pyFirstLetter = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.FIRST_LETTER, "");
+            boolean matches = cleanName.contains(filter)
+                    || pyName.contains(filter.toLowerCase())
+                    || pyFirstLetter.contains(filter.toLowerCase());
+            return !matches;
         }
         Optional<SlimefunItem> sfItem = SlimefunItem.getOptionalByItem(item);
         return sfItem.map(s -> !slimefunItems.contains(s)).orElse(true);
