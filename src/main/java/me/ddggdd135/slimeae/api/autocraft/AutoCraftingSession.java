@@ -173,7 +173,7 @@ public class AutoCraftingSession {
         return !craftingSteps.isEmpty();
     }
 
-    public void moveNext(int maxDevices) {
+    public synchronized void moveNext(int maxDevices) {
         if (!hasNext()) return;
         KeyValuePair<CraftingRecipe, Long> next = craftingSteps.get(0);
         boolean doCraft = !isCancelling;
