@@ -2,6 +2,8 @@ package me.ddggdd135.slimeae.core.slimefun.terminals;
 
 import com.balugaq.jeg.api.groups.SearchGroup;
 import com.balugaq.jeg.implementation.JustEnoughGuide;
+import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum;
+import com.github.houbb.pinyin.util.PinyinHelper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -36,6 +38,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import net.guizhanss.minecraft.guizhanlib.gugu.minecraft.helpers.inventory.ItemStackHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -403,29 +406,24 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     }
 
     protected boolean doFilterNoJEG(Map.Entry<ItemStack, Long> x, String filter) {
-        String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-        if (itemType.startsWith(filter)) {
-            return false;
-        }
-        String name = CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
+        ItemStack item = x.getKey();
+        String displayName = ItemStackHelper.getDisplayName(item);
+        String cleanName = ChatColor.stripColor(displayName).toLowerCase(Locale.ROOT);
 
-        return !name.contains(filter);
+        String pyName = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.INPUT, "");
+        String pyFirstLetter = PinyinHelper.toPinyin(cleanName, PinyinStyleEnum.FIRST_LETTER, "");
+        boolean matches = cleanName.contains(filter)
+                || pyName.contains(filter.toLowerCase())
+                || pyFirstLetter.contains(filter.toLowerCase());
+        return !matches;
     }
 
     protected boolean doFilterWithJEG(Map.Entry<ItemStack, Long> x, List<SlimefunItem> slimefunItems, String filter) {
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(x.getKey());
-        if (slimefunItem == null) return true;
-        if (!slimefunItems.contains(slimefunItem)) {
-            String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
-            if (itemType.startsWith(filter)) {
-                return false;
-            }
-            String name =
-                    CMIChatColor.stripColor(ItemUtils.getItemName(x.getKey()).toLowerCase(Locale.ROOT));
-
-            return !name.contains(filter);
+        ItemStack item = x.getKey();
+        if (item.getType().isItem() && SlimefunItem.getOptionalByItem(item).isEmpty()) {
+            return doFilterNoJEG(x, filter);
         }
-
-        return false;
+        Optional<SlimefunItem> sfItem = SlimefunItem.getOptionalByItem(item);
+        return sfItem.map(s -> !slimefunItems.contains(s)).orElse(true);
     }
 }
