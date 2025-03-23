@@ -22,7 +22,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class NetworkInfo implements IDisposable {
     private final Location controller;
@@ -192,13 +191,13 @@ public class NetworkInfo implements IDisposable {
                                 .toArray(String[]::new));
                 itemStack.setAmount((int) Math.min(64, session.getCount()));
             }
-            ItemMeta meta = itemStack.getItemMeta();
-            List<String> lore = meta.getLore();
+
+            List<String> lore = itemStack.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
             lore.add("&e点击查看");
-            meta.setLore(CMIChatColor.translate(lore));
-            itemStack.setItemMeta(meta);
+            itemStack.setLore(CMIChatColor.translate(lore));
+
             autoCraftingMenu.replaceExistingItem(i, itemStack);
             autoCraftingMenu.addMenuClickHandler(i, (player, i1, itemStack1, clickAction) -> {
                 session.showGUI(player);
