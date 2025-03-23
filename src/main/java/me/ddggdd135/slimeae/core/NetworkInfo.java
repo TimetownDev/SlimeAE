@@ -182,6 +182,7 @@ public class NetworkInfo implements IDisposable {
             if (itemStacks.length == 1) {
                 itemStack = itemStacks[0].clone();
                 itemStack.setAmount((int) Math.min(64, session.getCount()));
+                if (itemStack.isEmpty()) continue;
             } else {
                 itemStack = new AdvancedCustomItemStack(
                         Material.BARREL,
