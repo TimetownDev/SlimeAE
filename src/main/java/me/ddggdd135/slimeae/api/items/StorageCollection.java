@@ -132,9 +132,9 @@ public class StorageCollection implements IStorage {
             rest.putKey(request.getKey(), amount);
         }
         ItemUtils.trim(rest);
-        for (Map.Entry<ItemStack, Long> entry : rest.entrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : rest.keyEntrySet()) {
             if (takeCache.containsKey(entry.getKey())) {
-                IStorage storage = takeCache.get(entry.getKey());
+                IStorage storage = takeCache.getKey(entry.getKey());
                 ItemStorage itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
                 found.addItem(itemStacks.getStorage());
                 if (rest.keySet().isEmpty()) break;
@@ -151,6 +151,8 @@ public class StorageCollection implements IStorage {
             }
 
             found.addItem(itemStacks.getStorage());
+            rest = ItemUtils.takeItems(rest, found.getStorage());
+            ItemUtils.trim(rest);
             if (rest.keySet().isEmpty()) break;
         }
         notIncluded.addAll(rest.sourceKeySet());

@@ -70,7 +70,7 @@ public class MEInterface extends TickingBlock
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
 
             if (setting == null) {
-                networkStorage.pushItem(itemStack);
+                if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
                 continue;
             }
 

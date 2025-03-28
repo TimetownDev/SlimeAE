@@ -120,6 +120,7 @@ public class ItemStorage implements IStorage {
 
     @Nonnull
     public ItemStack[] toItemStacks() {
+        ItemUtils.trim(storage);
         return ItemUtils.createItems(storage);
     }
 
