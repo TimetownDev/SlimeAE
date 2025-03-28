@@ -24,6 +24,7 @@ import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -136,57 +137,63 @@ public class MECraftPlanningTerminal extends METerminal {
         player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
         ChatUtils.awaitInput(player, msg -> {
             if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
-            try {
-                int amount = Integer.parseInt(msg);
-                if (amount > NetworkInfo.getMaxCraftingAmount()) {
-                    player.sendMessage(
-                            CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
-                    return;
-                }
-                if (amount <= 0) {
-                    player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
-                    return;
-                }
-
-                AutoCraftingSession session = new AutoCraftingSession(info, recipeEntry.getRecipe(), amount);
-                session.refreshGUI(45, false);
-                AEMenu menu = session.getMenu();
-                int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
-                int acceptSlot = 47;
-                int cancelSlot = 51;
-                for (int slot1 : borders) {
-                    menu.replaceExistingItem(slot1, ChestMenuUtils.getBackground());
-                    menu.addMenuClickHandler(slot1, ChestMenuUtils.getEmptyClickHandler());
-                }
-                menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
-                menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
-                    if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
-                        player.sendMessage(CMIChatColor.translate(
-                                "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
-                        return false;
+            Bukkit.getScheduler().runTaskAsynchronously(SlimeAEPlugin.getInstance(), () -> {
+                try {
+                    int amount = Integer.parseInt(msg);
+                    if (amount > NetworkInfo.getMaxCraftingAmount()) {
+                        player.sendMessage(
+                                CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                        return;
                     }
-                    player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
-                    session.refreshGUI(54);
-                    session.start();
-                    return false;
-                });
-                menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
-                menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
-                    player.closeInventory();
-                    return false;
-                });
-                menu.open(player);
-            } catch (NumberFormatException e) {
-                player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
-            } catch (NoEnoughMaterialsException e) {
-                player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
-                for (Map.Entry<ItemStack, Long> entry : e.getMissingMaterials().entrySet()) {
-                    String itemName = ItemUtils.getItemName(entry.getKey());
-                    player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                    if (amount <= 0) {
+                        player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                        return;
+                    }
+
+                    AutoCraftingSession session = new AutoCraftingSession(info, recipeEntry.getRecipe(), amount);
+                    Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> {
+                        session.refreshGUI(45, false);
+                        AEMenu menu = session.getMenu();
+                        int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
+                        int acceptSlot = 47;
+                        int cancelSlot = 51;
+                        for (int slot1 : borders) {
+                            menu.replaceExistingItem(slot1, ChestMenuUtils.getBackground());
+                            menu.addMenuClickHandler(slot1, ChestMenuUtils.getEmptyClickHandler());
+                        }
+                        menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
+                        menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
+                            if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
+                                player.sendMessage(CMIChatColor.translate(
+                                        "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
+                                return false;
+                            }
+                            player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
+                            session.refreshGUI(54);
+                            session.start();
+                            return false;
+                        });
+                        menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
+                        menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
+                            player.closeInventory();
+                            return false;
+                        });
+                        menu.open(player);
+                    });
+                } catch (NumberFormatException e) {
+                    player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
+                } catch (NoEnoughMaterialsException e) {
+                    player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
+                    for (Map.Entry<ItemStack, Long> entry :
+                            e.getMissingMaterials().entrySet()) {
+                        String itemName = ItemUtils.getItemName(entry.getKey());
+                        player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
+                    }
+                } catch (Exception e) {
+                    player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
                 }
-            } catch (Exception e) {
-                player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
-            }
+            });
+            player.sendMessage(CMIChatColor.translate("&a&l计算中..."));
         });
     }
 
