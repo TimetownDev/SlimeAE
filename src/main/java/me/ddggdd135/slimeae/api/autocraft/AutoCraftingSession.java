@@ -21,13 +21,13 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
+import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
-import me.ddggdd135.slimeae.utils.KeyValuePair;
 import net.Zrips.CMILib.Items.CMIMaterial;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -44,8 +44,10 @@ public class AutoCraftingSession {
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final long count;
-    private final List<KeyValuePair<CraftingRecipe, Long>> craftingSteps;
+    private final List<CraftStep> craftingSteps;
     private int running = 0;
+    private int virtualRunning = 0;
+    private int virtualProcess = 0;
     private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
@@ -87,11 +89,11 @@ public class AutoCraftingSession {
     }
 
     @Nonnull
-    public List<KeyValuePair<CraftingRecipe, Long>> getCraftingSteps() {
+    public List<CraftStep> getCraftingSteps() {
         return craftingSteps;
     }
 
-    private List<KeyValuePair<CraftingRecipe, Long>> match(CraftingRecipe recipe, long count, ItemStorage storage) {
+    private List<CraftStep> match(CraftingRecipe recipe, long count, ItemStorage storage) {
         if (!craftingPath.add(recipe)) {
             throw new IllegalStateException("检测到循环依赖的合成配方");
         }
@@ -111,7 +113,7 @@ public class AutoCraftingSession {
                 throw new NoEnoughMaterialsException(missing.getStorage());
             }
 
-            List<KeyValuePair<CraftingRecipe, Long>> result = new ArrayList<>();
+            List<CraftStep> result = new ArrayList<>();
             ItemStorage missing = new ItemStorage();
             ItemHashMap<Long> in = ItemUtils.getAmounts(recipe.getInput());
 
@@ -159,7 +161,7 @@ public class AutoCraftingSession {
                 throw new NoEnoughMaterialsException(missing.getStorage());
             }
 
-            result.add(new KeyValuePair<>(recipe, count));
+            result.add(new CraftStep(recipe, count));
             return result;
         } finally {
             // 无论是否成功,都要从路径中移除当前配方
@@ -177,11 +179,13 @@ public class AutoCraftingSession {
 
     public synchronized void moveNext(int maxDevices) {
         if (!hasNext()) return;
-        KeyValuePair<CraftingRecipe, Long> next = craftingSteps.get(0);
+        CraftStep next = craftingSteps.get(0);
+        CraftType craftType = next.getRecipe().getCraftType();
         boolean doCraft = !isCancelling;
-        if (running <= 0 && isCancelling) info.getCraftingSessions().remove(this);
-        if (next.getValue() <= 0) {
-            if (running <= 0) {
+        if (running <= 0 && virtualRunning <= 0 && isCancelling)
+            info.getCraftingSessions().remove(this);
+        if (next.getAmount() <= 0) {
+            if (running <= 0 && virtualRunning <= 0) {
                 craftingSteps.remove(0);
                 return;
             }
@@ -189,53 +193,52 @@ public class AutoCraftingSession {
             doCraft = false;
         }
         Location[] locations = info.getRecipeMap().entrySet().stream()
-                .filter(x -> x.getValue().contains(next.getKey()))
+                .filter(x -> x.getValue().contains(next.getRecipe()))
                 .map(Map.Entry::getKey)
                 .toArray(Location[]::new);
 
         IStorage networkStorage = info.getStorage();
         ItemStorage tempStorage = info.getTempStorage();
         if (!networkStorage.contains(ItemUtils.createRequests(
-                        ItemUtils.getAmounts(next.getKey().getInput())))
-                && running <= 0) {
+                        ItemUtils.getAmounts(next.getRecipe().getInput())))
+                && running <= 0
+                && virtualRunning <= 0) {
             // 合成出现错误 重新规划
             try {
                 info.getCraftingSessions().remove(this);
                 new AutoCraftingSession(
                                 info,
                                 recipe,
-                                craftingSteps.get(craftingSteps.size() - 1).getValue())
+                                craftingSteps.get(craftingSteps.size() - 1).getAmount())
                         .start();
             } catch (Throwable ignored) {
             }
         }
-        Set<Block> globalDevices = new HashSet<>();
+
         for (Location location : locations) {
             IMECraftHolder holder =
                     SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(next.getKey())))
+            CraftingRecipe nextRecipe = next.getRecipe();
+            if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(nextRecipe)))
                 continue;
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
-                IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
+                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (device.isGlobal(deviceBlock)) {
-                    continue;
-                }
-                if (!device.isSupport(deviceBlock, next.getKey())) continue;
+                if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
+                if (!device.isSupport(deviceBlock, nextRecipe)) continue;
                 if (running < maxDevices
                         && doCraft
-                        && device.canStartCrafting(deviceBlock, next.getKey())
-                        && networkStorage.contains(ItemUtils.createRequests(
-                                ItemUtils.getAmounts(next.getKey().getInput())))) {
-                    networkStorage.tryTakeItem(ItemUtils.createRequests(
-                            ItemUtils.getAmounts(next.getKey().getInput())));
-                    device.startCrafting(deviceBlock, next.getKey());
+                        && device.canStartCrafting(deviceBlock, nextRecipe)
+                        && networkStorage.contains(
+                                ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())))) {
+                    networkStorage.tryTakeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
+                    device.startCrafting(deviceBlock, nextRecipe);
                     running++;
-                    next.setValue(next.getValue() - 1);
-                    if (next.getValue() <= 0) doCraft = false;
+                    next.decreaseAmount(1);
+                    if (next.getAmount() <= 0) doCraft = false;
                 } else if (running > 0
                         && device.isFinished(deviceBlock)
-                        && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
+                        && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
                     tempStorage.addItem(finished.getOutput(), true);
@@ -243,42 +246,69 @@ public class AutoCraftingSession {
                 }
             }
         }
-        for (Location location : info.getRecipeMap().keySet()) {
-            IMECraftHolder holder =
-                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
-                IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
-                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (device == null) continue;
-                if (device.isGlobal(deviceBlock)) {
-                    globalDevices.add(deviceBlock);
-                }
+
+        // 计算虚拟设备
+        if (isCancelling) {
+            ItemHashMap<Long> resultItems = new ItemHashMap<>();
+            for (Map.Entry<ItemKey, Long> entry :
+                    ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+                resultItems.putKey(entry.getKey(), entry.getValue() * virtualRunning);
+            }
+            tempStorage.addItem(resultItems, true);
+            virtualRunning = 0;
+
+            menu.getContents();
+            if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
+            return;
+        }
+        int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
+                - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
+        int sessions = 0;
+
+        for (AutoCraftingSession session : info.getCraftingSessions()) {
+            if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
+        }
+
+        long neededSpeed = Math.min(next.getAmount() * 4L + virtualRunning * 4L, maxDevices * 4L);
+        int speed = available / sessions;
+        if (speed > maxDevices * 4) speed = maxDevices * 4;
+        if (speed > neededSpeed) speed = (int) neededSpeed;
+
+        long actualAmount = Math.min(speed / 4, next.getAmount());
+        ItemHashMap<Long> neededItems = new ItemHashMap<>();
+        for (Map.Entry<ItemKey, Long> entry :
+                ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+            neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
+        }
+
+        ItemRequest[] requests = ItemUtils.createRequests(neededItems);
+        if (networkStorage.contains(requests)) {
+            networkStorage.tryTakeItem(requests);
+            virtualRunning += (int) actualAmount;
+            next.decreaseAmount(actualAmount);
+
+            if (virtualRunning == actualAmount) {
+                menu.getContents();
+                if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
+
+                return;
             }
         }
-        for (Block deviceBlock : globalDevices) {
-            IMECraftDevice device = (IMECraftDevice) SlimefunItem.getById(
-                    StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-            if (device == null) continue;
-            if (running < maxDevices
-                    && doCraft
-                    && device.canStartCrafting(deviceBlock, next.getKey())
-                    && networkStorage.contains(ItemUtils.createRequests(
-                            ItemUtils.getAmounts(next.getKey().getInput())))) {
-                networkStorage.tryTakeItem(ItemUtils.createRequests(
-                        ItemUtils.getAmounts(next.getKey().getInput())));
-                device.startCrafting(deviceBlock, next.getKey());
-                running++;
-                next.setValue(next.getValue() - 1);
-                if (next.getValue() <= 0) doCraft = false;
-            } else if (running > 0
-                    && device.isFinished(deviceBlock)
-                    && device.getFinishedCraftingRecipe(deviceBlock).equals(next.getKey())) {
-                CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
-                device.finishCrafting(deviceBlock);
-                if (finished != null) tempStorage.addItem(finished.getOutput(), true);
-                running--;
-            }
+
+        virtualProcess += speed;
+        info.getVirtualCraftingDeviceUsed()
+                .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) - speed);
+
+        int result = virtualProcess / 4;
+        virtualProcess -= result * 4;
+
+        virtualRunning -= result;
+        ItemHashMap<Long> resultItems = new ItemHashMap<>();
+        for (Map.Entry<ItemKey, Long> entry :
+                ItemUtils.getAmounts(next.getRecipe().getOutput()).keyEntrySet()) {
+            resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
+        tempStorage.addItem(resultItems, true);
 
         menu.getContents();
         if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
@@ -295,8 +325,8 @@ public class AutoCraftingSession {
 
     public void refreshGUI(int maxSize, boolean cancelButton) {
         if (cancelButton) maxSize--;
-        List<KeyValuePair<CraftingRecipe, Long>> process = getCraftingSteps();
-        List<KeyValuePair<CraftingRecipe, Long>> process2 = new ArrayList<>();
+        List<CraftStep> process = getCraftingSteps();
+        List<CraftStep> process2 = new ArrayList<>();
         if (process.size() > maxSize - 1) {
             process2 = process.subList(maxSize, process.size());
             process = process.subList(0, maxSize);
@@ -306,8 +336,8 @@ public class AutoCraftingSession {
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
         for (int i = 0; i < process.size(); i++) {
-            KeyValuePair<CraftingRecipe, Long> item = process.get(i);
-            ItemStack[] itemStacks = item.getKey().getOutput();
+            CraftStep item = process.get(i);
+            ItemStack[] itemStacks = item.getRecipe().getOutput();
             ItemStack itemStack;
             if (itemStacks.length == 1) {
                 itemStack = itemStacks[0].clone();
@@ -323,8 +353,8 @@ public class AutoCraftingSession {
             List<String> lore = meta.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
-            lore.add("&a计划合成 &e" + item.getValue() + "&a次");
-            if (i == 0 && running != 0) lore.add("&a合成中 &e" + running);
+            lore.add("&a计划合成 &e" + item.getAmount() + "&a次");
+            if (i == 0 && running + virtualRunning != 0) lore.add("&a合成中 &e" + (running + virtualRunning));
             meta.setLore(CMIChatColor.translate(lore));
             itemStack.setItemMeta(meta);
             NBT.modify(itemStack, x -> {
@@ -342,16 +372,18 @@ public class AutoCraftingSession {
             int displayCount = Math.min(process2.size(), maxLines);
             int remaining = process2.size() - displayCount;
 
-            for (KeyValuePair<CraftingRecipe, Long> item : process2.subList(0, displayCount)) {
-                SlimefunItem slimefunItem = SlimefunItem.getByItem(item.getKey().getOutput()[0]);
+            for (CraftStep item : process2.subList(0, displayCount)) {
+                CraftingRecipe craftingRecipe = item.getRecipe();
+                SlimefunItem slimefunItem =
+                        SlimefunItem.getByItem(craftingRecipe.getOutput()[0]);
                 if (slimefunItem != null) {
                     lore.add("  - " + CMIChatColor.stripColor(slimefunItem.getItemName()) + " x "
-                            + item.getKey().getOutput()[0].getAmount());
+                            + craftingRecipe.getOutput()[0].getAmount());
                 } else {
                     lore.add("  - "
-                            + CMIMaterial.get(item.getKey().getOutput()[0].getType())
+                            + CMIMaterial.get(craftingRecipe.getOutput()[0].getType())
                                     .getTranslatedName() + " x "
-                            + item.getKey().getOutput()[0].getAmount());
+                            + craftingRecipe.getOutput()[0].getAmount());
                 }
             }
             if (remaining > 0) {

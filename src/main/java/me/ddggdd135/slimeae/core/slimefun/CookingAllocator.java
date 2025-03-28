@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
+import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -30,7 +30,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class CookingAllocator extends MEBus implements IMECraftDevice {
+public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     private final Map<Block, CraftingRecipe> recipeMap = new HashMap<>();
     private final Set<Block> running = new HashSet<>();
 
@@ -145,9 +145,4 @@ public class CookingAllocator extends MEBus implements IMECraftDevice {
 
     @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
-
-    @Override
-    public boolean isGlobal(Block block) {
-        return false;
-    }
 }

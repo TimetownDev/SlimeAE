@@ -11,6 +11,7 @@ import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -28,6 +29,8 @@ public class NetworkInfo implements IDisposable {
     private Set<Location> children = new ConcurrentHashSet<>();
     private final Set<Location> craftingHolders = new ConcurrentHashSet<>();
     private final Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
+    private final Map<CraftType, Integer> virtualCraftingDeviceSpeeds = new ConcurrentHashMap<>();
+    private final Map<CraftType, Integer> virtualCraftingDeviceUsed = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private IStorage storageNoNetworks = new StorageCollection();
     private final Set<AutoCraftingSession> craftingSessions = new ConcurrentHashSet<>();
@@ -129,6 +132,16 @@ public class NetworkInfo implements IDisposable {
     @Nonnull
     public Map<Location, Set<CraftingRecipe>> getRecipeMap() {
         return recipeMap;
+    }
+
+    @Nonnull
+    public Map<CraftType, Integer> getVirtualCraftingDeviceSpeeds() {
+        return virtualCraftingDeviceSpeeds;
+    }
+
+    @Nonnull
+    public Map<CraftType, Integer> getVirtualCraftingDeviceUsed() {
+        return virtualCraftingDeviceUsed;
     }
 
     @Nonnull

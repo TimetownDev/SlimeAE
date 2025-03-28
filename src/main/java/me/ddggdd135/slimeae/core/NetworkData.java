@@ -1,18 +1,20 @@
 package me.ddggdd135.slimeae.core;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
+import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
@@ -83,10 +85,28 @@ public class NetworkData {
             newRecipeMap.put(location, new HashSet<>(List.of(slimefunItem.getSupportedRecipes(location.getBlock()))));
         }
 
+        Map<CraftType, Integer> newSpeeds = new ConcurrentHashMap<>();
+        for (Location location : info.getRecipeMap().keySet()) {
+            IMECraftHolder holder =
+                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
+                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
+                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
+                if (!(imeCraftDevice instanceof IMEVirtualCraftDevice device)) continue;
+                CraftType craftType = device.getCraftingType();
+                int speed = newSpeeds.getOrDefault(craftType, 0);
+                speed += device.getSpeed(deviceBlock);
+                newSpeeds.put(craftType, speed);
+            }
+        }
+
         info.getCraftingHolders().clear();
         info.getCraftingHolders().addAll(newCraftingHolders);
         info.getRecipeMap().clear();
         info.getRecipeMap().putAll(newRecipeMap);
+        info.getVirtualCraftingDeviceSpeeds().clear();
+        info.getVirtualCraftingDeviceSpeeds().putAll(newSpeeds);
+        info.getVirtualCraftingDeviceUsed().clear();
 
         return info;
     }

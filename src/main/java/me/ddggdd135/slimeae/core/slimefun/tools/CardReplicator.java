@@ -47,7 +47,7 @@ public class CardReplicator extends SlimefunItem {
             if (e.getPlayer().isSneaking()) {
                 ItemStack[] cards = new ItemStack[slots.length];
                 for (int i = 0; i < slots.length; i++) {
-                    cards[i] = blockMenu.getItemInSlot(slots[i]);
+                    cards[i] = ItemUtils.getSettingItem(blockMenu.getInventory(), slots[i]);
                 }
                 NBT.modify(e.getItem(), x -> {
                     x.setInteger(SIZE_KEY, slots.length);

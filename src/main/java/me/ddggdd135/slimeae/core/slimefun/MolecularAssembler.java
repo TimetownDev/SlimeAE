@@ -6,39 +6,31 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.attributes.MachineProcessHolder;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.slimeae.api.abstracts.Card;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
+import me.ddggdd135.slimeae.api.interfaces.IMEVirtualCraftDevice;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.recipes.CraftingOperation;
+import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class MolecularAssembler extends TickingBlock
         // 如果不是TickingBlock的话 玩家不打开一次方块就没法自动合成 奇怪的bug
-        implements IMECraftDevice, MachineProcessHolder<CraftingOperation>, InventoryBlock, ICardHolder {
-
-    private final MachineProcessor<CraftingOperation> processor = new MachineProcessor<>(this);
-    private final Map<Location, Integer> runningTimes = new HashMap<>();
+        implements IMEVirtualCraftDevice, InventoryBlock, ICardHolder {
 
     @Override
     public boolean isSynchronized() {
@@ -61,58 +53,33 @@ public class MolecularAssembler extends TickingBlock
         BlockMenu menu = slimefunBlockData.getBlockMenu();
         if (menu == null) return;
         tickCards(block, SlimefunItem.getById(slimefunBlockData.getSfId()), slimefunBlockData);
-        CraftingOperation operation = processor.getOperation(block);
+        if (!menu.hasViewer()) return;
 
-        int ticks = runningTimes.computeIfAbsent(block.getLocation(), x -> 0);
-        if (ticks >= 20 && operation != null) {
-            processor.endOperation(block);
-            networkInfo.getTempStorage().addItem(operation.getRecipe().getInput(), true);
-
-            runningTimes.put(block.getLocation(), 0);
-            return;
+        CraftingRecipe recipe = null;
+        for (AutoCraftingSession autoCraftingSession : networkInfo.getCraftingSessions()) {
+            if (autoCraftingSession.getCraftingSteps().get(0).getRecipe().getCraftType() == getCraftingType()) {
+                recipe = autoCraftingSession.getCraftingSteps().get(0).getRecipe();
+            }
         }
 
-        for (int slot : getCraftingInputSlots()) {
-            menu.replaceExistingItem(slot, MenuItems.EMPTY);
-        }
-        menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
+        if (recipe == null) {
+            for (int slot : getCraftingInputSlots()) {
+                menu.replaceExistingItem(slot, MenuItems.EMPTY);
+            }
 
-        if (operation == null) {
-            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
-
-            runningTimes.put(block.getLocation(), 0);
+            menu.replaceExistingItem(getOutputSlot(), MenuItems.EMPTY);
 
             return;
         }
 
-        ItemStack[] input = operation.getRecipe().getInput();
+        ItemStack[] input = recipe.getInput();
         for (int i = 0; i < input.length; i++) {
             ItemStack itemStack = input[i];
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemUtils.setSettingItem(menu.getInventory(), getCraftingInputSlots()[i], itemStack);
         }
 
-        ticks++;
-        runningTimes.put(block.getLocation(), ticks);
-
-        if (isFinished(block)) {
-            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
-            return;
-        }
-
-        operation.addProgress(1);
-
-        int progress = operation.getProgress();
-        int maxProgress = operation.getTotalTicks();
-
-        menu.replaceExistingItem(
-                getProgressSlot(),
-                new CustomItemStack(
-                        Material.GREEN_STAINED_GLASS_PANE,
-                        "&a进度: &e" + progress + "&7/&e" + maxProgress,
-                        "&7" + (int) ((progress / (double) maxProgress) * 100) + "%"));
-
-        ItemStack[] output = operation.getRecipe().getOutput();
+        ItemStack[] output = recipe.getOutput();
         if (output.length > 0) {
             ItemStack displayItem = output[0];
             ItemUtils.setSettingItem(menu.getInventory(), getOutputSlot(), displayItem);
@@ -120,55 +87,7 @@ public class MolecularAssembler extends TickingBlock
     }
 
     @Override
-    public boolean isSupport(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        return SlimefunItem.getById(
-                                StorageCacheUtils.getBlock(block.getLocation()).getSfId())
-                        instanceof MolecularAssembler
-                && recipe.getCraftType() == CraftType.CRAFTING_TABLE;
-    }
-
-    @Override
-    public boolean canStartCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        return isSupport(block, recipe) && processor.getOperation(block) == null;
-    }
-
-    @Override
-    public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        runningTimes.put(block.getLocation(), 0);
-        processor.startOperation(block, new CraftingOperation(4, recipe));
-    }
-
-    @Override
-    public boolean isFinished(@Nonnull Block block) {
-        CraftingOperation craftingOperation = processor.getOperation(block);
-        if (craftingOperation == null) return false;
-        return craftingOperation.isFinished();
-    }
-
-    @Nullable @Override
-    public CraftingRecipe getFinishedCraftingRecipe(@Nonnull Block block) {
-        if (!isFinished(block)) return null;
-        return processor.getOperation(block).getRecipe();
-    }
-
-    @Override
-    public void finishCrafting(@Nonnull Block block) {
-        BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
-        if (menu != null) {
-            menu.replaceExistingItem(getProgressSlot(), ChestMenuUtils.getBackground());
-            menu.replaceExistingItem(getOutputSlot(), null);
-        }
-        processor.endOperation(block);
-    }
-
-    @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
-
-    @Nonnull
-    @Override
-    public MachineProcessor<CraftingOperation> getMachineProcessor() {
-        return processor;
-    }
 
     @Override
     public int[] getInputSlots() {
@@ -220,6 +139,7 @@ public class MolecularAssembler extends TickingBlock
             17, // 第二行边框和空格
             18,
             19,
+            23,
             25,
             26, // 第三行边框和空格
             27,
@@ -256,8 +176,6 @@ public class MolecularAssembler extends TickingBlock
             preset.addItem(slot, MenuItems.EMPTY, ChestMenuUtils.getEmptyClickHandler());
         }
 
-        preset.addItem(getProgressSlot(), ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
-
         preset.addItem(getOutputSlot(), MenuItems.EMPTY, (player, i, itemStack, clickAction) -> false);
     }
 
@@ -276,20 +194,29 @@ public class MolecularAssembler extends TickingBlock
                 if (blockMenu == null) return;
 
                 dropCards(blockMenu);
-
-                CraftingOperation operation = processor.getOperation(b);
-                if (operation == null) return;
-                processor.endOperation(b);
-
-                for (ItemStack itemStack : operation.getRecipe().getInput()) {
-                    b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                }
             }
         };
     }
 
     @Override
-    public boolean isGlobal(Block block) {
-        return true;
+    public int getSpeed(@Nonnull Block block) {
+        Card accelerationCard = (Card) SlimefunItem.getByItem(SlimefunAEItems.ACCELERATION_CARD);
+        SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
+
+        BlockMenu menu = data.getBlockMenu();
+        if (menu == null) return 0;
+
+        Map<Card, Integer> amount = cache.get(block.getLocation());
+        if (amount == null) {
+            ICardHolder.updateCache(block, this, data);
+            amount = cache.get(block.getLocation());
+        }
+
+        return amount.getOrDefault(accelerationCard, 0) + 1;
+    }
+
+    @Override
+    public CraftType getCraftingType() {
+        return CraftType.CRAFTING_TABLE;
     }
 }
