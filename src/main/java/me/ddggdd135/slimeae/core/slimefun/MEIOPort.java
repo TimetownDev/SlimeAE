@@ -28,7 +28,6 @@ import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -137,14 +136,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 blockMenu.dropItems(b.getLocation(), getMeStorageCellInputSlots());
                 blockMenu.dropItems(b.getLocation(), getMeStorageCellOutputSlots());
 
-                for (int slot : getCardSlots()) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack != null
-                            && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
-                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                    }
-                }
+                dropCards(blockMenu);
             }
         };
     }
@@ -168,13 +160,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
-        for (int slot : getCardSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.CARD);
-            }
-            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
-        }
+        initCardSlots(menu);
 
         ItemStack setting = menu.getItemInSlot(getSettingSlot());
         if (setting == null || setting.getType().isAir()) {

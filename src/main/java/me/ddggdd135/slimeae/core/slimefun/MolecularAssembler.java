@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.core.machines.MachineProcessor;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
@@ -264,13 +263,7 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
-        for (int slot : getCardSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.CARD);
-            }
-            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
-        }
+        initCardSlots(menu);
     }
 
     @Nonnull
@@ -282,14 +275,7 @@ public class MolecularAssembler extends TickingBlock
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
-                for (int slot : getCardSlots()) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack != null
-                            && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
-                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                    }
-                }
+                dropCards(blockMenu);
 
                 CraftingOperation operation = processor.getOperation(b);
                 if (operation == null) return;

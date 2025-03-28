@@ -105,7 +105,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
 
     @Override
     public void init(@Nonnull BlockMenuPreset preset) {
-        for (int slot : getBoarderSlots()) {
+        for (int slot : getBorderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
     }
@@ -166,7 +166,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         defaultAmount = SlimeAEPlugin.getInstance().getConfig().getLong("me-cleaner.default", 131072L);
     }
 
-    public int[] getBoarderSlots() {
+    public int[] getBorderSlots() {
         return new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 50, 51, 52, 53};
     }
 

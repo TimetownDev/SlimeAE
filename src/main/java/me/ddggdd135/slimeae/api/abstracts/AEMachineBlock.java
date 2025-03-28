@@ -9,15 +9,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
-import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -62,14 +58,7 @@ public abstract class AEMachineBlock extends AbstractMachineBlock implements ICa
 
                 getMachineProcessor().endOperation(b);
 
-                for (int slot : CARD_SLOTS) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack != null
-                            && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
-                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                    }
-                }
+                dropCards(blockMenu);
             }
         };
     }
@@ -83,13 +72,7 @@ public abstract class AEMachineBlock extends AbstractMachineBlock implements ICa
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
 
-        for (int slot : getCardSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.CARD);
-            }
-            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
-        }
+        initCardSlots(menu);
     }
 
     @Override

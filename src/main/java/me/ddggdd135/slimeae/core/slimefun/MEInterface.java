@@ -131,6 +131,7 @@ public class MEInterface extends TickingBlock
 
                 if (blockMenu != null) {
                     blockMenu.dropItems(b.getLocation(), getItemSlots());
+                    dropCards(blockMenu);
                 }
 
                 for (int slot : getPatternSlots()) {
@@ -138,15 +139,6 @@ public class MEInterface extends TickingBlock
                     if (itemStack != null
                             && itemStack.getType() != Material.AIR
                             && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.PATTERN, true, false))) {
-                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                    }
-                }
-
-                for (int slot : getCardSlots()) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack != null
-                            && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
                         b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
                     }
                 }
@@ -167,7 +159,7 @@ public class MEInterface extends TickingBlock
     @Override
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
-        preset.drawBackground(getBoarderSlots());
+        preset.drawBackground(getBorderSlots());
         for (int slot : getPatternSlots()) {
             preset.addMenuClickHandler(slot, ItemUtils.getPatternSlotClickHandler());
         }
@@ -176,22 +168,11 @@ public class MEInterface extends TickingBlock
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
-        for (int slot : getSettingSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir())
-                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
-            menu.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler(block));
-        }
+        initSettingSlots(menu);
+        initCardSlots(menu);
         for (int slot : getPatternSlots()) {
             if (menu.getItemInSlot(slot) == null
                     || menu.getItemInSlot(slot).getType().isAir()) menu.replaceExistingItem(slot, MenuItems.PATTERN);
-        }
-        for (int slot : getCardSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.CARD);
-            }
-            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
         }
     }
 
@@ -269,7 +250,7 @@ public class MEInterface extends TickingBlock
         return new int[] {18, 19, 20, 21, 22, 23, 24, 25, 26};
     }
 
-    public int[] getBoarderSlots() {
+    public int[] getBorderSlots() {
         return new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 27, 28, 29, 30, 31, 32, 33, 34, 35, 48, 49, 50, 51, 52, 53};
     }
 

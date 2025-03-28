@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +26,6 @@ import me.ddggdd135.slimeae.api.blockdata.MEBusData;
 import me.ddggdd135.slimeae.api.blockdata.MEBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -150,14 +147,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
-                for (int slot : getCardSlots()) {
-                    ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                    if (itemStack != null
-                            && itemStack.getType() != Material.AIR
-                            && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
-                        b.getWorld().dropItemNaturally(b.getLocation(), itemStack);
-                    }
-                }
+                dropCards(blockMenu);
             }
         });
     }
@@ -239,13 +229,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
                 getDownSlot(),
                 (player, i, itemStack, clickAction) -> directionClick(player, clickAction, menu, BlockFace.DOWN));
 
-        for (int slot : getCardSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir()) {
-                menu.replaceExistingItem(slot, MenuItems.CARD);
-            }
-            menu.addMenuClickHandler(slot, ItemUtils.getCardSlotClickHandler(block));
-        }
+        initCardSlots(menu);
     }
 
     private boolean directionClick(Player player, ClickAction action, BlockMenu blockMenu, BlockFace blockFace) {

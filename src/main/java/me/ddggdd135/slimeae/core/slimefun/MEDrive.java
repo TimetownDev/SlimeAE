@@ -91,7 +91,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     @Override
     @OverridingMethodsMustInvokeSuper
     public void init(@Nonnull BlockMenuPreset preset) {
-        for (int slot : getBoarderSlots()) {
+        for (int slot : getBorderSlots()) {
             preset.addItem(slot, ChestMenuUtils.getBackground(), ChestMenuUtils.getEmptyClickHandler());
         }
     }
@@ -145,7 +145,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         return new int[] {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
     }
 
-    public int[] getBoarderSlots() {
+    public int[] getBorderSlots() {
         return new int[] {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 20, 24, 25, 26, 27, 28, 29, 33, 34, 35, 36, 37,
             38, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53

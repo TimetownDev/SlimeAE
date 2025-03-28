@@ -26,7 +26,6 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -167,12 +166,7 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
         super.newInstance(menu, block);
 
-        for (int slot : getSettingSlots()) {
-            if (menu.getItemInSlot(slot) == null
-                    || menu.getItemInSlot(slot).getType().isAir())
-                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
-            menu.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler(block));
-        }
+        initSettingSlots(menu);
     }
 
     @Override

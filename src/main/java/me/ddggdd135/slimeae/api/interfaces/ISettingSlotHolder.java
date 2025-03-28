@@ -43,4 +43,18 @@ public interface ISettingSlotHolder {
     static List<Pair<ItemKey, Integer>> getCache(@Nonnull Location location) {
         return cache.get(location);
     }
+
+    default void initSettingSlots(@Nonnull BlockMenu menu) {
+        for (int slot : getSettingSlots()) {
+            if (menu.getItemInSlot(slot) == null
+                    || menu.getItemInSlot(slot).getType().isAir())
+                ItemUtils.setSettingItem(menu.getInventory(), slot, MenuItems.SETTING);
+
+            // 防止刷物
+            ItemStack itemStack = ItemUtils.getSettingItem(menu.getInventory(), slot);
+            if (itemStack != null) ItemUtils.setSettingItem(menu.getInventory(), slot, itemStack);
+
+            menu.addMenuClickHandler(slot, ItemUtils.getSettingSlotClickHandler(menu.getBlock()));
+        }
+    }
 }

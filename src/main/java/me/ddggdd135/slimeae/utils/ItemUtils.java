@@ -688,18 +688,18 @@ public class ItemUtils {
                     ItemStack cursor,
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
-                ItemStack current = inventory.getItem(i);
+                ItemStack current = getSettingItem(inventory, i);
                 if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.CARD, true, false)) {
                     if (cursor != null && !cursor.getType().isAir() && SlimefunItem.getByItem(cursor) instanceof Card) {
-                        inventory.setItem(i, cursor);
+                        setSettingItem(inventory, i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
                     }
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
-                        inventory.setItem(i, MenuItems.CARD);
+                        setSettingItem(inventory, i, MenuItems.CARD);
                     } else if (SlimefunItem.getByItem(cursor) instanceof Card) {
-                        inventory.setItem(i, cursor);
+                        setSettingItem(inventory, i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
                 }

@@ -9,7 +9,6 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -19,7 +18,6 @@ import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -85,14 +83,7 @@ public class CardReplicator extends SlimefunItem {
                             IntStream.rangeClosed(0, 35).toArray(),
                             ItemUtils.createRequests(ItemUtils.getAmounts(need)));
 
-                    for (int slot : slots) {
-                        ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                        if (itemStack != null
-                                && itemStack.getType() != Material.AIR
-                                && !(SlimefunUtils.isItemSimilar(itemStack, MenuItems.CARD, true, false))) {
-                            block.getWorld().dropItemNaturally(block.getLocation(), itemStack);
-                        }
-                    }
+                    iCardHolder.dropCards(blockMenu);
 
                     for (int i = 0; i < size; i++) {
                         blockMenu.replaceExistingItem(slots[i], cards[i]);
