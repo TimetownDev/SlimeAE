@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.tasks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -9,7 +8,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class DataSavingTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
-    private final AtomicBoolean running = new AtomicBoolean(false);
+    private volatile boolean running = false;
 
     private volatile boolean paused = false;
 
@@ -21,7 +20,9 @@ public class DataSavingTask implements Runnable {
     }
 
     private void reset() {
-        running.set(false);
+        synchronized (this) {
+            running = false;
+        }
     }
 
     @Override
@@ -32,8 +33,9 @@ public class DataSavingTask implements Runnable {
 
         try {
             // If this method is actually still running... DON'T
-            if (!running.compareAndSet(false, true)) {
-                return;
+            synchronized (this) {
+                if (running) return;
+                running = true;
             }
 
             if (!halted) {
