@@ -1,24 +1,21 @@
 package me.ddggdd135.slimeae.api.items;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemStorage implements IStorage {
     @Nonnull
-    private Map<ItemStack, Long> storage = new ItemHashMap<>();
+    private ItemHashMap<Long> storage = new ItemHashMap<>();
 
     private boolean isReadonly;
 
-    private void trim(@Nonnull ItemStack itemStack) {
-        ItemStack template = itemStack.asOne();
-        if (storage.getOrDefault(template, 0L) == 0) {
-            storage.remove(template);
+    private void trim(@Nonnull ItemKey key) {
+        if (storage.getOrDefault(key, 0L) == 0) {
+            storage.removeKey(key);
         }
     }
 
@@ -32,21 +29,19 @@ public class ItemStorage implements IStorage {
         this(storage.getStorage());
     }
 
-    public ItemStorage(@Nonnull Map<ItemStack, Long> items) {
+    public ItemStorage(@Nonnull ItemHashMap<Long> items) {
         storage = new ItemHashMap<>(items);
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull ItemStack itemStack) {
         if (isReadonly) return;
-        for (ItemStack itemStack : itemStacks) {
-            ItemStack template = itemStack.asOne();
-            long amount = storage.getOrDefault(template, 0L);
-            amount += itemStack.getAmount();
-            storage.put(template, amount);
-            itemStack.setAmount(0);
-            trim(itemStack);
-        }
+        ItemStack template = itemStack.asOne();
+        long amount = storage.getOrDefault(template, 0L);
+        amount += itemStack.getAmount();
+        storage.put(template, amount);
+        itemStack.setAmount(0);
+        trim(new ItemKey(itemStack));
     }
 
     public void addItem(@Nonnull ItemStack[] itemStacks) {
@@ -61,29 +56,28 @@ public class ItemStorage implements IStorage {
             long amount = storage.getOrDefault(template, 0L);
             amount += itemStack.getAmount();
             storage.put(template, amount);
-            trim(itemStack);
+            trim(new ItemKey(itemStack));
         }
     }
 
-    public void addItem(@Nonnull Map<ItemStack, Long> storage) {
+    public void addItem(@Nonnull ItemHashMap<Long> storage) {
         addItem(storage, false);
     }
 
-    public void addItem(@Nonnull Map<ItemStack, Long> storage, boolean force) {
+    public void addItem(@Nonnull ItemHashMap<Long> storage, boolean force) {
         if (isReadonly && !force) return;
         this.storage = ItemUtils.addItems(this.storage, storage);
     }
 
-    public void addItem(@Nonnull ItemStack itemStack, long amount) {
+    public void addItem(@Nonnull ItemKey itemStack, long amount) {
         addItem(itemStack, amount, false);
     }
 
-    public void addItem(@Nonnull ItemStack itemStack, long amount, boolean force) {
+    public void addItem(@Nonnull ItemKey itemStack, long amount, boolean force) {
         if (isReadonly && !force) return;
-        ItemStack template = itemStack.asOne();
-        long a = storage.getOrDefault(template, 0L);
+        long a = storage.getOrDefault(itemStack, 0L);
         a += amount;
-        storage.put(template, a);
+        storage.putKey(itemStack, a);
     }
 
     public void addItem(@Nonnull ItemStack itemStack) {
@@ -102,32 +96,31 @@ public class ItemStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        List<ItemStack> itemStacks = new ArrayList<>();
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        ItemStorage itemStacks = new ItemStorage();
         for (ItemRequest request : requests) {
-            long amount = storage.getOrDefault(request.getTemplate(), 0L);
+            long amount = storage.getOrDefault(request.getKey(), 0L);
             if (amount >= request.getAmount()) {
-                ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
-                itemStacks.addAll(List.of(tmp));
-                storage.put(request.getTemplate(), amount - request.getAmount());
+                itemStacks.addItem(request.getKey(), request.getAmount());
+                storage.putKey(request.getKey(), amount - request.getAmount());
             } else {
-                ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
-                itemStacks.addAll(List.of(tmp));
-                storage.put(request.getTemplate(), 0L);
+                itemStacks.addItem(request.getKey(), amount);
+                storage.putKey(request.getKey(), 0L);
             }
-            trim(request.getTemplate());
+            trim(request.getKey());
         }
-        return itemStacks.toArray(ItemStack[]::new);
+        return itemStacks;
     }
 
     @Override
     @Nonnull
-    public Map<ItemStack, Long> getStorage() {
+    public ItemHashMap<Long> getStorage() {
         return new ItemHashMap<>(storage);
     }
 
     @Nonnull
     public ItemStack[] toItemStacks() {
+        ItemUtils.trim(storage);
         return ItemUtils.createItems(storage);
     }
 

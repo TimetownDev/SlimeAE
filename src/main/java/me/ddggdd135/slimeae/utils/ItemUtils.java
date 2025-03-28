@@ -15,12 +15,14 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
@@ -85,7 +87,7 @@ public class ItemUtils {
      * @return 物品堆数组
      */
     @Nonnull
-    public static ItemStack[] createItems(@Nonnull Map<ItemStack, Long> storage) {
+    public static ItemStack[] createItems(@Nonnull ItemHashMap<Long> storage) {
         int len = 0;
         for (Map.Entry<ItemStack, Long> i : storage.entrySet()) {
             len += (int)
@@ -123,7 +125,7 @@ public class ItemUtils {
     public static ItemStack[] createItems(@Nonnull ItemRequest[] requests) {
         List<ItemStack> itemStacks = new ArrayList<>();
         for (ItemRequest request : requests) {
-            itemStacks.addAll(List.of(createItems(request.getTemplate(), request.getAmount())));
+            itemStacks.addAll(List.of(createItems(request.getKey().getItemStack(), request.getAmount())));
         }
         return itemStacks.toArray(new ItemStack[0]);
     }
@@ -153,9 +155,9 @@ public class ItemUtils {
      * @param requests 物品请求数组
      * @return 是否包含所有请求的物品
      */
-    public static boolean contains(@Nonnull Map<ItemStack, Long> storage, @Nonnull ItemRequest[] requests) {
+    public static boolean contains(@Nonnull ItemHashMap<Long> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            if (!storage.containsKey(request.getTemplate()) || storage.get(request.getTemplate()) < request.getAmount())
+            if (!storage.containsKey(request.getKey()) || storage.getKey(request.getKey()) < request.getAmount())
                 return false;
         }
         return true;
@@ -168,8 +170,8 @@ public class ItemUtils {
      * @param request 物品请求
      * @return 是否包含请求的物品
      */
-    public static boolean contains(@Nonnull Map<ItemStack, Long> storage, @Nonnull ItemRequest request) {
-        return storage.containsKey(request.getTemplate()) && storage.get(request.getTemplate()) >= request.getAmount();
+    public static boolean contains(@Nonnull ItemHashMap<Long> storage, @Nonnull ItemRequest request) {
+        return storage.containsKey(request.getKey()) && storage.getKey(request.getKey()) >= request.getAmount();
     }
 
     /**
@@ -179,10 +181,10 @@ public class ItemUtils {
      * @return 物品请求数组
      */
     @Nonnull
-    public static ItemRequest[] createRequests(@Nonnull Map<ItemStack, Long> itemStacks) {
+    public static ItemRequest[] createRequests(@Nonnull ItemHashMap<Long> itemStacks) {
         List<ItemRequest> requests = new ArrayList<>();
-        for (ItemStack itemStack : itemStacks.keySet()) {
-            requests.add(new ItemRequest(itemStack, itemStacks.get(itemStack), true));
+        for (ItemKey key : itemStacks.sourceKeySet()) {
+            requests.add(new ItemRequest(key, itemStacks.getKey(key)));
         }
         return requests.toArray(new ItemRequest[0]);
     }
@@ -194,8 +196,8 @@ public class ItemUtils {
      * @return 物品到数量的映射
      */
     @Nonnull
-    public static Map<ItemStack, Long> getAmounts(@Nonnull ItemStack[] itemStacks) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public static ItemHashMap<Long> getAmounts(@Nonnull ItemStack[] itemStacks) {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         for (ItemStack itemStack : itemStacks) {
             if (itemStack == null || itemStack.getType().isAir()) continue;
             ItemStack template = itemStack.asOne();
@@ -209,14 +211,14 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static Map<ItemStack, Long> getAmounts(@Nonnull ItemRequest[] requests) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public static ItemHashMap<Long> getAmounts(@Nonnull ItemRequest[] requests) {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         for (ItemRequest request : requests) {
-            ItemStack template = request.getTemplate();
-            if (storage.containsKey(template)) {
-                storage.put(template, storage.get(template) + request.getAmount());
+            ItemKey key = request.getKey();
+            if (storage.containsKey(key)) {
+                storage.putKey(key, storage.getKey(key) + request.getAmount());
             } else {
-                storage.put(template, request.getAmount());
+                storage.putKey(key, request.getAmount());
             }
         }
         return storage;
@@ -230,15 +232,14 @@ public class ItemUtils {
      * @return 更新后的存储映射
      */
     @Nonnull
-    public static Map<ItemStack, Long> takeItems(
-            @Nonnull Map<ItemStack, Long> source, @Nonnull Map<ItemStack, Long> toTake) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>(source);
-        for (Map.Entry<ItemStack, Long> data : toTake.entrySet()) {
-            ItemStack itemStack = data.getKey();
-            if (storage.containsKey(itemStack)) {
-                storage.put(itemStack, storage.get(itemStack) - data.getValue());
+    public static ItemHashMap<Long> takeItems(@Nonnull ItemHashMap<Long> source, @Nonnull ItemHashMap<Long> toTake) {
+        ItemHashMap<Long> storage = new ItemHashMap<>(source);
+        for (Map.Entry<ItemKey, Long> data : toTake.keyEntrySet()) {
+            ItemKey key = data.getKey();
+            if (storage.containsKey(key)) {
+                storage.putKey(key, storage.getKey(key) - data.getValue());
             } else {
-                storage.put(itemStack, -data.getValue());
+                storage.putKey(key, -data.getValue());
             }
         }
         return storage;
@@ -252,15 +253,14 @@ public class ItemUtils {
      * @return 更新后的存储映射
      */
     @Nonnull
-    public static Map<ItemStack, Long> addItems(
-            @Nonnull Map<ItemStack, Long> source, @Nonnull Map<ItemStack, Long> toAdd) {
-        Map<ItemStack, Long> storage = new ItemHashMap<>(source);
-        for (Map.Entry<ItemStack, Long> data : toAdd.entrySet()) {
-            ItemStack itemStack = data.getKey();
-            if (storage.containsKey(itemStack)) {
-                storage.put(itemStack, storage.get(itemStack) + data.getValue());
+    public static ItemHashMap<Long> addItems(@Nonnull ItemHashMap<Long> source, @Nonnull ItemHashMap<Long> toAdd) {
+        ItemHashMap<Long> storage = new ItemHashMap<>(source);
+        for (Map.Entry<ItemKey, Long> data : toAdd.keyEntrySet()) {
+            ItemKey key = data.getKey();
+            if (storage.containsKey(key)) {
+                storage.putKey(key, storage.getKey(key) + data.getValue());
             } else {
-                storage.put(itemStack, data.getValue());
+                storage.putKey(key, data.getValue());
             }
         }
         return storage;
@@ -271,16 +271,19 @@ public class ItemUtils {
      *
      * @param storage 要清理的存储映射
      */
-    public static void trim(@Nonnull Map<ItemStack, Long> storage) {
-        for (Iterator<Map.Entry<ItemStack, Long>> it = storage.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<ItemStack, Long> data = it.next();
-            ItemStack itemStack = data.getKey();
-            if (itemStack == null || itemStack.getType().isAir() || storage.get(itemStack) <= 0) it.remove();
+    public static void trim(@Nonnull ItemHashMap<Long> storage) {
+        for (Iterator<Map.Entry<ItemKey, Long>> it = storage.keyEntrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ItemKey, Long> data = it.next();
+            ItemKey key = data.getKey();
+            if (key == null
+                    || key.getItemStack().getType().isAir()
+                    || key.getItemStack().getType().isAir()
+                    || storage.getKey(key) <= 0) it.remove();
         }
     }
 
     public static boolean contains(BlockMenu inv, int[] slots, ItemStack[] itemStacks) {
-        Map<ItemStack, Long> toTake = getAmounts(itemStacks);
+        ItemHashMap<Long> toTake = getAmounts(itemStacks);
 
         for (ItemStack itemStack : toTake.keySet()) {
             if (toTake.get(itemStack) > getItemAmount(inv, slots, itemStack)) {
@@ -291,7 +294,7 @@ public class ItemUtils {
     }
 
     public static boolean contains(Inventory inv, int[] slots, ItemStack[] itemStacks) {
-        Map<ItemStack, Long> toTake = getAmounts(itemStacks);
+        ItemHashMap<Long> toTake = getAmounts(itemStacks);
 
         for (ItemStack itemStack : toTake.keySet()) {
             if (toTake.get(itemStack) > getItemAmount(inv, slots, itemStack)) {
@@ -384,19 +387,17 @@ public class ItemUtils {
             boolean finalIsReadOnly = isReadOnly;
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull ItemStack itemStack) {
                     if (finalIsReadOnly) return;
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return;
-                    for (ItemStack itemStack : itemStacks) {
-                        if (itemStack.getType().isAir()) continue;
-                        int[] inputSlots = blockMenu
-                                .getPreset()
-                                .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, itemStack);
-                        if (inputSlots == null) continue;
-                        ItemStack rest = blockMenu.pushItem(itemStack, inputSlots);
-                        if (rest != null) itemStack.setAmount(rest.getAmount());
-                    }
+                    if (itemStack.getType().isAir()) return;
+                    int[] inputSlots = blockMenu
+                            .getPreset()
+                            .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, itemStack);
+                    if (inputSlots == null) return;
+                    ItemStack rest = blockMenu.pushItem(itemStack, inputSlots);
+                    if (rest != null) itemStack.setAmount(rest.getAmount());
                     blockMenu.markDirty();
                 }
 
@@ -409,10 +410,10 @@ public class ItemUtils {
 
                 @Nonnull
                 @Override
-                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
+                public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-                    if (blockMenu == null) return new ItemStack[0];
-                    Map<ItemStack, Long> amounts = ItemUtils.getAmounts(requests);
+                    if (blockMenu == null) return new ItemStorage();
+                    ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();
 
                     for (Map.Entry<ItemStack, Long> data : amounts.entrySet()) {
@@ -426,12 +427,12 @@ public class ItemUtils {
                             if (item == null || item.getType().isAir()) continue;
                             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                                 if (item.getAmount() > data.getValue()) {
-                                    found.addItem(itemStack, data.getValue());
+                                    found.addItem(new ItemKey(itemStack), data.getValue());
                                     long rest = item.getAmount() - data.getValue();
                                     item.setAmount((int) rest);
                                     break;
                                 } else {
-                                    found.addItem(itemStack, item.getAmount());
+                                    found.addItem(new ItemKey(itemStack), item.getAmount());
                                     blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
                                     long rest = data.getValue() - item.getAmount();
                                     if (rest != 0) amounts.put(itemStack, rest);
@@ -441,12 +442,12 @@ public class ItemUtils {
                         }
                     }
                     blockMenu.markDirty();
-                    return found.toItemStacks();
+                    return found;
                 }
 
                 @Override
                 @Nonnull
-                public Map<ItemStack, Long> getStorage() {
+                public ItemHashMap<Long> getStorage() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return new ItemHashMap<>();
                     int[] outputSlots =
@@ -463,17 +464,17 @@ public class ItemUtils {
         } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull ItemStack[] itemStacks) {
+                public void pushItem(@Nonnull ItemStack itemStack) {
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
-                        furnaceInventory.addItem(itemStacks);
+                        furnaceInventory.addItem(itemStack);
                     } else if (container instanceof Chest chest) {
                         Inventory inventory = chest.getBlockInventory();
                         if (InvUtils.fitAll(
                                 inventory,
-                                itemStacks,
+                                new ItemStack[] {itemStack},
                                 IntStream.range(0, inventory.getSize()).toArray())) {
-                            inventory.addItem(itemStacks);
+                            inventory.addItem(itemStack);
                         }
                     }
                 }
@@ -485,9 +486,9 @@ public class ItemUtils {
 
                 @Nonnull
                 @Override
-                public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
+                public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
                     ItemStack[] items = getVanillaItemStacks(block);
-                    Map<ItemStack, Long> amounts = ItemUtils.getAmounts(requests);
+                    ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();
 
                     for (Map.Entry<ItemStack, Long> data : amounts.entrySet()) {
@@ -497,12 +498,12 @@ public class ItemUtils {
                             if (item == null || item.getType().isAir()) continue;
                             if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                                 if (item.getAmount() > data.getValue()) {
-                                    found.addItem(itemStack, data.getValue());
+                                    found.addItem(new ItemKey(itemStack), data.getValue());
                                     long rest = item.getAmount() - data.getValue();
                                     item.setAmount((int) rest);
                                     break;
                                 } else {
-                                    found.addItem(itemStack, item.getAmount());
+                                    found.addItem(new ItemKey(itemStack), item.getAmount());
                                     long rest = data.getValue() - item.getAmount();
                                     item.setAmount(0);
                                     if (rest != 0) amounts.put(itemStack, rest);
@@ -511,12 +512,12 @@ public class ItemUtils {
                             }
                         }
                     }
-                    return found.toItemStacks();
+                    return found;
                 }
 
                 @Override
                 @Nonnull
-                public Map<ItemStack, Long> getStorage() {
+                public ItemHashMap<Long> getStorage() {
                     Container container =
                             (Container) PaperLib.getBlockState(block, false).getState();
                     ItemStack[] items = new ItemStack[0];
@@ -599,7 +600,7 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static ChestMenu.MenuClickHandler getSettingSlotClickHandler() {
+    public static ChestMenu.MenuClickHandler getSettingSlotClickHandler(@Nonnull Block block) {
         return new ChestMenu.AdvancedMenuClickHandler() {
             @Override
             public boolean onClick(
@@ -621,6 +622,11 @@ public class ItemUtils {
                         setSettingItem(inventory, i, cursor);
                     }
                 }
+                SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+                if (slimefunBlockData == null) return false;
+                SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
+                if (!(slimefunItem instanceof ISettingSlotHolder)) return false;
+                ISettingSlotHolder.cache.remove(block.getLocation());
 
                 return false;
             }
@@ -835,7 +841,7 @@ public class ItemUtils {
 
     public static ItemStack[] takeItems(Inventory inventory, int[] slots, ItemRequest[] requests) {
         ItemStack[] items = Arrays.stream(slots).mapToObj(inventory::getItem).toArray(ItemStack[]::new);
-        Map<ItemStack, Long> amounts = ItemUtils.getAmounts(requests);
+        ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
         ItemStorage found = new ItemStorage();
 
         for (ItemStack itemStack : amounts.keySet()) {
@@ -843,12 +849,12 @@ public class ItemUtils {
                 if (item == null || item.getType().isAir()) continue;
                 if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
                     if (item.getAmount() > amounts.get(itemStack)) {
-                        found.addItem(itemStack, amounts.get(itemStack));
+                        found.addItem(new ItemKey(itemStack), amounts.get(itemStack));
                         long rest = item.getAmount() - amounts.get(itemStack);
                         item.setAmount((int) rest);
                         break;
                     } else {
-                        found.addItem(itemStack, item.getAmount());
+                        found.addItem(new ItemKey(itemStack), item.getAmount());
                         long rest = amounts.get(itemStack) - item.getAmount();
                         item.setAmount(0);
                         if (rest != 0) amounts.put(itemStack, rest);

@@ -1,18 +1,17 @@
 package me.ddggdd135.slimeae.api.exceptions;
 
-import java.util.Map;
 import javax.annotation.Nonnull;
-import org.bukkit.inventory.ItemStack;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 
 public class NoEnoughMaterialsException extends RuntimeException {
-    private final Map<ItemStack, Long> missingMaterials;
+    private final ItemHashMap<Long> missingMaterials;
 
-    public NoEnoughMaterialsException(@Nonnull Map<ItemStack, Long> missingMaterials) {
+    public NoEnoughMaterialsException(@Nonnull ItemHashMap<Long> missingMaterials) {
         this.missingMaterials = missingMaterials;
     }
 
     @Nonnull
-    public Map<ItemStack, Long> getMissingMaterials() {
+    public ItemHashMap<Long> getMissingMaterials() {
         return missingMaterials;
     }
 }

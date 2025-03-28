@@ -6,19 +6,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
-    private final Map<ItemStack, Long> storages;
+    private final ItemHashMap<Long> storages;
     private long stored;
     private final long size;
     private final UUID uuid;
@@ -79,35 +79,31 @@ public class MEStorageCellCache implements IStorage {
         return stored;
     }
 
-    private void trim(@Nonnull ItemStack template) {
-        if (storages.containsKey(template) && storages.getOrDefault(template, 0L) == 0) {
-            storages.remove(template);
+    private void trim(@Nonnull ItemKey key) {
+        if (storages.containsKey(key) && storages.getKey(key) == 0) {
+            storages.removeKey(key);
             SlimeAEPlugin.getStorageCellDataController().markDirty(this);
         }
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull ItemStack itemStack) {
         if (storages instanceof CreativeItemMap) {
-            for (ItemStack itemStack : itemStacks) {
-                itemStack.setAmount(0);
-            }
+            itemStack.setAmount(0);
             return;
         }
-        for (ItemStack itemStack : itemStacks) {
-            if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) continue;
-            ItemStack template = itemStack.asOne();
-            long amount = storages.getOrDefault(template, 0L);
-            long toAdd;
-            if (stored + itemStack.getAmount() > size) toAdd = size - stored;
-            else toAdd = itemStack.getAmount();
-            stored += toAdd;
-            storages.put(template, amount + toAdd);
-            SlimeAEPlugin.getStorageCellDataController().markDirty(this);
-            itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
-            trim(itemStack);
-        }
+        if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+                || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+        ItemKey key = new ItemKey(itemStack.asOne());
+        long amount = storages.getOrDefault(key, 0L);
+        long toAdd;
+        if (stored + itemStack.getAmount() > size) toAdd = size - stored;
+        else toAdd = itemStack.getAmount();
+        stored += toAdd;
+        storages.putKey(key, amount + toAdd);
+        SlimeAEPlugin.getStorageCellDataController().markDirty(this);
+        itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
+        trim(key);
     }
 
     @Override
@@ -115,48 +111,46 @@ public class MEStorageCellCache implements IStorage {
         if (storages instanceof CreativeItemMap) return true;
 
         for (ItemRequest request : requests) {
-            if (!storages.containsKey(request.getTemplate())
-                    || storages.getOrDefault(request.getTemplate(), 0L) < request.getAmount()) return false;
+            if (!storages.containsKey(request.getKey())
+                    || storages.getOrDefault(request.getKey(), 0L) < request.getAmount()) return false;
         }
         return true;
     }
 
     @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
         if (storages instanceof CreativeItemMap) {
-            return ItemUtils.createItems(requests);
+            return new ItemStorage(storages);
         }
 
-        List<ItemStack> itemStacks = new ArrayList<>();
+        ItemStorage itemStacks = new ItemStorage();
         for (ItemRequest request : requests) {
-            if (storages.containsKey(request.getTemplate())) {
-                long amount = storages.get(request.getTemplate());
+            if (storages.containsKey(request.getKey())) {
+                long amount = storages.getKey(request.getKey());
                 if (amount >= request.getAmount()) {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), request.getAmount());
-                    itemStacks.addAll(List.of(tmp));
+                    itemStacks.addItem(request.getKey(), request.getAmount());
                     stored -= request.getAmount();
-                    storages.put(request.getTemplate(), amount - request.getAmount());
+                    storages.putKey(request.getKey(), amount - request.getAmount());
                     SlimeAEPlugin.getStorageCellDataController().markDirty(this);
                 } else {
-                    ItemStack[] tmp = ItemUtils.createItems(request.getTemplate(), amount);
-                    itemStacks.addAll(List.of(tmp));
-                    stored -= storages.get(request.getTemplate());
-                    storages.put(request.getTemplate(), 0L);
+                    itemStacks.addItem(request.getKey(), amount);
+                    stored -= storages.getKey(request.getKey());
+                    storages.putKey(request.getKey(), 0L);
                 }
-                trim(request.getTemplate());
+                trim(request.getKey());
             }
         }
-        return itemStacks.toArray(new ItemStack[0]);
+        return itemStacks;
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Long> getStorage() {
+    public @Nonnull ItemHashMap<Long> getStorage() {
         if (storages instanceof CreativeItemMap) return storages;
         return new ItemHashMap<>(storages);
     }
 
-    public Map<ItemStack, Long> getSourceStorage() {
+    public ItemHashMap<Long> getSourceStorage() {
         return storages;
     }
 
@@ -174,8 +168,8 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
-        if (storages.containsKey(itemStack)) return 1000;
+    public int getTier(@Nonnull ItemKey key) {
+        if (storages.containsKey(key)) return 1000;
 
         return 0;
     }

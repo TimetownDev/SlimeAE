@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae.api.database;
 
 import java.util.*;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
@@ -105,7 +106,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellC
 
     public MEStorageCellCache loadData(ItemStack itemStack) {
         MEStorageCellCache storageCellCache = new MEStorageCellCache(itemStack);
-        Map<ItemStack, Long> storage = storageCellCache.getSourceStorage();
+        ItemHashMap<Long> storage = storageCellCache.getSourceStorage();
         long stored = 0;
         List<Map<String, String>> data = execQuery("SELECT * FROM " + getTableName() + " WHERE uuid = '"
                 + storageCellCache.getUuid().toString() + "';");

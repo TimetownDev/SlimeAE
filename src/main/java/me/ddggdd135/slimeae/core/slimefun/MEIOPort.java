@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -68,11 +69,13 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         return;
                     }
 
-                    ItemStack target = meStorageCellCache.getStorage().entrySet().stream()
+                    ItemKey target = meStorageCellCache.getStorage().keyEntrySet().stream()
                             .filter(x -> x.getValue() > 0)
                             .map(Map.Entry::getKey)
-                            .toArray(ItemStack[]::new)[0];
-                    ItemStack[] tmp = meStorageCellCache.tryTakeItem(new ItemRequest(target, 40960, true));
+                            .toArray(ItemKey[]::new)[0];
+                    ItemStack[] tmp = meStorageCellCache
+                            .tryTakeItem(new ItemRequest(target, 40960))
+                            .toItemStacks();
                     networkStorage.pushItem(tmp);
                     tmp = ItemUtils.trimItems(tmp);
                     meStorageCellCache.pushItem(tmp);
@@ -98,11 +101,13 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
                 if (networkStorage.getStorage().isEmpty()) return;
 
-                ItemStack target = networkStorage.getStorage().entrySet().stream()
+                ItemKey target = networkStorage.getStorage().keyEntrySet().stream()
                         .filter(x -> x.getValue() > 0)
                         .map(Map.Entry::getKey)
-                        .toArray(ItemStack[]::new)[0];
-                ItemStack[] tmp = networkStorage.tryTakeItem(new ItemRequest(target, 40960, true));
+                        .toArray(ItemKey[]::new)[0];
+                ItemStack[] tmp = networkStorage
+                        .tryTakeItem(new ItemRequest(target, 40960))
+                        .toItemStacks();
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);
                 networkStorage.pushItem(tmp);

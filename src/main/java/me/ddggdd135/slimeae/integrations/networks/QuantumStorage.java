@@ -6,9 +6,9 @@ import io.github.sefiraat.networks.network.stackcaches.QuantumCache;
 import io.github.sefiraat.networks.slimefun.network.NetworkQuantumStorage;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.Map;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -38,18 +38,16 @@ public class QuantumStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
+    public void pushItem(@Nonnull ItemStack itemStack) {
         if (!isReadOnly && quantumCache != null && quantumCache.getAmount() > 0) {
             int stored = (int) quantumCache.getAmount();
             int size = quantumCache.getLimit();
             if (stored >= size && !quantumCache.isVoidExcess()) return;
             ItemStack storedItem = quantumCache.getItemStack();
-            for (ItemStack itemStack : itemStacks) {
-                if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
-                    int toAdd = Math.min(size - stored, itemStack.getAmount());
-                    stored += toAdd;
-                    itemStack.setAmount(itemStack.getAmount() - toAdd);
-                }
+            if (SlimefunUtils.isItemSimilar(itemStack, storedItem, true, false)) {
+                int toAdd = Math.min(size - stored, itemStack.getAmount());
+                stored += toAdd;
+                itemStack.setAmount(itemStack.getAmount() - toAdd);
             }
             if (!(stored > size)) {
                 quantumCache.setAmount(stored);
@@ -66,7 +64,7 @@ public class QuantumStorage implements IStorage {
         ItemStack storedItem = quantumCache.getItemStack();
         boolean toReturn = true;
         for (ItemRequest request : requests) {
-            if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
+            if (SlimefunUtils.isItemSimilar(request.getKey().getItemStack(), storedItem, true, false)) {
                 toReturn = toReturn && stored >= request.getAmount();
             }
         }
@@ -75,41 +73,41 @@ public class QuantumStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (quantumCache == null || quantumCache.getAmount() <= 0) return new ItemStack[0];
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        if (quantumCache == null || quantumCache.getAmount() <= 0) return new ItemStorage();
         int stored = (int) (quantumCache.getAmount() - 1);
         ItemStack storedItem = quantumCache.getItemStack();
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
-            if (SlimefunUtils.isItemSimilar(request.getTemplate(), storedItem, true, false)) {
+            if (SlimefunUtils.isItemSimilar(request.getKey().getItemStack(), storedItem, true, false)) {
                 long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
-                    toReturn.addItem(request.getTemplate(), toTake);
+                    toReturn.addItem(request.getKey(), toTake);
                 }
             }
         }
         quantumCache.setAmount(stored + 1);
         // 下面这一行吃性能
         // NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
-        return toReturn.toItemStacks();
+        return toReturn;
     }
 
     @Override
     @Nonnull
-    public Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public ItemHashMap<Long> getStorage() {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         if (quantumCache == null || quantumCache.getAmount() <= 0) return storage;
         storage.put(quantumCache.getItemStack().asOne(), quantumCache.getAmount() - 1);
         return storage;
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
+    public int getTier(@Nonnull ItemKey itemStack) {
         if (quantumCache == null || quantumCache.getAmount() <= 0) return -1;
         ItemStack storedItem = quantumCache.getItemStack();
         if (storedItem == null || storedItem.getType().isAir()) return -1;
-        if (storedItem.getType() == itemStack.getType()) return 2000;
+        if (storedItem.getType() == itemStack.getItemStack().getType()) return 2000;
 
         return 0;
     }

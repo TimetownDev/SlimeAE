@@ -153,13 +153,11 @@ public class PinnedManager implements IManager {
 
     @Nonnull
     public ItemStack markItemAsPinnedDataItem(@Nonnull ItemStack itemStack, @Nonnull Player player) {
-        return new AdvancedCustomItemStack(itemStack, itemMeta -> {
-                    itemMeta.getPersistentDataContainer()
-                            .set(
-                                    PINNED_KEY,
-                                    PersistentDataType.STRING,
-                                    player.getUniqueId().toString());
-                })
+        return new AdvancedCustomItemStack(itemStack, itemMeta -> itemMeta.getPersistentDataContainer()
+                        .set(
+                                PINNED_KEY,
+                                PersistentDataType.STRING,
+                                player.getUniqueId().toString()))
                 .clone();
     }
 

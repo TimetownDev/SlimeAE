@@ -4,11 +4,15 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -42,19 +46,27 @@ public class MEAdvancedVanillaExportBus extends MEAdvancedExportBus {
             Block target = block.getRelative(direction);
             if (!(PaperLib.getBlockState(target, false).getState() instanceof Container container)) continue;
 
-            for (int slot : getSettingSlots()) {
-                ItemStack setting = blockMenu.getItemInSlot(slot);
-                if (setting == null || setting.getType().isAir()) {
+            if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
+                ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
+            List<Pair<ItemKey, Integer>> settings = ISettingSlotHolder.getCache(block.getLocation());
+            for (int i = 0; i < getSettingSlots().length; i++) {
+                Pair<ItemKey, Integer> setting = settings.get(i);
+
+                if (setting == null) {
                     continue;
                 }
+
+                ItemStack itemStack = setting.getFirstValue().getItemStack();
 
                 Inventory inventory = container.getInventory();
 
                 int[] inputSlots = IntStream.range(0, inventory.getSize()).toArray();
                 if (inputSlots == null || inputSlots.length == 0) continue;
 
-                if (InvUtils.fits(inventory, setting, inputSlots)) {
-                    ItemStack[] taken = networkStorage.tryTakeItem(new ItemRequest(setting, setting.getAmount()));
+                if (InvUtils.fits(inventory, itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
+                    ItemStack[] taken = networkStorage
+                            .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
+                            .toItemStacks();
                     if (taken.length != 0) {
                         inventory.addItem(taken[0]);
                     }

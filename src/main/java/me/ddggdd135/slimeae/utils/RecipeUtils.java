@@ -20,6 +20,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
@@ -257,17 +258,17 @@ public class RecipeUtils {
         return null;
     }
 
-    @Nullable public static CraftingRecipe getRecipe(@Nonnull Map<ItemStack, Long> input, @Nullable ItemStack output) {
+    @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemHashMap<Long> input, @Nullable ItemStack output) {
         return getRecipe(input, output, SUPPORTED_RECIPE_TYPES);
     }
 
     @Nullable public static CraftingRecipe getRecipe(
-            @Nonnull Map<ItemStack, Long> input, @Nullable ItemStack output, Map<RecipeType, SlimefunItem> supported) {
+            @Nonnull ItemHashMap<Long> input, @Nullable ItemStack output, Map<RecipeType, SlimefunItem> supported) {
         for (Map.Entry<RecipeType, SlimefunItem> entry : supported.entrySet()) {
             if (entry.getValue() == null) continue;
 
             for (ItemStack[] inputItems : getInputs(entry.getKey())) {
-                Map<ItemStack, Long> input1 = ItemUtils.getAmounts(inputItems);
+                ItemHashMap<Long> input1 = ItemUtils.getAmounts(inputItems);
                 if (!MapUtils.areMapsEqual(input1, input)) continue;
                 ItemStack[] output1 = getOutputs(entry.getKey(), inputItems);
                 if (output1.length != 1) continue;

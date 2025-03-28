@@ -5,10 +5,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.mooy1.infinityexpansion.items.storage.StorageCache;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -40,8 +40,8 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack[] itemStacks) {
-        if (!isReadOnly && cache != null) cache.depositAll(itemStacks, true);
+    public void pushItem(@Nonnull ItemStack itemStack) {
+        if (!isReadOnly && cache != null) cache.depositAll(new ItemStack[] {itemStack}, true);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class InfinityBarrelStorage implements IStorage {
         if (cache == null) return false;
         boolean toReturn = true;
         for (ItemRequest request : requests) {
-            if (cache.matches(request.getTemplate())) {
+            if (cache.matches(request.getKey().getItemStack())) {
                 int amount = cache.amount();
                 toReturn = toReturn && amount >= request.getAmount();
             }
@@ -59,25 +59,25 @@ public class InfinityBarrelStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStack[] tryTakeItem(@Nonnull ItemRequest[] requests) {
-        if (cache == null) return new ItemStack[0];
+    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+        if (cache == null) return new ItemStorage();
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
-            if (cache.matches(request.getTemplate())) {
+            if (cache.matches(request.getKey().getItemStack())) {
                 int amount = cache.amount() - 1;
                 long toTake = Math.min(amount, request.getAmount());
                 if (toTake != 0) {
                     cache.amount((int) (amount + 1 - toTake));
-                    toReturn.addItem(ItemUtils.createItems(request.getTemplate(), toTake));
+                    toReturn.addItem(ItemUtils.createItems(request.getKey().getItemStack(), toTake));
                 }
             }
         }
-        return toReturn.toItemStacks();
+        return toReturn;
     }
 
     @Override
-    public @Nonnull Map<ItemStack, Long> getStorage() {
-        Map<ItemStack, Long> storage = new ItemHashMap<>();
+    public @Nonnull ItemHashMap<Long> getStorage() {
+        ItemHashMap<Long> storage = new ItemHashMap<>();
         Material material = cache.material();
         ItemMeta meta = cache.meta();
 
@@ -90,9 +90,9 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public int getTier(@Nonnull ItemStack itemStack) {
+    public int getTier(@Nonnull ItemKey itemStack) {
         if (cache == null || cache.amount() <= 0) return -1;
-        if (cache.material() == itemStack.getType()) return 2000;
+        if (cache.material() == itemStack.getItemStack().getType()) return 2000;
 
         return -1;
     }

@@ -21,8 +21,10 @@ import java.util.*;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
@@ -188,7 +190,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         }
 
         IStorage networkStorage = info.getStorage();
-        Map<ItemStack, Long> storage = networkStorage.getStorage();
+        ItemHashMap<Long> storage = networkStorage.getStorage();
 
         Player player = (Player) blockMenu.getInventory().getViewers().get(0);
 
@@ -369,13 +371,16 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                                         playerInventory,
                                         template,
                                         IntStream.range(0, 36).toArray())) {
-                            playerInventory.addItem(
-                                    networkStorage.tryTakeItem(new ItemRequest(template, template.getMaxStackSize())));
+                            playerInventory.addItem(networkStorage
+                                    .tryTakeItem(new ItemRequest(new ItemKey(template), template.getMaxStackSize()))
+                                    .toItemStacks());
                         } else if (!clickAction.isShiftClicked()
                                         && cursor.getType().isAir()
                                 || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
                                         && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
-                            ItemStack[] gotten = networkStorage.tryTakeItem(new ItemRequest(template, 1));
+                            ItemStack[] gotten = networkStorage
+                                    .tryTakeItem(new ItemRequest(new ItemKey(template), 1))
+                                    .toItemStacks();
                             if (gotten.length != 0) {
                                 ItemStack newCursor = gotten[0];
                                 newCursor.add(cursor.getAmount());

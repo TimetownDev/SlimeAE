@@ -6,6 +6,7 @@ import io.github.sefiraat.networks.network.stackcaches.ItemRequest;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -13,8 +14,8 @@ import org.bukkit.inventory.ItemStack;
 public class StorageToBarrelWrapper extends BarrelIdentity {
     protected final IStorage storage;
 
-    public StorageToBarrelWrapper(@Nonnull Location location, @Nonnull IStorage storage, @Nonnull ItemStack itemStack) {
-        super(location, itemStack, storage.getStorage().getOrDefault(itemStack, 0L), BarrelType.UNKNOWN);
+    public StorageToBarrelWrapper(@Nonnull Location location, @Nonnull IStorage storage, @Nonnull ItemKey key) {
+        super(location, key.getItemStack(), storage.getStorage().getOrDefault(key, 0L), BarrelType.UNKNOWN);
         this.storage = storage;
     }
 
@@ -25,8 +26,9 @@ public class StorageToBarrelWrapper extends BarrelIdentity {
         if (!SlimefunUtils.isItemSimilar(getItemStack(), itemRequest.getItemStack(), true, false)) return null;
 
         ItemStack[] itemStacks = storage.tryTakeItem(new me.ddggdd135.slimeae.api.items.ItemRequest(
-                itemRequest.getItemStack(),
-                Math.min(itemRequest.getItemStack().getMaxStackSize(), itemRequest.getAmount())));
+                        new ItemKey(itemRequest.getItemStack()),
+                        Math.min(itemRequest.getItemStack().getMaxStackSize(), itemRequest.getAmount())))
+                .toItemStacks();
         if (itemStacks.length == 1) return itemStacks[0];
         return null;
     }

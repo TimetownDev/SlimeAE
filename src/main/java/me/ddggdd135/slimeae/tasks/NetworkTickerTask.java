@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
@@ -75,11 +76,11 @@ public class NetworkTickerTask implements Runnable {
                     }
 
                     ItemStorage tempStorage = info.getTempStorage();
-                    Set<ItemStack> toPush =
-                            new HashSet<>(tempStorage.getStorage().keySet());
-                    for (ItemStack itemStack : toPush) {
-                        ItemStack[] items =
-                                tempStorage.tryTakeItem(new ItemRequest(itemStack, Integer.MAX_VALUE, true));
+                    Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
+                    for (ItemKey key : toPush) {
+                        ItemStack[] items = tempStorage
+                                .tryTakeItem(new ItemRequest(key, Integer.MAX_VALUE))
+                                .toItemStacks();
                         info.getStorage().pushItem(items);
                         items = ItemUtils.trimItems(items);
                         tempStorage.addItem(items, true);
@@ -104,9 +105,10 @@ public class NetworkTickerTask implements Runnable {
                     for (AutoCraftingSession session : sessions) {
                         if (!session.hasNext()) {
                             info.getCraftingSessions().remove(session);
-                            Slimefun.runSync(() -> {
-                                session.getMenu().getInventory().getViewers().forEach(HumanEntity::closeInventory);
-                            });
+                            Slimefun.runSync(() -> session.getMenu()
+                                    .getInventory()
+                                    .getViewers()
+                                    .forEach(HumanEntity::closeInventory));
                         } else session.moveNext(1024);
                     }
                     info.updateAutoCraftingMenu();
