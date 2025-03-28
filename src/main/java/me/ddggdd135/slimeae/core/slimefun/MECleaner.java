@@ -116,13 +116,18 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
             player.closeInventory();
             player.sendMessage(ChatColor.YELLOW + "请输入你想要设置的数量");
             ChatUtils.awaitInput(player, msg -> {
-                long amount = Long.parseLong(msg);
-                if (amount <= 0) {
-                    player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
-                    return;
+                try {
+                    long amount = Long.parseLong(msg);
+                    if (amount <= 0) {
+                        player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                        return;
+                    }
+
+                    setAmount(block.getLocation(), amount);
+                } catch (NumberFormatException e) {
+                    player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
                 }
 
-                setAmount(block.getLocation(), amount);
                 updateGUI(block);
                 menu.open(player);
             });
