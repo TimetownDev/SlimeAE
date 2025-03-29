@@ -33,7 +33,7 @@ public class NetworkInfo implements IDisposable {
     private final Map<CraftType, Integer> virtualCraftingDeviceUsed = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private IStorage storageNoNetworks = new StorageCollection();
-    private final Set<AutoCraftingSession> craftingSessions = new ConcurrentHashSet<>();
+    private final Set<AutoCraftingSession> autoCraftingSessions = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tmpStorage = new ItemStorage();
 
@@ -104,6 +104,10 @@ public class NetworkInfo implements IDisposable {
     public void dispose() {
         NetworkData networkData = SlimeAEPlugin.getNetworkData();
         networkData.AllNetworkData.remove(this);
+
+        for (AutoCraftingSession session : autoCraftingSessions) {
+            session.dispose();
+        }
     }
 
     @Override
@@ -168,8 +172,8 @@ public class NetworkInfo implements IDisposable {
     }
 
     @Nonnull
-    public Set<AutoCraftingSession> getCraftingSessions() {
-        return craftingSessions;
+    public Set<AutoCraftingSession> getAutoCraftingSessions() {
+        return autoCraftingSessions;
     }
 
     public void openAutoCraftingSessionsMenu(@Nonnull Player player) {
@@ -182,7 +186,7 @@ public class NetworkInfo implements IDisposable {
             if (content == null) continue;
             content.setType(Material.AIR);
         }
-        List<AutoCraftingSession> sessions = getCraftingSessions().stream().toList();
+        List<AutoCraftingSession> sessions = getAutoCraftingSessions().stream().toList();
         if (sessions.size() > 53) sessions = sessions.subList(sessions.size() - 53, sessions.size());
         for (int i = 0; i < 54; i++) {
             autoCraftingMenu.replaceExistingItem(i, null);

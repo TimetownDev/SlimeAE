@@ -18,17 +18,17 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.events.AutoCraftingSessionDisposingEvent;
+import me.ddggdd135.slimeae.api.events.AutoCraftingStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftDevice;
-import me.ddggdd135.slimeae.api.interfaces.IMECraftHolder;
-import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
-import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import net.Zrips.CMILib.Items.CMIMaterial;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -36,7 +36,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class AutoCraftingSession {
+public class AutoCraftingSession implements IDisposable {
     private static final int MAX_LORE_LINES = 15;
     private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
 
@@ -51,6 +51,7 @@ public class AutoCraftingSession {
     private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
+    private final ItemStorage storage;
 
     public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         //        ItemStorage storage = new ItemStorage();
@@ -72,6 +73,15 @@ public class AutoCraftingSession {
         this.count = count;
         menu.setSize(54);
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+        this.storage = new ItemStorage();
+        for (CraftStep step : craftingSteps) {
+            ItemStorage items = new ItemStorage();
+            for (Map.Entry<ItemKey, Long> entry :
+                    ItemUtils.getAmounts(step.getRecipe().getInput()).keyEntrySet()) {
+                items.addItem(entry.getKey(), entry.getValue() * step.getAmount());
+            }
+        }
+        info.getStorage().tryTakeItem(ItemUtils.createRequests(storage.getStorage()));
     }
 
     @Nonnull
@@ -182,8 +192,7 @@ public class AutoCraftingSession {
         CraftStep next = craftingSteps.get(0);
         CraftType craftType = next.getRecipe().getCraftType();
         boolean doCraft = !isCancelling;
-        if (running <= 0 && virtualRunning <= 0 && isCancelling)
-            info.getCraftingSessions().remove(this);
+        if (running <= 0 && virtualRunning <= 0 && isCancelling) dispose();
         if (next.getAmount() <= 0) {
             if (running <= 0 && virtualRunning <= 0) {
                 craftingSteps.remove(0);
@@ -196,24 +205,6 @@ public class AutoCraftingSession {
                 .filter(x -> x.getValue().contains(next.getRecipe()))
                 .map(Map.Entry::getKey)
                 .toArray(Location[]::new);
-
-        IStorage networkStorage = info.getStorage();
-        ItemStorage tempStorage = info.getTempStorage();
-        if (!networkStorage.contains(ItemUtils.createRequests(
-                        ItemUtils.getAmounts(next.getRecipe().getInput())))
-                && running <= 0
-                && virtualRunning <= 0) {
-            // 合成出现错误 重新规划
-            try {
-                info.getCraftingSessions().remove(this);
-                new AutoCraftingSession(
-                                info,
-                                recipe,
-                                craftingSteps.get(craftingSteps.size() - 1).getAmount())
-                        .start();
-            } catch (Throwable ignored) {
-            }
-        }
 
         for (Location location : locations) {
             IMECraftHolder holder =
@@ -229,9 +220,8 @@ public class AutoCraftingSession {
                 if (running < maxDevices
                         && doCraft
                         && device.canStartCrafting(deviceBlock, nextRecipe)
-                        && networkStorage.contains(
-                                ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())))) {
-                    networkStorage.tryTakeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
+                        && storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())))) {
+                    storage.tryTakeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
                     device.startCrafting(deviceBlock, nextRecipe);
                     running++;
                     next.decreaseAmount(1);
@@ -241,7 +231,7 @@ public class AutoCraftingSession {
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     device.finishCrafting(deviceBlock);
-                    tempStorage.addItem(finished.getOutput(), true);
+                    storage.addItem(finished.getOutput());
                     running--;
                 }
             }
@@ -254,18 +244,19 @@ public class AutoCraftingSession {
                     ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
                 resultItems.putKey(entry.getKey(), entry.getValue() * virtualRunning);
             }
-            tempStorage.addItem(resultItems, true);
+            storage.addItem(resultItems);
             virtualRunning = 0;
 
             menu.getContents();
             if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
             return;
         }
+
         int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
                 - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
         int sessions = 0;
 
-        for (AutoCraftingSession session : info.getCraftingSessions()) {
+        for (AutoCraftingSession session : info.getAutoCraftingSessions()) {
             if (session.getCraftingSteps().isEmpty()) continue;
             if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
         }
@@ -283,8 +274,8 @@ public class AutoCraftingSession {
         }
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
-        if (networkStorage.contains(requests)) {
-            networkStorage.tryTakeItem(requests);
+        if (storage.contains(requests) && doCraft) {
+            storage.tryTakeItem(requests);
             virtualRunning += (int) actualAmount;
             next.decreaseAmount(actualAmount);
 
@@ -309,7 +300,7 @@ public class AutoCraftingSession {
                 ItemUtils.getAmounts(next.getRecipe().getOutput()).keyEntrySet()) {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
-        tempStorage.addItem(resultItems, true);
+        storage.addItem(resultItems, true);
 
         menu.getContents();
         if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
@@ -403,11 +394,12 @@ public class AutoCraftingSession {
             menu.addItem(maxSize, MenuItems.CANCEL);
             menu.addMenuClickHandler(maxSize, (player, i1, itemStack, clickAction) -> {
                 if (isCancelling) {
-                    info.getCraftingSessions().remove(this);
+                    dispose();
                     player.sendMessage(CMIChatColor.translate("&a&l成功强制取消了合成任务"));
                     player.closeInventory();
                     return false;
                 }
+
                 isCancelling = true;
                 player.sendMessage(CMIChatColor.translate("&a&l开始取消合成任务"));
                 player.closeInventory();
@@ -420,10 +412,23 @@ public class AutoCraftingSession {
 
     public void start() {
         if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
-        info.getCraftingSessions().add(this);
+
+        AutoCraftingStartingEvent e = new AutoCraftingStartingEvent(this);
+        Bukkit.getPluginManager().callEvent(e);
+
+        info.getAutoCraftingSessions().add(this);
     }
 
     public AEMenu getMenu() {
         return menu;
+    }
+
+    @Override
+    public void dispose() {
+        AutoCraftingSessionDisposingEvent e = new AutoCraftingSessionDisposingEvent(this);
+        Bukkit.getPluginManager().callEvent(e);
+
+        info.getAutoCraftingSessions().remove(this);
+        info.getTempStorage().addItem(storage.getStorage(), true);
     }
 }

@@ -70,7 +70,7 @@ public class NetworkUtils {
     public static void doCraft(@Nonnull NetworkInfo networkInfo, @Nonnull ItemStack itemStack, long amount) {
         // 检查是否已有相同的合成任务
         boolean hasExistingTask = false;
-        for (AutoCraftingSession session : networkInfo.getCraftingSessions()) {
+        for (AutoCraftingSession session : networkInfo.getAutoCraftingSessions()) {
             // 检查配方的所有输出物品
             for (ItemStack output : session.getRecipe().getOutput()) {
                 if (SlimefunUtils.isItemSimilar(output, itemStack, true, false)) {
@@ -82,7 +82,7 @@ public class NetworkUtils {
         }
 
         // 如果没有现有任务且未达到最大任务数，则创建新的合成任务
-        if (!hasExistingTask && networkInfo.getCraftingSessions().size() < NetworkInfo.getMaxCraftingSessions()) {
+        if (!hasExistingTask && networkInfo.getAutoCraftingSessions().size() < NetworkInfo.getMaxCraftingSessions()) {
             CraftingRecipe recipe = networkInfo.getRecipeFor(itemStack);
             if (recipe != null) {
                 // 检查配方输出是否包含目标物品

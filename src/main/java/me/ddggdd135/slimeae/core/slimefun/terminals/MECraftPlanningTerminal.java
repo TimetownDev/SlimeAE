@@ -163,7 +163,7 @@ public class MECraftPlanningTerminal extends METerminal {
                         }
                         menu.replaceExistingItem(acceptSlot, MenuItems.ACCEPT);
                         menu.addMenuClickHandler(acceptSlot, (p, s, itemStack1, action) -> {
-                            if (info.getCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
+                            if (info.getAutoCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
                                 player.sendMessage(CMIChatColor.translate(
                                         "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
                                 return false;

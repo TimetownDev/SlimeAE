@@ -56,7 +56,7 @@ public class MolecularAssembler extends TickingBlock
         if (!menu.hasViewer()) return;
 
         CraftingRecipe recipe = null;
-        for (AutoCraftingSession autoCraftingSession : networkInfo.getCraftingSessions()) {
+        for (AutoCraftingSession autoCraftingSession : networkInfo.getAutoCraftingSessions()) {
             if (autoCraftingSession.getCraftingSteps().isEmpty()) continue;
             if (autoCraftingSession.getCraftingSteps().get(0).getRecipe().getCraftType() == getCraftingType()) {
                 recipe = autoCraftingSession.getCraftingSteps().get(0).getRecipe();

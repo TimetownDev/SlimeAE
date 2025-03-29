@@ -101,10 +101,10 @@ public class NetworkTickerTask implements Runnable {
                     });
 
                     // tick autoCrafting
-                    Set<AutoCraftingSession> sessions = new HashSet<>(info.getCraftingSessions());
+                    Set<AutoCraftingSession> sessions = new HashSet<>(info.getAutoCraftingSessions());
                     for (AutoCraftingSession session : sessions) {
                         if (!session.hasNext()) {
-                            info.getCraftingSessions().remove(session);
+                            info.getAutoCraftingSessions().remove(session);
                             Slimefun.runSync(() -> session.getMenu()
                                     .getInventory()
                                     .getViewers()
