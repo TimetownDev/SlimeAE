@@ -266,6 +266,7 @@ public class AutoCraftingSession {
         int sessions = 0;
 
         for (AutoCraftingSession session : info.getCraftingSessions()) {
+            if (session.getCraftingSteps().isEmpty()) continue;
             if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
         }
 
