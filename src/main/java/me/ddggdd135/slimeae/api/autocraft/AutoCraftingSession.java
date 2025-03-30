@@ -290,7 +290,7 @@ public class AutoCraftingSession implements IDisposable {
 
         virtualProcess += speed;
         info.getVirtualCraftingDeviceUsed()
-                .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) + speed);
+                .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) - speed);
 
         int result = virtualProcess / 4;
         virtualProcess -= result * 4;
