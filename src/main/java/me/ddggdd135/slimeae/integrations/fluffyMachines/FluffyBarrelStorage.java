@@ -1,11 +1,13 @@
 package me.ddggdd135.slimeae.integrations.fluffyMachines;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.ncbpfluffybear.fluffymachines.items.Barrel;
 import java.util.Objects;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
@@ -100,9 +102,16 @@ public class FluffyBarrelStorage implements IStorage {
 
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
-        ItemStack storedItem = barrel.getStoredItem(block);
-        if (storedItem == null || storedItem.getType().isAir()) return -1;
-        if (itemStack.getItemStack().getType() == storedItem.getType()) return 2000;
+        try {
+            if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return -1;
+            ItemStack storedItem = barrel.getStoredItem(block);
+            if (storedItem == null || storedItem.getType().isAir()) return -1;
+            if (itemStack.getItemStack().getType() == storedItem.getType()) return 2000;
+        } catch (Exception e) {
+            SlimeAEPlugin.getInstance()
+                    .getLogger()
+                    .log(Level.SEVERE, "在操作蓬松桶时发生了错误 方块位置 " + LocationUtils.locationToString(block.getLocation()), e);
+        }
 
         return -1;
     }

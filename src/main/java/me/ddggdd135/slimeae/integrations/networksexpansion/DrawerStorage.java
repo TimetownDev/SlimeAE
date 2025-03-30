@@ -85,13 +85,15 @@ public class DrawerStorage implements IStorage {
 
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
+        if (data == null) return -1;
+
         for (ItemContainer itemContainer : data.getStoredItems()) {
             if (itemStack.getItemStack().getType() == itemContainer.getWrapper().getType()) {
                 return 3000;
             }
         }
 
-        return -1;
+        return 0;
     }
 
     @Override

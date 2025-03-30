@@ -1,11 +1,13 @@
 package me.ddggdd135.slimeae.integrations.infinity;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.mooy1.infinityexpansion.items.storage.StorageCache;
 import io.github.mooy1.infinityexpansion.items.storage.StorageUnit;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.Objects;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
@@ -91,8 +93,14 @@ public class InfinityBarrelStorage implements IStorage {
 
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
-        if (cache == null || cache.amount() <= 0) return -1;
-        if (cache.material() == itemStack.getItemStack().getType()) return 2000;
+        try {
+            if (cache == null || cache.amount() <= 0) return -1;
+            if (cache.material() == itemStack.getItemStack().getType()) return 2000;
+        } catch (Exception e) {
+            SlimeAEPlugin.getInstance()
+                    .getLogger()
+                    .log(Level.SEVERE, "在操作无尽存储时发生了错误 方块位置 " + LocationUtils.locationToString(location), e);
+        }
 
         return -1;
     }
