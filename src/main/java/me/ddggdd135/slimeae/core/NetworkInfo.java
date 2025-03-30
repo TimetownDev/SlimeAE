@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
@@ -15,6 +16,7 @@ import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -35,7 +37,7 @@ public class NetworkInfo implements IDisposable {
     private IStorage storageNoNetworks = new StorageCollection();
     private final Set<AutoCraftingSession> autoCraftingSessions = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
-    private final ItemStorage tmpStorage = new ItemStorage();
+    private final ItemStorage tempStorage = new ItemStorage();
 
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
@@ -72,14 +74,14 @@ public class NetworkInfo implements IDisposable {
     public NetworkInfo(@Nonnull Location controller) {
         this.controller = controller;
         autoCraftingMenu.setSize(54);
-        tmpStorage.setReadonly(true);
+        tempStorage.setReadonly(true);
     }
 
     public NetworkInfo(@Nonnull Location controller, @Nonnull Set<Location> children) {
         this.controller = controller;
         this.children = children;
         autoCraftingMenu.setSize(54);
-        tmpStorage.setReadonly(true);
+        tempStorage.setReadonly(true);
     }
 
     @Nonnull
@@ -108,6 +110,8 @@ public class NetworkInfo implements IDisposable {
         for (AutoCraftingSession session : autoCraftingSessions) {
             session.dispose();
         }
+
+        updateTempStorage();
     }
 
     @Override
@@ -228,6 +232,18 @@ public class NetworkInfo implements IDisposable {
 
     @Nonnull
     public ItemStorage getTempStorage() {
-        return tmpStorage;
+        return tempStorage;
+    }
+
+    public void updateTempStorage() {
+        Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
+        for (ItemKey key : toPush) {
+            ItemStack[] items = tempStorage
+                    .tryTakeItem(new ItemRequest(key, Integer.MAX_VALUE))
+                    .toItemStacks();
+            storage.pushItem(items);
+            items = ItemUtils.trimItems(items);
+            tempStorage.addItem(items, true);
+        }
     }
 }

@@ -8,20 +8,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
-import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.api.items.ItemRequest;
-import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.integrations.networks.QuantumStorage;
-import me.ddggdd135.slimeae.utils.ItemUtils;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitScheduler;
 
 public class NetworkTickerTask implements Runnable {
@@ -75,16 +69,7 @@ public class NetworkTickerTask implements Runnable {
                         info.dispose();
                     }
 
-                    ItemStorage tempStorage = info.getTempStorage();
-                    Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
-                    for (ItemKey key : toPush) {
-                        ItemStack[] items = tempStorage
-                                .tryTakeItem(new ItemRequest(key, Integer.MAX_VALUE))
-                                .toItemStacks();
-                        info.getStorage().pushItem(items);
-                        items = ItemUtils.trimItems(items);
-                        tempStorage.addItem(items, true);
-                    }
+                    info.updateTempStorage();
 
                     StorageCollection storageCollection = (StorageCollection) info.getStorage();
                     for (IStorage storage : storageCollection.getStorages()) {
@@ -104,11 +89,7 @@ public class NetworkTickerTask implements Runnable {
                     Set<AutoCraftingSession> sessions = new HashSet<>(info.getAutoCraftingSessions());
                     for (AutoCraftingSession session : sessions) {
                         if (!session.hasNext()) {
-                            info.getAutoCraftingSessions().remove(session);
-                            Slimefun.runSync(() -> session.getMenu()
-                                    .getInventory()
-                                    .getViewers()
-                                    .forEach(HumanEntity::closeInventory));
+                            session.dispose();
                         } else session.moveNext(1024);
                     }
                     info.updateAutoCraftingMenu();
