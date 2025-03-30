@@ -81,6 +81,8 @@ public class AutoCraftingSession implements IDisposable {
                     ItemUtils.getAmounts(step.getRecipe().getInput()).keyEntrySet()) {
                 items.addItem(entry.getKey(), entry.getValue() * step.getAmount());
             }
+
+            storage.addItem(items.getStorage());
         }
         info.getStorage().tryTakeItem(ItemUtils.createRequests(storage.getStorage()));
     }
@@ -255,42 +257,44 @@ public class AutoCraftingSession implements IDisposable {
 
         int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
                 - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
-        int sessions = 0;
+        if (available > 0) {
+            int sessions = 0;
 
-        for (AutoCraftingSession session : info.getAutoCraftingSessions()) {
-            if (session.getCraftingSteps().isEmpty()) continue;
-            if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
-        }
-
-        long neededSpeed = Math.min(next.getAmount() * 4L + virtualRunning * 4L, maxDevices * 4L);
-        int speed = available / sessions;
-        if (speed > maxDevices * 4) speed = maxDevices * 4;
-        if (speed > neededSpeed) speed = (int) neededSpeed;
-
-        long actualAmount = Math.min(speed / 4, next.getAmount());
-        ItemHashMap<Long> neededItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry :
-                ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
-            neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
-        }
-
-        ItemRequest[] requests = ItemUtils.createRequests(neededItems);
-        if (storage.contains(requests) && doCraft) {
-            storage.tryTakeItem(requests);
-            virtualRunning += (int) actualAmount;
-            next.decreaseAmount(actualAmount);
-
-            if (virtualRunning == actualAmount) {
-                menu.getContents();
-                if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
-
-                return;
+            for (AutoCraftingSession session : info.getAutoCraftingSessions()) {
+                if (session.getCraftingSteps().isEmpty()) continue;
+                if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
             }
-        }
 
-        virtualProcess += speed;
-        info.getVirtualCraftingDeviceUsed()
-                .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) - speed);
+            long neededSpeed = Math.min(next.getAmount() * 4L + virtualRunning * 4L, maxDevices * 4L);
+            int speed = available / sessions;
+            if (speed > maxDevices * 4) speed = maxDevices * 4;
+            if (speed > neededSpeed) speed = (int) neededSpeed;
+
+            long actualAmount = Math.min(speed / 4, next.getAmount());
+            ItemHashMap<Long> neededItems = new ItemHashMap<>();
+            for (Map.Entry<ItemKey, Long> entry :
+                    ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+                neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
+            }
+
+            ItemRequest[] requests = ItemUtils.createRequests(neededItems);
+            if (storage.contains(requests) && doCraft) {
+                storage.tryTakeItem(requests);
+                virtualRunning += (int) actualAmount;
+                next.decreaseAmount(actualAmount);
+
+                if (virtualRunning == actualAmount) {
+                    menu.getContents();
+                    if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
+
+                    return;
+                }
+            }
+
+            virtualProcess += speed;
+            info.getVirtualCraftingDeviceUsed()
+                    .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) + speed);
+        }
 
         int result = Math.min(virtualProcess / 4, virtualRunning);
         virtualProcess -= result * 4;
@@ -301,7 +305,7 @@ public class AutoCraftingSession implements IDisposable {
                 ItemUtils.getAmounts(next.getRecipe().getOutput()).keyEntrySet()) {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
-        storage.addItem(resultItems, true);
+        storage.addItem(resultItems);
 
         menu.getContents();
         if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
