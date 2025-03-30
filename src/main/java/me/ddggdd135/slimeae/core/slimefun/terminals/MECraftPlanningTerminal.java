@@ -166,6 +166,7 @@ public class MECraftPlanningTerminal extends METerminal {
                             if (info.getAutoCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
                                 player.sendMessage(CMIChatColor.translate(
                                         "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
+                                session.dispose();
                                 return false;
                             }
                             player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
@@ -176,6 +177,7 @@ public class MECraftPlanningTerminal extends METerminal {
                         menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
                         menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
                             player.closeInventory();
+                            session.dispose();
                             return false;
                         });
                         menu.open(player);
