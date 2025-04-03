@@ -286,7 +286,7 @@ public class AutoCraftingTask implements IDisposable {
         }
         storage.addItem(resultItems);
 
-        long actualAmount = Math.min(maxDevices, next.getAmount());
+        long actualAmount = Math.min(maxDevices - virtualRunning, next.getAmount());
         ItemHashMap<Long> neededItems = new ItemHashMap<>();
         for (Map.Entry<ItemKey, Long> entry :
                 ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
