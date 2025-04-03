@@ -265,31 +265,10 @@ public class AutoCraftingSession implements IDisposable {
                 if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
             }
 
-            long neededSpeed = Math.min(next.getAmount() * 4L + virtualRunning * 4L, maxDevices * 4L);
+            long neededSpeed = Math.min(virtualRunning * 4L, maxDevices * 4L);
             int speed = available / sessions;
             if (speed > maxDevices * 4) speed = maxDevices * 4;
             if (speed > neededSpeed) speed = (int) neededSpeed;
-
-            long actualAmount = Math.min(speed / 4, next.getAmount());
-            ItemHashMap<Long> neededItems = new ItemHashMap<>();
-            for (Map.Entry<ItemKey, Long> entry :
-                    ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
-                neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
-            }
-
-            ItemRequest[] requests = ItemUtils.createRequests(neededItems);
-            if (storage.contains(requests) && doCraft) {
-                storage.tryTakeItem(requests);
-                virtualRunning += (int) actualAmount;
-                next.decreaseAmount(actualAmount);
-
-                if (virtualRunning == actualAmount) {
-                    menu.getContents();
-                    if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
-
-                    return;
-                }
-            }
 
             virtualProcess += speed;
             info.getVirtualCraftingDeviceUsed()
@@ -306,6 +285,27 @@ public class AutoCraftingSession implements IDisposable {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
         storage.addItem(resultItems);
+
+        long actualAmount = Math.min(maxDevices, next.getAmount());
+        ItemHashMap<Long> neededItems = new ItemHashMap<>();
+        for (Map.Entry<ItemKey, Long> entry :
+                ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+            neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
+        }
+
+        ItemRequest[] requests = ItemUtils.createRequests(neededItems);
+        if (storage.contains(requests) && doCraft) {
+            storage.tryTakeItem(requests);
+            virtualRunning += (int) actualAmount;
+            next.decreaseAmount(actualAmount);
+
+            if (virtualRunning == actualAmount) {
+                menu.getContents();
+                if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
+
+                return;
+            }
+        }
 
         menu.getContents();
         if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
