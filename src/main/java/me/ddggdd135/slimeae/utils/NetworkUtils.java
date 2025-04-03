@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.Stack;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -70,9 +70,9 @@ public class NetworkUtils {
     public static void doCraft(@Nonnull NetworkInfo networkInfo, @Nonnull ItemStack itemStack, long amount) {
         // 检查是否已有相同的合成任务
         boolean hasExistingTask = false;
-        for (AutoCraftingSession session : networkInfo.getAutoCraftingSessions()) {
+        for (AutoCraftingTask task : networkInfo.getAutoCraftingSessions()) {
             // 检查配方的所有输出物品
-            for (ItemStack output : session.getRecipe().getOutput()) {
+            for (ItemStack output : task.getRecipe().getOutput()) {
                 if (SlimefunUtils.isItemSimilar(output, itemStack, true, false)) {
                     hasExistingTask = true;
                     break;
@@ -100,8 +100,8 @@ public class NetworkUtils {
                 if (hasMatchingOutput) {
                     try {
                         // 创建并启动新的合成任务
-                        AutoCraftingSession session = new AutoCraftingSession(networkInfo, recipe, amount / onceAmount);
-                        session.start();
+                        AutoCraftingTask task = new AutoCraftingTask(networkInfo, recipe, amount / onceAmount);
+                        task.start();
                     } catch (Exception e) {
                         // 忽略合成失败的情况，等待下一次尝试
                     }

@@ -18,8 +18,8 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.events.AutoCraftingSessionDisposingEvent;
-import me.ddggdd135.slimeae.api.events.AutoCraftingStartingEvent;
+import me.ddggdd135.slimeae.api.events.AutoCraftingTaskDisposingEvent;
+import me.ddggdd135.slimeae.api.events.AutoCraftingTaskStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -37,7 +37,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class AutoCraftingSession implements IDisposable {
+public class AutoCraftingTask implements IDisposable {
     private static final int MAX_LORE_LINES = 15;
     private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
 
@@ -54,7 +54,7 @@ public class AutoCraftingSession implements IDisposable {
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private final ItemStorage storage;
 
-    public AutoCraftingSession(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
+    public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         //        ItemStorage storage = new ItemStorage();
         //        storage.addItem(
         //                ItemUtils.createItems(new AdvancedCustomItemStack(SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ),
@@ -258,15 +258,15 @@ public class AutoCraftingSession implements IDisposable {
         int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
                 - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
         if (available > 0) {
-            int sessions = 0;
+            int tasks = 0;
 
-            for (AutoCraftingSession session : info.getAutoCraftingSessions()) {
-                if (session.getCraftingSteps().isEmpty()) continue;
-                if (session.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) sessions++;
+            for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
+                if (task.getCraftingSteps().isEmpty()) continue;
+                if (task.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) tasks++;
             }
 
             long neededSpeed = Math.min(virtualRunning * 4L, maxDevices * 4L);
-            int speed = available / sessions;
+            int speed = available / tasks;
             if (speed > maxDevices * 4) speed = maxDevices * 4;
             if (speed > neededSpeed) speed = (int) neededSpeed;
 
@@ -418,7 +418,7 @@ public class AutoCraftingSession implements IDisposable {
     public void start() {
         if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
 
-        AutoCraftingStartingEvent e = new AutoCraftingStartingEvent(this);
+        AutoCraftingTaskStartingEvent e = new AutoCraftingTaskStartingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
 
         info.getAutoCraftingSessions().add(this);
@@ -430,7 +430,7 @@ public class AutoCraftingSession implements IDisposable {
 
     @Override
     public void dispose() {
-        AutoCraftingSessionDisposingEvent e = new AutoCraftingSessionDisposingEvent(this);
+        AutoCraftingTaskDisposingEvent e = new AutoCraftingTaskDisposingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
 
         info.getAutoCraftingSessions().remove(this);

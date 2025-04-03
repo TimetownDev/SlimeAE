@@ -11,7 +11,7 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IDisposable;
@@ -35,7 +35,7 @@ public class NetworkInfo implements IDisposable {
     private final Map<CraftType, Integer> virtualCraftingDeviceUsed = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private IStorage storageNoNetworks = new StorageCollection();
-    private final Set<AutoCraftingSession> autoCraftingSessions = new ConcurrentHashSet<>();
+    private final Set<AutoCraftingTask> autoCraftingTasks = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tempStorage = new ItemStorage();
 
@@ -52,7 +52,7 @@ public class NetworkInfo implements IDisposable {
 
     // 重载配置
     public static void reloadConfig() {
-        maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-sessions", 32);
+        maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-tasks", 32);
         maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 32768);
     }
 
@@ -107,8 +107,8 @@ public class NetworkInfo implements IDisposable {
         NetworkData networkData = SlimeAEPlugin.getNetworkData();
         networkData.AllNetworkData.remove(this);
 
-        for (AutoCraftingSession session : autoCraftingSessions) {
-            session.dispose();
+        for (AutoCraftingTask task : autoCraftingTasks) {
+            task.dispose();
         }
 
         updateTempStorage();
@@ -176,8 +176,8 @@ public class NetworkInfo implements IDisposable {
     }
 
     @Nonnull
-    public Set<AutoCraftingSession> getAutoCraftingSessions() {
-        return autoCraftingSessions;
+    public Set<AutoCraftingTask> getAutoCraftingSessions() {
+        return autoCraftingTasks;
     }
 
     public void openAutoCraftingSessionsMenu(@Nonnull Player player) {
@@ -190,19 +190,19 @@ public class NetworkInfo implements IDisposable {
             if (content == null) continue;
             content.setType(Material.AIR);
         }
-        List<AutoCraftingSession> sessions = getAutoCraftingSessions().stream().toList();
-        if (sessions.size() > 53) sessions = sessions.subList(sessions.size() - 53, sessions.size());
+        List<AutoCraftingTask> tasks = getAutoCraftingSessions().stream().toList();
+        if (tasks.size() > 53) tasks = tasks.subList(tasks.size() - 53, tasks.size());
         for (int i = 0; i < 54; i++) {
             autoCraftingMenu.replaceExistingItem(i, null);
             autoCraftingMenu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
         int i = 0;
-        for (AutoCraftingSession session : sessions) {
-            ItemStack[] itemStacks = session.getRecipe().getOutput();
+        for (AutoCraftingTask task : tasks) {
+            ItemStack[] itemStacks = task.getRecipe().getOutput();
             ItemStack itemStack;
             if (itemStacks.length == 1) {
                 itemStack = itemStacks[0].clone();
-                itemStack.setAmount((int) Math.min(64, session.getCount()));
+                itemStack.setAmount((int) Math.min(64, task.getCount()));
                 if (itemStack.isEmpty()) continue;
             } else {
                 itemStack = new AdvancedCustomItemStack(
@@ -211,7 +211,7 @@ public class NetworkInfo implements IDisposable {
                         Arrays.stream(itemStacks)
                                 .map(x -> "  &e- &f" + ItemUtils.getItemName(x) + "&f x " + x.getAmount())
                                 .toArray(String[]::new));
-                itemStack.setAmount((int) Math.min(64, session.getCount()));
+                itemStack.setAmount((int) Math.min(64, task.getCount()));
             }
 
             List<String> lore = itemStack.getLore();
@@ -222,7 +222,7 @@ public class NetworkInfo implements IDisposable {
 
             autoCraftingMenu.replaceExistingItem(i, itemStack);
             autoCraftingMenu.addMenuClickHandler(i, (player, i1, itemStack1, clickAction) -> {
-                session.showGUI(player);
+                task.showGUI(player);
                 return false;
             });
             i++;

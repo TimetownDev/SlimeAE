@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -150,10 +150,10 @@ public class MECraftPlanningTerminal extends METerminal {
                         return;
                     }
 
-                    AutoCraftingSession session = new AutoCraftingSession(info, recipeEntry.getRecipe(), amount);
+                    AutoCraftingTask task = new AutoCraftingTask(info, recipeEntry.getRecipe(), amount);
                     Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> {
-                        session.refreshGUI(45, false);
-                        AEMenu menu = session.getMenu();
+                        task.refreshGUI(45, false);
+                        AEMenu menu = task.getMenu();
                         int[] borders = new int[] {45, 46, 48, 49, 50, 52, 53};
                         int acceptSlot = 47;
                         int cancelSlot = 51;
@@ -166,18 +166,18 @@ public class MECraftPlanningTerminal extends METerminal {
                             if (info.getAutoCraftingSessions().size() >= NetworkInfo.getMaxCraftingSessions()) {
                                 player.sendMessage(CMIChatColor.translate(
                                         "&c&l这个网络已经有" + NetworkInfo.getMaxCraftingSessions() + "个合成任务了"));
-                                session.dispose();
+                                task.dispose();
                                 return false;
                             }
                             player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
-                            session.refreshGUI(54);
-                            session.start();
+                            task.refreshGUI(54);
+                            task.start();
                             return false;
                         });
                         menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);
                         menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
                             player.closeInventory();
-                            session.dispose();
+                            task.dispose();
                             return false;
                         });
                         menu.open(player);

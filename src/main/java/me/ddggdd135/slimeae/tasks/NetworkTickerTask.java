@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -86,11 +86,11 @@ public class NetworkTickerTask implements Runnable {
                     });
 
                     // tick autoCrafting
-                    Set<AutoCraftingSession> sessions = new HashSet<>(info.getAutoCraftingSessions());
-                    for (AutoCraftingSession session : sessions) {
-                        if (!session.hasNext()) {
-                            session.dispose();
-                        } else session.moveNext(1024);
+                    Set<AutoCraftingTask> tasks = new HashSet<>(info.getAutoCraftingSessions());
+                    for (AutoCraftingTask task : tasks) {
+                        if (!task.hasNext()) {
+                            task.dispose();
+                        } else task.moveNext(1024);
                     }
                     info.updateAutoCraftingMenu();
                 }

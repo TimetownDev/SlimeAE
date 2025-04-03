@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.abstracts.Card;
-import me.ddggdd135.slimeae.api.autocraft.AutoCraftingSession;
+import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
@@ -57,10 +57,10 @@ public class LargeMolecularAssembler extends TickingBlock
         if (!menu.hasViewer()) return;
 
         CraftingRecipe recipe = null;
-        for (AutoCraftingSession autoCraftingSession : networkInfo.getAutoCraftingSessions()) {
-            if (autoCraftingSession.getCraftingSteps().isEmpty()) continue;
-            if (autoCraftingSession.getCraftingSteps().get(0).getRecipe().getCraftType() == getCraftingType()) {
-                recipe = autoCraftingSession.getCraftingSteps().get(0).getRecipe();
+        for (AutoCraftingTask autoCraftingTask : networkInfo.getAutoCraftingSessions()) {
+            if (autoCraftingTask.getCraftingSteps().isEmpty()) continue;
+            if (autoCraftingTask.getCraftingSteps().get(0).getRecipe().getCraftType() == getCraftingType()) {
+                recipe = autoCraftingTask.getCraftingSteps().get(0).getRecipe();
             }
         }
 
