@@ -76,13 +76,16 @@ public class AutoCraftingTask implements IDisposable {
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         this.storage = new ItemStorage();
         for (CraftStep step : craftingSteps) {
-            ItemStorage items = new ItemStorage();
             for (Map.Entry<ItemKey, Long> entry :
                     ItemUtils.getAmounts(step.getRecipe().getInput()).keyEntrySet()) {
-                items.addItem(entry.getKey(), entry.getValue() * step.getAmount());
+                storage.addItem(entry.getKey(), entry.getValue() * step.getAmount());
             }
-
-            storage.addItem(items.getStorage());
+        }
+        for (CraftStep step : craftingSteps) {
+            for (Map.Entry<ItemKey, Long> entry :
+                    ItemUtils.getAmounts(step.getRecipe().getOutput()).keyEntrySet()) {
+                storage.tryTakeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
+            }
         }
         info.getStorage().tryTakeItem(ItemUtils.createRequests(storage.getStorage()));
     }
