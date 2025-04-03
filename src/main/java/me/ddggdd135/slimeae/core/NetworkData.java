@@ -89,6 +89,7 @@ public class NetworkData {
         for (Location location : info.getRecipeMap().keySet()) {
             IMECraftHolder holder =
                     SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+            if (holder == null) continue;
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
                 IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
