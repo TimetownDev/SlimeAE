@@ -13,6 +13,9 @@ import me.ddggdd135.slimeae.api.abstracts.MEObject;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.ddggdd135.slimeae.core.slimefun.*;
 import me.ddggdd135.slimeae.core.slimefun.buses.*;
+import me.ddggdd135.slimeae.core.slimefun.cards.AccelerationCard;
+import me.ddggdd135.slimeae.core.slimefun.cards.CraftingCard;
+import me.ddggdd135.slimeae.core.slimefun.cards.RedstoneCard;
 import me.ddggdd135.slimeae.core.slimefun.terminals.*;
 import me.ddggdd135.slimeae.core.slimefun.tools.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -442,6 +445,14 @@ public class SlimefunAEItems {
                                     ? Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE
                                     : Material.SHULKER_SHELL,
                             "{#33ccf3}合成卡")
+                    .addFlags(ItemFlag.values()));
+    public static final SlimefunItemStack REDSTONE_CARD = new SlimefunItemStack(
+            "REDSTONE_CARD",
+            new AdvancedCustomItemStack(
+                            Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                                    ? Material.RIB_ARMOR_TRIM_SMITHING_TEMPLATE
+                                    : Material.SHULKER_SHELL,
+                            "&c红石卡")
                     .addFlags(ItemFlag.values()));
     //    public static final SlimefunItemStack CAPACITY_CARD = new SlimefunItemStack(
     //            "CAPACITY_CARD",
@@ -1320,6 +1331,12 @@ public class SlimefunAEItems {
                         CRAFTING_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {BASIC_CARD, new ItemStack(Material.CRAFTING_TABLE)})
+                .register(plugin);
+        new RedstoneCard(
+                        SlimefunAEItemGroups.MATERIAL,
+                        REDSTONE_CARD,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {BASIC_CARD, new ItemStack(Material.REDSTONE_TORCH)})
                 .register(plugin);
         //        new SlimefunItem(
         //                        SlimefunAEItemGroups.MATERIAL,
