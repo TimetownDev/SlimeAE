@@ -77,7 +77,8 @@ public class MenuItems {
                 "&c  - 古代祭坛",
                 "&5  - 榨汁机",
                 "&6  - 矿物粉碎机",
-                "&f  - 压力机"));
+                "&f  - 压力机",
+                "&c  - 加热压力舱"));
         List<String> PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE = new ArrayList<>(List.of(
                 "",
                 "&e支持以下合成配方:",
@@ -92,7 +93,8 @@ public class MenuItems {
                 "&c  - 古代祭坛",
                 "&5  - 榨汁机",
                 "&6  - 矿物粉碎机",
-                "&f  - 压力机"));
+                "&f  - 压力机",
+                "&c  - 加热压力舱"));
 
         if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
             CRAFTING_TABLE_LORE.add("{#299482}  - 纳米工作台");

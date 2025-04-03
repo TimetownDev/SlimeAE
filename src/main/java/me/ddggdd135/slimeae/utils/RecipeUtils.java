@@ -15,6 +15,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AltarRecipe;
+import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientAltar;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.ItemStackSnapshot;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
@@ -321,6 +323,11 @@ public class RecipeUtils {
                     .map(SuperRecipe::getInput)
                     .toList();
         }
+        if (slimefunItem instanceof AncientAltar ancientAltar) {
+            return ancientAltar.getRecipes().stream()
+                    .map(RecipeUtils::getAltarRecipeInput)
+                    .toList();
+        }
 
         return new ArrayList<>();
     }
@@ -424,6 +431,28 @@ public class RecipeUtils {
                 return recipe.getOutput();
             }
         }
+        if (slimefunItem instanceof AncientAltar ancientAltar) {
+            List<AltarRecipe> recipes = ancientAltar.getRecipes();
+            i:
+            for (AltarRecipe recipe : recipes) {
+                ItemStack[] in = getAltarRecipeInput(recipe);
+                for (int i = 0; i < Math.max(in.length, inputs.length); i++) {
+                    ItemStack x = null;
+                    ItemStack y = null;
+                    if (in.length > i) {
+                        x = in[i];
+                    }
+                    if (inputs.length > i) {
+                        y = inputs[i];
+                    }
+                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
+                        continue i;
+                    }
+                }
+
+                return new ItemStack[] {recipe.getOutput()};
+            }
+        }
 
         return new ItemStack[0];
     }
@@ -486,6 +515,24 @@ public class RecipeUtils {
         return result;
     }
 
+    public static ItemStack[] getAltarRecipeInput(@Nonnull AltarRecipe altarRecipe) {
+        List<ItemStack> input = altarRecipe.getInput();
+        ItemStack[] itemStacks = new ItemStack[9];
+        itemStacks[0] = input.get(0);
+        itemStacks[1] = input.get(1);
+        itemStacks[2] = input.get(2);
+        itemStacks[5] = input.get(3);
+
+        itemStacks[8] = input.get(4);
+        itemStacks[7] = input.get(5);
+        itemStacks[6] = input.get(6);
+        itemStacks[3] = input.get(7);
+
+        itemStacks[4] = altarRecipe.getCatalyst();
+
+        return itemStacks;
+    }
+
     static {
         SUPPORTED_RECIPE_TYPES.put(
                 RecipeType.ENHANCED_CRAFTING_TABLE, SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
@@ -500,6 +547,8 @@ public class RecipeUtils {
         SUPPORTED_RECIPE_TYPES.put(RecipeType.JUICER, SlimefunItem.getByItem(SlimefunItems.JUICER));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.ORE_CRUSHER, SlimefunItem.getByItem(SlimefunItems.ORE_CRUSHER));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.PRESSURE_CHAMBER, SlimefunItem.getByItem(SlimefunItems.PRESSURE_CHAMBER));
+        SUPPORTED_RECIPE_TYPES.put(
+                RecipeType.HEATED_PRESSURE_CHAMBER, SlimefunItem.getByItem(SlimefunItems.HEATED_PRESSURE_CHAMBER));
 
         CRAFTING_TABLE_TYPES.put(
                 RecipeType.ENHANCED_CRAFTING_TABLE, SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
