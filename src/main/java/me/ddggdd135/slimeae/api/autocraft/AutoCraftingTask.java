@@ -72,6 +72,7 @@ public class AutoCraftingTask implements IDisposable {
         this.recipe = recipe;
         this.count = count;
         menu.setSize(54);
+        menu.addMenuCloseHandler(player -> dispose());
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         this.storage = new ItemStorage();
         for (CraftStep step : craftingSteps) {
