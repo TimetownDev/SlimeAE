@@ -60,13 +60,6 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
 
     public static void saveStorage(@Nonnull ItemStack itemStack) {
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
-        //        NBTItem nbtItem = new NBTItem(itemStack);
-        //        if (nbtItem.hasTag(ITEM_STORAGE_KEY)) nbtItem.removeKey(ITEM_STORAGE_KEY);
-        //        NBTCompoundList list = nbtItem.getCompoundList(ITEM_STORAGE_KEY);
-        //        list.clear();
-        //        list.addAll(ItemUtils.toNBT(getStorage(itemStack).getStorage()));
-        //        nbtItem.applyNBT(itemStack);
-
         SlimeAEPlugin.getStorageCellDataController().updateAsync(getStorage(itemStack));
     }
 
@@ -81,6 +74,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         List<String> lores = new ArrayList<>();
         lores.add(
                 CMIChatColor.translate("&e已存储 " + meStorageCellCache.getStored() + "/" + meStorageCellCache.getSize()));
+        lores.add("");
         List<Map.Entry<ItemStack, Long>> storages = meStorageCellCache.getStorage().entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
                 .toList();
