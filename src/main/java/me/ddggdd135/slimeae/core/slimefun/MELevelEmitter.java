@@ -58,7 +58,11 @@ public class MELevelEmitter extends TickingBlock implements IMEObject, Inventory
         if (blockMenu == null) return;
 
         NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (networkInfo == null) return;
+        if (networkInfo == null) {
+            updateBlock(block, 0);
+            return;
+        }
+
         IStorage storage = networkInfo.getStorage();
 
         long setting = getAmount(block.getLocation());
