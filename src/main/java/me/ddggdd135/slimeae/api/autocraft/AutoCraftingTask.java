@@ -32,7 +32,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -439,8 +438,7 @@ public class AutoCraftingTask implements IDisposable {
         info.getAutoCraftingSessions().remove(this);
         info.getTempStorage().addItem(storage.getStorage(), true);
 
-        Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> menu.getInventory()
-                .getViewers()
-                .forEach(HumanEntity::closeInventory));
+        Bukkit.getScheduler()
+                .runTask(SlimeAEPlugin.getInstance(), () -> menu.getInventory().close());
     }
 }
