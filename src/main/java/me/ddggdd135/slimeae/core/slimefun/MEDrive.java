@@ -50,7 +50,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                                 && !itemStack.getType().isAir()
                                 && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                                 && MEItemStorageCell.isCurrentServer(itemStack)) {
-                            blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
+                            MEItemStorageCell.updateLore(itemStack);
                         }
                     }
                     blockMenu.dropItems(b.getLocation(), getMEItemStorageCellSlots());
@@ -107,14 +107,13 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                         && MEItemStorageCell.isCurrentServer(itemStack)) {
 
-                    itemStack = MEItemStorageCell.updateLore(itemStack);
+                    MEItemStorageCell.updateLore(itemStack);
                     NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                     if (networkInfo == null) return true;
                     StorageCollection storageCollection = (StorageCollection) networkInfo.getStorage();
                     MEStorageCellCache result = MEItemStorageCell.getStorage(itemStack);
                     if (result != null) {
                         storageCollection.removeStorage(result);
-                        menu.replaceExistingItem(slot, itemStack);
                     }
                 }
                 return true;
@@ -132,7 +131,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                     && !itemStack.getType().isAir()
                     && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                     && MEItemStorageCell.isCurrentServer(itemStack)) {
-                blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
+                MEItemStorageCell.updateLore(itemStack);
                 blockMenu.markDirty();
                 Slimefun.getDatabaseManager()
                         .getBlockDataController()

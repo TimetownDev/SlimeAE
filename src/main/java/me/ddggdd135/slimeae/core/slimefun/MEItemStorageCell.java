@@ -75,11 +75,12 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
      *
      * @param itemStack 存储元件物品
      */
-    public static ItemStack updateLore(@Nonnull ItemStack itemStack) {
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return itemStack;
+    public static void updateLore(@Nonnull ItemStack itemStack) {
+        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
         MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
-        ItemStack toReturn = itemStack.clone();
         List<String> lores = new ArrayList<>();
+        lores.add(
+                CMIChatColor.translate("&e已存储 " + meStorageCellCache.getStored() + "/" + meStorageCellCache.getSize()));
         List<Map.Entry<ItemStack, Long>> storages = meStorageCellCache.getStorage().entrySet().stream()
                 .sorted(ALPHABETICAL_SORT)
                 .toList();
@@ -92,8 +93,7 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
             lines++;
             lores.add(CMIChatColor.translate("&e" + ItemUtils.getItemName(entry.getKey()) + " - " + entry.getValue()));
         }
-        toReturn.setLore(lores);
-        return toReturn;
+        itemStack.setLore(lores);
     }
 
     @Nonnull

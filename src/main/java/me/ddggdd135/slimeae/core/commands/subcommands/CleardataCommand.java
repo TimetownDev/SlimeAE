@@ -57,7 +57,7 @@ public class CleardataCommand extends SubCommand {
                     return false;
                 }
                 data.getSourceStorage().clear();
-                player.getInventory().setItemInMainHand(MEItemStorageCell.updateLore(itemStack));
+                MEItemStorageCell.updateLore(itemStack);
                 SlimeAEPlugin.getStorageCellDataController().delete(data);
                 commandSender.sendMessage(CMIChatColor.translate("&a成功清除了存储元件数据"));
 

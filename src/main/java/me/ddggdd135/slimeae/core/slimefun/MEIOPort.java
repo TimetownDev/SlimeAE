@@ -64,7 +64,8 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorage(itemStack);
                     if (meStorageCellCache.getStorage().isEmpty()) {
                         blockMenu.replaceExistingItem(slot, null);
-                        blockMenu.pushItem(MEItemStorageCell.updateLore(itemStack), getMeStorageCellOutputSlots());
+                        MEItemStorageCell.updateLore(itemStack);
+                        blockMenu.pushItem(itemStack, getMeStorageCellOutputSlots());
                         return;
                     }
 
@@ -78,7 +79,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     networkStorage.pushItem(tmp);
                     tmp = ItemUtils.trimItems(tmp);
                     meStorageCellCache.pushItem(tmp);
-                    blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
+                    MEItemStorageCell.updateLore(itemStack);
                 }
             }
 
@@ -94,7 +95,8 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorage(itemStack);
                 if (meStorageCellCache.getStored() >= meStorageCellCache.getSize()) {
                     blockMenu.replaceExistingItem(slot, null);
-                    blockMenu.pushItem(MEItemStorageCell.updateLore(itemStack), getMeStorageCellOutputSlots());
+                    MEItemStorageCell.updateLore(itemStack);
+                    blockMenu.pushItem(itemStack, getMeStorageCellOutputSlots());
                     return;
                 }
 
@@ -110,7 +112,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);
                 networkStorage.pushItem(tmp);
-                blockMenu.replaceExistingItem(slot, MEItemStorageCell.updateLore(itemStack));
+                MEItemStorageCell.updateLore(itemStack);
             }
         }
     }
