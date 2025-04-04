@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 public class MEChainedExportBusData extends MEChainedBusData implements IInventoryBlockData {
-    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "MEChainedExportBus");
+    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "me_chained_export_bus");
 
     private ItemStack[] itemStacks = new ItemStack[0];
 

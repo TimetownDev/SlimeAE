@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 
 public class MEBusData implements IBlockData {
-    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "MEBus");
+    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "me_bus");
 
     private BlockFace direction = BlockFace.SELF;
 

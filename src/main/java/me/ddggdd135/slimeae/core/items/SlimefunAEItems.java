@@ -262,6 +262,10 @@ public class SlimefunAEItems {
                     "&e支持蓬松桶和无尽存储单元",
                     "&e支持网络量子存储和网络抽屉",
                     "&e不支持原版容器"));
+    public static final SlimefunItemStack ME_LEVEL_EMITTER = new SlimefunItemStack(
+            "ME_LEVEL_EMITTER",
+            new AdvancedCustomItemStack(
+                    Material.TARGET, "&f&lME标准发信器", "", "{#3366ff>}当AE网络中 设定物品大于设定的数量 发出红石信号{#33ccf3<}"));
     public static final SlimefunItemStack ME_TERMINAL = new SlimefunItemStack(
             "ME_TERMINAL",
             new AdvancedCustomItemStack(Material.SHROOMLIGHT, "&fME终端", "", "{#3366ff>}管理AE网络中的物品{#33ccf3<}"));
@@ -908,6 +912,12 @@ public class SlimefunAEItems {
                         new ItemStack[] {
                             ME_INTERFACE, new ItemStack(Material.STICKY_PISTON), new ItemStack(Material.PISTON)
                         })
+                .register(plugin);
+        new MELevelEmitter(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_LEVEL_EMITTER,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_INTERFACE, REDSTONE_CARD, CALCULATION_PROCESSOR})
                 .register(plugin);
         new METerminal(SlimefunAEItemGroups.MACHINE, ME_TERMINAL, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
                     QUARTZ_GLASS, FORMATION_CORE, ANNIHILATION_CORE, LOGIC_PROCESSOR

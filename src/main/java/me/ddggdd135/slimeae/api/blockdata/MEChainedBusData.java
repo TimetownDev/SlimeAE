@@ -6,7 +6,7 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import org.bukkit.NamespacedKey;
 
 public class MEChainedBusData extends MEBusData {
-    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "MEChainedBus");
+    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "me_chained_bus");
     private int distance = 1;
 
     public int getDistance() {

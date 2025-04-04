@@ -11,7 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 
 public class MEAdvancedBusData extends MEBusData implements IBlockData {
-    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "MEAdvancedBus");
+    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "me_advanced_bus");
 
     private Set<BlockFace> directions = new HashSet<>(List.of(BlockFace.SELF));
 

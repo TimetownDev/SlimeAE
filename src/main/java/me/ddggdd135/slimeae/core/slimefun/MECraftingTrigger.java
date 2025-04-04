@@ -15,6 +15,7 @@ import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MECraftingTrigger extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
-    private static final long defaultAmount = 64L;
+    private static long defaultAmount = 64L;
 
     @Override
     public boolean isSynchronized() {
@@ -163,6 +164,10 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
                 "",
                 "&eAE网络中 设定物品不会低于这个数量");
         blockMenu.replaceExistingItem(getInfoSlot(), info);
+    }
+
+    public static void reloadConfig() {
+        defaultAmount = SlimeAEPlugin.getInstance().getConfig().getLong("me-crafting-trigger.default", 131072L);
     }
 
     public int[] getBorderSlots() {

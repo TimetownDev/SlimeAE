@@ -25,6 +25,14 @@ networks-expansion-switch:
 me-cleaner:
   default: 131072
 
+# ME合成触发器设置
+me-crafting-trigger:
+  default: 64
+
+# ME标准发信器
+level-emitter:
+  default: 64
+
 # 世界生成设置
 world-gen:
   # 是否启用矿石生成

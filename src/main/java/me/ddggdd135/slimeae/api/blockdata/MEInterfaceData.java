@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 public class MEInterfaceData implements IInventoryBlockData {
-    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "MEInterface");
+    private static final NamespacedKey key = new NamespacedKey(SlimeAEPlugin.getInstance(), "me_interface");
     private ItemStack[] itemStacks = new ItemStack[0];
 
     @Override

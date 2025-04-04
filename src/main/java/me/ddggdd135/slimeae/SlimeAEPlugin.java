@@ -21,6 +21,8 @@ import me.ddggdd135.slimeae.core.listeners.NetworkListener;
 import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
 import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.core.slimefun.MECleaner;
+import me.ddggdd135.slimeae.core.slimefun.MECraftingTrigger;
+import me.ddggdd135.slimeae.core.slimefun.MELevelEmitter;
 import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.core.slimefun.cards.CraftingCard;
 import me.ddggdd135.slimeae.integrations.*;
@@ -318,5 +320,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载ME清除器配置
         MECleaner.reloadConfig();
+
+        // 重载ME合成触发器配置
+        MECraftingTrigger.reloadConfig();
+
+        // 重载ME标准发信器配置
+        MELevelEmitter.reloadConfig();
     }
 }
