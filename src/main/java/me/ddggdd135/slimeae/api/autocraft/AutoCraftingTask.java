@@ -424,6 +424,8 @@ public class AutoCraftingTask implements IDisposable {
         AutoCraftingTaskStartingEvent e = new AutoCraftingTaskStartingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
 
+        menu.addMenuCloseHandler(player -> {});
+
         info.getAutoCraftingSessions().add(this);
     }
 
