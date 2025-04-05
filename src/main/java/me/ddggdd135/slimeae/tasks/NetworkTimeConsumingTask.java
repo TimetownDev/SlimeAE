@@ -8,41 +8,36 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.Bukkit;
 
 public class NetworkTimeConsumingTask implements Runnable {
     private int tickRate;
     private boolean halted = false;
-    private volatile boolean running = false;
 
     private volatile boolean paused = false;
 
     public void start(@Nonnull SlimeAEPlugin plugin) {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
-
-        BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(plugin, this, 100L, tickRate);
-    }
-
-    private void reset() {
-        synchronized (this) {
-            running = false;
-        }
+        run();
     }
 
     @Override
     public void run() {
+        long startTime = System.currentTimeMillis();
+
+        run0();
+
+        long elapsed = System.currentTimeMillis() - startTime;
+        long nextDelay = Math.max(tickRate - elapsed, 0);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(SlimeAEPlugin.getInstance(), this, nextDelay);
+    }
+
+    public void run0() {
         if (paused) {
             return;
         }
 
         try {
-            // If this method is actually still running... DON'T
-            synchronized (this) {
-                if (running) return;
-                running = true;
-            }
-
             // Run our ticker code
             if (!halted) {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
@@ -60,8 +55,6 @@ public class NetworkTimeConsumingTask implements Runnable {
             SlimeAEPlugin.getInstance()
                     .getLogger()
                     .log(Level.SEVERE, x, () -> "An Exception was caught while ticking Networks for SlimeAE");
-        } finally {
-            reset();
         }
     }
 
