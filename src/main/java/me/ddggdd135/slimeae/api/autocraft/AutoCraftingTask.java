@@ -270,6 +270,7 @@ public class AutoCraftingTask implements IDisposable {
 
             long neededSpeed = Math.min(virtualRunning * 4L, maxDevices * 4L);
             int speed = available / tasks;
+            if (speed == 0) speed++;
             if (speed > maxDevices * 4) speed = maxDevices * 4;
             if (speed > neededSpeed) speed = (int) neededSpeed;
 

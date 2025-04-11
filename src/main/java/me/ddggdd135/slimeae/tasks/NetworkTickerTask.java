@@ -63,7 +63,7 @@ public class NetworkTickerTask implements Runnable {
                     if (!(slimefunItem instanceof IMEController)) {
                         info.dispose();
                     }
-
+                    info.getVirtualCraftingDeviceUsed().clear();
                     info.updateTempStorage();
 
                     StorageCollection storageCollection = (StorageCollection) info.getStorage();

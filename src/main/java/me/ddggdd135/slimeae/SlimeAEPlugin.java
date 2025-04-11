@@ -1,7 +1,6 @@
 package me.ddggdd135.slimeae;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,7 +39,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
     private final NetworkData networkData = new NetworkData();
-    private int slimefunTickCount;
     private final InfinityIntegration infinityIntegration = new InfinityIntegration();
     private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
     private final NetworksIntegration networksIntegration = new NetworksIntegration();
@@ -107,12 +105,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
             world.getPopulators().add(new SlimefunBlockPopulator());
         }
 
-        Bukkit.getScheduler()
-                .runTaskTimer(
-                        this,
-                        () -> slimefunTickCount++,
-                        1,
-                        Slimefun.getTickerTask().getTickRate());
         networkTicker.start(this);
         networkTimeConsumingTask.start(this);
         dataSavingTask.start(this);
@@ -176,14 +168,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static NetworkData getNetworkData() {
         return getInstance().networkData;
-    }
-
-    /**
-     * 获取Slimefun计时器计数
-     * @return 当前的计时器计数值
-     */
-    public static int getSlimefunTickCount() {
-        return getInstance().slimefunTickCount;
     }
 
     /**

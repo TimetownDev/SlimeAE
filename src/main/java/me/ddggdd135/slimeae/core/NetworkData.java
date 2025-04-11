@@ -4,6 +4,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
@@ -41,12 +42,23 @@ public class NetworkData {
             info = new NetworkInfo(controller);
             AllNetworkData.add(info);
         }
+
+        if (!updateChildren(info)) return null;
+        if (!updateStorage(info)) return null;
+        if (!updateAutoCraft(info)) return null;
+
+        return info;
+    }
+
+    public boolean updateChildren(@Nonnull NetworkInfo info) {
+        Location controller = info.getController();
+
         if (info.getChildren().size() == 1 || info.getChildren().isEmpty()) {
             Set<Location> children = NetworkUtils.scan(controller.getBlock());
             for (Location location : children) {
                 if (AllControllers.containsKey(location) && !location.equals(controller)) {
                     info.dispose();
-                    return null;
+                    return false;
                 }
             }
 
@@ -56,6 +68,10 @@ public class NetworkData {
 
         info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
 
+        return true;
+    }
+
+    public boolean updateStorage(@Nonnull NetworkInfo info) {
         StorageCollection storageNoNetworks = new StorageCollection();
         NetworksStorage networksStorage = null;
         for (Location location : info.getChildren()) {
@@ -76,6 +92,10 @@ public class NetworkData {
         storageCollection.addStorage(networksStorage);
         info.setStorage(storageCollection);
 
+        return true;
+    }
+
+    public boolean updateAutoCraft(@Nonnull NetworkInfo info) {
         Set<Location> newCraftingHolders = new ConcurrentHashSet<>();
         Map<Location, Set<CraftingRecipe>> newRecipeMap = new ConcurrentHashMap<>();
         for (Location location : info.getChildren()) {
@@ -107,8 +127,7 @@ public class NetworkData {
         info.getRecipeMap().putAll(newRecipeMap);
         info.getVirtualCraftingDeviceSpeeds().clear();
         info.getVirtualCraftingDeviceSpeeds().putAll(newSpeeds);
-        info.getVirtualCraftingDeviceUsed().clear();
 
-        return info;
+        return true;
     }
 }
