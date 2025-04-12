@@ -84,10 +84,10 @@ public class AutoCraftingTask implements IDisposable {
         for (CraftStep step : craftingSteps) {
             for (Map.Entry<ItemKey, Long> entry :
                     ItemUtils.getAmounts(step.getRecipe().getOutput()).keyEntrySet()) {
-                storage.tryTakeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
+                storage.takeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
             }
         }
-        info.getStorage().tryTakeItem(ItemUtils.createRequests(storage.getStorage()));
+        info.getStorage().takeItem(ItemUtils.createRequests(storage.getStorage()));
     }
 
     @Nonnull
@@ -139,11 +139,11 @@ public class AutoCraftingTask implements IDisposable {
                 long need = in.getKey(key) * count;
 
                 if (amount >= need) {
-                    storage.tryTakeItem(new ItemRequest(key, need));
+                    storage.takeItem(new ItemRequest(key, need));
                 } else {
                     long remainingNeed = need - amount;
                     if (amount > 0) {
-                        storage.tryTakeItem(new ItemRequest(key, amount));
+                        storage.takeItem(new ItemRequest(key, amount));
                     }
 
                     // 尝试合成缺少的材料
@@ -227,7 +227,7 @@ public class AutoCraftingTask implements IDisposable {
                         && doCraft
                         && device.canStartCrafting(deviceBlock, nextRecipe)
                         && storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())))) {
-                    storage.tryTakeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
+                    storage.takeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
                     device.startCrafting(deviceBlock, nextRecipe);
                     running++;
                     next.decreaseAmount(1);
@@ -299,7 +299,7 @@ public class AutoCraftingTask implements IDisposable {
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests) && doCraft) {
-            storage.tryTakeItem(requests);
+            storage.takeItem(requests);
             virtualRunning += (int) actualAmount;
             next.decreaseAmount(actualAmount);
 

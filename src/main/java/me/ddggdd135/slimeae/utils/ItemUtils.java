@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -387,7 +388,9 @@ public class ItemUtils {
             boolean finalIsReadOnly = isReadOnly;
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull ItemStack itemStack) {
+                public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+                    ItemStack itemStack = itemStackCache.getItemStack();
+
                     if (finalIsReadOnly) return;
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return;
@@ -410,7 +413,7 @@ public class ItemUtils {
 
                 @Nonnull
                 @Override
-                public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+                public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return new ItemStorage();
                     ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
@@ -464,7 +467,8 @@ public class ItemUtils {
         } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
                 @Override
-                public void pushItem(@Nonnull ItemStack itemStack) {
+                public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+                    ItemStack itemStack = itemStackCache.getItemStack();
                     if (container instanceof Furnace furnace) {
                         FurnaceInventory furnaceInventory = furnace.getInventory();
                         furnaceInventory.addItem(itemStack);
@@ -486,7 +490,7 @@ public class ItemUtils {
 
                 @Nonnull
                 @Override
-                public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+                public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
                     ItemStack[] items = getVanillaItemStacks(block);
                     ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();

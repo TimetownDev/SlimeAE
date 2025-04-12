@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -42,8 +43,8 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
-        if (!isReadOnly && cache != null) cache.depositAll(new ItemStack[] {itemStack}, true);
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        if (!isReadOnly && cache != null) cache.depositAll(new ItemStack[] {itemStackCache.getItemStack()}, true);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class InfinityBarrelStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (cache == null) return new ItemStorage();
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {

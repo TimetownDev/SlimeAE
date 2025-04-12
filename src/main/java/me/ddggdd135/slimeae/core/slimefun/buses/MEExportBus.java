@@ -95,7 +95,7 @@ public class MEExportBus extends MEBus implements ISettingSlotHolder {
 
             if (targetInv.fits(itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
                 ItemStack[] taken = networkStorage
-                        .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
+                        .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                         .toItemStacks();
                 if (taken.length != 0) {
                     targetInv.pushItem(taken[0], inputSlots);

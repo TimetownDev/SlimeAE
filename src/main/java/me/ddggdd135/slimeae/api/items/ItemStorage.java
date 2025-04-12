@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.items;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -34,14 +35,17 @@ public class ItemStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
         if (isReadonly) return;
-        ItemStack template = itemStack.asOne();
-        long amount = storage.getOrDefault(template, 0L);
+
+        ItemStack itemStack = itemStackCache.getItemStack();
+        ItemKey itemKey = itemStackCache.getItemKey();
+
+        long amount = storage.getOrDefault(itemKey, 0L);
         amount += itemStack.getAmount();
-        storage.put(template, amount);
+        storage.putKey(itemKey, amount);
         itemStack.setAmount(0);
-        trim(new ItemKey(itemStack));
+        trim(itemKey);
     }
 
     public void addItem(@Nonnull ItemStack[] itemStacks) {
@@ -96,7 +100,7 @@ public class ItemStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         ItemStorage itemStacks = new ItemStorage();
         for (ItemRequest request : requests) {
             long amount = storage.getOrDefault(request.getKey(), 0L);

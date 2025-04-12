@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.interfaces;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import org.bukkit.inventory.ItemStack;
@@ -14,20 +15,29 @@ public interface IStorage {
 
     /**
      * 将物品推送到存储中
-     * @param itemStacks 要存储的物品数组
+     * @param itemStackCache 要存储的物品
      */
-    void pushItem(@Nonnull ItemStack itemStacks);
-
-    // 添加boolean
-    //    default void pushItem(@Nonnull ItemStack itemStack) {
-    //        pushItem(new ItemStack[] {itemStack});
-    //    }
+    void pushItem(@Nonnull ItemStackCache itemStackCache);
 
     /**
-     * 将单个物品推送到存储中
      *
      * @param itemStacks 要存储的物品
-     * @return
+     */
+    default void pushItem(@Nonnull ItemStackCache[] itemStacks) {
+        for (ItemStackCache itemStack : itemStacks) pushItem(itemStack);
+    }
+
+    /**
+     * 将物品推送到存储中
+     * @param itemStack 要存储的物品
+     */
+    default void pushItem(@Nonnull ItemStack itemStack) {
+        pushItem(new ItemStackCache(itemStack));
+    }
+
+    /**
+     *
+     * @param itemStacks 要存储的物品
      */
     default void pushItem(@Nonnull ItemStack[] itemStacks) {
         for (ItemStack itemStack : itemStacks) pushItem(itemStack);
@@ -55,7 +65,7 @@ public interface IStorage {
      * @return 成功提取的物品数组
      */
     @Nonnull
-    ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests);
+    ItemStorage takeItem(@Nonnull ItemRequest[] requests);
 
     /**
      * 尝试从存储中提取单个物品
@@ -63,8 +73,8 @@ public interface IStorage {
      * @return 成功提取的物品数组
      */
     @Nonnull
-    default ItemStorage tryTakeItem(@Nonnull ItemRequest request) {
-        return tryTakeItem(new ItemRequest[] {request});
+    default ItemStorage takeItem(@Nonnull ItemRequest request) {
+        return takeItem(new ItemRequest[] {request});
     }
 
     /**

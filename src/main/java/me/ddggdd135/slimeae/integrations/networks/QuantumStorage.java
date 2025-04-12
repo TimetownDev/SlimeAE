@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -38,7 +39,9 @@ public class QuantumStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        ItemStack itemStack = itemStackCache.getItemStack();
+
         if (!isReadOnly && quantumCache != null && quantumCache.getAmount() > 0) {
             int stored = (int) quantumCache.getAmount();
             int size = quantumCache.getLimit();
@@ -73,7 +76,7 @@ public class QuantumStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (quantumCache == null || quantumCache.getAmount() <= 0) return new ItemStorage();
         int stored = (int) (quantumCache.getAmount() - 1);
         ItemStack storedItem = quantumCache.getItemStack();

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -77,11 +78,12 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
-        ItemKey key = new ItemKey(itemStack);
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        ItemStack itemStack = itemStackCache.getItemStack();
+        ItemKey key = itemStackCache.getItemKey();
 
         IStorage pushStorage = pushCache.getKey(key);
-        if (pushStorage != null) pushStorage.pushItem(itemStack);
+        if (pushStorage != null) pushStorage.pushItem(itemStackCache);
 
         if (itemStack.isEmpty()) return;
 
@@ -100,7 +102,7 @@ public class StorageCollection implements IStorage {
                 .reversed());
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
-            storage.left().pushItem(itemStack);
+            storage.left().pushItem(itemStackCache);
             if (itemStack.isEmpty()) return;
         }
     }
@@ -120,7 +122,7 @@ public class StorageCollection implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         ItemHashMap<Long> rest = new ItemHashMap<>();
         ItemStorage found = new ItemStorage();
         // init rest
@@ -135,14 +137,14 @@ public class StorageCollection implements IStorage {
         for (Map.Entry<ItemKey, Long> entry : rest.keyEntrySet()) {
             if (takeCache.containsKey(entry.getKey())) {
                 IStorage storage = takeCache.getKey(entry.getKey());
-                ItemStorage itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
+                ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
                 found.addItem(itemStacks.getStorage());
                 if (rest.keySet().isEmpty()) break;
             }
         }
 
         for (IStorage storage : storages) {
-            ItemStorage itemStacks = storage.tryTakeItem(ItemUtils.createRequests(rest));
+            ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
             for (ItemKey key : itemStacks.getStorage().sourceKeySet()) {
                 ItemStack itemStack = key.getItemStack();
                 if (itemStack != null && !itemStack.getType().isAir()) {

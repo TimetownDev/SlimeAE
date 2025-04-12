@@ -239,7 +239,7 @@ public class NetworkInfo implements IDisposable {
         Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
         for (ItemKey key : toPush) {
             ItemStack[] items = tempStorage
-                    .tryTakeItem(new ItemRequest(key, Integer.MAX_VALUE))
+                    .takeItem(new ItemRequest(key, Integer.MAX_VALUE))
                     .toItemStacks();
             storage.pushItem(items);
             items = ItemUtils.trimItems(items);

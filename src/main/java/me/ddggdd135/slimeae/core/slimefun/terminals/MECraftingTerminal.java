@@ -198,7 +198,7 @@ public class MECraftingTerminal extends METerminal {
             else itemStack.setAmount(itemStack.getAmount() - 1);
             if (itemStack.getAmount() == 0) {
                 ItemStack[] gotten = networkStorage
-                        .tryTakeItem(new ItemRequest(new ItemKey(input[i]), input[i].getAmount()))
+                        .takeItem(new ItemRequest(new ItemKey(input[i]), input[i].getAmount()))
                         .toItemStacks();
                 if (gotten.length != 0) itemStack.setAmount(gotten[0].getAmount());
             }

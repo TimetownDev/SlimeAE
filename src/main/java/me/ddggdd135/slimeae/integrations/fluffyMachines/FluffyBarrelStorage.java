@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -43,7 +44,9 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        ItemStack itemStack = itemStackCache.getItemStack();
+
         if (!isReadOnly && blockMenu != null && barrel != null && barrel.getStored(block) > 0) {
             int stored = barrel.getStored(block);
             int size = barrel.getCapacity(block);
@@ -74,7 +77,7 @@ public class FluffyBarrelStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return new ItemStorage();
         int stored = barrel.getStored(block) - 1;
         ItemStack storedItem = barrel.getStoredItem(block);

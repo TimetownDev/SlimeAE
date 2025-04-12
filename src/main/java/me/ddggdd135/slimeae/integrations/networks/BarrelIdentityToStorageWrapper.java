@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
@@ -20,8 +21,8 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
-        barrelIdentity.depositItemStack(itemStack);
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        barrelIdentity.depositItemStack(itemStackCache.getItemStack());
     }
 
     @Override
@@ -39,7 +40,7 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
 
     @Override
     @Nonnull
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         ItemStorage storage = new ItemStorage();
 
         for (ItemRequest request : requests) {

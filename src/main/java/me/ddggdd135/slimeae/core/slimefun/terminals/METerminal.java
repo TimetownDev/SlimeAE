@@ -372,14 +372,14 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                                         template,
                                         IntStream.range(0, 36).toArray())) {
                             playerInventory.addItem(networkStorage
-                                    .tryTakeItem(new ItemRequest(new ItemKey(template), template.getMaxStackSize()))
+                                    .takeItem(new ItemRequest(new ItemKey(template), template.getMaxStackSize()))
                                     .toItemStacks());
                         } else if (!clickAction.isShiftClicked()
                                         && cursor.getType().isAir()
                                 || (SlimefunUtils.isItemSimilar(template, cursor, true, false)
                                         && cursor.getAmount() + 1 <= cursor.getMaxStackSize())) {
                             ItemStack[] gotten = networkStorage
-                                    .tryTakeItem(new ItemRequest(new ItemKey(template), 1))
+                                    .takeItem(new ItemRequest(new ItemKey(template), 1))
                                     .toItemStacks();
                             if (gotten.length != 0) {
                                 ItemStack newCursor = gotten[0];

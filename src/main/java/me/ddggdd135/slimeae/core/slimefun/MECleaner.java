@@ -89,7 +89,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
             if (current <= setting) continue;
 
             ItemRequest request = new ItemRequest(new ItemKey(template), current - setting);
-            storageCells.tryTakeItem(request);
+            storageCells.takeItem(request);
         }
     }
 

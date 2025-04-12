@@ -61,7 +61,7 @@ public class MEVanillaExportBus extends MEExportBus {
 
             if (InvUtils.fits(inventory, itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
                 ItemStack[] taken = networkStorage
-                        .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
+                        .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                         .toItemStacks();
                 if (taken.length != 0) {
                     inventory.addItem(taken[0]);

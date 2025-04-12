@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -34,8 +35,9 @@ public class DrawerStorage implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
-        if (!isReadOnly && data != null) data.depositItemStack(itemStack, NetworksDrawer.isLocked(block.getLocation()));
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        if (!isReadOnly && data != null)
+            data.depositItemStack(itemStackCache.getItemStack(), NetworksDrawer.isLocked(block.getLocation()));
     }
 
     @Override
@@ -59,7 +61,7 @@ public class DrawerStorage implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (data == null) return new ItemStorage();
         io.github.sefiraat.networks.network.stackcaches.ItemRequest[] networksRequests =
                 SlimeAEPlugin.getNetworksIntegration().asNetworkRequests(requests);

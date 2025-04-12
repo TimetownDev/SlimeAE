@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
@@ -87,14 +88,16 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
-    public void pushItem(@Nonnull ItemStack itemStack) {
+    public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        ItemStack itemStack = itemStackCache.getItemStack();
+        ItemKey key = itemStackCache.getItemKey();
+
         if (storages instanceof CreativeItemMap) {
             itemStack.setAmount(0);
             return;
         }
         if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                 || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
-        ItemKey key = new ItemKey(itemStack.asOne());
         long amount = storages.getOrDefault(key, 0L);
         long toAdd;
         if (stored + itemStack.getAmount() > size) toAdd = size - stored;
@@ -119,7 +122,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Nonnull
     @Override
-    public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (storages instanceof CreativeItemMap) {
             return new ItemStorage(storages);
         }

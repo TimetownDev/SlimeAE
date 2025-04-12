@@ -74,7 +74,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                             .map(Map.Entry::getKey)
                             .toArray(ItemKey[]::new)[0];
                     ItemStack[] tmp = meStorageCellCache
-                            .tryTakeItem(new ItemRequest(target, 40960))
+                            .takeItem(new ItemRequest(target, 40960))
                             .toItemStacks();
                     networkStorage.pushItem(tmp);
                     tmp = ItemUtils.trimItems(tmp);
@@ -106,9 +106,8 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         .filter(x -> x.getValue() > 0)
                         .map(Map.Entry::getKey)
                         .toArray(ItemKey[]::new)[0];
-                ItemStack[] tmp = networkStorage
-                        .tryTakeItem(new ItemRequest(target, 40960))
-                        .toItemStacks();
+                ItemStack[] tmp =
+                        networkStorage.takeItem(new ItemRequest(target, 40960)).toItemStacks();
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);
                 networkStorage.pushItem(tmp);

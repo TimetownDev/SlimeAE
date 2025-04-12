@@ -97,7 +97,7 @@ public class MEInterface extends TickingBlock
                 itemStack.setAmount(0);
             }
             ItemStack[] received = networkStorage
-                    .tryTakeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue() - amount))
+                    .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue() - amount))
                     .toItemStacks();
             if (received.length != 0) {
                 if (newItemStack != null && !newItemStack.getType().isAir()) {

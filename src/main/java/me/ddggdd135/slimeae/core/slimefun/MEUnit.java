@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
@@ -85,7 +86,9 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         return new IStorage() {
             @Override
-            public void pushItem(@Nonnull ItemStack itemStack) {
+            public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+                ItemStack itemStack = itemStackCache.getItemStack();
+
                 if (blockMenu == null) return;
                 ItemStack result = blockMenu.pushItem(itemStack, Slots);
                 if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
@@ -101,7 +104,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
 
             @Nonnull
             @Override
-            public ItemStorage tryTakeItem(@Nonnull ItemRequest[] requests) {
+            public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
                 if (blockMenu == null) return new ItemStorage();
                 ItemHashMap<Long> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
                 ItemStorage found = new ItemStorage();
