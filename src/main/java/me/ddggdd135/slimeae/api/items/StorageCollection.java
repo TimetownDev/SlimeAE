@@ -168,11 +168,11 @@ public class StorageCollection implements IStorage {
         for (IStorage storage : storages) {
             ItemHashMap<Long> tmp = storage.getStorage();
             if (tmp instanceof CreativeItemMap) return tmp;
-            for (ItemStack itemStack : tmp.keySet()) {
-                if (result.containsKey(itemStack)) {
-                    result.put(itemStack, result.get(itemStack) + tmp.get(itemStack));
+            for (ItemKey itemKey : tmp.sourceKeySet()) {
+                if (result.containsKey(itemKey)) {
+                    result.putKey(itemKey, result.getKey(itemKey) + tmp.getKey(itemKey));
                 } else {
-                    result.put(itemStack, tmp.get(itemStack));
+                    result.putKey(itemKey, tmp.getKey(itemKey));
                 }
             }
         }
