@@ -37,7 +37,8 @@ public class NetworkTickerTask implements Runnable {
         run0();
 
         long elapsed = System.currentTimeMillis() - startTime;
-        long nextDelay = Math.max(tickRate - elapsed, 0);
+        long nextDelay = Math.max(tickRate * 50L - elapsed, 0) / 50;
+
         Bukkit.getScheduler().runTaskLaterAsynchronously(SlimeAEPlugin.getInstance(), this, nextDelay);
     }
 
