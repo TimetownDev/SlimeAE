@@ -23,6 +23,7 @@ public class NetworkTickerTask implements Runnable {
     private boolean halted = false;
 
     private volatile boolean paused = false;
+    private volatile long tick = 0;
 
     public void start(@Nonnull SlimeAEPlugin plugin) {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay") / 2;
@@ -48,11 +49,11 @@ public class NetworkTickerTask implements Runnable {
         try {
             // Run our ticker code
             if (!halted) {
-                Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
-                for (NetworkInfo networkInfo : allNetworkData) {
-                    NetworkInfo info = SlimeAEPlugin.getNetworkData().refreshNetwork(networkInfo.getController());
-                    if (info == null) continue;
+                tick++;
 
+                Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
+                for (NetworkInfo info : allNetworkData) {
+                    if (tick % 16 == 0) info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
                     SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(info.getController());
                     if (slimefunBlockData == null || !info.getController().isChunkLoaded()) {
                         info.dispose();
@@ -73,11 +74,12 @@ public class NetworkTickerTask implements Runnable {
                         }
                     }
 
+                    NetworkInfo finalInfo = info;
                     new HashSet<>(info.getChildren()).forEach(x -> {
                         IMEObject imeObject =
                                 SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
                         if (imeObject == null) return;
-                        imeObject.onNetworkTick(x.getBlock(), info);
+                        imeObject.onNetworkTick(x.getBlock(), finalInfo);
                     });
 
                     // tick autoCrafting

@@ -9,6 +9,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.HashMap;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
@@ -32,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 public class MECraftingTrigger extends TickingBlock implements IMEObject, InventoryBlock {
     public static final String AMOUNT_KEY = "amount";
     private static long defaultAmount = 64L;
+    private static Map<Location, Long> ticks = new HashMap<>();
 
     @Override
     public boolean isSynchronized() {
@@ -68,28 +71,32 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
 
+        long tick = ticks.getOrDefault(block.getLocation(), 0L);
+        tick++;
+        ticks.put(block.getLocation(), tick);
+
         long setting = getAmount(block.getLocation());
 
         IStorage networkStorage = networkInfo.getStorage();
         ItemHashMap<Long> total = networkStorage.getStorage();
 
-        for (int slot : getSettingSlots()) {
-            ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (itemStack == null || itemStack.getType().isAir()) continue;
-            ItemStack template = itemStack.asOne();
-            long current = total.getOrDefault(template, 0L);
-            if (current >= setting) continue;
+        int slot = getSettingSlots()[(int) (tick % getSettingSlots().length)];
 
-            long toCraft = setting - current;
-            long amount;
-            if (toCraft <= 64) amount = toCraft;
-            else {
-                amount = (long) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
-            }
-            if (amount > toCraft) amount = toCraft;
+        ItemStack itemStack = blockMenu.getItemInSlot(slot);
+        if (itemStack == null || itemStack.getType().isAir()) return;
+        ItemStack template = itemStack.asOne();
+        long current = total.getOrDefault(template, 0L);
+        if (current >= setting) return;
 
-            NetworkUtils.doCraft(networkInfo, template, amount);
+        long toCraft = setting - current;
+        long amount;
+        if (toCraft <= 64) amount = toCraft;
+        else {
+            amount = (long) (5 * toCraft / (Math.log(toCraft) / Math.log(1.15)) + 53.2);
         }
+        if (amount > toCraft) amount = toCraft;
+
+        NetworkUtils.doCraft(networkInfo, template, amount);
     }
 
     @Override
