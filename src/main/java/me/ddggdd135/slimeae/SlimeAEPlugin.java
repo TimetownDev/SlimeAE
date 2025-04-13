@@ -26,6 +26,7 @@ import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.core.slimefun.cards.CraftingCard;
 import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.*;
+import me.ddggdd135.slimeae.utils.SlimefunItemUtils;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -134,6 +135,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         networkTicker.setPaused(true);
         networkTicker.halt();
+        networkTimeConsumingTask.setPaused(true);
+        networkTimeConsumingTask.halt();
+        dataSavingTask.setPaused(true);
+        dataSavingTask.halt();
+
+        SlimefunItemUtils.unregisterItemGroups(this);
+        SlimefunItemUtils.unregisterAllItems(this);
 
         storageCellDataController.shutdown();
     }
