@@ -96,8 +96,9 @@ public class MEStorageCellCache implements IStorage {
             itemStack.setAmount(0);
             return;
         }
-        if (SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
+        if (SlimefunItem.getById(itemStackCache.getItemKey().getType().getId()) instanceof MEItemStorageCell
                 || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+
         long amount = storages.getOrDefault(key, 0L);
         long toAdd;
         if (stored + itemStack.getAmount() > size) toAdd = size - stored;

@@ -39,29 +39,48 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private static SlimeAEPlugin instance;
-    private final NetworkData networkData = new NetworkData();
-    private final InfinityIntegration infinityIntegration = new InfinityIntegration();
-    private final FluffyMachinesIntegration fluffyMachinesIntegration = new FluffyMachinesIntegration();
-    private final NetworksIntegration networksIntegration = new NetworksIntegration();
-    private final NetworksExpansionIntegration networksExpansionIntegration = new NetworksExpansionIntegration();
-    private final TranscEndenceIntegration transcEndenceIntegration = new TranscEndenceIntegration();
-    private final JustEnoughGuideIntegration justEnoughGuideIntegration = new JustEnoughGuideIntegration();
-    private final GalactifunIntegration galactifunIntegration = new GalactifunIntegration();
-    private final ObsidianExpansionIntegration obsidianExpansionIntegration = new ObsidianExpansionIntegration();
-    private final ExoticGardenIntegration exoticGardenIntegration = new ExoticGardenIntegration();
+    private NetworkData networkData;
+    private InfinityIntegration infinityIntegration;
+    private FluffyMachinesIntegration fluffyMachinesIntegration;
+    private NetworksIntegration networksIntegration = new NetworksIntegration();
+    private NetworksExpansionIntegration networksExpansionIntegration;
+    private TranscEndenceIntegration transcEndenceIntegration;
+    private JustEnoughGuideIntegration justEnoughGuideIntegration;
+    private GalactifunIntegration galactifunIntegration;
+    private ObsidianExpansionIntegration obsidianExpansionIntegration;
+    private ExoticGardenIntegration exoticGardenIntegration;
 
-    private final StorageCellDataController storageCellDataController = new StorageCellDataController();
+    private StorageCellDataController storageCellDataController;
 
-    private final NetworkTickerTask networkTicker = new NetworkTickerTask();
-    private final NetworkTimeConsumingTask networkTimeConsumingTask = new NetworkTimeConsumingTask();
-    private final DataSavingTask dataSavingTask = new DataSavingTask();
-    private final SlimeAECommand slimeAECommand = new SlimeAECommand();
+    private NetworkTickerTask networkTicker;
+    private NetworkTimeConsumingTask networkTimeConsumingTask;
+    private DataSavingTask dataSavingTask;
+    private SlimeAECommand slimeAECommand = new SlimeAECommand();
     private PinnedManager pinnedManager;
     private Metrics metrics;
 
     @Override
     public void onEnable() {
         instance = this;
+
+        networkData = new NetworkData();
+        infinityIntegration = new InfinityIntegration();
+        fluffyMachinesIntegration = new FluffyMachinesIntegration();
+        networksIntegration = new NetworksIntegration();
+        networksExpansionIntegration = new NetworksExpansionIntegration();
+        transcEndenceIntegration = new TranscEndenceIntegration();
+        justEnoughGuideIntegration = new JustEnoughGuideIntegration();
+        galactifunIntegration = new GalactifunIntegration();
+        obsidianExpansionIntegration = new ObsidianExpansionIntegration();
+        exoticGardenIntegration = new ExoticGardenIntegration();
+
+        storageCellDataController = new StorageCellDataController();
+
+        networkTicker = new NetworkTickerTask();
+        networkTimeConsumingTask = new NetworkTimeConsumingTask();
+        dataSavingTask = new DataSavingTask();
+        slimeAECommand = new SlimeAECommand();
+
         pinnedManager = new PinnedManager();
 
         if (!getServer().getPluginManager().isPluginEnabled("GuizhanLibPlugin")) {

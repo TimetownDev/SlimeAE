@@ -9,9 +9,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.IntStream;
+import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.api.interfaces.*;
@@ -66,7 +65,7 @@ public class CardReplicator extends SlimefunItem {
                         e.getPlayer().sendMessage(CMIChatColor.translate("&e升级卡卡槽大小和存储的不匹配"));
                         return;
                     }
-                    Set<ItemStack> placeHolders = new HashSet<>();
+                    ItemHashSet placeHolders = new ItemHashSet();
                     placeHolders.add(MenuItems.CARD);
                     ItemStack[] cards = x.getItemStackArray(CARDS_KEY);
                     ItemStack[] need = ItemUtils.removeAll(cards, placeHolders);

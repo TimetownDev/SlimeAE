@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -872,7 +873,7 @@ public class ItemUtils {
     }
 
     @Nonnull
-    public static ItemStack[] removeAll(@Nonnull ItemStack[] itemStacks, @Nonnull Set<ItemStack> toRemove) {
+    public static ItemStack[] removeAll(@Nonnull ItemStack[] itemStacks, @Nonnull ItemHashSet toRemove) {
         List<ItemStack> result = new ArrayList<>(itemStacks.length);
         for (ItemStack itemStack : itemStacks) {
             if (toRemove.contains(itemStack.asOne())) continue;
