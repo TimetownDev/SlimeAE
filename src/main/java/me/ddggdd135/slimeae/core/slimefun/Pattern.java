@@ -4,10 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.attributes.DistinctiveItem;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -21,30 +18,38 @@ import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class Pattern extends SlimefunItem implements DistinctiveItem {
+public class Pattern extends SlimefunItem {
+    private static final Map<UUID, CraftingRecipe> cache = new HashMap<>();
+    public static final String UUID_KEY = "uuid";
+    public static final String RECIPE_KEY = "recipe";
+    public static final String INPUT_KEY = "input";
+    public static final String OUTPUT_KEY = "output";
+    public static final String CRAFTING_TYPE_KEY = "crafting_type";
+
     public Pattern(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
-    @Override
-    public boolean canStack(@Nonnull ItemMeta sfItemMeta, @Nonnull ItemMeta itemMeta) {
-        List<String> lorea = sfItemMeta.getLore();
-        List<String> loreb = itemMeta.getLore();
-        if (lorea == null && loreb == null) return true;
-        if (lorea == null) lorea = new ArrayList<>();
-        if (loreb == null) loreb = new ArrayList<>();
-        return lorea.isEmpty() && loreb.isEmpty() && sfItemMeta.equals(itemMeta);
-    }
-
     @Nullable public static CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
-        return NBT.get(itemStack, x -> {
-            if (!x.hasTag("recipe", NBTType.NBTTagCompound)) return null;
-            ReadableNBT compound = x.getCompound("recipe");
-            return new CraftingRecipe(
-                    compound.getEnum("crafting_type", CraftType.class),
-                    compound.getItemStackArray("input"),
-                    compound.getItemStackArray("output"));
+        UUID uuid = NBT.get(itemStack, x -> {
+            return x.getUUID(UUID_KEY);
         });
+
+        CraftingRecipe craftingRecipe = cache.get(uuid);
+        if (craftingRecipe == null) {
+            craftingRecipe = NBT.get(itemStack, x -> {
+                if (!x.hasTag(RECIPE_KEY, NBTType.NBTTagCompound)) return null;
+                ReadableNBT compound = x.getCompound(RECIPE_KEY);
+                return new CraftingRecipe(
+                        compound.getEnum(CRAFTING_TYPE_KEY, CraftType.class),
+                        compound.getItemStackArray(INPUT_KEY),
+                        compound.getItemStackArray(OUTPUT_KEY));
+            });
+
+            cache.put(uuid, craftingRecipe);
+        }
+
+        return craftingRecipe;
     }
 
     @Nonnull
@@ -72,13 +77,16 @@ public class Pattern extends SlimefunItem implements DistinctiveItem {
         itemStack.setItemMeta(meta);
         // 先clone meta 不然nbt修改后因为bug会导致名称丢失
 
+        UUID uuid = UUID.randomUUID();
+
         NBT.modify(itemStack, x -> {
-            if (x.hasTag("recipe")) x.removeKey("recipe");
-            ReadWriteNBT compound = x.getOrCreateCompound("recipe");
-            compound.setEnum("crafting_type", recipe.getCraftType());
-            compound.setItemStackArray("input", recipe.getInput());
-            compound.setItemStackArray("output", recipe.getOutput());
-            x.setUUID("uuid", UUID.randomUUID());
+            if (x.hasTag(RECIPE_KEY)) x.removeKey(RECIPE_KEY);
+            ReadWriteNBT compound = x.getOrCreateCompound(RECIPE_KEY);
+            compound.setEnum(CRAFTING_TYPE_KEY, recipe.getCraftType());
+            compound.setItemStackArray(INPUT_KEY, recipe.getInput());
+            compound.setItemStackArray(OUTPUT_KEY, recipe.getOutput());
+            x.setUUID(UUID_KEY, uuid);
         });
+        cache.put(uuid, recipe);
     }
 }
