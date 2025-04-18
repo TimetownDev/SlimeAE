@@ -151,7 +151,7 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    getRecipeInputs(shapelessRecipe.getChoiceList(), input),
+                    shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
                     new ItemStack(
                             shapelessRecipe.getResult().getType(),
                             shapelessRecipe.getResult().getAmount()));

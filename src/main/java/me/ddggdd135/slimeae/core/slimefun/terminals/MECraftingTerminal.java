@@ -195,7 +195,10 @@ public class MECraftingTerminal extends METerminal {
             ItemStack itemStack = blockMenu.getItemInSlot(getCraftSlots()[i]);
             if (itemStack == null || itemStack.getType().isAir()) continue;
             if (input.length > i) itemStack.setAmount(itemStack.getAmount() - input[i].getAmount());
-            else itemStack.setAmount(itemStack.getAmount() - 1);
+            else {
+                itemStack.setAmount(itemStack.getAmount() - 1);
+                continue;
+            }
             if (itemStack.getAmount() == 0) {
                 ItemStack[] gotten = networkStorage
                         .takeItem(new ItemRequest(new ItemKey(input[i]), input[i].getAmount()))
