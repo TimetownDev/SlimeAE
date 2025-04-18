@@ -8,6 +8,7 @@ import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
+import me.ddggdd135.guguslimefunlib.items.ItemType;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -15,14 +16,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class StorageCollection implements IStorage {
     private final Set<IStorage> storages;
-    private final ItemHashMap<IStorage> takeCache;
-    private final ItemHashMap<IStorage> pushCache;
+    private final Map<ItemType, IStorage> takeCache;
+    private final Map<ItemType, IStorage> pushCache;
     private final ItemHashSet notIncluded;
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
-        this.takeCache = new ItemHashMap<>();
-        this.pushCache = new ItemHashMap<>();
+        this.takeCache = new HashMap<>();
+        this.pushCache = new HashMap<>();
         this.notIncluded = new ItemHashSet();
         for (IStorage storage : storages) {
             addStorage(storage);
@@ -52,8 +53,8 @@ public class StorageCollection implements IStorage {
 
             return result;
         }
-        Map.Entry<ItemStack, IStorage> toRemove = null;
-        for (Map.Entry<ItemStack, IStorage> entry : takeCache.entrySet()) {
+        Map.Entry<ItemType, IStorage> toRemove = null;
+        for (Map.Entry<ItemType, IStorage> entry : takeCache.entrySet()) {
             if (entry.getValue() == storage) {
                 toRemove = entry;
                 break;
@@ -64,7 +65,7 @@ public class StorageCollection implements IStorage {
         }
 
         toRemove = null;
-        for (Map.Entry<ItemStack, IStorage> entry : pushCache.entrySet()) {
+        for (Map.Entry<ItemType, IStorage> entry : pushCache.entrySet()) {
             if (entry.getValue() == storage) {
                 toRemove = entry;
                 break;
@@ -82,7 +83,7 @@ public class StorageCollection implements IStorage {
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
 
-        IStorage pushStorage = pushCache.getKey(key);
+        IStorage pushStorage = pushCache.get(key.getType());
         if (pushStorage != null) pushStorage.pushItem(itemStackCache);
 
         if (itemStack.isEmpty()) return;
@@ -136,7 +137,7 @@ public class StorageCollection implements IStorage {
         ItemUtils.trim(rest);
         for (Map.Entry<ItemKey, Long> entry : rest.keyEntrySet()) {
             if (takeCache.containsKey(entry.getKey())) {
-                IStorage storage = takeCache.getKey(entry.getKey());
+                IStorage storage = takeCache.get(entry.getKey().getType());
                 ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
                 found.addItem(itemStacks.getStorage());
                 if (rest.keySet().isEmpty()) break;
@@ -148,7 +149,7 @@ public class StorageCollection implements IStorage {
             for (ItemKey key : itemStacks.getStorage().sourceKeySet()) {
                 ItemStack itemStack = key.getItemStack();
                 if (itemStack != null && !itemStack.getType().isAir()) {
-                    takeCache.putKey(key, storage);
+                    takeCache.put(key.getType(), storage);
                 }
             }
 

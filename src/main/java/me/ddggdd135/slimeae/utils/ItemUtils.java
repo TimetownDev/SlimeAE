@@ -376,7 +376,8 @@ public class ItemUtils {
                 }
             }
             if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer) {
+                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer
+                        && NetworksDrawer.getStorageData(block.getLocation()) != null) {
                     return new DrawerStorage(block);
                 }
             }

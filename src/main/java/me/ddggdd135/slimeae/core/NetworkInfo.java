@@ -35,7 +35,7 @@ public class NetworkInfo implements IDisposable {
     private final Map<CraftType, Integer> virtualCraftingDeviceUsed = new ConcurrentHashMap<>();
     private IStorage storage = new StorageCollection();
     private IStorage storageNoNetworks = new StorageCollection();
-    private final Set<AutoCraftingTask> autoCraftingTasks = new ConcurrentHashSet<>();
+    private final ConcurrentHashSet<AutoCraftingTask> autoCraftingTasks = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tempStorage = new ItemStorage();
 
@@ -176,7 +176,7 @@ public class NetworkInfo implements IDisposable {
     }
 
     @Nonnull
-    public Set<AutoCraftingTask> getAutoCraftingSessions() {
+    public ConcurrentHashSet<AutoCraftingTask> getAutoCraftingSessions() {
         return autoCraftingTasks;
     }
 
@@ -190,7 +190,7 @@ public class NetworkInfo implements IDisposable {
             if (content == null) continue;
             content.setType(Material.AIR);
         }
-        List<AutoCraftingTask> tasks = getAutoCraftingSessions().stream().toList();
+        List<AutoCraftingTask> tasks = getAutoCraftingSessions().toList();
         if (tasks.size() > 53) tasks = tasks.subList(tasks.size() - 53, tasks.size());
         for (int i = 0; i < 54; i++) {
             autoCraftingMenu.replaceExistingItem(i, null);
