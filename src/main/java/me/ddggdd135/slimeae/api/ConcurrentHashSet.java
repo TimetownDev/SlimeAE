@@ -99,4 +99,13 @@ public class ConcurrentHashSet<E> implements Set<E> {
     public void clear() {
         map.clear();
     }
+
+    @Nonnull
+    public List<E> toList() {
+        ArrayList<E> list = new ArrayList<>(size() + 4);
+
+        list.addAll(this);
+
+        return list;
+    }
 }
