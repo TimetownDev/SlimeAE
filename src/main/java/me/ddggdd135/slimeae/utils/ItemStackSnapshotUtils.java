@@ -8,7 +8,7 @@ public class ItemStackSnapshotUtils {
     @Nonnull
     public static ItemStack clone(@Nonnull ItemStackSnapshot itemStackSnapshot) {
         ItemStack itemStack = new ItemStack(itemStackSnapshot.getType(), itemStackSnapshot.getAmount());
-        itemStack.setItemMeta(itemStackSnapshot.getItemMeta());
+        if (itemStackSnapshot.hasItemMeta()) itemStack.setItemMeta(itemStackSnapshot.getItemMeta());
 
         return itemStack;
     }
