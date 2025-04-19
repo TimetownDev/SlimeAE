@@ -318,7 +318,8 @@ public class RecipeUtils {
             }
             return result;
         }
-        if (slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()
+                && slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
             return abstractManualCrafter.getRecipes().stream()
                     .map(SuperRecipe::getInput)
                     .toList();
@@ -409,7 +410,8 @@ public class RecipeUtils {
 
             return new ItemStack[0];
         }
-        if (slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
+        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()
+                && slimefunItem instanceof AbstractManualCrafter abstractManualCrafter) {
             List<SuperRecipe> recipes = abstractManualCrafter.getRecipes();
             i:
             for (SuperRecipe recipe : recipes) {
