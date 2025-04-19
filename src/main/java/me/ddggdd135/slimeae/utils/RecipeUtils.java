@@ -312,7 +312,7 @@ public class RecipeUtils {
                         re[j] = null;
                         continue;
                     }
-                    re[j] = new ItemStack(in[j]);
+                    re[j] = ItemStackSnapshotUtils.clone(in[j]);
                 }
                 result.add(re);
             }
