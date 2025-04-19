@@ -58,7 +58,7 @@ import org.bukkit.persistence.PersistentDataType;
  */
 public class ItemUtils {
     public static final String DISPLAY_ITEM_KEY = "display_item";
-    public static final String SOURCE_LORE_KEY = "source_lore";
+    public static final String ITEM_KEY = "item";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -789,20 +789,16 @@ public class ItemUtils {
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
         if (addLore) {
             List<String> lore = result.getLore();
-            if (lore != null) {
-                List<String> finalLore = lore;
-                NBT.modify(result, x -> {
-                    x.getStringList(SOURCE_LORE_KEY).clear();
-                    x.getStringList(SOURCE_LORE_KEY).addAll(finalLore);
-                });
-            }
-
             if (lore == null) lore = new ArrayList<>();
 
             lore.add("");
             lore.add("&e物品数量 " + amount);
             if (addPinnedLore) lore.add("&e===已置顶===");
             result.setLore(CMIChatColor.translate(lore));
+
+            NBT.modify(result, x -> {
+                x.setString(ITEM_KEY, SerializeUtils.object2String(itemStack));
+            });
         }
 
         NBT.modify(result, x -> {
@@ -813,20 +809,9 @@ public class ItemUtils {
 
     @Nonnull
     public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
-        ItemStack result = itemStack.asOne();
-        List<String> lore = NBT.get(result, x -> {
-            if (x.hasTag(SOURCE_LORE_KEY))
-                return x.getStringList(SOURCE_LORE_KEY).toListCopy();
-
-            return null;
+        return (ItemStack) NBT.get(itemStack, x -> {
+            return SerializeUtils.string2Object(x.getString(ITEM_KEY));
         });
-        result.setLore(lore);
-
-        NBT.modify(result, x -> {
-            x.removeKey(DISPLAY_ITEM_KEY);
-            x.removeKey(SOURCE_LORE_KEY);
-        });
-        return result;
     }
 
     public static <T extends SlimefunItem> T setRecipeOutput(@Nonnull T item, @Nonnull ItemStack output) {
