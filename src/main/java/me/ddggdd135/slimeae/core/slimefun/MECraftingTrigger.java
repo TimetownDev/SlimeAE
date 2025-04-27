@@ -78,7 +78,7 @@ public class MECraftingTrigger extends TickingBlock implements IMEObject, Invent
         long setting = getAmount(block.getLocation());
 
         IStorage networkStorage = networkInfo.getStorage();
-        ItemHashMap<Long> total = networkStorage.getStorage();
+        ItemHashMap<Long> total = networkStorage.getStorageUnsafe();
 
         int slot = getSettingSlots()[(int) (tick % getSettingSlots().length)];
 

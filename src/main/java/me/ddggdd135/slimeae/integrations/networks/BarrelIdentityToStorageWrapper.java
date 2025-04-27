@@ -64,7 +64,7 @@ public class BarrelIdentityToStorageWrapper implements IStorage {
 
     @Override
     @Nonnull
-    public ItemHashMap<Long> getStorage() {
+    public ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> map = new ItemHashMap<>();
         ItemStack itemStack = barrelIdentity.getItemStack();
         if (itemStack != null && !itemStack.getType().isAir()) {

@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
+import me.ddggdd135.slimeae.api.annotation.Unsafe;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import org.bukkit.inventory.ItemStack;
@@ -82,7 +83,13 @@ public interface IStorage {
      * @return 物品到数量的映射
      */
     @Nonnull
-    ItemHashMap<Long> getStorage();
+    @Unsafe
+    ItemHashMap<Long> getStorageUnsafe();
+
+    @Nonnull
+    default ItemHashMap<Long> copyStorage() {
+        return new ItemHashMap<>(getStorageUnsafe());
+    }
 
     /**
      * 获取物品的存储等级

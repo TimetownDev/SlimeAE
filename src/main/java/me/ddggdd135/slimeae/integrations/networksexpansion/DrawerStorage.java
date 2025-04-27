@@ -75,7 +75,7 @@ public class DrawerStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemHashMap<Long> getStorage() {
+    public ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
         if (data == null) return storage;
         for (ItemContainer itemContainer : data.getStoredItems()) {

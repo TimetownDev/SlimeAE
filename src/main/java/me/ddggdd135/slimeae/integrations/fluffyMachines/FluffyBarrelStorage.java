@@ -96,7 +96,7 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     @Override
-    public @Nonnull ItemHashMap<Long> getStorage() {
+    public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
         if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return storage;
         storage.put(barrel.getStoredItem(block).asOne(), (long) (barrel.getStored(block) - 1));

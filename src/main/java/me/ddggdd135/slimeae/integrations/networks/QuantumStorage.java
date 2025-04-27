@@ -98,7 +98,7 @@ public class QuantumStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemHashMap<Long> getStorage() {
+    public ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
         if (quantumCache == null || quantumCache.getAmount() <= 0) return storage;
         storage.put(quantumCache.getItemStack().asOne(), quantumCache.getAmount() - 1);

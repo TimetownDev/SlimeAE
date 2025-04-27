@@ -76,7 +76,7 @@ public class MELevelEmitter extends TickingBlock implements IMEObject, Inventory
             return;
         }
         ItemKey itemKey = settings.get(0).getFirstValue();
-        long actual = storage.getStorage().getOrDefault(itemKey, 0L);
+        long actual = storage.getStorageUnsafe().getOrDefault(itemKey, 0L);
 
         if (actual < setting) {
             updateBlock(block, 0);

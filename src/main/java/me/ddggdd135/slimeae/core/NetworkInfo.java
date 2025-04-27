@@ -236,7 +236,7 @@ public class NetworkInfo implements IDisposable {
     }
 
     public void updateTempStorage() {
-        Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorage().sourceKeySet());
+        Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorageUnsafe().sourceKeySet());
         for (ItemKey key : toPush) {
             ItemStack[] items = tempStorage
                     .takeItem(new ItemRequest(key, Integer.MAX_VALUE))

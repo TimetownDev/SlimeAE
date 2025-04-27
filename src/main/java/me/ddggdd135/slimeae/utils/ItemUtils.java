@@ -410,7 +410,7 @@ public class ItemUtils {
                 public boolean contains(@Nonnull ItemRequest[] requests) {
                     BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
                     if (blockMenu == null) return false;
-                    return ItemUtils.contains(getStorage(), requests);
+                    return ItemUtils.contains(getStorageUnsafe(), requests);
                 }
 
                 @Nonnull
@@ -452,7 +452,7 @@ public class ItemUtils {
 
                 @Override
                 @Nonnull
-                public ItemHashMap<Long> getStorage() {
+                public ItemHashMap<Long> getStorageUnsafe() {
                     BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
                     if (inv == null) return new ItemHashMap<>();
                     int[] outputSlots =
@@ -463,7 +463,7 @@ public class ItemUtils {
                         ItemStack itemStack = inv.getItemInSlot(slot);
                         if (itemStack != null && !itemStack.getType().isAir()) storage.addItem(itemStack);
                     }
-                    return storage.getStorage();
+                    return storage.getStorageUnsafe();
                 }
             };
         } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
@@ -487,7 +487,7 @@ public class ItemUtils {
 
                 @Override
                 public boolean contains(@Nonnull ItemRequest[] requests) {
-                    return ItemUtils.contains(getStorage(), requests);
+                    return ItemUtils.contains(getStorageUnsafe(), requests);
                 }
 
                 @Nonnull
@@ -523,7 +523,7 @@ public class ItemUtils {
 
                 @Override
                 @Nonnull
-                public ItemHashMap<Long> getStorage() {
+                public ItemHashMap<Long> getStorageUnsafe() {
                     Container container =
                             (Container) PaperLib.getBlockState(block, false).getState();
                     ItemStack[] items = new ItemStack[0];

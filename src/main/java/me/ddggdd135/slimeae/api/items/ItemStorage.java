@@ -27,7 +27,7 @@ public class ItemStorage implements IStorage {
     }
 
     public ItemStorage(@Nonnull IStorage storage) {
-        this(storage.getStorage());
+        this(storage.getStorageUnsafe());
     }
 
     public ItemStorage(@Nonnull ItemHashMap<Long> items) {
@@ -118,8 +118,8 @@ public class ItemStorage implements IStorage {
 
     @Override
     @Nonnull
-    public ItemHashMap<Long> getStorage() {
-        return new ItemHashMap<>(storage);
+    public ItemHashMap<Long> getStorageUnsafe() {
+        return storage;
     }
 
     @Nonnull

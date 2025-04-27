@@ -79,7 +79,7 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     @Override
-    public @Nonnull ItemHashMap<Long> getStorage() {
+    public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
         Material material = cache.material();
         ItemMeta meta = cache.meta();

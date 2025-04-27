@@ -99,7 +99,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
             @Override
             public boolean contains(@Nonnull ItemRequest[] requests) {
                 if (blockMenu == null) return false;
-                return ItemUtils.contains(getStorage(), requests);
+                return ItemUtils.contains(getStorageUnsafe(), requests);
             }
 
             @Nonnull
@@ -134,7 +134,7 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
             }
 
             @Override
-            public @Nonnull ItemHashMap<Long> getStorage() {
+            public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
                 if (blockMenu == null) return new ItemHashMap<>();
                 return ItemUtils.getAmounts(blockMenu.getContents());
             }

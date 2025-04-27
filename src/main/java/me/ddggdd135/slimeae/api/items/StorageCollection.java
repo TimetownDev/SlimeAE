@@ -110,7 +110,7 @@ public class StorageCollection implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> storage = getStorage();
+        ItemHashMap<Long> storage = getStorageUnsafe();
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getKey())) return false;
             if (!ItemUtils.contains(storage, request)) {
@@ -139,22 +139,22 @@ public class StorageCollection implements IStorage {
             if (takeCache.containsKey(entry.getKey())) {
                 IStorage storage = takeCache.get(entry.getKey().getType());
                 ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-                found.addItem(itemStacks.getStorage());
+                found.addItem(itemStacks.getStorageUnsafe());
                 if (rest.keySet().isEmpty()) break;
             }
         }
 
         for (IStorage storage : storages) {
             ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-            for (ItemKey key : itemStacks.getStorage().sourceKeySet()) {
+            for (ItemKey key : itemStacks.getStorageUnsafe().sourceKeySet()) {
                 ItemStack itemStack = key.getItemStack();
                 if (itemStack != null && !itemStack.getType().isAir()) {
                     takeCache.put(key.getType(), storage);
                 }
             }
 
-            found.addItem(itemStacks.getStorage());
-            rest = ItemUtils.takeItems(rest, found.getStorage());
+            found.addItem(itemStacks.getStorageUnsafe());
+            rest = ItemUtils.takeItems(rest, found.getStorageUnsafe());
             ItemUtils.trim(rest);
             if (rest.keySet().isEmpty()) break;
         }
@@ -164,10 +164,11 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
-    public @Nonnull ItemHashMap<Long> getStorage() {
+    public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> result = new ItemHashMap<>();
+
         for (IStorage storage : storages) {
-            ItemHashMap<Long> tmp = storage.getStorage();
+            ItemHashMap<Long> tmp = storage.getStorageUnsafe();
             if (tmp instanceof CreativeItemMap) return tmp;
             for (ItemKey itemKey : tmp.sourceKeySet()) {
                 if (result.containsKey(itemKey)) {

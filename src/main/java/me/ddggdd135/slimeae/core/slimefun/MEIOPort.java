@@ -62,14 +62,14 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
                         && MEItemStorageCell.isCurrentServer(itemStack)) {
                     MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorage(itemStack);
-                    if (meStorageCellCache.getStorage().isEmpty()) {
+                    if (meStorageCellCache.getStorageUnsafe().isEmpty()) {
                         blockMenu.replaceExistingItem(slot, null);
                         MEItemStorageCell.updateLore(itemStack);
                         blockMenu.pushItem(itemStack, getMeStorageCellOutputSlots());
                         return;
                     }
 
-                    ItemKey target = meStorageCellCache.getStorage().keyEntrySet().stream()
+                    ItemKey target = meStorageCellCache.getStorageUnsafe().keyEntrySet().stream()
                             .filter(x -> x.getValue() > 0)
                             .map(Map.Entry::getKey)
                             .toArray(ItemKey[]::new)[0];
@@ -100,9 +100,9 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     return;
                 }
 
-                if (networkStorage.getStorage().isEmpty()) return;
+                if (networkStorage.getStorageUnsafe().isEmpty()) return;
 
-                ItemKey target = networkStorage.getStorage().keyEntrySet().stream()
+                ItemKey target = networkStorage.getStorageUnsafe().keyEntrySet().stream()
                         .filter(x -> x.getValue() > 0)
                         .map(Map.Entry::getKey)
                         .toArray(ItemKey[]::new)[0];

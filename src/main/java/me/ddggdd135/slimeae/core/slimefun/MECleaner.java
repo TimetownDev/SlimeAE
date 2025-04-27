@@ -78,7 +78,7 @@ public class MECleaner extends TickingBlock implements IMEObject, InventoryBlock
         for (IStorage storage : networkStorage.getStorages()) {
             if (storage instanceof MEStorageCellCache) storageCells.addStorage(storage);
         }
-        ItemHashMap<Long> total = storageCells.getStorage();
+        ItemHashMap<Long> total = storageCells.getStorageUnsafe();
 
         for (int slot : getSettingSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);

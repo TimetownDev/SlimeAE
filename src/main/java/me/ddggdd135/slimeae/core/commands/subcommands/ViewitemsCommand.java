@@ -206,7 +206,7 @@ public class ViewitemsCommand extends SubCommand {
     }
 
     private void updateGui(AEMenu menu, MEStorageCellCache data) {
-        ItemHashMap<Long> storage = data.getStorage();
+        ItemHashMap<Long> storage = data.getStorageUnsafe();
 
         // 获取过滤器
         String filter = filterCache.get(data.getUuid()).toLowerCase(Locale.ROOT);
