@@ -151,7 +151,9 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
+                    shapelessRecipe.getIngredientList().stream()
+                            .map(x -> new ItemStack(x.getType()))
+                            .toArray(ItemStack[]::new),
                     new ItemStack(
                             shapelessRecipe.getResult().getType(),
                             shapelessRecipe.getResult().getAmount()));
@@ -233,7 +235,9 @@ public class RecipeUtils {
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
                 return new CraftingRecipe(
                         CraftType.CRAFTING_TABLE,
-                        shapelessRecipe.getIngredientList().toArray(ItemStack[]::new),
+                        shapelessRecipe.getIngredientList().stream()
+                                .map(x -> new ItemStack(x.getType()))
+                                .toArray(ItemStack[]::new),
                         new ItemStack(
                                 shapelessRecipe.getResult().getType(),
                                 shapelessRecipe.getResult().getAmount()));
