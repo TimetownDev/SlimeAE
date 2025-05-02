@@ -109,7 +109,7 @@ public class AutoCraftingTask implements IDisposable {
                     long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
                     long need = in.get(template) * count;
                     if (amount < need) {
-                        missing.addItem(ItemUtils.createItems(template, need - amount));
+                        missing.addItem(new ItemKey(template), need - amount);
                     }
                 }
                 throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
@@ -135,7 +135,7 @@ public class AutoCraftingTask implements IDisposable {
                     // 尝试合成缺少的材料
                     CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
                     if (craftingRecipe == null) {
-                        missing.addItem(ItemUtils.createItems(key.getItemStack(), remainingNeed));
+                        missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
                         continue;
                     }
 
@@ -152,7 +152,7 @@ public class AutoCraftingTask implements IDisposable {
                         // 合并子合成缺少的材料
                         for (Map.Entry<ItemStack, Long> entry :
                                 e.getMissingMaterials().entrySet()) {
-                            missing.addItem(ItemUtils.createItems(entry.getKey(), entry.getValue()));
+                            missing.addItem(new ItemKey(entry.getKey()), entry.getValue());
                         }
                     }
                 }

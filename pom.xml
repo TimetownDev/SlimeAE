@@ -176,7 +176,7 @@
         <dependency>
             <groupId>com.ytdd9527</groupId>
             <artifactId>NetworksExpansion</artifactId>
-            <version>4e10d9b0e3</version>
+            <version>c2ffa043f4dd3e42fe7c8a49f7e2f1023f739378</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/NetworksExpansion.jar</systemPath>
         </dependency>

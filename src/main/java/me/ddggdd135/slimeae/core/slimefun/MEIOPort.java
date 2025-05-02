@@ -13,6 +13,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
@@ -73,11 +74,11 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                             .filter(x -> x.getValue() > 0)
                             .map(Map.Entry::getKey)
                             .toArray(ItemKey[]::new)[0];
-                    ItemStack[] tmp = meStorageCellCache
+                    ItemHashMap<Long> tmp = meStorageCellCache
                             .takeItem(new ItemRequest(target, 40960))
-                            .toItemStacks();
+                            .getStorageUnsafe();
                     networkStorage.pushItem(tmp);
-                    tmp = ItemUtils.trimItems(tmp);
+                    ItemUtils.trim(tmp);
                     meStorageCellCache.pushItem(tmp);
                     MEItemStorageCell.updateLore(itemStack);
                 }

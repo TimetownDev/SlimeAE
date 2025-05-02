@@ -109,6 +109,33 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
+    public void pushItem(@Nonnull ItemInfo itemInfo) {
+        ItemKey key = itemInfo.getItemKey();
+        ItemHashMap<Long> storages = data.getStorage();
+        long stored = data.getStored();
+        long size = data.getSize();
+
+        if (storages instanceof CreativeItemMap) {
+            itemInfo.setAmount(0);
+            return;
+        }
+
+        ItemStack itemStack = key.getItemStack();
+        if (SlimefunItem.getById(key.getType().getId()) instanceof MEItemStorageCell
+                || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+
+        long amount = storages.getOrDefault(key, 0L);
+        long toAdd;
+        if (stored + itemInfo.getAmount() > size) toAdd = size - stored;
+        else toAdd = itemInfo.getAmount();
+        stored += toAdd;
+        data.setStored(stored);
+        storages.putKey(key, amount + toAdd);
+        itemInfo.setAmount((int) (itemInfo.getAmount() - toAdd));
+        trim(key);
+    }
+
+    @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
         ItemHashMap<Long> storages = data.getStorage();
 

@@ -4,7 +4,9 @@ import com.balugaq.netex.api.data.ItemContainer;
 import com.balugaq.netex.api.data.StorageUnitData;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -12,6 +14,7 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.ItemInfo;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import org.bukkit.block.Block;
@@ -38,6 +41,16 @@ public class DrawerStorage implements IStorage {
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
         if (!isReadOnly && data != null)
             data.depositItemStack(itemStackCache.getItemStack(), NetworksDrawer.isLocked(block.getLocation()));
+    }
+
+    @Override
+    public void pushItem(@Nonnull ItemInfo itemInfo) {
+        if (!isReadOnly && data != null) {
+            Map.Entry<ItemStack, Integer> entry =
+                    new AbstractMap.SimpleEntry<>(itemInfo.getItemKey().getItemStack(), (int) itemInfo.getAmount());
+            data.depositItemStack(entry, NetworksDrawer.isLocked(block.getLocation()));
+            itemInfo.setAmount(entry.getValue());
+        }
     }
 
     @Override

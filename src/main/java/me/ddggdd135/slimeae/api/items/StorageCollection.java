@@ -109,6 +109,35 @@ public class StorageCollection implements IStorage {
     }
 
     @Override
+    public void pushItem(@Nonnull ItemInfo itemInfo) {
+        ItemKey key = itemInfo.getItemKey();
+
+        IStorage pushStorage = pushCache.get(key.getType());
+        if (pushStorage != null) pushStorage.pushItem(itemInfo);
+
+        if (itemInfo.isEmpty()) return;
+
+        List<IStorage> tmp = new ArrayList<>(storages);
+        List<ObjectIntImmutablePair<IStorage>> sorted = new ArrayList<>(tmp.size());
+
+        // 计算每个 storage 的 tier 并缓存结果
+        for (IStorage storage : tmp) {
+            int totalTier = storage.getTier(key);
+            if (totalTier < 0) continue;
+            sorted.add(new ObjectIntImmutablePair<>(storage, totalTier));
+        }
+
+        // 根据缓存的 tier 排序
+        sorted.sort(Comparator.<ObjectIntImmutablePair<IStorage>>comparingInt(ObjectIntImmutablePair::rightInt)
+                .reversed());
+
+        for (ObjectIntImmutablePair<IStorage> storage : sorted) {
+            storage.left().pushItem(itemInfo);
+            if (itemInfo.isEmpty()) return;
+        }
+    }
+
+    @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
         ItemHashMap<Long> storage = getStorageUnsafe();
         for (ItemRequest request : requests) {
