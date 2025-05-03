@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.api.MEStorageCellData;
 import me.ddggdd135.slimeae.api.annotation.Unsafe;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -155,7 +156,7 @@ public class MEStorageCellCache implements IStorage {
         long stored = data.getStored();
 
         if (storages instanceof CreativeItemMap) {
-            return new ItemStorage(storages);
+            return new ItemStorage(ItemUtils.getAmounts(requests));
         }
 
         ItemStorage itemStacks = new ItemStorage();
