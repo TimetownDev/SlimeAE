@@ -40,6 +40,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.guizhanss.minecraft.guizhanlib.gugu.minecraft.helpers.inventory.ItemStackHelper;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
@@ -788,5 +789,13 @@ public class ItemUtils {
         }
 
         return result.toArray(ItemStack[]::new);
+    }
+
+    @Nonnull
+    public static ItemStack withType(@Nonnull ItemStack itemStack, Material material) {
+        ItemStack result = itemStack.clone();
+        result.setType(material);
+
+        return result;
     }
 }

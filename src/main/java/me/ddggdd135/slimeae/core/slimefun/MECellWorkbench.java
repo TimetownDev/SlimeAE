@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -9,14 +10,22 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.MEStorageCellFilterData;
+import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -35,8 +44,16 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         return 1;
     }
 
+    public int getReversedSlot() {
+        return 17;
+    }
+
+    public int getFuzzySlot() {
+        return 26;
+    }
+
     public int[] getBorderSlots() {
-        return new int[] {0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 25, 34, 43, 44, 52, 53};
+        return new int[] {0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 25, 34, 35, 43, 44, 52, 53};
     }
 
     public int[] getSettingSlots() {
@@ -71,6 +88,8 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         if (itemStack != null) ItemUtils.setSettingItem(menu.getInventory(), getStorageCellSlot(), itemStack);
 
         menu.addMenuClickHandler(getStorageCellSlot(), onStorageCellSlotClick(menu, block));
+
+        updateGUI(block);
     }
 
     @Nonnull
@@ -104,7 +123,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
                     ClickAction clickAction) {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = ItemUtils.getSettingItem(inventory, i);
-                if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.STORAGE_CELL, true, false)) {
+                if (SlimefunUtils.isItemSimilar(current, MenuItems.STORAGE_CELL, true, false)) {
                     if (cursor != null
                             && !cursor.getType().isAir()
                             && SlimefunItem.getByItem(cursor) instanceof MEItemStorageCell) {
@@ -121,6 +140,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
                     }
                 }
 
+                updateGUI(block);
                 return false;
             }
 
@@ -131,5 +151,85 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         };
     }
 
-    public void updateGUI(@Nonnull Block block) {}
+    public void updateGUI(@Nonnull Block block) {
+        SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
+        if (slimefunBlockData == null) return;
+
+        BlockMenu menu = slimefunBlockData.getBlockMenu();
+        if (menu == null) return;
+
+        for (int slot : getSettingSlots()) {
+            menu.replaceExistingItem(slot, MenuItems.SETTING);
+            menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
+                if (cursor == null || cursor.getType().isAir()) return false;
+
+                ItemStack itemStack = ItemUtils.getSettingItem(menu.getInventory(), getStorageCellSlot());
+                if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return false;
+
+                MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
+                MEStorageCellFilterData data = cache.getFilterData();
+
+                if (data.getFilters().size() >= getSettingSlots().length
+                        || data.getFilters().contains(cursor)) return false;
+
+                data.getFilters().add(cursor);
+                data.updateItemTypes();
+
+                SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
+
+                updateGUI(block);
+                return false;
+            });
+        }
+
+        menu.replaceExistingItem(getReversedSlot(), MenuItems.CANNOT_NOW);
+        menu.addMenuClickHandler(getReversedSlot(), ChestMenuUtils.getEmptyClickHandler());
+        menu.replaceExistingItem(getFuzzySlot(), MenuItems.CANNOT_NOW);
+        menu.addMenuClickHandler(getFuzzySlot(), ChestMenuUtils.getEmptyClickHandler());
+
+        ItemStack itemStack = ItemUtils.getSettingItem(menu.getInventory(), getStorageCellSlot());
+        if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return;
+
+        MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
+        MEStorageCellFilterData data = cache.getFilterData();
+
+        List<ItemKey> itemKeys = new ArrayList<>(data.getFilters());
+
+        for (int i = 0; i < itemKeys.size(); i++) {
+            ItemKey itemKey = itemKeys.get(i);
+            menu.replaceExistingItem(getSettingSlots()[i], itemKey.getItemStack());
+            menu.addMenuClickHandler(getSettingSlots()[i], (player, i1, cursor, clickAction) -> {
+                data.getFilters().remove(itemKey);
+                data.updateItemTypes();
+
+                SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
+
+                updateGUI(block);
+                return false;
+            });
+        }
+
+        menu.replaceExistingItem(
+                getReversedSlot(),
+                ItemUtils.withType(
+                        MenuItems.REVERSED,
+                        data.isReversed() ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE));
+        menu.addMenuClickHandler(getReversedSlot(), (player, i, itemStack1, clickAction) -> {
+            data.setReversed(!data.isReversed());
+            SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
+            updateGUI(block);
+            return false;
+        });
+        menu.replaceExistingItem(
+                getFuzzySlot(),
+                ItemUtils.withType(
+                        MenuItems.FUZZY,
+                        data.isFuzzy() ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE));
+        menu.addMenuClickHandler(getFuzzySlot(), (player, i, itemStack1, clickAction) -> {
+            data.setFuzzy(!data.isFuzzy());
+            SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
+            updateGUI(block);
+            return false;
+        });
+    }
 }
