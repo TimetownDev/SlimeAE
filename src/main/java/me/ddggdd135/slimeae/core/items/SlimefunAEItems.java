@@ -655,14 +655,14 @@ public class SlimefunAEItems {
                         ME_CELL_WORKBENCH,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {
+                            new ItemStack(Material.WHITE_WOOL),
+                            LOGIC_PROCESSOR,
+                            new ItemStack(Material.WHITE_WOOL),
                             new ItemStack(Material.IRON_INGOT),
-                            ENGINEERING_PROCESSOR,
+                            new ItemStack(Material.CHEST),
                             new ItemStack(Material.IRON_INGOT),
-                            ME_GLASS_CABLE,
-                            null,
-                            ME_GLASS_CABLE,
                             new ItemStack(Material.IRON_INGOT),
-                            ENGINEERING_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);

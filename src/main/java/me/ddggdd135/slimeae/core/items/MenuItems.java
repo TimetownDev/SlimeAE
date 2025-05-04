@@ -65,7 +65,7 @@ public class MenuItems {
     public static final SlimefunItemStack REVERSED = new SlimefunItemStack(
             "_AE_MN_REVERSED_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&e反向模式", "", "&e点击切换"));
     public static final SlimefunItemStack FUZZY = new SlimefunItemStack(
-            "_AE_MN_FUZZY_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&e反模糊模式", "", "&e点击切换"));
+            "_AE_MN_FUZZY_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&e模糊模式", "", "&e点击切换"));
     public static final SlimefunItemStack CANNOT_NOW =
             new SlimefunItemStack("_AE_MN_CANNOT_NOW_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l现在不行"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
