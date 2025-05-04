@@ -16,7 +16,6 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -71,7 +70,7 @@ public class InfinityBarrelStorage implements IStorage {
                 long toTake = Math.min(amount, request.getAmount());
                 if (toTake != 0) {
                     cache.amount((int) (amount + 1 - toTake));
-                    toReturn.addItem(ItemUtils.createItems(request.getKey().getItemStack(), toTake));
+                    toReturn.addItem(new ItemKey(request.getKey().getItemStack()), toTake);
                 }
             }
         }

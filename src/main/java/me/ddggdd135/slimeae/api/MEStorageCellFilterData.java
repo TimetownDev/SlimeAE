@@ -42,6 +42,8 @@ public class MEStorageCellFilterData {
      * 允许存入则返回true
      */
     public boolean matches(@Nonnull ItemKey itemKey) {
+        if (filters.isEmpty()) return true;
+
         if (!isFuzzy) {
             return filters.contains(itemKey) && !isReversed;
         }

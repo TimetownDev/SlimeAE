@@ -16,7 +16,6 @@ import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -87,7 +86,7 @@ public class FluffyBarrelStorage implements IStorage {
                 long toTake = Math.min(stored, request.getAmount());
                 if (toTake != 0) {
                     stored -= toTake;
-                    toReturn.addItem(ItemUtils.createItems(request.getKey().getItemStack(), toTake));
+                    toReturn.addItem(new ItemKey(request.getKey().getItemStack()), toTake);
                 }
             }
         }

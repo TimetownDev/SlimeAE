@@ -26,6 +26,7 @@ import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.BlockMenuStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -39,7 +40,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.guizhanss.minecraft.guizhanlib.gugu.minecraft.helpers.inventory.ItemStackHelper;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
@@ -387,85 +387,7 @@ public class ItemUtils {
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
 
         if (inv != null) {
-            boolean finalIsReadOnly = isReadOnly;
-            return new IStorage() {
-                @Override
-                public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-                    ItemStack itemStack = itemStackCache.getItemStack();
-
-                    if (finalIsReadOnly) return;
-                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-                    if (blockMenu == null) return;
-                    if (itemStack.getType().isAir()) return;
-                    int[] inputSlots = blockMenu
-                            .getPreset()
-                            .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, itemStack);
-                    if (inputSlots == null) return;
-                    ItemStack rest = blockMenu.pushItem(itemStack, inputSlots);
-                    if (rest != null) itemStack.setAmount(rest.getAmount());
-                    blockMenu.markDirty();
-                }
-
-                @Override
-                public boolean contains(@Nonnull ItemRequest[] requests) {
-                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-                    if (blockMenu == null) return false;
-                    return ItemUtils.contains(getStorageUnsafe(), requests);
-                }
-
-                @Nonnull
-                @Override
-                public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-                    BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-                    if (blockMenu == null) return new ItemStorage();
-                    ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
-                    ItemStorage found = new ItemStorage();
-
-                    for (Map.Entry<ItemStack, Long> data : amounts.entrySet()) {
-                        ItemStack itemStack = data.getKey();
-                        int[] outputSlots = blockMenu
-                                .getPreset()
-                                .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, itemStack);
-                        if (outputSlots == null) continue;
-                        for (int slot : outputSlots) {
-                            ItemStack item = blockMenu.getItemInSlot(slot);
-                            if (item == null || item.getType().isAir()) continue;
-                            if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                                if (item.getAmount() > data.getValue()) {
-                                    found.addItem(new ItemKey(itemStack), data.getValue());
-                                    long rest = item.getAmount() - data.getValue();
-                                    item.setAmount((int) rest);
-                                    break;
-                                } else {
-                                    found.addItem(new ItemKey(itemStack), item.getAmount());
-                                    blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
-                                    long rest = data.getValue() - item.getAmount();
-                                    if (rest != 0) amounts.put(itemStack, rest);
-                                    else break;
-                                }
-                            }
-                        }
-                    }
-                    blockMenu.markDirty();
-                    return found;
-                }
-
-                @Override
-                @Nonnull
-                public ItemHashMap<Long> getStorageUnsafe() {
-                    BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
-                    if (inv == null) return new ItemHashMap<>();
-                    int[] outputSlots =
-                            inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
-                    if (outputSlots == null) return new ItemHashMap<>();
-                    ItemStorage storage = new ItemStorage();
-                    for (int slot : outputSlots) {
-                        ItemStack itemStack = inv.getItemInSlot(slot);
-                        if (itemStack != null && !itemStack.getType().isAir()) storage.addItem(itemStack);
-                    }
-                    return storage.getStorageUnsafe();
-                }
-            };
+            return new BlockMenuStorage(inv, isReadOnly);
         } else if (allowVanilla && PaperLib.getBlockState(block, false).getState() instanceof Container container) {
             return new IStorage() {
                 @Override

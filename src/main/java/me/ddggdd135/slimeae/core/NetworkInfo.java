@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -238,11 +239,11 @@ public class NetworkInfo implements IDisposable {
     public void updateTempStorage() {
         Set<ItemKey> toPush = new HashSet<>(tempStorage.getStorageUnsafe().sourceKeySet());
         for (ItemKey key : toPush) {
-            ItemStack[] items = tempStorage
+            ItemHashMap<Long> items = tempStorage
                     .takeItem(new ItemRequest(key, Integer.MAX_VALUE))
-                    .toItemStacks();
+                    .getStorageUnsafe();
             storage.pushItem(items);
-            items = ItemUtils.trimItems(items);
+            ItemUtils.trim(items);
             tempStorage.addItem(items, true);
         }
     }

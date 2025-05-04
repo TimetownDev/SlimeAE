@@ -48,6 +48,18 @@ public class ItemStorage implements IStorage {
         trim(itemKey);
     }
 
+    public void pushItem(@Nonnull ItemInfo itemInfo) {
+        if (isReadonly) return;
+
+        ItemKey itemKey = itemInfo.getItemKey();
+
+        long amount = storage.getOrDefault(itemKey, 0L);
+        amount += itemInfo.getAmount();
+        storage.putKey(itemKey, amount);
+        itemInfo.setAmount(0);
+        trim(itemKey);
+    }
+
     public void addItem(@Nonnull ItemStack[] itemStacks) {
         addItem(itemStacks, false);
     }

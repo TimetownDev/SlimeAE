@@ -7,22 +7,16 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
-import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.api.items.ItemRequest;
-import me.ddggdd135.slimeae.api.items.ItemStorage;
+import me.ddggdd135.slimeae.api.items.BlockMenuStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
-import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -84,61 +78,11 @@ public class MEUnit extends SlimefunItem implements IMEStorageObject, InventoryB
     @Override
     @Nullable public IStorage getStorage(Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-        return new IStorage() {
-            @Override
-            public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-                ItemStack itemStack = itemStackCache.getItemStack();
+        if (blockMenu != null) {
+            return new BlockMenuStorage(blockMenu, false);
+        }
 
-                if (blockMenu == null) return;
-                ItemStack result = blockMenu.pushItem(itemStack, Slots);
-                if (result != null && !result.getType().isAir()) itemStack.setAmount(result.getAmount());
-                else itemStack.setAmount(0);
-                blockMenu.markDirty();
-            }
-
-            @Override
-            public boolean contains(@Nonnull ItemRequest[] requests) {
-                if (blockMenu == null) return false;
-                return ItemUtils.contains(getStorageUnsafe(), requests);
-            }
-
-            @Nonnull
-            @Override
-            public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-                if (blockMenu == null) return new ItemStorage();
-                ItemHashMap<Long> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
-                ItemStorage found = new ItemStorage();
-
-                for (ItemStack itemStack : amounts.keySet()) {
-                    for (int slot : Slots) {
-                        ItemStack item = blockMenu.getItemInSlot(slot);
-                        if (item == null || item.getType().isAir()) continue;
-                        if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                            if (item.getAmount() > amounts.get(itemStack)) {
-                                found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
-                                long rest = item.getAmount() - amounts.get(itemStack);
-                                item.setAmount((int) rest);
-                                break;
-                            } else {
-                                found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-                                blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
-                                long rest = amounts.get(itemStack) - item.getAmount();
-                                if (rest != 0) amounts.put(itemStack, rest);
-                                else break;
-                            }
-                        }
-                    }
-                }
-                blockMenu.markDirty();
-                return found;
-            }
-
-            @Override
-            public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
-                if (blockMenu == null) return new ItemHashMap<>();
-                return ItemUtils.getAmounts(blockMenu.getContents());
-            }
-        };
+        return null;
     }
 
     @Override

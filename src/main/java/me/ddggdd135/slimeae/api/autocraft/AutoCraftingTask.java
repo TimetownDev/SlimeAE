@@ -61,18 +61,23 @@ public class AutoCraftingTask implements IDisposable {
         menu.addMenuCloseHandler(player -> dispose());
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         this.storage = new ItemStorage();
-        for (CraftStep step : craftingSteps) {
+
+        for (int i = 0; i < craftingSteps.size(); i++) {
+            CraftStep step = craftingSteps.get(i);
+
             for (Map.Entry<ItemKey, Long> entry :
                     ItemUtils.getAmounts(step.getRecipe().getInput()).keyEntrySet()) {
                 storage.addItem(entry.getKey(), entry.getValue() * step.getAmount());
             }
-        }
-        for (CraftStep step : craftingSteps) {
+
+            if (i == craftingSteps.size() - 1) continue;
+
             for (Map.Entry<ItemKey, Long> entry :
                     ItemUtils.getAmounts(step.getRecipe().getOutput()).keyEntrySet()) {
                 storage.takeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
             }
         }
+
         info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
     }
 
@@ -109,7 +114,7 @@ public class AutoCraftingTask implements IDisposable {
                     long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
                     long need = in.get(template) * count;
                     if (amount < need) {
-                        missing.addItem(ItemUtils.createItems(template, need - amount));
+                        missing.addItem(new ItemKey(template), need - amount);
                     }
                 }
                 throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
@@ -135,7 +140,7 @@ public class AutoCraftingTask implements IDisposable {
                     // 尝试合成缺少的材料
                     CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
                     if (craftingRecipe == null) {
-                        missing.addItem(ItemUtils.createItems(key.getItemStack(), remainingNeed));
+                        missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
                         continue;
                     }
 
@@ -152,7 +157,7 @@ public class AutoCraftingTask implements IDisposable {
                         // 合并子合成缺少的材料
                         for (Map.Entry<ItemStack, Long> entry :
                                 e.getMissingMaterials().entrySet()) {
-                            missing.addItem(ItemUtils.createItems(entry.getKey(), entry.getValue()));
+                            missing.addItem(new ItemKey(entry.getKey()), entry.getValue());
                         }
                     }
                 }

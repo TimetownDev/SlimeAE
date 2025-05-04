@@ -16,6 +16,7 @@ import me.ddggdd135.slimeae.api.MEStorageCellStorageData;
 import me.ddggdd135.slimeae.api.annotation.Unsafe;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.ShulkerBoxUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -118,6 +119,36 @@ public class MEStorageCellCache implements IStorage {
     }
 
     @Override
+    public void pushItem(@Nonnull ItemInfo itemInfo) {
+        ItemKey key = itemInfo.getItemKey();
+        ItemHashMap<Long> storages = storageData.getStorage();
+        long stored = storageData.getStored();
+        long size = storageData.getSize();
+
+        if (storages instanceof CreativeItemMap) {
+            itemInfo.setAmount(0);
+            return;
+        }
+
+        ItemStack itemStack = key.getItemStack();
+
+        if (!filterData.matches(key)) return;
+
+        if (SlimefunItem.getById(key.getType().getId()) instanceof MEItemStorageCell
+                || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+
+        long amount = storages.getOrDefault(key, 0L);
+        long toAdd;
+        if (stored + itemInfo.getAmount() > size) toAdd = size - stored;
+        else toAdd = itemInfo.getAmount();
+        stored += toAdd;
+        storageData.setStored(stored);
+        storages.putKey(key, amount + toAdd);
+        itemInfo.setAmount((int) (itemInfo.getAmount() - toAdd));
+        trim(key);
+    }
+
+    @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
         ItemHashMap<Long> storages = storageData.getStorage();
 
@@ -137,7 +168,7 @@ public class MEStorageCellCache implements IStorage {
         long stored = storageData.getStored();
 
         if (storages instanceof CreativeItemMap) {
-            return new ItemStorage(storages);
+            return new ItemStorage(ItemUtils.getAmounts(requests));
         }
 
         ItemStorage itemStacks = new ItemStorage();

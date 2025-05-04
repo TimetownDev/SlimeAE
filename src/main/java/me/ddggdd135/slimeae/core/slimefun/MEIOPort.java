@@ -13,6 +13,7 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
@@ -69,15 +70,17 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         return;
                     }
 
-                    ItemKey target = meStorageCellCache.getStorageUnsafe().keyEntrySet().stream()
+                    ItemKey[] storage = meStorageCellCache.getStorageUnsafe().keyEntrySet().stream()
                             .filter(x -> x.getValue() > 0)
                             .map(Map.Entry::getKey)
-                            .toArray(ItemKey[]::new)[0];
-                    ItemStack[] tmp = meStorageCellCache
-                            .takeItem(new ItemRequest(target, 40960))
-                            .toItemStacks();
+                            .toArray(ItemKey[]::new);
+                    if (storage.length == 0) return;
+
+                    ItemHashMap<Long> tmp = meStorageCellCache
+                            .takeItem(new ItemRequest(storage[0], 81920))
+                            .getStorageUnsafe();
                     networkStorage.pushItem(tmp);
-                    tmp = ItemUtils.trimItems(tmp);
+                    ItemUtils.trim(tmp);
                     meStorageCellCache.pushItem(tmp);
                     MEItemStorageCell.updateLore(itemStack);
                 }
@@ -102,12 +105,13 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
                 if (networkStorage.getStorageUnsafe().isEmpty()) return;
 
-                ItemKey target = networkStorage.getStorageUnsafe().keyEntrySet().stream()
+                ItemKey[] storage = networkStorage.getStorageUnsafe().keyEntrySet().stream()
                         .filter(x -> x.getValue() > 0)
                         .map(Map.Entry::getKey)
-                        .toArray(ItemKey[]::new)[0];
-                ItemStack[] tmp =
-                        networkStorage.takeItem(new ItemRequest(target, 40960)).toItemStacks();
+                        .toArray(ItemKey[]::new);
+                ItemStack[] tmp = networkStorage
+                        .takeItem(new ItemRequest(storage[0], 81920))
+                        .toItemStacks();
                 meStorageCellCache.pushItem(tmp);
                 tmp = ItemUtils.trimItems(tmp);
                 networkStorage.pushItem(tmp);
