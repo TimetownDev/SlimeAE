@@ -74,4 +74,15 @@ public class SerializeUtils {
 
         return null;
     }
+
+    @Nonnull
+    public static String boolToString(boolean bool) {
+        if (bool) return "true";
+
+        return "false";
+    }
+
+    public static boolean stringToBool(@Nonnull String s) {
+        return s.equals("true");
+    }
 }

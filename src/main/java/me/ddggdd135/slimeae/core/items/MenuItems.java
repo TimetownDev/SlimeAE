@@ -20,6 +20,9 @@ public class MenuItems {
             "_AE_MN_PATTERN_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}编码样板槽位"));
     public static final SlimefunItemStack CARD = new SlimefunItemStack(
             "_AE_MN_CARD_", new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}升级卡槽位"));
+    public static final SlimefunItemStack STORAGE_CELL = new SlimefunItemStack(
+            "_AE_MN_STORAGE_CELL_",
+            new AdvancedCustomItemStack(Material.GREEN_STAINED_GLASS_PANE, "{#Spring_Green}存储元件槽位"));
     public static final SlimefunItemStack DISTANCE = new SlimefunItemStack(
             "_AE_MN_DISTANCE_",
             new AdvancedCustomItemStack(

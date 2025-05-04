@@ -11,7 +11,8 @@ import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.MEStorageCellData;
+import me.ddggdd135.slimeae.api.MEStorageCellFilterData;
+import me.ddggdd135.slimeae.api.MEStorageCellStorageData;
 import me.ddggdd135.slimeae.api.annotation.Unsafe;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
@@ -20,21 +21,25 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
-    private final MEStorageCellData data;
+    private final MEStorageCellStorageData storageData;
+    private final MEStorageCellFilterData filterData;
 
     public MEStorageCellCache(ItemStack itemStack) {
-        data = new MEStorageCellData(itemStack);
-        cache.put(data.getUuid(), this);
+        storageData = MEStorageCellStorageData.getMEStorageCellStorageData(itemStack);
+        filterData = MEStorageCellFilterData.getMEStorageCellFilterData(itemStack);
+        cache.put(storageData.getUuid(), this);
     }
 
-    public MEStorageCellCache(@Nonnull MEStorageCellData data) {
-        this.data = data;
-        cache.put(data.getUuid(), this);
+    public MEStorageCellCache(
+            @Nonnull MEStorageCellStorageData storageData, @Nonnull MEStorageCellFilterData filterData) {
+        this.storageData = storageData;
+        this.filterData = filterData;
+        cache.put(storageData.getUuid(), this);
     }
 
     @Nonnull
-    public MEStorageCellData getData() {
-        return data;
+    public MEStorageCellStorageData getStorageData() {
+        return storageData;
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(@Nonnull ItemStack itemStack) {
@@ -58,7 +63,8 @@ public class MEStorageCellCache implements IStorage {
         }
 
         return new MEStorageCellCache(
-                SlimeAEPlugin.getStorageCellDataController().loadData(itemStack));
+                SlimeAEPlugin.getStorageCellStorageDataController().loadData(itemStack),
+                SlimeAEPlugin.getStorageCellFilterDataController().loadData(itemStack));
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(@Nonnull UUID uuid) {
@@ -66,19 +72,19 @@ public class MEStorageCellCache implements IStorage {
     }
 
     public long getSize() {
-        return data.getSize();
+        return storageData.getSize();
     }
 
     public long getStored() {
-        return data.getStored();
+        return storageData.getStored();
     }
 
     private void trim(@Nonnull ItemKey key) {
-        ItemHashMap<Long> storages = data.getStorage();
+        ItemHashMap<Long> storages = storageData.getStorage();
 
         if (storages.containsKey(key) && storages.getKey(key) == 0) {
             storages.removeKey(key);
-            SlimeAEPlugin.getStorageCellDataController().markDirty(data);
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
         }
     }
 
@@ -86,14 +92,17 @@ public class MEStorageCellCache implements IStorage {
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
-        ItemHashMap<Long> storages = data.getStorage();
-        long stored = data.getStored();
-        long size = data.getSize();
+        ItemHashMap<Long> storages = storageData.getStorage();
+        long stored = storageData.getStored();
+        long size = storageData.getSize();
 
         if (storages instanceof CreativeItemMap) {
             itemStack.setAmount(0);
             return;
         }
+
+        if (!filterData.matches(key)) return;
+
         if (SlimefunItem.getById(itemStackCache.getItemKey().getType().getId()) instanceof MEItemStorageCell
                 || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
 
@@ -102,7 +111,7 @@ public class MEStorageCellCache implements IStorage {
         if (stored + itemStack.getAmount() > size) toAdd = size - stored;
         else toAdd = itemStack.getAmount();
         stored += toAdd;
-        data.setStored(stored);
+        storageData.setStored(stored);
         storages.putKey(key, amount + toAdd);
         itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
         trim(key);
@@ -110,7 +119,7 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> storages = data.getStorage();
+        ItemHashMap<Long> storages = storageData.getStorage();
 
         if (storages instanceof CreativeItemMap) return true;
 
@@ -124,8 +133,8 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> storages = data.getStorage();
-        long stored = data.getStored();
+        ItemHashMap<Long> storages = storageData.getStorage();
+        long stored = storageData.getStored();
 
         if (storages instanceof CreativeItemMap) {
             return new ItemStorage(storages);
@@ -144,11 +153,11 @@ public class MEStorageCellCache implements IStorage {
                     stored -= storages.getKey(request.getKey());
                     storages.putKey(request.getKey(), 0L);
                 }
-                SlimeAEPlugin.getStorageCellDataController().markDirty(data);
+                SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
                 trim(request.getKey());
             }
         }
-        data.setStored(stored);
+        storageData.setStored(stored);
 
         return itemStacks;
     }
@@ -156,7 +165,7 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Unsafe
     public ItemHashMap<Long> getStorageUnsafe() {
-        return data.getStorage();
+        return storageData.getStorage();
     }
 
     @Override
@@ -164,26 +173,31 @@ public class MEStorageCellCache implements IStorage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MEStorageCellCache cellCache = (MEStorageCellCache) o;
-        return Objects.equals(data, cellCache.data);
+        return Objects.equals(storageData, cellCache.storageData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data);
+        return Objects.hash(storageData);
     }
 
     @Override
     public int getTier(@Nonnull ItemKey key) {
-        if (data.getStorage().containsKey(key)) return 1000;
+        if (storageData.getStorage().containsKey(key)) return 1000;
 
         return 0;
     }
 
     public UUID getUuid() {
-        return data.getUuid();
+        return storageData.getUuid();
     }
 
     public void setStored(long stored) {
-        data.setStored(stored);
+        storageData.setStored(stored);
+    }
+
+    @Nonnull
+    public MEStorageCellFilterData getFilterData() {
+        return filterData;
     }
 }

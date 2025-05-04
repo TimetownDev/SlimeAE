@@ -18,7 +18,7 @@ public abstract class DatabaseController<TData> {
     protected BlockDataController blockDataController;
     protected IDataSourceAdapter<?> adapter;
     protected CraftHikariDataSource ds;
-    protected final DatabaseThreadFactory threadFactory = new DatabaseThreadFactory();
+    protected final DatabaseThreadFactory threadFactory = new DatabaseThreadFactory("AE-Database-Thread");
     protected final Class<TData> clazz;
     protected ExecutorService readExecutor;
     protected ExecutorService writeExecutor;
@@ -39,8 +39,8 @@ public abstract class DatabaseController<TData> {
         blockDataController = Slimefun.getDatabaseManager().getBlockDataController();
         adapter = ReflectionUtils.getField(blockDataController, "dataAdapter");
         ds = new CraftHikariDataSource(ReflectionUtils.<Object>getField(adapter, "ds"));
-        readExecutor = Executors.newFixedThreadPool(3, threadFactory);
-        writeExecutor = Executors.newFixedThreadPool(5, threadFactory);
+        readExecutor = Executors.newFixedThreadPool(2, threadFactory);
+        writeExecutor = Executors.newFixedThreadPool(3, threadFactory);
         callbackExecutor = Executors.newCachedThreadPool(threadFactory);
     }
 

@@ -6,7 +6,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.api.abstracts.MEChainedBus;
-import me.ddggdd135.slimeae.api.database.StorageCellDataController;
+import me.ddggdd135.slimeae.api.database.StorageCellFilterDataController;
+import me.ddggdd135.slimeae.api.database.StorageCellStorageDataController;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.SlimeAECommand;
@@ -50,7 +51,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private ObsidianExpansionIntegration obsidianExpansionIntegration;
     private ExoticGardenIntegration exoticGardenIntegration;
 
-    private StorageCellDataController storageCellDataController;
+    private StorageCellStorageDataController storageCellStorageDataController;
+    private StorageCellFilterDataController storageCellFilterDataController;
 
     private NetworkTickerTask networkTicker;
     private NetworkTimeConsumingTask networkTimeConsumingTask;
@@ -74,7 +76,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         obsidianExpansionIntegration = new ObsidianExpansionIntegration();
         exoticGardenIntegration = new ExoticGardenIntegration();
 
-        storageCellDataController = new StorageCellDataController();
+        storageCellStorageDataController = new StorageCellStorageDataController();
+        storageCellFilterDataController = new StorageCellFilterDataController();
 
         networkTicker = new NetworkTickerTask();
         networkTimeConsumingTask = new NetworkTimeConsumingTask();
@@ -119,7 +122,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (obsidianExpansionIntegration.isLoaded()) getLogger().info("黑曜石科技已接入");
         if (exoticGardenIntegration.isLoaded()) getLogger().info("异域花园已接入");
 
-        storageCellDataController.init();
+        storageCellStorageDataController.init();
 
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
@@ -159,10 +162,11 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         dataSavingTask.setPaused(true);
         dataSavingTask.halt();
 
+        storageCellStorageDataController.shutdown();
+        storageCellFilterDataController.shutdown();
+
         SlimefunItemUtils.unregisterItemGroups(this);
         SlimefunItemUtils.unregisterAllItems(this);
-
-        storageCellDataController.shutdown();
     }
 
     @Override
@@ -279,8 +283,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     }
 
     @Nonnull
-    public static StorageCellDataController getStorageCellDataController() {
-        return getInstance().storageCellDataController;
+    public static StorageCellStorageDataController getStorageCellStorageDataController() {
+        return getInstance().storageCellStorageDataController;
+    }
+
+    @Nonnull
+    public static StorageCellFilterDataController getStorageCellFilterDataController() {
+        return getInstance().storageCellFilterDataController;
     }
 
     @Nonnull

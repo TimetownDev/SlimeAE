@@ -2,27 +2,30 @@ package me.ddggdd135.slimeae.api;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.items.CreativeItemMap;
 import me.ddggdd135.slimeae.core.slimefun.MECreativeItemStorageCell;
 import me.ddggdd135.slimeae.core.slimefun.MEItemStorageCell;
 import org.bukkit.inventory.ItemStack;
 
-public class MEStorageCellData {
-    private static final Map<UUID, MEStorageCellData> cache = new ConcurrentHashMap<>();
+public class MEStorageCellStorageData {
+    private static final Map<UUID, MEStorageCellStorageData> cache = new ConcurrentHashMap<>();
+    private UUID uuid;
     private ItemHashMap<Long> storages;
     private long stored;
     private long size;
-    private UUID uuid;
 
-    public MEStorageCellData() {}
+    public MEStorageCellStorageData() {}
 
-    public MEStorageCellData(@Nonnull ItemStack itemStack) {
+    public MEStorageCellStorageData(@Nonnull ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
         size = MEItemStorageCell.getSize(itemStack);
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) storages = new CreativeItemMap();
@@ -45,10 +48,6 @@ public class MEStorageCellData {
 
     public UUID getUuid() {
         return uuid;
-    }
-
-    public void setUuid(@Nonnull UUID uuid) {
-        this.uuid = uuid;
     }
 
     public long getSize() {
@@ -76,7 +75,41 @@ public class MEStorageCellData {
         this.stored = stored;
     }
 
-    @Nullable public static MEStorageCellData getMEStorageCellData(@Nonnull UUID uuid) {
+    @Nullable public static MEStorageCellStorageData getMEStorageCellStorageData(@Nonnull UUID uuid) {
         return cache.getOrDefault(uuid, null);
+    }
+
+    @Nullable public static MEStorageCellStorageData getMEStorageCellStorageData(@Nonnull ItemStack itemStack) {
+        if (!MEItemStorageCell.isCurrentServer(itemStack)) {
+            return null;
+        }
+
+        UUID uuid = UUID.randomUUID();
+        if (!NBT.get(itemStack, x -> {
+            return x.hasTag(MEItemStorageCell.UUID_KEY, NBTType.NBTTagIntArray);
+        })) {
+            UUID finalUuid = uuid;
+            NBT.modify(itemStack, x -> {
+                x.setUUID(MEItemStorageCell.UUID_KEY, finalUuid);
+            });
+        } else {
+            uuid = NBT.get(itemStack, x -> {
+                return x.getUUID(MEItemStorageCell.UUID_KEY);
+            });
+            if (getMEStorageCellStorageData(uuid) != null) return getMEStorageCellStorageData(uuid);
+        }
+
+        return SlimeAEPlugin.getStorageCellStorageDataController().loadData(itemStack);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof MEStorageCellStorageData that)) return false;
+        return Objects.equals(uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 }

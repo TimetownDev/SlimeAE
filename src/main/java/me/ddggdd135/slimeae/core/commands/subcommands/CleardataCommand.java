@@ -58,7 +58,9 @@ public class CleardataCommand extends SubCommand {
                 }
                 data.getStorageUnsafe().clear();
                 MEItemStorageCell.updateLore(itemStack);
-                SlimeAEPlugin.getStorageCellDataController().delete(data.getData());
+
+                SlimeAEPlugin.getStorageCellStorageDataController().delete(data.getStorageData());
+                SlimeAEPlugin.getStorageCellFilterDataController().delete(data.getFilterData());
                 commandSender.sendMessage(CMIChatColor.translate("&a成功清除了存储元件数据"));
 
                 return false;
@@ -74,7 +76,10 @@ public class CleardataCommand extends SubCommand {
         }
         MEStorageCellCache data = MEStorageCellCache.getMEStorageCellCache(uuid);
         if (data != null) data.getStorageUnsafe().clear();
-        SlimeAEPlugin.getStorageCellDataController().delete(uuid);
+
+        SlimeAEPlugin.getStorageCellStorageDataController().delete(uuid);
+        SlimeAEPlugin.getStorageCellFilterDataController().delete(uuid);
+
         commandSender.sendMessage(CMIChatColor.translate("&a成功清除了存储元件数据"));
         return false;
     }

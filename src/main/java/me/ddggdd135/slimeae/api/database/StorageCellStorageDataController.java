@@ -3,15 +3,15 @@ package me.ddggdd135.slimeae.api.database;
 import java.util.*;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
-import me.ddggdd135.slimeae.api.MEStorageCellData;
+import me.ddggdd135.slimeae.api.MEStorageCellStorageData;
 import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
-public class StorageCellDataController extends DatabaseController<MEStorageCellData> {
-    public final Set<MEStorageCellData> needSave = new HashSet<>();
+public class StorageCellStorageDataController extends DatabaseController<MEStorageCellStorageData> {
+    public final Set<MEStorageCellStorageData> needSave = new HashSet<>();
 
-    public StorageCellDataController() {
-        super(MEStorageCellData.class);
+    public StorageCellStorageDataController() {
+        super(MEStorageCellStorageData.class);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
     }
 
     @Override
-    public void update(MEStorageCellData data) {
+    public void update(MEStorageCellStorageData data) {
         cancelWriteTask(data);
         delete(data);
 
@@ -52,7 +52,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
         }
     }
 
-    public void update(MEStorageCellData data, ItemStack itemStack, int amount, boolean insert) {
+    public void update(MEStorageCellStorageData data, ItemStack itemStack, int amount, boolean insert) {
         if (!insert)
             executeSql("UPDATE " + getTableName() + " SET amount = " + amount + " WHERE uuid = '" + data.getUuid()
                     + "' AND item_hash = " + getItemHash(itemStack) + ";");
@@ -62,7 +62,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
                     + SerializeUtils.object2String(itemStack) + "', " + amount + ");");
     }
 
-    public void delete(MEStorageCellData data) {
+    public void delete(MEStorageCellStorageData data) {
         cancelWriteTask(data);
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + data.getUuid() + "';");
     }
@@ -71,21 +71,21 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + uuid + "';");
     }
 
-    public void delete(MEStorageCellData data, ItemStack itemStack) {
+    public void delete(MEStorageCellStorageData data, ItemStack itemStack) {
         executeSql("DELETE FROM " + getTableName() + " WHERE uuid = '" + data.getUuid() + "' AND item_hash = "
                 + getItemHash(itemStack) + ";");
     }
 
-    public void updateAsync(MEStorageCellData data) {
+    public void updateAsync(MEStorageCellStorageData data) {
         cancelWriteTask(data);
         submitWriteTask(data, () -> update(data));
     }
 
-    public void updateAsync(MEStorageCellData data, ItemStack itemStack, int amount, boolean insert) {
+    public void updateAsync(MEStorageCellStorageData data, ItemStack itemStack, int amount, boolean insert) {
         submitWriteTask(data, () -> update(data, itemStack, amount, insert));
     }
 
-    public void deleteAsync(MEStorageCellData data) {
+    public void deleteAsync(MEStorageCellStorageData data) {
         cancelWriteTask(data);
         submitWriteTask(data, () -> delete(data));
     }
@@ -94,7 +94,7 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
         submitWriteTask(null, () -> delete(uuid));
     }
 
-    public void deleteAsync(MEStorageCellData data, ItemStack itemStack) {
+    public void deleteAsync(MEStorageCellStorageData data, ItemStack itemStack) {
         submitWriteTask(data, () -> delete(data, itemStack));
     }
 
@@ -104,8 +104,8 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
         return SerializeUtils.getItemHash(itemStack);
     }
 
-    public MEStorageCellData loadData(ItemStack itemStack) {
-        MEStorageCellData storageCellData = new MEStorageCellData(itemStack);
+    public MEStorageCellStorageData loadData(ItemStack itemStack) {
+        MEStorageCellStorageData storageCellData = new MEStorageCellStorageData(itemStack);
         ItemHashMap<Long> storage = storageCellData.getStorage();
         long stored = 0;
         List<Map<String, String>> data = execQuery("SELECT * FROM " + getTableName() + " WHERE uuid = '"
@@ -126,15 +126,15 @@ public class StorageCellDataController extends DatabaseController<MEStorageCellD
         return storageCellData;
     }
 
-    public void markDirty(MEStorageCellData data) {
+    public void markDirty(MEStorageCellStorageData data) {
         needSave.add(data);
     }
 
     public void saveAllAsync() {
-        Set<MEStorageCellData> diff = new HashSet<>(needSave);
+        Set<MEStorageCellStorageData> diff = new HashSet<>(needSave);
         needSave.clear();
 
-        for (MEStorageCellData data : diff) {
+        for (MEStorageCellStorageData data : diff) {
             updateAsync(data);
         }
     }

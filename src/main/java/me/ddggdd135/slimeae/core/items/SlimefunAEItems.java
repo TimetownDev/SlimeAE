@@ -79,6 +79,10 @@ public class SlimefunAEItems {
                     "&fME驱动器",
                     "",
                     "{#3366ff>}用于放置ME存储元件{#33ccf3<}"));
+    public static final SlimefunItemStack ME_CELL_WORKBENCH = new SlimefunItemStack(
+            "ME_CELL_WORKBENCH",
+            new AdvancedCustomItemStack(
+                    Material.CRAFTING_TABLE, "&dME元件工作台", "", "{#3366ff>}用于修改存储元件的 黑/白 名单等{#33ccf3<}"));
     public static final SlimefunItemStack ME_IO_PORT = new SlimefunItemStack(
             "ME_IO_PORT",
             new AdvancedCustomItemStack(
@@ -645,6 +649,22 @@ public class SlimefunAEItems {
                     ENGINEERING_PROCESSOR,
                     new ItemStack(Material.IRON_INGOT)
                 })
+                .register(plugin);
+        new MECellWorkbench(
+                        SlimefunAEItemGroups.MACHINE,
+                        ME_CELL_WORKBENCH,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.IRON_INGOT),
+                            ENGINEERING_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
+                            ME_GLASS_CABLE,
+                            null,
+                            ME_GLASS_CABLE,
+                            new ItemStack(Material.IRON_INGOT),
+                            ENGINEERING_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT)
+                        })
                 .register(plugin);
         new MEIOPort(SlimefunAEItemGroups.MACHINE, ME_IO_PORT, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
                     new ItemStack(Material.GLASS),
