@@ -101,7 +101,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, false)
-                .pushItem(recipe.getInput());
+                .pushItem(ItemUtils.trimItems(recipe.getInput()));
         running.add(block);
         recipeMap.put(block, recipe);
     }
