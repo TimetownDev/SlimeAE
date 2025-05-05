@@ -57,7 +57,10 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
     }
 
     public int[] getSettingSlots() {
-        return new int[] {18, 19, 20, 21, 22, 23, 24, 27, 28, 29, 30, 31, 32, 33, 36, 37, 38, 39, 40, 41, 42};
+        return new int[] {
+            18, 19, 20, 21, 22, 23, 24, 27, 28, 29, 30, 31, 32, 33, 36, 37, 38, 39, 40, 41, 42, 45, 46, 47, 48, 49, 50,
+            51
+        };
     }
 
     @Override
@@ -191,6 +194,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return;
 
         MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
+        if (cache == null) return;
         MEStorageCellFilterData data = cache.getFilterData();
 
         List<ItemKey> itemKeys = new ArrayList<>(data.getFilters());
