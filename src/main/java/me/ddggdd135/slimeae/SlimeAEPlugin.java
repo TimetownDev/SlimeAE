@@ -123,6 +123,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (exoticGardenIntegration.isLoaded()) getLogger().info("异域花园已接入");
 
         storageCellStorageDataController.init();
+        storageCellFilterDataController.init();
 
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
