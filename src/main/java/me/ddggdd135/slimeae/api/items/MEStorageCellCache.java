@@ -63,9 +63,7 @@ public class MEStorageCellCache implements IStorage {
             if (getMEStorageCellCache(uuid) != null) return getMEStorageCellCache(uuid);
         }
 
-        return new MEStorageCellCache(
-                SlimeAEPlugin.getStorageCellStorageDataController().loadData(itemStack),
-                SlimeAEPlugin.getStorageCellFilterDataController().loadData(itemStack));
+        return new MEStorageCellCache(itemStack);
     }
 
     @Nullable public static MEStorageCellCache getMEStorageCellCache(@Nonnull UUID uuid) {

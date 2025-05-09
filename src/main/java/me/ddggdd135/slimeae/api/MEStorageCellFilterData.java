@@ -45,10 +45,12 @@ public class MEStorageCellFilterData {
         if (filters.isEmpty()) return true;
 
         if (!isFuzzy) {
-            return filters.contains(itemKey) && !isReversed;
+            if (!isReversed) return filters.contains(itemKey);
+            return !filters.contains(itemKey);
         }
 
-        return filterItemTypes.contains(itemKey.getType());
+        if (!isReversed) return filterItemTypes.contains(itemKey.getType());
+        return !filterItemTypes.contains(itemKey.getType());
     }
 
     @Nonnull

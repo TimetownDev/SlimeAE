@@ -130,15 +130,15 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
                     if (cursor != null
                             && !cursor.getType().isAir()
                             && SlimefunItem.getByItem(cursor) instanceof MEItemStorageCell) {
-                        ItemUtils.setSettingItem(inventory, i, cursor);
+                        inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
                     }
                 } else {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
-                        ItemUtils.setSettingItem(inventory, i, MenuItems.STORAGE_CELL);
+                        inventory.setItem(i, MenuItems.STORAGE_CELL);
                     } else if (SlimefunItem.getByItem(cursor) instanceof MEItemStorageCell) {
-                        ItemUtils.setSettingItem(inventory, i, cursor);
+                        inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
                 }
@@ -162,27 +162,8 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         if (menu == null) return;
 
         for (int slot : getSettingSlots()) {
-            menu.replaceExistingItem(slot, MenuItems.SETTING);
-            menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
-                if (cursor == null || cursor.getType().isAir()) return false;
-
-                ItemStack itemStack = ItemUtils.getSettingItem(menu.getInventory(), getStorageCellSlot());
-                if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return false;
-
-                MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
-                MEStorageCellFilterData data = cache.getFilterData();
-
-                if (data.getFilters().size() >= getSettingSlots().length
-                        || data.getFilters().contains(cursor)) return false;
-
-                data.getFilters().add(cursor);
-                data.updateItemTypes();
-
-                SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
-
-                updateGUI(block);
-                return false;
-            });
+            menu.replaceExistingItem(slot, MenuItems.CANNOT_NOW);
+            menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
 
         menu.replaceExistingItem(getReversedSlot(), MenuItems.CANNOT_NOW);
@@ -190,12 +171,50 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
         menu.replaceExistingItem(getFuzzySlot(), MenuItems.CANNOT_NOW);
         menu.addMenuClickHandler(getFuzzySlot(), ChestMenuUtils.getEmptyClickHandler());
 
-        ItemStack itemStack = ItemUtils.getSettingItem(menu.getInventory(), getStorageCellSlot());
+        ItemStack itemStack = menu.getItemInSlot(getStorageCellSlot());
         if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return;
 
         MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
         if (cache == null) return;
         MEStorageCellFilterData data = cache.getFilterData();
+
+        for (int slot : getSettingSlots()) {
+            menu.replaceExistingItem(slot, MenuItems.SETTING);
+            menu.addMenuClickHandler(slot, new ChestMenu.AdvancedMenuClickHandler() {
+
+                @Override
+                public boolean onClick(Player player, int i, ItemStack itemStack, ClickAction clickAction) {
+                    return false;
+                }
+
+                @Override
+                public boolean onClick(
+                        InventoryClickEvent inventoryClickEvent,
+                        Player player,
+                        int i,
+                        ItemStack cursor,
+                        ClickAction clickAction) {
+                    if (cursor == null || cursor.getType().isAir()) return false;
+
+                    ItemStack itemStack = menu.getItemInSlot(getStorageCellSlot());
+                    if (SlimefunUtils.isItemSimilar(itemStack, MenuItems.STORAGE_CELL, true, false)) return false;
+
+                    MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
+                    MEStorageCellFilterData data = cache.getFilterData();
+
+                    if (data.getFilters().size() >= getSettingSlots().length
+                            || data.getFilters().contains(cursor)) return false;
+
+                    data.getFilters().add(cursor);
+                    data.updateItemTypes();
+
+                    SlimeAEPlugin.getStorageCellFilterDataController().markDirty(data);
+
+                    updateGUI(block);
+                    return false;
+                }
+            });
+        }
 
         List<ItemKey> itemKeys = new ArrayList<>(data.getFilters());
 
