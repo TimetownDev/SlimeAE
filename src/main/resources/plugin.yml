@@ -14,11 +14,11 @@ softdepend:
   - Galactifun
   - ObsidianExpansion
   - ExoticGarden
-  - GuizhanLibPlugin
 depend:
   - Slimefun
   - CMILib
   - GuguSlimefunLib
+  - GuizhanLibPlugin
 
 commands:
   SlimeAE:
