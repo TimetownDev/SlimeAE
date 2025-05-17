@@ -54,6 +54,17 @@ public class MEStorageCellFilterData {
     }
 
     @Nonnull
+    public ItemKey[] matches(@Nonnull ItemKey[] itemKeys) {
+        List<ItemKey> result = new ArrayList<>(itemKeys.length);
+
+        for (ItemKey itemKey : itemKeys) {
+            if (matches(itemKey)) result.add(itemKey);
+        }
+
+        return result.toArray(ItemKey[]::new);
+    }
+
+    @Nonnull
     public UUID getUuid() {
         return uuid;
     }

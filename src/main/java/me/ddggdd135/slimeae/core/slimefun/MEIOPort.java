@@ -77,7 +77,8 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     if (storage.length == 0) return;
 
                     ItemHashMap<Long> tmp = meStorageCellCache
-                            .takeItem(new ItemRequest(storage[0], 81920))
+                            .takeItem(
+                                    new ItemRequest(storage[0], (long) (81920 + (meStorageCellCache.getSize() * 0.01))))
                             .getStorageUnsafe();
                     networkStorage.pushItem(tmp);
                     ItemUtils.trim(tmp);
@@ -105,15 +106,17 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
                 if (networkStorage.getStorageUnsafe().isEmpty()) return;
 
-                ItemKey[] storage = networkStorage.getStorageUnsafe().keyEntrySet().stream()
-                        .filter(x -> x.getValue() > 0)
-                        .map(Map.Entry::getKey)
-                        .toArray(ItemKey[]::new);
-                ItemStack[] tmp = networkStorage
-                        .takeItem(new ItemRequest(storage[0], 81920))
-                        .toItemStacks();
+                ItemKey[] storage = meStorageCellCache
+                        .getFilterData()
+                        .matches(networkStorage.getStorageUnsafe().keyEntrySet().stream()
+                                .filter(x -> x.getValue() > 0)
+                                .map(Map.Entry::getKey)
+                                .toArray(ItemKey[]::new));
+                ItemHashMap<Long> tmp = networkStorage
+                        .takeItem(new ItemRequest(storage[0], (long) (81920 + (meStorageCellCache.getSize() * 0.01))))
+                        .getStorageUnsafe();
                 meStorageCellCache.pushItem(tmp);
-                tmp = ItemUtils.trimItems(tmp);
+                ItemUtils.trim(tmp);
                 networkStorage.pushItem(tmp);
                 MEItemStorageCell.updateLore(itemStack);
             }
