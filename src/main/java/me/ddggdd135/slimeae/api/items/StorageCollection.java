@@ -104,6 +104,7 @@ public class StorageCollection implements IStorage {
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             storage.left().pushItem(itemStackCache);
+            pushCache.put(key.getType(), storage.left());
             if (itemStack.isEmpty()) return;
         }
     }
@@ -200,10 +201,16 @@ public class StorageCollection implements IStorage {
             ItemHashMap<Long> tmp = storage.getStorageUnsafe();
             if (tmp instanceof CreativeItemMap) return tmp;
             for (ItemKey itemKey : tmp.sourceKeySet()) {
-                if (result.containsKey(itemKey)) {
-                    result.putKey(itemKey, result.getKey(itemKey) + tmp.getKey(itemKey));
+                Long currentValue = tmp.getKey(itemKey);
+                if (currentValue == null) {
+                    continue;
+                }
+
+                Long existingValue = result.getKey(itemKey);
+                if (existingValue != null) {
+                    result.putKey(itemKey, existingValue + currentValue);
                 } else {
-                    result.putKey(itemKey, tmp.getKey(itemKey));
+                    result.putKey(itemKey, currentValue);
                 }
             }
         }
