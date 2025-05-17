@@ -139,7 +139,7 @@
         <dependency>
             <groupId>com.github.SlimefunGuguProject</groupId>
             <artifactId>Slimefun4</artifactId>
-            <version>dev-SNAPSHOT</version>
+            <version>2025.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
