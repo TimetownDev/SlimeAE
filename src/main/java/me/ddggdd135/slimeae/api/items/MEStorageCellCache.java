@@ -112,7 +112,7 @@ public class MEStorageCellCache implements IStorage {
         stored += toAdd;
         storageData.setStored(stored);
         storages.putKey(key, amount + toAdd);
-                    SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
+        SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
         itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
         trim(key);
     }
@@ -144,7 +144,7 @@ public class MEStorageCellCache implements IStorage {
         storageData.setStored(stored);
         storages.putKey(key, amount + toAdd);
         itemInfo.setAmount((int) (itemInfo.getAmount() - toAdd));
-                    SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
+        SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
         trim(key);
     }
 
