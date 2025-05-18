@@ -104,14 +104,14 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     return;
                 }
 
-                if (networkStorage.getStorageUnsafe().isEmpty()) return;
-
                 ItemKey[] storage = meStorageCellCache
                         .getFilterData()
                         .matches(networkStorage.getStorageUnsafe().keyEntrySet().stream()
                                 .filter(x -> x.getValue() > 0)
                                 .map(Map.Entry::getKey)
                                 .toArray(ItemKey[]::new));
+
+                if (storage.length == 0) return;
                 ItemHashMap<Long> tmp = networkStorage
                         .takeItem(new ItemRequest(storage[0], (long) (81920 + (meStorageCellCache.getSize() * 0.01))))
                         .getStorageUnsafe();
