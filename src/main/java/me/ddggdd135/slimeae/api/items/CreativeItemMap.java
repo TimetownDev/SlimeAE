@@ -3,19 +3,18 @@ package me.ddggdd135.slimeae.api.items;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class CreativeItemMap extends ItemHashMap<Long> {
-    public static final Set<ItemStack> allItemStacks;
-    public static final Set<Map.Entry<ItemStack, Long>> allAmount;
-    public static final long amount = 64 * 1024;
+    public static final ItemHashMap<Long> allItemStacks;
+    public static final long amount = Integer.MAX_VALUE;
 
     public CreativeItemMap(@Nonnull ItemHashMap<Long> items) {}
 
@@ -59,56 +58,38 @@ public class CreativeItemMap extends ItemHashMap<Long> {
 
     @Nonnull
     public Set<ItemStack> keySet() {
-        return allItemStacks;
+        return allItemStacks.keySet();
+    }
+
+    @Nonnull
+    public Set<ItemKey> sourceKeySet() {
+        return allItemStacks.sourceKeySet();
+    }
+
+    @Nonnull
+    public Set<Map.Entry<ItemKey, Long>> keyEntrySet() {
+        return allItemStacks.keyEntrySet();
     }
 
     @Nonnull
     public Collection<Long> values() {
-        return new HashSet<>();
+        return allItemStacks.values();
     }
 
     @Nonnull
     public Set<Map.Entry<ItemStack, Long>> entrySet() {
-        return allAmount;
-    }
-
-    public static final class Entry implements Map.Entry<ItemStack, Long> {
-        private final ItemStack key;
-
-        @Override
-        public ItemStack getKey() {
-            return key;
-        }
-
-        @Override
-        public Long getValue() {
-            return amount;
-        }
-
-        @Override
-        public Long setValue(Long value) {
-            return amount;
-        }
-
-        public Entry(ItemStack key) {
-            this.key = key;
-        }
+        return allItemStacks.entrySet();
     }
 
     static {
-        allItemStacks = new HashSet<>();
+        allItemStacks = new ItemHashMap<>();
         for (Material material : Material.values()) {
             if (!material.isItem() || material.isAir()) continue;
-            allItemStacks.add(new AdvancedCustomItemStack(material));
+            allItemStacks.put(new AdvancedCustomItemStack(material), amount);
         }
 
         for (SlimefunItem slimefunItem : Slimefun.getRegistry().getEnabledSlimefunItems()) {
-            allItemStacks.add(slimefunItem.getItem().clone());
-        }
-
-        allAmount = new HashSet<>();
-        for (ItemStack itemStack : allItemStacks) {
-            allAmount.add(new Entry(itemStack));
+            allItemStacks.put(slimefunItem.getItem().clone(), amount);
         }
     }
 }
