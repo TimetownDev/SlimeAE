@@ -92,6 +92,7 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
             String fieldData = itemData.get("data");
             if (fieldName.equals("filter")) {
                 ItemStack item = (ItemStack) SerializeUtils.string2Object(fieldData);
+                if (item == null) continue;
                 storageCellData.getFilters().add(item);
             }
 

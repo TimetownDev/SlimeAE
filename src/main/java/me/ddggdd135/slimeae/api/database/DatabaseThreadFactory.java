@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 public class DatabaseThreadFactory implements ThreadFactory {
     private final AtomicInteger threadCount = new AtomicInteger(0);
-    private String threadName = "SF-Database-Thread";
+    private String threadName = "AE-Database-Thread";
 
     public DatabaseThreadFactory() {}
 
