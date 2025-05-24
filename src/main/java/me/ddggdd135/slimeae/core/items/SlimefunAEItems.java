@@ -406,7 +406,7 @@ public class SlimefunAEItems {
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_4T = new SlimefunItemStack(
             "ME_ITEM_STORAGE_COMPONENT_4T", new AdvancedCustomItemStack(Material.BLAZE_POWDER, "{#3366ff}4t-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_16T = new SlimefunItemStack(
-            "ME_ITEM_STORAGE_COMPONENT_16T", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}16T-ME存储组件"));
+            "ME_ITEM_STORAGE_COMPONENT_16T", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}16t-ME存储组件"));
 
     // CELL
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_1K = new SlimefunItemStack(
