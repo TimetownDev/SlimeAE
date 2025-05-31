@@ -288,4 +288,9 @@ public class MECraftPlanningTerminal extends METerminal {
             return isPinned;
         }
     }
+
+    @Override
+    public boolean fastInsert() {
+        return super.fastInsert();
+    }
 }

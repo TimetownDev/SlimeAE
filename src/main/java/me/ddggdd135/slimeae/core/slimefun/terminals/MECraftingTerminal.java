@@ -244,4 +244,9 @@ public class MECraftingTerminal extends METerminal {
             }
         };
     }
+
+    @Override
+    public boolean fastInsert() {
+        return super.fastInsert();
+    }
 }
