@@ -398,6 +398,26 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 }
             });
         }
+
+        if (fastInsert()) {
+            menu.addPlayerInventoryClickHandler((p, s, itemStack, a) -> {
+                if (!a.isShiftClicked() || a.isRightClicked()) {
+                    return true;
+                }
+
+                // Shift+Left-click
+                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+                if (info == null) {
+                    return false;
+                }
+
+                if (itemStack != null && !itemStack.getType().isAir()) {
+                    info.getStorage().pushItem(itemStack);
+                }
+
+                return false;
+            });
+        }
     }
 
     @Override
@@ -436,5 +456,9 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         }
         Optional<SlimefunItem> sfItem = SlimefunItem.getOptionalByItem(item);
         return sfItem.map(s -> !slimefunItems.contains(s)).orElse(true);
+    }
+
+    public boolean fastInsert() {
+        return true;
     }
 }

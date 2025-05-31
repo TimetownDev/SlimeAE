@@ -210,4 +210,9 @@ public class MEPatternTerminal extends METerminal {
             }
         };
     }
+
+    @Override
+    public boolean fastInsert() {
+        return super.fastInsert();
+    }
 }
