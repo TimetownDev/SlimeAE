@@ -3,12 +3,13 @@ package me.ddggdd135.slimeae.integrations.networksexpansion;
 import com.balugaq.netex.api.data.ItemContainer;
 import com.balugaq.netex.api.data.StorageUnitData;
 import com.ytdd9527.networksexpansion.implementation.machines.unit.NetworksDrawer;
+import com.ytdd9527.networksexpansion.utils.databases.DataStorage;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.*;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.InitializeSafeProvider;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
@@ -22,6 +23,15 @@ import org.bukkit.inventory.ItemStack;
 
 public class DrawerStorage implements IStorage {
     private StorageUnitData data;
+    private VarHandle ID_HANDLE = (new InitializeSafeProvider<>(() -> {
+                try {
+                    return MethodHandles.privateLookupIn(StorageUnitData.class, MethodHandles.lookup())
+                            .findVarHandle(StorageUnitData.class, "id", int.class);
+                } catch (NoSuchFieldException | IllegalAccessException var1) {
+                    return null;
+                }
+            }))
+            .v();
     private Block block;
     private boolean isReadOnly;
 
@@ -76,12 +86,25 @@ public class DrawerStorage implements IStorage {
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         if (data == null) return new ItemStorage();
-        io.github.sefiraat.networks.network.stackcaches.ItemRequest[] networksRequests =
-                SlimeAEPlugin.getNetworksIntegration().asNetworkRequests(requests);
+
         ItemStorage storage = new ItemStorage();
-        for (io.github.sefiraat.networks.network.stackcaches.ItemRequest request : networksRequests) {
-            ItemStack itemStack = data.requestItem(request);
-            if (itemStack != null && !itemStack.getType().isAir()) storage.addItem(itemStack);
+        for (ItemRequest request : requests) {
+            int amount = (int) request.getAmount();
+
+            for (ItemContainer itemContainer : data.getStoredItemsDirectly()) {
+                int containerAmount = itemContainer.getAmount();
+                if (itemContainer.getSample().isSimilar(request.getKey().getItemStack())) {
+                    int take = Math.min(amount, containerAmount);
+                    if (take > 0) {
+                        itemContainer.removeAmount(take);
+                        DataStorage.setStoredAmount(
+                                (Integer) ID_HANDLE.get(data), itemContainer.getId(), itemContainer.getAmount());
+
+                        storage.addItem(request.getKey(), take);
+                    }
+                    break;
+                }
+            }
         }
         return storage;
     }
@@ -91,7 +114,7 @@ public class DrawerStorage implements IStorage {
     public ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
         if (data == null) return storage;
-        for (ItemContainer itemContainer : data.getStoredItems()) {
+        for (ItemContainer itemContainer : data.getStoredItemsDirectly()) {
             storage.put(itemContainer.getSample(), (long) itemContainer.getAmount());
         }
 
@@ -102,8 +125,8 @@ public class DrawerStorage implements IStorage {
     public int getTier(@Nonnull ItemKey itemStack) {
         if (data == null) return -1;
 
-        for (ItemContainer itemContainer : data.getStoredItems()) {
-            if (itemStack.getItemStack().getType() == itemContainer.getWrapper().getType()) {
+        for (ItemContainer itemContainer : data.getStoredItemsDirectly()) {
+            if (itemStack.getItemStack().getType() == itemContainer.getSample().getType()) {
                 return 3000;
             }
         }
