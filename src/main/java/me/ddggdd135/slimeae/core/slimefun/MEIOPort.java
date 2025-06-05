@@ -2,6 +2,8 @@ package me.ddggdd135.slimeae.core.slimefun;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.sefiraat.networks.network.stackcaches.QuantumCache;
+import io.github.sefiraat.networks.slimefun.network.NetworkQuantumStorage;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -27,6 +29,7 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.QuantumUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
@@ -85,6 +88,36 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     meStorageCellCache.pushItem(tmp);
                     MEItemStorageCell.updateLore(itemStack);
                 }
+
+                if (itemStack != null
+                        && !itemStack.getType().isAir()
+                        && SlimefunItem.getByItem(itemStack) instanceof NetworkQuantumStorage) {
+                    QuantumCache quantumCache = QuantumUtils.getQuantumCache(itemStack);
+
+                    if (quantumCache == null) return;
+                    if (quantumCache.getItemStack() == null) return;
+
+                    if (quantumCache.getItemStack() == null || quantumCache.getAmount() <= 0) {
+                        blockMenu.replaceExistingItem(slot, null);
+                        blockMenu.pushItem(itemStack, getMeStorageCellOutputSlots());
+                        return;
+                    }
+
+                    ItemHashMap<Long> tmp = new ItemHashMap<>();
+                    long amount = (long) (quantumCache.getLimit() * 0.01);
+                    long current = quantumCache.getAmount();
+
+                    long toTake = Math.min(amount, current);
+
+                    ItemKey itemKey = new ItemKey(quantumCache.getItemStack());
+                    tmp.putKey(itemKey, toTake);
+                    networkStorage.pushItem(tmp);
+                    ItemUtils.trim(tmp);
+
+                    current += tmp.getOrDefault(itemKey, 0L);
+                    quantumCache.setAmount((int) (current - toTake));
+                    QuantumUtils.setQuantumCache(itemStack, quantumCache);
+                }
             }
 
             return;
@@ -119,6 +152,35 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 ItemUtils.trim(tmp);
                 networkStorage.pushItem(tmp);
                 MEItemStorageCell.updateLore(itemStack);
+            }
+
+            if (itemStack != null
+                    && !itemStack.getType().isAir()
+                    && SlimefunItem.getByItem(itemStack) instanceof NetworkQuantumStorage) {
+                QuantumCache quantumCache = QuantumUtils.getQuantumCache(itemStack);
+
+                if (quantumCache == null) return;
+                if (quantumCache.getItemStack() == null) return;
+
+                if (quantumCache.getItemStack() == null || quantumCache.getAmount() >= quantumCache.getLimit()) {
+                    blockMenu.replaceExistingItem(slot, null);
+                    blockMenu.pushItem(itemStack, getMeStorageCellOutputSlots());
+                    return;
+                }
+
+                ItemKey itemKey = new ItemKey(quantumCache.getItemStack());
+
+                long amount = (long) (quantumCache.getLimit() * 0.01);
+                long current = quantumCache.getAmount();
+
+                long toTake = Math.min(quantumCache.getLimit() - current, amount);
+                ItemHashMap<Long> tmp = networkStorage
+                        .takeItem(new ItemRequest(itemKey, toTake))
+                        .getStorageUnsafe();
+
+                current += tmp.getOrDefault(itemKey, 0L);
+                quantumCache.setAmount((int) (current - toTake));
+                QuantumUtils.setQuantumCache(itemStack, quantumCache);
             }
         }
     }
