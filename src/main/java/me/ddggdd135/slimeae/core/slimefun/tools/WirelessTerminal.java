@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
-import me.ddggdd135.slimeae.core.slimefun.terminals.MESecurityTerminal;
+import me.ddggdd135.slimeae.core.slimefun.terminals.METerminal;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -35,7 +35,7 @@ public class WirelessTerminal extends SlimefunItem {
             SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(location);
             if (slimefunBlockData == null) return;
             SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
-            if (!(slimefunItem instanceof MESecurityTerminal)) return;
+            if (!(slimefunItem instanceof METerminal)) return;
             BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
             if (blockMenu == null) return;
             blockMenu.open(e.getPlayer());
@@ -46,7 +46,7 @@ public class WirelessTerminal extends SlimefunItem {
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (slimefunBlockData == null) return;
         SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
-        if (!(slimefunItem instanceof MESecurityTerminal)) return;
+        if (!(slimefunItem instanceof METerminal)) return;
         String location = LocationUtils.getLocKey(block.getLocation());
         NBT.modify(itemStack, x -> {
             x.setString(LOCATION_KEY, location);

@@ -11,10 +11,13 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.slimefun.tools.WirelessTerminal;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -93,6 +96,21 @@ public class MESecurityTerminal extends METerminal {
         ItemStack in = blockMenu.getItemInSlot(getTerminalInputSlot());
         SlimefunItem slimefunItem = SlimefunItem.getByItem(in);
         if (!(slimefunItem instanceof WirelessTerminal)) return;
+        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+
+        if (networkInfo == null) return;
+        for (Location location : networkInfo.getChildren()) {
+            SlimefunItem sfItem = (SlimefunItem)
+                    SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(location);
+
+            if (sfItem.getClass() != METerminal.class) continue;
+            WirelessTerminal.bindTo(location.getBlock(), in);
+            blockMenu.replaceExistingItem(getTerminalOutputSlot(), in);
+            blockMenu.replaceExistingItem(getTerminalInputSlot(), null);
+
+            return;
+        }
+
         WirelessTerminal.bindTo(block, in);
         blockMenu.replaceExistingItem(getTerminalOutputSlot(), in);
         blockMenu.replaceExistingItem(getTerminalInputSlot(), null);
