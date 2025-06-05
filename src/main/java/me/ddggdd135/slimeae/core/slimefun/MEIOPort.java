@@ -108,6 +108,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     long current = quantumCache.getAmount();
 
                     long toTake = Math.min(amount, current);
+                    current -= toTake;
 
                     ItemKey itemKey = new ItemKey(quantumCache.getItemStack());
                     tmp.putKey(itemKey, toTake);
@@ -115,7 +116,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                     ItemUtils.trim(tmp);
 
                     current += tmp.getOrDefault(itemKey, 0L);
-                    quantumCache.setAmount((int) (current - toTake));
+                    quantumCache.setAmount((int) (current));
                     QuantumUtils.setQuantumCache(itemStack, quantumCache);
                 }
             }
@@ -179,7 +180,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                         .getStorageUnsafe();
 
                 current += tmp.getOrDefault(itemKey, 0L);
-                quantumCache.setAmount((int) (current - toTake));
+                quantumCache.setAmount((int) (current));
                 QuantumUtils.setQuantumCache(itemStack, quantumCache);
             }
         }
