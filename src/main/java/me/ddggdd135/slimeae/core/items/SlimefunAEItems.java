@@ -289,7 +289,8 @@ public class SlimefunAEItems {
                     Material.GLASS,
                     "&eME交换监控器",
                     "",
-                    "{#3366ff>}可以直接存取其显示的物品{#33ccf3<}" + "{#3366ff>}锁定设定后 左键取出物品 右键放回物品{#33ccf3<}"));
+                    "{#3366ff>}可以直接存取其显示的物品{#33ccf3<}",
+                    "{#3366ff>}锁定设定后 左键取出物品 右键放回物品{#33ccf3<}"));
     public static final SlimefunItemStack ME_CLEANER = new SlimefunItemStack(
             "ME_CLEANER",
             new AdvancedCustomItemStack(Material.OBSERVER, "&fME清除器", "", "{#3366ff>}用于清除ME存储元件中多余的物品{#33ccf3<}"));
