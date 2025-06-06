@@ -45,7 +45,8 @@ public class MenuItems {
             "_AE_MN_CHANGE_SORT_STACK_", new AdvancedCustomItemStack(Material.BLUE_STAINED_GLASS_PANE, "&e更改排序方式"));
 
     public static final SlimefunItemStack FILTER_STACK = new SlimefunItemStack(
-            "_AE_MN_FILTER_STACK_", new AdvancedCustomItemStack(Material.NAME_TAG, "&e设置过滤器 (右键点击以清除)"));
+            "_AE_MN_FILTER_STACK_",
+            new AdvancedCustomItemStack(Material.NAME_TAG, "&e设置过滤器", "", "&e右键清除过滤器", "&aShift点击将在粘液书中搜索当前物品"));
     public static final SlimefunItemStack PUSH_BACK = new SlimefunItemStack(
             "_AE_MN_PUSH_BACK_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l点击将物品返回ME网络"));
     public static final ItemStack CRAFT_ITEM =

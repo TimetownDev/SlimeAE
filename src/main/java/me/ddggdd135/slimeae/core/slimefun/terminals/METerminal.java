@@ -318,20 +318,34 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         menu.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
         menu.addMenuClickHandler(getFilter(), (player, i, cursor, clickAction) -> {
+            if (clickAction.isShiftClicked()) {
+                String filter = getFilter(block);
+                if (filter.isEmpty()) {
+                    player.sendMessage(CMIChatColor.translate("&c&l你还没有设置过滤器"));
+                    player.closeInventory();
+                    return false;
+                }
+
+                player.chat("/sf search " + filter);
+                return false;
+            }
+
             if (clickAction.isRightClicked()) {
                 setFilter(block, "");
-            } else {
-                player.closeInventory();
-                player.sendMessage(ChatColor.YELLOW + "请输入你想要过滤的物品名称(显示名)或类型");
-                ChatUtils.awaitInput(player, filter -> {
-                    if (filter.isBlank()) {
-                        return;
-                    }
-                    setFilter(block, filter.toLowerCase(Locale.ROOT));
-                    player.sendMessage(ChatColor.GREEN + "已启用过滤器");
-                    menu.open(player);
-                });
+                return false;
             }
+
+            player.closeInventory();
+            player.sendMessage(ChatColor.YELLOW + "请输入你想要过滤的物品名称(显示名)或类型");
+            ChatUtils.awaitInput(player, filter -> {
+                if (filter.isBlank()) {
+                    return;
+                }
+                setFilter(block, filter.toLowerCase(Locale.ROOT));
+                player.sendMessage(ChatColor.GREEN + "已启用过滤器");
+                menu.open(player);
+            });
+
             return false;
         });
 
