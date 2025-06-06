@@ -12,7 +12,7 @@
     <name>SlimeAEPlugin</name>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>23</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -25,8 +25,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
                 <configuration>
-                    <source>16</source>
-                    <target>16</target>
+                    <source>23</source>
+                    <target>23</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -176,7 +176,7 @@
         <dependency>
             <groupId>com.ytdd9527</groupId>
             <artifactId>NetworksExpansion</artifactId>
-            <version>c2ffa043f4dd3e42fe7c8a49f7e2f1023f739378</version>
+            <version>a9fb40dfede66b33fc66dc416433c5522d227349</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/NetworksExpansion.jar</systemPath>
         </dependency>
