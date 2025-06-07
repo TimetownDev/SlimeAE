@@ -151,8 +151,8 @@ public class RecipeUtils {
         if (minecraftRecipe instanceof ShapelessRecipe shapelessRecipe) {
             return new CraftingRecipe(
                     CraftType.CRAFTING_TABLE,
-                    shapelessRecipe.getIngredientList().stream()
-                            .map(x -> new ItemStack(x.getType()))
+                    Arrays.stream(ItemUtils.trimItems(input))
+                            .map(ItemStack::asOne)
                             .toArray(ItemStack[]::new),
                     new ItemStack(
                             shapelessRecipe.getResult().getType(),
@@ -217,6 +217,11 @@ public class RecipeUtils {
             }
         }
 
+        // 校验输入中是否包含粘液物品，粘液物品不应该用原版配方合成
+        boolean inputHasSimi =
+                Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
+        if (inputHasSimi) return null;
+
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
@@ -235,8 +240,8 @@ public class RecipeUtils {
             if (output.length == 1 && SlimefunUtils.isItemSimilar(output[0], out, true, false))
                 return new CraftingRecipe(
                         CraftType.CRAFTING_TABLE,
-                        shapelessRecipe.getIngredientList().stream()
-                                .map(x -> new ItemStack(x.getType()))
+                        Arrays.stream(ItemUtils.trimItems(input))
+                                .map(ItemStack::asOne)
                                 .toArray(ItemStack[]::new),
                         new ItemStack(
                                 shapelessRecipe.getResult().getType(),
