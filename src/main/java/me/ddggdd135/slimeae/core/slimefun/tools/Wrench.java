@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.utils.BlockUtils;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +34,7 @@ public class Wrench extends SlimefunItem {
     }
 
     static {
-        for (Field field : SlimefunAEItems.class.getFields()) {
+        for (Field field : SlimeAEItems.class.getFields()) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
             try {
                 Object object = field.get(null);

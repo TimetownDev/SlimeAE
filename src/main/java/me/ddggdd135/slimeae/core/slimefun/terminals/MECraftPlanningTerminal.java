@@ -20,7 +20,7 @@ import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -123,7 +123,7 @@ public class MECraftPlanningTerminal extends METerminal {
     }
 
     private void handleItemClick(Player player, RecipeEntry recipeEntry, NetworkInfo info, Block block) {
-        if (SlimefunUtils.isItemSimilar(player.getItemOnCursor(), SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
+        if (SlimefunUtils.isItemSimilar(player.getItemOnCursor(), SlimeAEItems.AE_TERMINAL_TOPPER, true, false)) {
             ItemStack template = recipeEntry.getItemStack().getKey().asOne();
             PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
             List<ItemStack> pinned = pinnedManager.getPinnedItems(player);

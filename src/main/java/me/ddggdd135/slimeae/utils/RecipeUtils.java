@@ -29,7 +29,7 @@ import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.wrappers.CraftCraftingBlock;
 import me.ddggdd135.slimeae.api.wrappers.CraftCraftingBlockRecipe;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.recipes.SlimefunAERecipeTypes;
 import me.lucasgithuber.obsidianexpansion.Items;
 import me.lucasgithuber.obsidianexpansion.machines.ObsidianForge;
@@ -547,8 +547,8 @@ public class RecipeUtils {
     static {
         SUPPORTED_RECIPE_TYPES.put(
                 RecipeType.ENHANCED_CRAFTING_TABLE, SlimefunItem.getByItem(SlimefunItems.ENHANCED_CRAFTING_TABLE));
-        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.CHARGER, SlimefunItem.getByItem(SlimefunAEItems.CHARGER));
-        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.INSCRIBER, SlimefunItem.getByItem(SlimefunAEItems.INSCRIBER));
+        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.CHARGER, SlimefunItem.getByItem(SlimeAEItems.CHARGER));
+        SUPPORTED_RECIPE_TYPES.put(SlimefunAERecipeTypes.INSCRIBER, SlimefunItem.getByItem(SlimeAEItems.INSCRIBER));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.MAGIC_WORKBENCH, SlimefunItem.getByItem(SlimefunItems.MAGIC_WORKBENCH));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.ARMOR_FORGE, SlimefunItem.getByItem(SlimefunItems.ARMOR_FORGE));
         SUPPORTED_RECIPE_TYPES.put(RecipeType.SMELTERY, SlimefunItem.getByItem(SlimefunItems.SMELTERY));

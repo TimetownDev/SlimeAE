@@ -6,7 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.abstracts.AEMachineBlock;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -45,50 +45,48 @@ public class Inscriber extends AEMachineBlock {
     @Override
     protected void registerDefaultRecipes() {
         registerRecipe(5, new ItemStack[] {SlimefunItems.SILICON, new ItemStack(Material.IRON_INGOT)}, new ItemStack[] {
-            SlimefunAEItems.PRINTED_SILICON
+            SlimeAEItems.PRINTED_SILICON
         });
 
         registerRecipe(
                 10,
-                new ItemStack[] {SlimefunAEItems.PRINTED_SILICON, new ItemStack(Material.GOLD_INGOT)},
-                new ItemStack[] {SlimefunAEItems.PRINTED_LOGIC_CIRCUIT});
+                new ItemStack[] {SlimeAEItems.PRINTED_SILICON, new ItemStack(Material.GOLD_INGOT)},
+                new ItemStack[] {SlimeAEItems.PRINTED_LOGIC_CIRCUIT});
 
         registerRecipe(
                 10,
-                new ItemStack[] {SlimefunAEItems.PRINTED_SILICON, SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ},
-                new ItemStack[] {SlimefunAEItems.PRINTED_CALCULATION_CIRCUIT});
+                new ItemStack[] {SlimeAEItems.PRINTED_SILICON, SlimeAEItems.CRYSTAL_CERTUS_QUARTZ},
+                new ItemStack[] {SlimeAEItems.PRINTED_CALCULATION_CIRCUIT});
 
         registerRecipe(
                 10,
-                new ItemStack[] {SlimefunAEItems.PRINTED_SILICON, new ItemStack(Material.DIAMOND)},
-                new ItemStack[] {SlimefunAEItems.PRINTED_ENGINEERING_CIRCUIT});
+                new ItemStack[] {SlimeAEItems.PRINTED_SILICON, new ItemStack(Material.DIAMOND)},
+                new ItemStack[] {SlimeAEItems.PRINTED_ENGINEERING_CIRCUIT});
 
         registerRecipe(
                 20,
                 new ItemStack[] {
-                    SlimefunAEItems.PRINTED_LOGIC_CIRCUIT,
-                    new ItemStack(Material.REDSTONE),
-                    SlimefunAEItems.PRINTED_SILICON
+                    SlimeAEItems.PRINTED_LOGIC_CIRCUIT, new ItemStack(Material.REDSTONE), SlimeAEItems.PRINTED_SILICON
                 },
-                new ItemStack[] {SlimefunAEItems.LOGIC_PROCESSOR});
+                new ItemStack[] {SlimeAEItems.LOGIC_PROCESSOR});
 
         registerRecipe(
                 20,
                 new ItemStack[] {
-                    SlimefunAEItems.PRINTED_CALCULATION_CIRCUIT,
+                    SlimeAEItems.PRINTED_CALCULATION_CIRCUIT,
                     new ItemStack(Material.REDSTONE),
-                    SlimefunAEItems.PRINTED_SILICON
+                    SlimeAEItems.PRINTED_SILICON
                 },
-                new ItemStack[] {SlimefunAEItems.CALCULATION_PROCESSOR});
+                new ItemStack[] {SlimeAEItems.CALCULATION_PROCESSOR});
 
         registerRecipe(
                 20,
                 new ItemStack[] {
-                    SlimefunAEItems.PRINTED_ENGINEERING_CIRCUIT,
+                    SlimeAEItems.PRINTED_ENGINEERING_CIRCUIT,
                     new ItemStack(Material.REDSTONE),
-                    SlimefunAEItems.PRINTED_SILICON
+                    SlimeAEItems.PRINTED_SILICON
                 },
-                new ItemStack[] {SlimefunAEItems.ENGINEERING_PROCESSOR});
+                new ItemStack[] {SlimeAEItems.ENGINEERING_PROCESSOR});
     }
 
     @Override

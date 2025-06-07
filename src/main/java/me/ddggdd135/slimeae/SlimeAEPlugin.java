@@ -13,8 +13,8 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.SlimeAECommand;
 import me.ddggdd135.slimeae.core.commands.subcommands.*;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItemGroups;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItemGroups;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.listeners.BlockListener;
 import me.ddggdd135.slimeae.core.listeners.CardListener;
 import me.ddggdd135.slimeae.core.listeners.NetworkListener;
@@ -103,8 +103,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         reloadConfig0();
 
         // Plugin startup logic
-        SlimefunAEItemGroups.onSetup(this);
-        SlimefunAEItems.onSetup(this);
+        SlimeAEItemGroups.onSetup(this);
+        SlimeAEItems.onSetup(this);
 
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
         Bukkit.getPluginManager().registerEvents(new CardListener(), this);

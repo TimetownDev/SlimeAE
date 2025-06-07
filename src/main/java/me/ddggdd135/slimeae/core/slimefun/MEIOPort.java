@@ -27,7 +27,7 @@ import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.QuantumUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -56,7 +56,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
         ItemStack setting = blockMenu.getItemInSlot(getSettingSlot());
         if (setting == null || setting.getType().isAir()) return;
         if (!InvUtils.fits(
-                blockMenu.getInventory(), SlimefunAEItems.ME_ITEM_STORAGE_COMPONENT_1K, getMeStorageCellOutputSlots()))
+                blockMenu.getInventory(), SlimeAEItems.ME_ITEM_STORAGE_COMPONENT_1K, getMeStorageCellOutputSlots()))
             return;
         if (SlimefunUtils.isItemSimilar(setting, MenuItems.INPUT_MODE, true, false)) {
             for (int slot : getMeStorageCellInputSlots()) {

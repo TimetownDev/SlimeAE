@@ -33,7 +33,7 @@ import me.ddggdd135.slimeae.api.items.CreativeItemMap;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -370,7 +370,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                         ItemStack template = ItemUtils.getDisplayItem(itemStack);
                         template.setAmount(template.getMaxStackSize());
 
-                        if (SlimefunUtils.isItemSimilar(cursor, SlimefunAEItems.AE_TERMINAL_TOPPER, true, false)) {
+                        if (SlimefunUtils.isItemSimilar(cursor, SlimeAEItems.AE_TERMINAL_TOPPER, true, false)) {
                             PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
                             List<ItemStack> pinned = pinnedManager.getPinnedItems(player);
                             if (pinned == null) pinned = new ArrayList<>();

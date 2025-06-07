@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -107,7 +107,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
         if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
-        ItemStack toOut = SlimefunAEItems.ENCODED_PATTERN.clone();
+        ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
 
         List<ItemStack> inputList = new ArrayList<>();
         for (int slot : getCraftSlots()) {

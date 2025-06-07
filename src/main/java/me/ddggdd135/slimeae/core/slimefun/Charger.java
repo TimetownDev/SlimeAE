@@ -5,7 +5,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.abstracts.AEMachineBlock;
-import me.ddggdd135.slimeae.core.items.SlimefunAEItems;
+import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,13 +43,13 @@ public class Charger extends AEMachineBlock {
 
     @Override
     protected void registerDefaultRecipes() {
-        registerRecipe(2, new ItemStack(Material.QUARTZ), SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ);
-        registerRecipe(2, SlimefunAEItems.CRYSTAL_CERTUS_QUARTZ, SlimefunAEItems.CHARGED_CRYSTAL_CERTUS_QUARTZ);
+        registerRecipe(2, new ItemStack(Material.QUARTZ), SlimeAEItems.CRYSTAL_CERTUS_QUARTZ);
+        registerRecipe(2, SlimeAEItems.CRYSTAL_CERTUS_QUARTZ, SlimeAEItems.CHARGED_CRYSTAL_CERTUS_QUARTZ);
 
-        registerRecipe(1, SlimefunAEItems.QUARTZ_DUST, SlimefunAEItems.CERTUS_QUARTZ_DUST);
-        registerRecipe(1, SlimefunAEItems.CERTUS_QUARTZ_DUST, SlimefunAEItems.FLUIX_DUST);
-        registerRecipe(1, SlimefunAEItems.FLUIX_DUST, SlimefunAEItems.SKY_STONE_DUST);
+        registerRecipe(1, SlimeAEItems.QUARTZ_DUST, SlimeAEItems.CERTUS_QUARTZ_DUST);
+        registerRecipe(1, SlimeAEItems.CERTUS_QUARTZ_DUST, SlimeAEItems.FLUIX_DUST);
+        registerRecipe(1, SlimeAEItems.FLUIX_DUST, SlimeAEItems.SKY_STONE_DUST);
 
-        registerRecipe(3, SlimefunAEItems.CHARGED_CRYSTAL_CERTUS_QUARTZ, SlimefunAEItems.CRYSTAL_FLUIX);
+        registerRecipe(3, SlimeAEItems.CHARGED_CRYSTAL_CERTUS_QUARTZ, SlimeAEItems.CRYSTAL_FLUIX);
     }
 }

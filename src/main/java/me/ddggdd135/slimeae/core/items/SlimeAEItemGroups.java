@@ -10,7 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
-public class SlimefunAEItemGroups {
+public class SlimeAEItemGroups {
     public static final ItemStack MAIN_ITEM_GROUP_ICON =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}应用能源2");
     public static final ItemStack INFO_ICON = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息");
