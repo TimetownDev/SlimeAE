@@ -11,36 +11,36 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
 public class SlimefunAEItemGroups {
-    public static final ItemStack MAIN_ITEM_GROUP_CURSOR =
+    public static final ItemStack MAIN_ITEM_GROUP_ICON =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}应用能源2");
-    public static final ItemStack INFO_CURSOR = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息");
-    public static final ItemStack CABLE_CURSOR =
+    public static final ItemStack INFO_ICON = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息");
+    public static final ItemStack CABLE_ICON =
             new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}线缆");
-    public static final ItemStack MACHINE_CURSOR =
+    public static final ItemStack MACHINE_ICON =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器");
-    public static final ItemStack ADVANCED_MACHINE_CURSOR =
+    public static final ItemStack ADVANCED_MACHINE_ICON =
             new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#FFD700}高级机器").doGlow();
-    public static final ItemStack MATERIAL_CURSOR = new AdvancedCustomItemStack(
+    public static final ItemStack MATERIAL_ICON = new AdvancedCustomItemStack(
             Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ,
             "{#Fuchsia_Pink}材料");
-    public static final ItemStack CELL_CURSOR = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件");
-    public static final ItemStack TOOL_CURSOR = new AdvancedCustomItemStack(Material.BLAZE_ROD, "&e工具");
+    public static final ItemStack CELL_ICON = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件");
+    public static final ItemStack TOOL_ICON = new AdvancedCustomItemStack(Material.BLAZE_ROD, "&e工具");
     public static final MainItemGroup MAIN_ITEM_GROUP =
-            new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_CURSOR);
+            new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_ICON);
     public static final DummyItemGroup INFO =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "info"), INFO_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "info"), INFO_ICON);
     public static final DummyItemGroup CABLE =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "cable"), CABLE_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "cable"), CABLE_ICON);
     public static final DummyItemGroup MACHINE =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), MACHINE_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), MACHINE_ICON);
     public static final DummyItemGroup ADVANCED_MACHINE =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), ADVANCED_MACHINE_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "machine"), ADVANCED_MACHINE_ICON);
     public static final DummyItemGroup MATERIAL =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), MATERIAL_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), MATERIAL_ICON);
     public static final DummyItemGroup CELL =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), CELL_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "material"), CELL_ICON);
     public static final DummyItemGroup TOOL =
-            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "tool"), TOOL_CURSOR);
+            new DummyItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "tool"), TOOL_ICON);
 
     public static void onSetup(SlimeAEPlugin plugin) {
         MAIN_ITEM_GROUP.setTier(0);
