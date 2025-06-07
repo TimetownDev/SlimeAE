@@ -1,6 +1,7 @@
 package me.ddggdd135.slimeae.api.items;
 
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
@@ -74,6 +75,9 @@ public class BlockMenuStorage implements IStorage {
 
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
-        return ItemUtils.getAmounts(blockMenu.getContents());
+        int[] slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(ItemTransportFlow.WITHDRAW);
+
+        return ItemUtils.getAmounts(
+                Arrays.stream(slots).mapToObj(blockMenu::getItemInSlot).toArray(ItemStack[]::new));
     }
 }

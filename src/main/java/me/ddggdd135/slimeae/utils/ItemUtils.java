@@ -160,9 +160,9 @@ public class ItemUtils {
      */
     public static boolean contains(@Nonnull ItemHashMap<Long> storage, @Nonnull ItemRequest[] requests) {
         for (ItemRequest request : requests) {
-            if (!storage.containsKey(request.getKey()) || storage.getKey(request.getKey()) < request.getAmount())
-                return false;
+            if (storage.getOrDefault(request.getKey(), 0L) < request.getAmount()) return false;
         }
+
         return true;
     }
 

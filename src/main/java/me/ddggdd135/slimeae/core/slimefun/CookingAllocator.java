@@ -10,10 +10,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
@@ -101,7 +98,9 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         ItemUtils.getStorage(block.getRelative(getDirection(blockMenu)), false, false)
-                .pushItem(ItemUtils.trimItems(recipe.getInput()));
+                .pushItem(Arrays.stream(ItemUtils.trimItems(recipe.getInput()))
+                        .map(x -> x.clone())
+                        .toArray(ItemStack[]::new));
         running.add(block);
         recipeMap.put(block, recipe);
     }
@@ -116,8 +115,9 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
 
         CraftingRecipe recipe = recipeMap.get(block);
         block = block.getRelative(getDirection(blockMenu));
-        IStorage storage = ItemUtils.getStorage(block, false, false, true);
+        IStorage storage = ItemUtils.getStorage(block, false, false);
         if (storage == null) return false;
+
         return storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
     }
 
