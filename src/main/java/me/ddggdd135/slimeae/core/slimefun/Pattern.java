@@ -15,6 +15,7 @@ import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBT;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.RecipeUtils;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -45,6 +46,9 @@ public class Pattern extends SlimefunItem {
                         compound.getItemStackArray(INPUT_KEY),
                         compound.getItemStackArray(OUTPUT_KEY));
             });
+
+            CraftingRecipe newRecipe = RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
+            if (newRecipe == null || !(newRecipe.equals(craftingRecipe))) craftingRecipe = null;
 
             cache.put(uuid, craftingRecipe);
         }
