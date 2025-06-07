@@ -112,9 +112,9 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
                 + storageCellData.getUuid().toString() + "';");
         for (Map<String, String> itemData : data) {
             ItemStack item = (ItemStack) SerializeUtils.string2Object(itemData.get("item_base64"));
-            if (item == null) continue;
+            if (item == null || item.getType().isAir()) continue;
             long amount = Long.parseLong(itemData.get("amount"));
-            if (storage.containsKey(itemStack)) {
+            if (storage.containsKey(item)) {
                 amount += storage.get(item);
             }
 
