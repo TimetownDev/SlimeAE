@@ -138,6 +138,12 @@ public class RecipeUtils {
                 Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
         if (inputHasSimi) return null;
 
+        ItemStack[] oldInput = input;
+        input = new ItemStack[9];
+        for (int i = 0; i < 9; i++) {
+            if (oldInput.length <= i) break;
+            input[i] = oldInput[i];
+        }
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
@@ -222,6 +228,12 @@ public class RecipeUtils {
                 Arrays.stream(input).filter(Objects::nonNull).anyMatch(item -> SlimefunItem.getByItem(item) != null);
         if (inputHasSimi) return null;
 
+        ItemStack[] oldInput = input;
+        input = new ItemStack[9];
+        for (int i = 0; i < 9; i++) {
+            if (oldInput.length <= i) break;
+            input[i] = oldInput[i];
+        }
         Recipe minecraftRecipe =
                 Bukkit.getCraftingRecipe(input, Bukkit.getWorlds().get(0));
         if (minecraftRecipe instanceof ShapedRecipe shapedRecipe) {
