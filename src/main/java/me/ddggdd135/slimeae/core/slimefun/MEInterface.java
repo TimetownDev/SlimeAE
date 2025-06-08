@@ -78,6 +78,7 @@ public class MEInterface extends TickingBlock
 
             if (!SlimefunUtils.isItemSimilar(settingItemStack, itemStack, true, false)) {
                 if (itemStack != null && !itemStack.getType().isAir()) networkStorage.pushItem(itemStack);
+                continue;
             }
 
             int amount = 0;
