@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.autocraft;
 import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import me.ddggdd135.slimeae.utils.CraftItemStackUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftingRecipe {
@@ -12,8 +13,8 @@ public class CraftingRecipe {
 
     public CraftingRecipe(@Nonnull CraftType craftType, @Nonnull ItemStack[] input, @Nonnull ItemStack[] output) {
         this.craftType = craftType;
-        this.input = input;
-        this.output = output;
+        this.input = CraftItemStackUtils.asCraftCopy(input);
+        this.output = CraftItemStackUtils.asCraftCopy(output);
     }
 
     public CraftingRecipe(@Nonnull CraftType craftType, @Nonnull ItemStack[] input, @Nonnull ItemStack output) {

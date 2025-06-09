@@ -164,7 +164,7 @@
         <dependency>
             <groupId>com.github.TimetownDev</groupId>
             <artifactId>GuguSlimefunLib</artifactId>
-            <version>8ffcaefb9a</version>
+            <version>afeac968aa</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
