@@ -176,7 +176,7 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
 
                 if (!(e.getPlayer().hasPermission("slimefun.inventory.bypass")
                         || Slimefun.getProtectionManager()
-                        .hasPermission(e.getPlayer(), block.getLocation(), Interaction.INTERACT_BLOCK))) {
+                                .hasPermission(e.getPlayer(), block.getLocation(), Interaction.INTERACT_BLOCK))) {
                     Slimefun.getLocalization().sendMessage(e.getPlayer(), "inventory.no-access", true);
                     return;
                 }
