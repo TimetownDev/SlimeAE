@@ -19,6 +19,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
+import me.ddggdd135.slimeae.api.interfaces.IRecipeCompletableWithGuide;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -35,7 +36,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class MECraftingTerminal extends METerminal {
+public class MECraftingTerminal extends METerminal implements IRecipeCompletableWithGuide {
     public MECraftingTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
@@ -160,6 +161,8 @@ public class MECraftingTerminal extends METerminal {
             }
             return false;
         });
+
+        addJEGRecipeButton(blockMenu, getJEGRecipeButtonSlot());
     }
 
     @Override
@@ -248,5 +251,19 @@ public class MECraftingTerminal extends METerminal {
     @Override
     public boolean fastInsert() {
         return super.fastInsert();
+    }
+
+    @Override
+    public int[] getIngredientSlots() {
+        return getCraftSlots();
+    }
+
+    public int getJEGRecipeButtonSlot() {
+        return 53;
+    }
+
+    @Override
+    public int getJEGFindingButtonSlot() {
+        return 49;
     }
 }

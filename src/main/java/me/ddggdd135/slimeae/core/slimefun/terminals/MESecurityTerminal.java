@@ -136,4 +136,9 @@ public class MESecurityTerminal extends METerminal {
     public boolean fastInsert() {
         return super.fastInsert();
     }
+
+    @Override
+    public int getJEGFindingButtonSlot() {
+        return 49;
+    }
 }

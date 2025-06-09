@@ -190,7 +190,7 @@
         <dependency>
             <groupId>com.github.balugaq</groupId>
             <artifactId>JustEnoughGuide</artifactId>
-            <version>44fecd8d71</version>
+            <version>3840a709aa</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
