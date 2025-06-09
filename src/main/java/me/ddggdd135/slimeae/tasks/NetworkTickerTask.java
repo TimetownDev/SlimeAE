@@ -10,6 +10,9 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.enums.AETaskType;
+import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
+import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
 import me.ddggdd135.slimeae.api.interfaces.IMEController;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -50,6 +53,10 @@ public class NetworkTickerTask implements Runnable {
         try {
             // Run our ticker code
             if (!halted) {
+                AEPreTaskEvent preTaskEventEvent = new AEPreTaskEvent(AETaskType.NETWORK_TICKER);
+                Bukkit.getPluginManager().callEvent(preTaskEventEvent);
+                if (preTaskEventEvent.isCancelled()) return;
+
                 tick++;
 
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
@@ -92,6 +99,9 @@ public class NetworkTickerTask implements Runnable {
                     }
                     info.updateAutoCraftingMenu();
                 }
+
+                AEPostTaskEvent postTaskEvent = new AEPostTaskEvent(AETaskType.NETWORK_TICKER);
+                Bukkit.getPluginManager().callEvent(postTaskEvent);
             }
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()

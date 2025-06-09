@@ -6,6 +6,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.enums.AETaskType;
+import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
+import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import org.bukkit.Bukkit;
@@ -41,6 +44,10 @@ public class NetworkTimeConsumingTask implements Runnable {
         try {
             // Run our ticker code
             if (!halted) {
+                AEPreTaskEvent preTaskEventEvent = new AEPreTaskEvent(AETaskType.NETWORK_TIME_CONSUMING);
+                Bukkit.getPluginManager().callEvent(preTaskEventEvent);
+                if (preTaskEventEvent.isCancelled()) return;
+
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
 
                 for (NetworkInfo networkInfo : allNetworkData) {
@@ -51,6 +58,9 @@ public class NetworkTimeConsumingTask implements Runnable {
                         slimefunItem.onNetworkTimeConsumingTick(x.getBlock(), networkInfo);
                     });
                 }
+
+                AEPostTaskEvent postTaskEvent = new AEPostTaskEvent(AETaskType.NETWORK_TIME_CONSUMING);
+                Bukkit.getPluginManager().callEvent(postTaskEvent);
             }
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()

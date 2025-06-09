@@ -3,6 +3,10 @@ package me.ddggdd135.slimeae.tasks;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.enums.AETaskType;
+import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
+import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitScheduler;
 
 public class DataSavingTask implements Runnable {
@@ -39,10 +43,18 @@ public class DataSavingTask implements Runnable {
             }
 
             if (!halted) {
+                AEPreTaskEvent preTaskEventEvent = new AEPreTaskEvent(AETaskType.DATA_SAVING);
+                Bukkit.getPluginManager().callEvent(preTaskEventEvent);
+                if (preTaskEventEvent.isCancelled()) return;
+
                 SlimeAEPlugin.getStorageCellStorageDataController().saveAllAsync();
                 SlimeAEPlugin.getStorageCellFilterDataController().saveAllAsync();
                 SlimeAEPlugin.getInstance().getLogger().info("开始保存ME存储元件数据");
+
+                AEPostTaskEvent postTaskEvent = new AEPostTaskEvent(AETaskType.DATA_SAVING);
+                Bukkit.getPluginManager().callEvent(postTaskEvent);
             }
+
         } catch (Exception | LinkageError x) {
             SlimeAEPlugin.getInstance()
                     .getLogger()
