@@ -21,7 +21,7 @@ public class NetworkTimeConsumingTask implements Runnable {
 
     public void start(@Nonnull SlimeAEPlugin plugin) {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
-        run();
+        Bukkit.getScheduler().runTaskLaterAsynchronously(SlimeAEPlugin.getInstance(), this, 10);
     }
 
     @Override

@@ -41,10 +41,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import net.guizhanss.minecraft.guizhanlib.gugu.minecraft.helpers.inventory.ItemStackHelper;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Container;
-import org.bukkit.block.Furnace;
+import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.FurnaceInventory;
@@ -499,14 +496,13 @@ public class ItemUtils {
     @Nonnull
     private static ItemStack[] getVanillaItemStacks(Block block) {
         Container container = (Container) PaperLib.getBlockState(block, false).getState();
-        ItemStack[] items = new ItemStack[0];
+        ItemStack[] items = container.getInventory().getContents();
+
         if (container instanceof Furnace furnace) {
             FurnaceInventory furnaceInventory = furnace.getInventory();
             items = new ItemStack[] {furnaceInventory.getResult()};
-        } else if (container instanceof Chest chest) {
-            Inventory inventory = chest.getBlockInventory();
-            items = inventory.getContents();
         }
+
         return items;
     }
 
@@ -742,7 +738,9 @@ public class ItemUtils {
         return item;
     }
 
-    public static String getItemName(ItemStack itemStack) {
+    public static String getItemName(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return "";
+
         String displayName = itemStack.getItemMeta().getDisplayName();
         if (!displayName.isEmpty()) return displayName;
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);

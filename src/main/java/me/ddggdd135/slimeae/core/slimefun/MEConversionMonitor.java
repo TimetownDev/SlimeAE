@@ -13,6 +13,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.stream.IntStream;
 import javax.annotation.Nonnull;
@@ -104,11 +105,18 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
     private BlockUseHandler onRightClick() {
         return e -> {
             e.cancel();
+            Block block = e.getClickedBlock().get();
+
+            if (!(e.getPlayer().hasPermission("slimefun.inventory.bypass")
+                    || Slimefun.getProtectionManager()
+                            .hasPermission(e.getPlayer(), block.getLocation(), Interaction.INTERACT_BLOCK))) {
+                Slimefun.getLocalization().sendMessage(e.getPlayer(), "inventory.no-access", true);
+                return;
+            }
 
             ItemStack hand = e.getItem();
             ItemStack item = getItem(e.getClickedBlock().get());
             Inventory playerInventory = e.getPlayer().getInventory();
-            Block block = e.getClickedBlock().get();
 
             NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
             if (networkInfo == null) {
@@ -164,6 +172,15 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
         return new BlockLeftClickedHandler() {
             @Override
             public void onLeftClick(PlayerInteractEvent e) {
+                Block block = e.getClickedBlock();
+
+                if (!(e.getPlayer().hasPermission("slimefun.inventory.bypass")
+                        || Slimefun.getProtectionManager()
+                        .hasPermission(e.getPlayer(), block.getLocation(), Interaction.INTERACT_BLOCK))) {
+                    Slimefun.getLocalization().sendMessage(e.getPlayer(), "inventory.no-access", true);
+                    return;
+                }
+
                 ItemStack hand = e.getItem();
                 ItemStack item = getItem(e.getClickedBlock());
                 Inventory playerInventory = e.getPlayer().getInventory();

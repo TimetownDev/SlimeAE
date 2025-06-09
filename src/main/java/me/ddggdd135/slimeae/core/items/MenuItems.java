@@ -69,6 +69,11 @@ public class MenuItems {
             "_AE_MN_FUZZY_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&e模糊模式", "", "&e点击切换"));
     public static final SlimefunItemStack CANNOT_NOW =
             new SlimefunItemStack("_AE_MN_CANNOT_NOW_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l现在不行"));
+    public static final SlimefunItemStack JEG_RECIPE_BUTTON = new SlimefunItemStack(
+            "_AE_JEG_RECIPE_BUTTON_", new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "&6配方补全", "&7点击打开配方补全界面"));
+    public static final SlimefunItemStack JEG_FINDING_BUTTON = new SlimefunItemStack(
+            "_AE_JEG_FINDING_BUTTON_",
+            new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "&6高级物品查找", "&7点击打开高级物品查找界面"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 
     static {

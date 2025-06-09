@@ -27,6 +27,7 @@ import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.interfaces.IItemFilterFindableWithGuide;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.CreativeItemMap;
@@ -48,7 +49,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class METerminal extends TickingBlock implements IMEObject, InventoryBlock {
+public class METerminal extends TickingBlock implements IMEObject, InventoryBlock, IItemFilterFindableWithGuide {
     public static final Comparator<Map.Entry<ItemStack, Long>> ALPHABETICAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
             Collator.getInstance(Locale.CHINA)::compare);
@@ -432,6 +433,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 return false;
             });
         }
+
+        addJEGFindingButton(menu, getJEGFindingButtonSlot());
     }
 
     @Override
@@ -474,5 +477,9 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     public boolean fastInsert() {
         return true;
+    }
+
+    public int getJEGFindingButtonSlot() {
+        return 17;
     }
 }

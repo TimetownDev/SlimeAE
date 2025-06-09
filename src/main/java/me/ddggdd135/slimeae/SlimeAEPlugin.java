@@ -15,10 +15,7 @@ import me.ddggdd135.slimeae.core.commands.subcommands.*;
 import me.ddggdd135.slimeae.core.generations.SlimefunBlockPopulator;
 import me.ddggdd135.slimeae.core.items.SlimeAEItemGroups;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
-import me.ddggdd135.slimeae.core.listeners.BlockListener;
-import me.ddggdd135.slimeae.core.listeners.CardListener;
-import me.ddggdd135.slimeae.core.listeners.NetworkListener;
-import me.ddggdd135.slimeae.core.listeners.NetworksIntegrationListener;
+import me.ddggdd135.slimeae.core.listeners.*;
 import me.ddggdd135.slimeae.core.managers.PinnedManager;
 import me.ddggdd135.slimeae.core.slimefun.MECleaner;
 import me.ddggdd135.slimeae.core.slimefun.MECraftingTrigger;
@@ -111,6 +108,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         Bukkit.getPluginManager().registerEvents(new NetworkListener(), this);
         if (networksExpansionIntegration.isLoaded())
             Bukkit.getPluginManager().registerEvents(new NetworksIntegrationListener(), this);
+        if (justEnoughGuideIntegration.isLoaded())
+            Bukkit.getPluginManager().registerEvents(new JEGCompatibleListener(), this);
 
         if (infinityIntegration.isLoaded()) getLogger().info("无尽贪婪已接入");
         if (fluffyMachinesIntegration.isLoaded()) getLogger().info("蓬松科技已接入");
