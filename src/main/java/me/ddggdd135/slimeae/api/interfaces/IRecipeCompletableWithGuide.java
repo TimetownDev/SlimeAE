@@ -1,7 +1,7 @@
 package me.ddggdd135.slimeae.api.interfaces;
 
 import com.balugaq.jeg.api.objects.events.GuideEvents;
-import com.balugaq.netex.utils.GuideUtil;
+import com.balugaq.jeg.utils.GuideUtil;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
