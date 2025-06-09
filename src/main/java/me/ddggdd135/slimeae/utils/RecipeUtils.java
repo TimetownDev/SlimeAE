@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
+import me.ddggdd135.guguslimefunlib.libraries.matlib.nmsMirror.impl.CraftBukkit;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -38,6 +39,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecip
 import me.sfiguz7.transcendence.lists.TEItems;
 import me.sfiguz7.transcendence.lists.TERecipeType;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.inventory.*;
 
 public class RecipeUtils {
@@ -116,13 +118,15 @@ public class RecipeUtils {
             in:
             for (ItemStack[] input1 : getInputs(entry.getKey())) {
                 for (int i = 0; i < Math.max(input.length, input1.length); i++) {
-                    ItemStack x = null;
-                    ItemStack y = null;
+                    ItemStack x = new ItemStack(Material.AIR);
+                    ItemStack y = new ItemStack(Material.AIR);
                     if (input.length > i) {
                         x = input[i];
+                        if (x == null) x = new ItemStack(Material.AIR);
                     }
                     if (input1.length > i) {
                         y = input1[i];
+                        if (y == null) y = new ItemStack(Material.AIR);
                     }
                     if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
                         continue in;
@@ -190,13 +194,15 @@ public class RecipeUtils {
             in:
             for (ItemStack[] input1 : getInputs(entry.getKey())) {
                 for (int i = 0; i < Math.max(input.length, input1.length); i++) {
-                    ItemStack x = null;
-                    ItemStack y = null;
+                    ItemStack x = new ItemStack(Material.AIR);
+                    ItemStack y = new ItemStack(Material.AIR);
                     if (input.length > i) {
                         x = input[i];
+                        if (x == null) x=new ItemStack(Material.AIR);
                     }
                     if (input1.length > i) {
                         y = input1[i];
+                        if (y == null) y = new ItemStack(Material.AIR);
                     }
                     if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
                         continue in;
