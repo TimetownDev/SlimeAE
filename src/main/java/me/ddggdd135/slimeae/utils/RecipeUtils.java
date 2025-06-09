@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.abstracts.AbstractMachineBlock;
-import me.ddggdd135.guguslimefunlib.libraries.matlib.nmsMirror.impl.CraftBukkit;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -198,7 +197,7 @@ public class RecipeUtils {
                     ItemStack y = new ItemStack(Material.AIR);
                     if (input.length > i) {
                         x = input[i];
-                        if (x == null) x=new ItemStack(Material.AIR);
+                        if (x == null) x = new ItemStack(Material.AIR);
                     }
                     if (input1.length > i) {
                         y = input1[i];
