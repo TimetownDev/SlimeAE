@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.utils.CraftItemStackUtils;
+import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftingRecipe {
@@ -41,7 +42,9 @@ public class CraftingRecipe {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CraftingRecipe that = (CraftingRecipe) o;
-        return craftType == that.craftType && Arrays.equals(input, that.input) && Arrays.equals(output, that.output);
+        return craftType == that.craftType
+                && ItemUtils.matchesAll(input, that.input, true)
+                && ItemUtils.matchesAll(output, that.output, true);
     }
 
     @Override

@@ -796,4 +796,28 @@ public class ItemUtils {
 
         return result;
     }
+
+    public static boolean matchesAll(@Nonnull ItemStack[] left, @Nonnull ItemStack[] right, boolean checkAmount) {
+        for (int i = 0; i < Math.max(left.length, right.length); i++) {
+            ItemStack x = new ItemStack(Material.AIR);
+            ItemStack y = new ItemStack(Material.AIR);
+            if (left.length > i) {
+                x = left[i];
+                if (x == null) x = new ItemStack(Material.AIR);
+            }
+            if (right.length > i) {
+                y = right[i];
+                if (y == null) y = new ItemStack(Material.AIR);
+            }
+
+            if (x.getType().isAir()) x.setAmount(0);
+            if (y.getType().isAir()) y.setAmount(0);
+
+            if (!SlimefunUtils.isItemSimilar(x, y, true, checkAmount)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
