@@ -47,8 +47,10 @@ public class Pattern extends SlimefunItem {
                         compound.getItemStackArray(OUTPUT_KEY));
             });
 
-            CraftingRecipe newRecipe = RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
-            if (newRecipe == null || !(newRecipe.equals(craftingRecipe))) craftingRecipe = null;
+            if (craftingRecipe.getCraftType() == CraftType.CRAFTING_TABLE) {
+                CraftingRecipe newRecipe = RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
+                if (newRecipe == null || !(newRecipe.equals(craftingRecipe))) craftingRecipe = null;
+            }
 
             cache.put(uuid, craftingRecipe);
         }
