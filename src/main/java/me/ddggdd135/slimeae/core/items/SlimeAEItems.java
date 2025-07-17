@@ -415,6 +415,16 @@ public class SlimeAEItems {
             "ME_ITEM_STORAGE_COMPONENT_4T", new AdvancedCustomItemStack(Material.BLAZE_POWDER, "{#3366ff}4t-ME存储组件"));
     public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_16T = new SlimefunItemStack(
             "ME_ITEM_STORAGE_COMPONENT_16T", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}16t-ME存储组件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_64T = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_64T", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}64t-ME存储组件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_256T = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_256T",
+            new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}256t-ME存储组件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_1P = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_1P", new AdvancedCustomItemStack(Material.NETHER_STAR, "{#33aaf7}1p-ME存储组件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_COMPONENT_INFINITY = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_COMPONENT_INFINITY",
+            new AdvancedCustomItemStack(Material.NETHERITE_BLOCK, "&c无&6尽&eME&a存&9储&c组&6件"));
 
     // CELL
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_1K = new SlimefunItemStack(
@@ -459,6 +469,17 @@ public class SlimeAEItems {
     public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_16T = new SlimefunItemStack(
             "ME_ITEM_STORAGE_CELL_16T",
             new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#33aaf7}16t-ME存储元件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_64T = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_64T",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#33aaf7}64t-ME存储元件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_256T = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_256T",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#33aaf7}256t-ME存储元件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_1P = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_1P", new AdvancedCustomItemStack(Material.MUSIC_DISC_PIGSTEP, "{#33aaf7}1p-ME存储元件"));
+    public static final SlimefunItemStack ME_ITEM_STORAGE_CELL_INFINITY = new SlimefunItemStack(
+            "ME_ITEM_STORAGE_CELL_INFINITY",
+            new AdvancedCustomItemStack(Material.MUSIC_DISC_5, "&c无&6尽&eME&a存&9储&c元&6件"));
     public static final SlimefunItemStack ME_CREATIVE_ITEM_STORAGE_CELL = new SlimefunItemStack(
             "ME_CREATIVE_ITEM_STORAGE_CELL",
             new AdvancedCustomItemStack(
@@ -1457,6 +1478,70 @@ public class SlimeAEItems {
                 .register(plugin);
         new SlimefunItem(
                         SlimeAEItemGroups.MATERIAL,
+                        ME_ITEM_STORAGE_COMPONENT_64T,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.REDSTONE),
+                            CALCULATION_PROCESSOR,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_16T,
+                            new ItemStack(Material.GLASS),
+                            ME_ITEM_STORAGE_COMPONENT_16T,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_16T,
+                            new ItemStack(Material.REDSTONE)
+                        })
+                .register(plugin);
+        new SlimefunItem(
+                        SlimeAEItemGroups.MATERIAL,
+                        ME_ITEM_STORAGE_COMPONENT_256T,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.REDSTONE),
+                            CALCULATION_PROCESSOR,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_64T,
+                            new ItemStack(Material.GLASS),
+                            ME_ITEM_STORAGE_COMPONENT_64T,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_64T,
+                            new ItemStack(Material.REDSTONE)
+                        })
+                .register(plugin);
+        new SlimefunItem(
+                        SlimeAEItemGroups.MATERIAL,
+                        ME_ITEM_STORAGE_COMPONENT_1P,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.REDSTONE),
+                            CALCULATION_PROCESSOR,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_256T,
+                            new ItemStack(Material.GLASS),
+                            ME_ITEM_STORAGE_COMPONENT_256T,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_256T,
+                            new ItemStack(Material.REDSTONE)
+                        })
+                .register(plugin);
+        new NotPlaceableItem(
+                        SlimeAEItemGroups.MATERIAL,
+                        ME_ITEM_STORAGE_COMPONENT_INFINITY,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_1P,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_1P,
+                            new ItemStack(Material.GLASS),
+                            ME_ITEM_STORAGE_COMPONENT_1P,
+                            new ItemStack(Material.REDSTONE),
+                            ME_ITEM_STORAGE_COMPONENT_1P,
+                            new ItemStack(Material.REDSTONE)
+                        })
+                .register(plugin);
+        new SlimefunItem(
+                        SlimeAEItemGroups.MATERIAL,
                         FORMATION_CORE,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {CRYSTAL_CERTUS_QUARTZ, FLUIX_DUST, LOGIC_PROCESSOR})
@@ -1679,6 +1764,34 @@ public class SlimeAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_16T},
                         16L * 1024L * 1024L * 1024L * 1024L)
+                .register(plugin);
+        new MEItemStorageCell(
+                        SlimeAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_64T,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_64T},
+                        64L * 1024L * 1024L * 1024L * 1024L)
+                .register(plugin);
+        new MEItemStorageCell(
+                        SlimeAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_256T,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_256T},
+                        256L * 1024L * 1024L * 1024L * 1024L)
+                .register(plugin);
+        new MEItemStorageCell(
+                        SlimeAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_1P,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_1P},
+                        1024L * 1024L * 1024L * 1024L * 1024L)
+                .register(plugin);
+        new MEItemStorageCell(
+                        SlimeAEItemGroups.CELL,
+                        ME_ITEM_STORAGE_CELL_INFINITY,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_INFINITY},
+                        Long.MAX_VALUE)
                 .register(plugin);
         new MECreativeItemStorageCell(
                         SlimeAEItemGroups.CELL, ME_CREATIVE_ITEM_STORAGE_CELL, RecipeType.NULL, new ItemStack[0])
