@@ -1,9 +1,11 @@
 package me.ddggdd135.slimeae.tasks;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -20,9 +22,12 @@ import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.integrations.networks.QuantumStorage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 public class NetworkTickerTask implements Runnable {
+    public Object2IntOpenHashMap<Location> errorTimes = new Object2IntOpenHashMap<>();
     private int tickRate;
+    private int errorResetTime = 2000;
     private boolean halted = false;
 
     private volatile boolean paused = false;
@@ -58,6 +63,7 @@ public class NetworkTickerTask implements Runnable {
                 if (preTaskEventEvent.isCancelled()) return;
 
                 tick++;
+                if (tick % errorResetTime == 0) errorTimes.clear();
 
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
                 for (NetworkInfo info : allNetworkData) {
@@ -84,10 +90,28 @@ public class NetworkTickerTask implements Runnable {
 
                     NetworkInfo finalInfo = info;
                     new HashSet<>(info.getChildren()).forEach(x -> {
+                        int times = errorTimes.getOrDefault(x, 0);
+                        if (times >= 4) {
+                            return;
+                        }
+
                         IMEObject imeObject =
                                 SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);
                         if (imeObject == null) return;
-                        imeObject.onNetworkTick(x.getBlock(), finalInfo);
+                        try {
+                            imeObject.onNetworkTick(x.getBlock(), finalInfo);
+                        } catch (Exception | LinkageError e) {
+                            SlimeAEPlugin.getInstance()
+                                    .getLogger()
+                                    .log(
+                                            Level.SEVERE,
+                                            e,
+                                            () ->
+                                                    "An Exception was caught while ticking the Network Tickers Task for SlimeAE, Block Location: "
+                                                            + LocationUtils.locationToString(x));
+                            times++;
+                            errorTimes.put(x, times);
+                        }
                     });
 
                     // tick autoCrafting
