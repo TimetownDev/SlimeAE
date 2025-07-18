@@ -119,7 +119,7 @@ public class ItemStorage implements IStorage {
             if (amount >= request.getAmount()) {
                 itemStacks.addItem(request.getKey(), request.getAmount());
                 storage.putKey(request.getKey(), amount - request.getAmount());
-            } else {
+            } else if (amount > 0) {
                 itemStacks.addItem(request.getKey(), amount);
                 storage.putKey(request.getKey(), 0L);
             }
