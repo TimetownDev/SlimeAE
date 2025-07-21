@@ -219,8 +219,8 @@ public class AutoCraftingTask implements IDisposable {
                 if (running < maxDevices
                         && doCraft
                         && device.canStartCrafting(deviceBlock, nextRecipe)
-                        && storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())))) {
-                    storage.takeItem(ItemUtils.createRequests(ItemUtils.getAmounts(nextRecipe.getInput())));
+                        && storage.contains(ItemUtils.createRequests(nextRecipe.getInputAmounts()))) {
+                    storage.takeItem(ItemUtils.createRequests(nextRecipe.getInputAmounts()));
                     device.startCrafting(deviceBlock, nextRecipe);
                     running++;
                     next.decreaseAmount(1);
@@ -240,7 +240,7 @@ public class AutoCraftingTask implements IDisposable {
         if (isCancelling) {
             ItemHashMap<Long> resultItems = new ItemHashMap<>();
             for (Map.Entry<ItemKey, Long> entry :
-                    ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+                    next.getRecipe().getInputAmounts().keyEntrySet()) {
                 resultItems.putKey(entry.getKey(), entry.getValue() * virtualRunning);
             }
             storage.addItem(resultItems);
@@ -278,15 +278,14 @@ public class AutoCraftingTask implements IDisposable {
         virtualRunning -= result;
         ItemHashMap<Long> resultItems = new ItemHashMap<>();
         for (Map.Entry<ItemKey, Long> entry :
-                ItemUtils.getAmounts(next.getRecipe().getOutput()).keyEntrySet()) {
+                next.getRecipe().getOutputAmounts().keyEntrySet()) {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
         storage.addItem(resultItems);
 
         long actualAmount = Math.min(maxDevices - virtualRunning, next.getAmount());
         ItemHashMap<Long> neededItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry :
-                ItemUtils.getAmounts(next.getRecipe().getInput()).keyEntrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : next.getRecipe().getInputAmounts().keyEntrySet()) {
             neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
         }
 

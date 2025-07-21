@@ -34,7 +34,7 @@ public class NetworkTickerTask implements Runnable {
     private volatile long tick = 0;
 
     public void start(@Nonnull SlimeAEPlugin plugin) {
-        this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay") / 2;
+        this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
         Bukkit.getScheduler().runTaskLaterAsynchronously(SlimeAEPlugin.getInstance(), this, 10);
     }
 
@@ -119,7 +119,7 @@ public class NetworkTickerTask implements Runnable {
                     for (AutoCraftingTask task : tasks) {
                         if (!task.hasNext()) {
                             task.dispose();
-                        } else task.moveNext(1024);
+                        } else task.moveNext(2048);
                     }
                     info.updateAutoCraftingMenu();
                 }

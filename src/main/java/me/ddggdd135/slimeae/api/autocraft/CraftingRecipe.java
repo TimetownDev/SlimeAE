@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.autocraft;
 import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.utils.CraftItemStackUtils;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import org.bukkit.inventory.ItemStack;
@@ -11,6 +12,8 @@ public class CraftingRecipe {
     private final CraftType craftType;
     private final ItemStack[] input;
     private final ItemStack[] output;
+    private ItemHashMap<Long> inputAmounts;
+    private ItemHashMap<Long> outputAmounts;
 
     public CraftingRecipe(@Nonnull CraftType craftType, @Nonnull ItemStack[] input, @Nonnull ItemStack[] output) {
         this.craftType = craftType;
@@ -35,6 +38,20 @@ public class CraftingRecipe {
     @Nonnull
     public ItemStack[] getOutput() {
         return output.clone();
+    }
+
+    @Nonnull
+    public ItemHashMap<Long> getInputAmounts() {
+        if (inputAmounts == null) inputAmounts = ItemUtils.getAmounts(input);
+
+        return inputAmounts;
+    }
+
+    @Nonnull
+    public ItemHashMap<Long> getOutputAmounts() {
+        if (outputAmounts == null) outputAmounts = ItemUtils.getAmounts(output);
+
+        return outputAmounts;
     }
 
     @Override
