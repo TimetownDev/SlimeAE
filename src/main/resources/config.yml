@@ -3,6 +3,9 @@ auto-update: true
 #自动保存间隔(s)
 auto-save-period: 300
 
+#接入蓬松科技
+support-fluffy-machines: true
+
 # 自动合成相关设置
 auto-crafting:
   # 每个网络最大同时进行的自动合成任务数
