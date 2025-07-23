@@ -59,12 +59,13 @@ public class AutoCraftingTask implements IDisposable {
         this.count = count;
         menu.setSize(54);
         menu.addMenuCloseHandler(player -> dispose());
+        info.getStorage().setLock(true);
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         this.storage = new ItemStorage();
 
         for (CraftStep step : craftingSteps) {
             for (Map.Entry<ItemKey, Long> entry :
-                    ItemUtils.getAmounts(step.getRecipe().getInput()).keyEntrySet()) {
+                    step.getRecipe().getInputAmounts().keyEntrySet()) {
                 storage.addItem(entry.getKey(), entry.getValue() * step.getAmount());
             }
         }
@@ -75,12 +76,13 @@ public class AutoCraftingTask implements IDisposable {
             if (i == craftingSteps.size() - 1) continue;
 
             for (Map.Entry<ItemKey, Long> entry :
-                    ItemUtils.getAmounts(step.getRecipe().getOutput()).keyEntrySet()) {
+                    step.getRecipe().getOutputAmounts().keyEntrySet()) {
                 storage.takeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
             }
         }
 
-        info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
+        info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()), true);
+        info.getStorage().setLock(false);
     }
 
     @Nonnull
@@ -111,7 +113,7 @@ public class AutoCraftingTask implements IDisposable {
             if (!info.getRecipes().contains(recipe)) {
                 // 记录直接缺少的材料
                 ItemStorage missing = new ItemStorage();
-                ItemHashMap<Long> in = ItemUtils.getAmounts(recipe.getInput());
+                ItemHashMap<Long> in = recipe.getInputAmounts();
                 for (ItemStack template : in.keySet()) {
                     long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
                     long need = in.get(template) * count;
@@ -124,7 +126,7 @@ public class AutoCraftingTask implements IDisposable {
 
             List<CraftStep> result = new ArrayList<>();
             ItemStorage missing = new ItemStorage();
-            ItemHashMap<Long> in = ItemUtils.getAmounts(recipe.getInput());
+            ItemHashMap<Long> in = recipe.getInputAmounts();
 
             // 遍历所需材料
             for (ItemKey key : in.sourceKeySet()) {
@@ -146,8 +148,8 @@ public class AutoCraftingTask implements IDisposable {
                         continue;
                     }
 
-                    ItemHashMap<Long> output = ItemUtils.getAmounts(craftingRecipe.getOutput());
-                    ItemHashMap<Long> input = ItemUtils.getAmounts(craftingRecipe.getInput());
+                    ItemHashMap<Long> output = craftingRecipe.getOutputAmounts();
+                    ItemHashMap<Long> input = craftingRecipe.getInputAmounts();
 
                     // 计算需要合成多少次
                     long out = output.getKey(key) - input.getOrDefault(key, 0L);
@@ -155,6 +157,9 @@ public class AutoCraftingTask implements IDisposable {
 
                     try {
                         result.addAll(match(craftingRecipe, countToCraft, storage));
+                        for (Map.Entry<ItemKey, Long> o : output.keyEntrySet()) {
+                            storage.addItem(o.getKey(), o.getValue() * countToCraft);
+                        }
                     } catch (NoEnoughMaterialsException e) {
                         // 合并子合成缺少的材料
                         for (Map.Entry<ItemStack, Long> entry :

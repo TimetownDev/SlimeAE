@@ -19,6 +19,7 @@ public class StorageCollection implements IStorage {
     private final Map<ItemType, IStorage> takeCache;
     private final Map<ItemType, IStorage> pushCache;
     private final ItemHashSet notIncluded;
+    private boolean lock;
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
@@ -80,6 +81,12 @@ public class StorageCollection implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
+        pushItem(itemStackCache, false);
+    }
+
+    public void pushItem(@Nonnull ItemStackCache itemStackCache, boolean force) {
+        if (lock && !force) return;
+
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
 
@@ -111,6 +118,12 @@ public class StorageCollection implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemInfo itemInfo) {
+        pushItem(itemInfo, false);
+    }
+
+    public void pushItem(@Nonnull ItemInfo itemInfo, boolean force) {
+        if (lock && !force) return;
+
         ItemKey key = itemInfo.getItemKey();
 
         IStorage pushStorage = pushCache.get(key.getType());
@@ -140,6 +153,12 @@ public class StorageCollection implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
+        return contains(requests, false);
+    }
+
+    public boolean contains(@Nonnull ItemRequest[] requests, boolean force) {
+        if (lock && !force) return false;
+
         ItemHashMap<Long> storage = getStorageUnsafe();
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getKey())) return false;
@@ -154,8 +173,15 @@ public class StorageCollection implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> rest = new ItemHashMap<>();
+        return takeItem(requests, false);
+    }
+
+    @Nonnull
+    public ItemStorage takeItem(@Nonnull ItemRequest[] requests, boolean force) {
         ItemStorage found = new ItemStorage();
+        if (lock && !force) return found;
+
+        ItemHashMap<Long> rest = new ItemHashMap<>();
         // init rest
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getKey())) continue;
@@ -225,5 +251,9 @@ public class StorageCollection implements IStorage {
         }
 
         return tier;
+    }
+
+    public void setLock(boolean lock) {
+        this.lock = lock;
     }
 }
