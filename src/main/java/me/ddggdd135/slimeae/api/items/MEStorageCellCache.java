@@ -182,7 +182,7 @@ public class MEStorageCellCache implements IStorage {
                 } else if (amount > 0) {
                     itemStacks.addItem(request.getKey(), amount);
                     stored -= amount;
-                    storages.putKey(request.getKey(), 0L);
+                    storages.removeKey(request.getKey());
                 }
 
                 SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
