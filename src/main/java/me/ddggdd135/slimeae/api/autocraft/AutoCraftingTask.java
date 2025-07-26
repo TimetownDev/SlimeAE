@@ -52,6 +52,7 @@ public class AutoCraftingTask implements IDisposable {
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private final ItemStorage storage;
+    private int failTimes;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         this.info = info;
@@ -296,6 +297,7 @@ public class AutoCraftingTask implements IDisposable {
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests) && doCraft) {
+            failTimes = 0;
             storage.takeItem(requests);
             virtualRunning += (int) actualAmount;
             next.decreaseAmount(actualAmount);
@@ -305,6 +307,16 @@ public class AutoCraftingTask implements IDisposable {
                 if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
 
                 return;
+            }
+        } else {
+            failTimes++;
+        }
+
+        if (failTimes >= 16) {
+            dispose();
+            try {
+                new AutoCraftingTask(info, recipe, count).start();
+            } catch (Exception ignored) {
             }
         }
 
