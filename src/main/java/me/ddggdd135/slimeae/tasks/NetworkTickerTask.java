@@ -81,7 +81,7 @@ public class NetworkTickerTask implements Runnable {
                     info.getVirtualCraftingDeviceUsed().clear();
                     info.updateTempStorage();
 
-                    StorageCollection storageCollection = (StorageCollection) info.getStorage();
+                    StorageCollection storageCollection = info.getStorage();
                     for (IStorage storage : storageCollection.getStorages()) {
                         if (storage instanceof QuantumStorage quantumStorage) {
                             quantumStorage.sync();

@@ -139,6 +139,6 @@ public class QuantumStorage implements IStorage {
     }
 
     public void sync() {
-        NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
+        if (quantumCache != null) NetworkQuantumStorage.syncBlock(block.getLocation(), quantumCache);
     }
 }
