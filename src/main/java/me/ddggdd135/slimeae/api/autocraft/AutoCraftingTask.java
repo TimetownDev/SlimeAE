@@ -60,7 +60,6 @@ public class AutoCraftingTask implements IDisposable {
         this.count = count;
         menu.setSize(54);
         menu.addMenuCloseHandler(player -> dispose());
-        info.getStorage().setLock(true);
         craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         this.storage = new ItemStorage();
 
@@ -82,8 +81,7 @@ public class AutoCraftingTask implements IDisposable {
             }
         }
 
-        info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()), true);
-        info.getStorage().setLock(false);
+        info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
     }
 
     @Nonnull

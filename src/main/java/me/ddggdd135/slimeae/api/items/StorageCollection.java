@@ -116,14 +116,7 @@ public class StorageCollection implements IStorage {
         }
     }
 
-    @Override
     public void pushItem(@Nonnull ItemInfo itemInfo) {
-        pushItem(itemInfo, false);
-    }
-
-    public void pushItem(@Nonnull ItemInfo itemInfo, boolean force) {
-        if (lock && !force) return;
-
         ItemKey key = itemInfo.getItemKey();
 
         IStorage pushStorage = pushCache.get(key.getType());
@@ -151,14 +144,7 @@ public class StorageCollection implements IStorage {
         }
     }
 
-    @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        return contains(requests, false);
-    }
-
-    public boolean contains(@Nonnull ItemRequest[] requests, boolean force) {
-        if (lock && !force) return false;
-
         ItemHashMap<Long> storage = getStorageUnsafe();
         for (ItemRequest request : requests) {
             if (notIncluded.contains(request.getKey())) return false;
@@ -171,15 +157,8 @@ public class StorageCollection implements IStorage {
     }
 
     @Nonnull
-    @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        return takeItem(requests, false);
-    }
-
-    @Nonnull
-    public ItemStorage takeItem(@Nonnull ItemRequest[] requests, boolean force) {
         ItemStorage found = new ItemStorage();
-        if (lock && !force) return found;
 
         ItemHashMap<Long> rest = new ItemHashMap<>();
         // init rest
