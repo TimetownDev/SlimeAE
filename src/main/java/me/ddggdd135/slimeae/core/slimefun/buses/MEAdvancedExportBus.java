@@ -17,8 +17,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEAdvancedBus;
-import me.ddggdd135.slimeae.api.blockdata.MEAdvancedBusDataAdapter;
 import me.ddggdd135.slimeae.api.blockdata.MEAdvancedExportBusData;
+import me.ddggdd135.slimeae.api.blockdata.MEAdvancedExportBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IBlockData;
 import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
@@ -36,7 +36,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHolder {
-    private static final MEAdvancedBusDataAdapter adapter = new MEAdvancedBusDataAdapter();
+    private static final MEAdvancedExportBusDataAdapter adapter = new MEAdvancedExportBusDataAdapter();
 
     public MEAdvancedExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
