@@ -38,6 +38,6 @@ public class AdvancedMolecularAssembler extends MolecularAssembler {
             amount = cache.get(block.getLocation());
         }
 
-        return (amount.getOrDefault(accelerationCard, 0) / 2 + 1) * defaultSpeed;
+        return (int) ((amount.getOrDefault(accelerationCard, 0) / 1.5 + 1) * defaultSpeed);
     }
 }
