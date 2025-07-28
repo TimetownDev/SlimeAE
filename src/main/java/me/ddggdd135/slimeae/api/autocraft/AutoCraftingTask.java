@@ -149,6 +149,7 @@ public class AutoCraftingTask implements IDisposable {
                         for (Map.Entry<ItemKey, Long> o : output.keyEntrySet()) {
                             storage.addItem(o.getKey(), o.getValue() * countToCraft);
                         }
+                        storage.takeItem(new ItemRequest(key, remainingNeed));
                     } catch (NoEnoughMaterialsException e) {
                         // 合并子合成缺少的材料
                         for (Map.Entry<ItemStack, Long> entry :
