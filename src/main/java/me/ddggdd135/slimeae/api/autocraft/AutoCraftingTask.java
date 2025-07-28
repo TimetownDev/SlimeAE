@@ -51,7 +51,7 @@ public class AutoCraftingTask implements IDisposable {
     private final AEMenu menu = new AEMenu("&e合成任务");
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
-    private final ItemStorage storage;
+    private ItemStorage storage;
     private int failTimes;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
@@ -71,7 +71,7 @@ public class AutoCraftingTask implements IDisposable {
             }
         }
 
-        info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
+        storage = info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
     }
 
     @Nonnull
@@ -284,23 +284,25 @@ public class AutoCraftingTask implements IDisposable {
         }
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
-        if (storage.contains(requests) && doCraft) {
-            failTimes = 0;
-            storage.takeItem(requests);
-            virtualRunning += (int) actualAmount;
-            next.decreaseAmount(actualAmount);
+        if (storage.contains(requests)) {
+            if (doCraft) {
+                failTimes = 0;
+                storage.takeItem(requests);
+                virtualRunning += (int) actualAmount;
+                next.decreaseAmount(actualAmount);
 
-            if (virtualRunning == actualAmount) {
-                menu.getContents();
-                if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
+                if (virtualRunning == actualAmount) {
+                    menu.getContents();
+                    if (!menu.getInventory().getViewers().isEmpty()) refreshGUI(54);
 
-                return;
+                    return;
+                }
             }
         } else {
             failTimes++;
         }
 
-        if (failTimes >= 16) {
+        if (failTimes >= 32) {
             dispose();
             try {
                 new AutoCraftingTask(info, recipe, count).start();
