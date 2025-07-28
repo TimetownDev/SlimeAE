@@ -285,7 +285,7 @@ public class AutoCraftingTask implements IDisposable {
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests)) {
-            if (doCraft) {
+            if (doCraft && next.getRecipe().getCraftType() != CraftType.COOKING) {
                 failTimes = 0;
                 storage.takeItem(requests);
                 virtualRunning += (int) actualAmount;
