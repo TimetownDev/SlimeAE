@@ -19,6 +19,7 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskDisposingEvent;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
@@ -65,17 +66,23 @@ public class AutoCraftingTask implements IDisposable {
         // 如果无误可以将这一步放在新版算法出错后，节省一次计算（当前版本计算量是原来的2倍）
         List<CraftStep> oldSteps = match(recipe, count, new ItemStorage(info.getStorage()));
 
-        // TODO 删除调试信息
+        // TODO 确定正确性后删除调试信息
         String errorInfo;
         if (!checkCraftStepsValid(oldSteps, new ItemStorage(info.getStorage()))) {
             errorInfo = "检查合成步骤出错（这是一条开发者消息，如果您看到这条信息，请截图告知开发者，多谢）";
         } else errorInfo = "";
 
-        List<CraftStep> newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
+        List<CraftStep> newSteps = null;
 
         // 如果新版算法出错，则退回旧版算法
-        if (!checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) craftingSteps = oldSteps;
-        else craftingSteps = newSteps;
+        List<CraftStep> usingSteps = oldSteps;
+        try {
+            newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
+            if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
+        } catch (Exception ignored) {
+        }
+
+        craftingSteps = usingSteps;
 
         this.storage = new ItemStorage();
 
@@ -89,7 +96,7 @@ public class AutoCraftingTask implements IDisposable {
 
         storage = info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
 
-        // TODO 删除调试信息
+        // TODO 确定正确性后删除调试信息
         boolean debug_initialItemEnough;
         debug_initialItemEnough = checkCraftStepsValid(craftingSteps, new ItemStorage(storage));
 
@@ -217,7 +224,7 @@ public class AutoCraftingTask implements IDisposable {
 
     private class CraftTaskCalcData {
         public class CraftTaskCalcItem {
-            List<CraftingRecipe> before = new ArrayList<>();
+            Set<CraftingRecipe> before = new ConcurrentHashSet<>();
             CraftingRecipe thisone;
             long count;
 
@@ -230,11 +237,11 @@ public class AutoCraftingTask implements IDisposable {
         public final Map<CraftingRecipe, CraftTaskCalcItem> recipeMap = new ConcurrentHashMap<>();
 
         public void addRecipe(CraftingRecipe recipe, long count, CraftingRecipe parent) {
+            recipeMap.get(parent).before.add(recipe);
             if (recipeMap.containsKey(recipe)) { // 加到之前的合成上
                 recipeMap.get(recipe).count += count;
             } else { // 第一次合成
                 recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
-                recipeMap.get(parent).before.add(recipe);
             }
         }
 
@@ -251,12 +258,17 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     private List<CraftStep> unpackCraftSteps(CraftingRecipe recipe) {
+        if (!craftingPath.add(recipe)) {
+            throw new IllegalStateException("我的算法思想有误");
+        }
         List<CraftStep> result = new ArrayList<>();
         CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
         for (CraftingRecipe beforeRecipe : recipeInfo.before) {
-            result.addAll(unpackCraftSteps(beforeRecipe));
+            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) result.addAll(unpackCraftSteps(beforeRecipe));
         }
         result.add(new CraftStep(recipe, recipeInfo.count));
+        recipeCalcData.recipeMap.remove(recipe);
+        craftingPath.remove(recipe);
         return result;
     }
 
