@@ -19,7 +19,6 @@ public class StorageCollection implements IStorage {
     private final Map<ItemType, IStorage> takeCache;
     private final Map<ItemType, IStorage> pushCache;
     private final ItemHashSet notIncluded;
-    private boolean lock;
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
@@ -79,14 +78,7 @@ public class StorageCollection implements IStorage {
         return storages.remove(storage);
     }
 
-    @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        pushItem(itemStackCache, false);
-    }
-
-    public void pushItem(@Nonnull ItemStackCache itemStackCache, boolean force) {
-        if (lock && !force) return;
-
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
 
@@ -175,9 +167,12 @@ public class StorageCollection implements IStorage {
                 IStorage storage = takeCache.get(entry.getKey().getType());
                 ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
                 found.addItem(itemStacks.getStorageUnsafe());
-                if (rest.keySet().isEmpty()) break;
             }
         }
+
+        rest = ItemUtils.takeItems(rest, found.getStorageUnsafe());
+        ItemUtils.trim(rest);
+        if (rest.isEmpty()) return found;
 
         for (IStorage storage : storages) {
             ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
@@ -189,7 +184,7 @@ public class StorageCollection implements IStorage {
             }
 
             found.addItem(itemStacks.getStorageUnsafe());
-            rest = ItemUtils.takeItems(rest, found.getStorageUnsafe());
+            rest = ItemUtils.takeItems(rest, itemStacks.getStorageUnsafe());
             ItemUtils.trim(rest);
             if (rest.keySet().isEmpty()) break;
         }
@@ -230,9 +225,5 @@ public class StorageCollection implements IStorage {
         }
 
         return tier;
-    }
-
-    public void setLock(boolean lock) {
-        this.lock = lock;
     }
 }
