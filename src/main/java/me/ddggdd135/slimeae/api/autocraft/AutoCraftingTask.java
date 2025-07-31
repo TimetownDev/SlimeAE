@@ -235,6 +235,7 @@ public class AutoCraftingTask implements IDisposable {
         }
 
         public final Map<CraftingRecipe, CraftTaskCalcItem> recipeMap = new ConcurrentHashMap<>();
+        public final List<CraftStep> result = new ArrayList<>();
 
         public void addRecipe(CraftingRecipe recipe, long count, CraftingRecipe parent) {
             recipeMap.get(parent).before.add(recipe);
@@ -247,6 +248,7 @@ public class AutoCraftingTask implements IDisposable {
 
         public void rootRecipe(CraftingRecipe recipe, long count) {
             recipeMap.clear();
+            result.clear();
             recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
         }
     }
@@ -254,22 +256,21 @@ public class AutoCraftingTask implements IDisposable {
     private List<CraftStep> calcCraftSteps(CraftingRecipe recipe, long count, ItemStorage storage) {
         recipeCalcData.rootRecipe(recipe, count);
         calcCraftStep(recipe, count, storage);
-        return unpackCraftSteps(recipe);
+        unpackCraftSteps(recipe);
+        return recipeCalcData.result;
     }
 
-    private List<CraftStep> unpackCraftSteps(CraftingRecipe recipe) {
+    private void unpackCraftSteps(CraftingRecipe recipe) {
         if (!craftingPath.add(recipe)) {
             throw new IllegalStateException("我的算法思想有误");
         }
-        List<CraftStep> result = new ArrayList<>();
         CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
         for (CraftingRecipe beforeRecipe : recipeInfo.before) {
-            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) result.addAll(unpackCraftSteps(beforeRecipe));
+            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) unpackCraftSteps(beforeRecipe);
         }
-        result.add(new CraftStep(recipe, recipeInfo.count));
+        recipeCalcData.result.add(new CraftStep(recipe, recipeInfo.count));
         recipeCalcData.recipeMap.remove(recipe);
         craftingPath.remove(recipe);
-        return result;
     }
 
     private void calcCraftStep(CraftingRecipe recipe, long count, ItemStorage storage) {
