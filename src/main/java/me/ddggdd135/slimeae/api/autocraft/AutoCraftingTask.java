@@ -56,6 +56,7 @@ public class AutoCraftingTask implements IDisposable {
     private ItemStorage storage;
     private int failTimes;
     private CraftTaskCalcData recipeCalcData = new CraftTaskCalcData();
+    private boolean disposed;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         this.info = info;
@@ -613,6 +614,9 @@ public class AutoCraftingTask implements IDisposable {
 
     @Override
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
+
         AutoCraftingTaskDisposingEvent e = new AutoCraftingTaskDisposingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
 
