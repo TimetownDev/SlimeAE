@@ -63,24 +63,16 @@ public class AutoCraftingTask implements IDisposable {
         this.recipe = recipe;
         this.count = count;
 
-        // 先使用旧版算法，验证checkCraftStepsValid是否有误
-        // 如果无误可以将这一步放在新版算法出错后，节省一次计算（当前版本计算量是原来的2倍）
-        List<CraftStep> oldSteps = match(recipe, count, new ItemStorage(info.getStorage()));
-
-        // TODO 确定正确性后删除调试信息
-        String errorInfo;
-        if (!checkCraftStepsValid(oldSteps, new ItemStorage(info.getStorage()))) {
-            errorInfo = "检查合成步骤出错（这是一条开发者消息，如果您看到这条信息，请截图告知开发者，多谢）";
-        } else errorInfo = "";
-
         List<CraftStep> newSteps = null;
 
-        // 如果新版算法出错，则退回旧版算法
-        List<CraftStep> usingSteps = oldSteps;
+        List<CraftStep> usingSteps;
         try {
             newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
             if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
+            else throw new IllegalStateException("新版算法出错，退回旧版算法");
         } catch (Exception ignored) {
+            // 新版算法出错，退回旧版算法
+            usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
         }
 
         craftingSteps = usingSteps;
@@ -97,13 +89,8 @@ public class AutoCraftingTask implements IDisposable {
 
         storage = info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
 
-        // TODO 确定正确性后删除调试信息
-        boolean debug_initialItemEnough;
-        debug_initialItemEnough = checkCraftStepsValid(craftingSteps, new ItemStorage(storage));
-
         String TitleInfo = craftingSteps == newSteps ? "&2(新版算法)" : "&7(旧版算法)";
-        if (debug_initialItemEnough) menu = new AEMenu("&e合成任务" + TitleInfo + errorInfo);
-        else menu = new AEMenu("&e合成任务" + TitleInfo + "&c(拿取材料失败，合成可能卡住)" + errorInfo);
+        menu = new AEMenu("&e合成任务" + TitleInfo);
         menu.setSize(54);
         menu.addMenuCloseHandler(player -> dispose());
     }
@@ -263,7 +250,7 @@ public class AutoCraftingTask implements IDisposable {
 
     private void unpackCraftSteps(CraftingRecipe recipe) {
         if (!craftingPath.add(recipe)) {
-            throw new IllegalStateException("我的算法思想有误");
+            throw new IllegalStateException("新版算法出错，退回旧版算法");
         }
         CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
         for (CraftingRecipe beforeRecipe : recipeInfo.before) {
