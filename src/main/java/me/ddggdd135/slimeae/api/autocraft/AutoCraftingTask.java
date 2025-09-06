@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
@@ -18,6 +19,7 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskDisposingEvent;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
@@ -48,19 +50,33 @@ public class AutoCraftingTask implements IDisposable {
     private int running = 0;
     private int virtualRunning = 0;
     private int virtualProcess = 0;
-    private final AEMenu menu = new AEMenu("&e合成任务");
+    private final AEMenu menu;
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private ItemStorage storage;
     private int failTimes;
+    private CraftTaskCalcData recipeCalcData = new CraftTaskCalcData();
+    private boolean disposed;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         this.info = info;
         this.recipe = recipe;
         this.count = count;
-        menu.setSize(54);
-        menu.addMenuCloseHandler(player -> dispose());
-        craftingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+
+        List<CraftStep> newSteps = null;
+
+        List<CraftStep> usingSteps;
+        try {
+            newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
+            if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
+            else throw new IllegalStateException("新版算法出错，退回旧版算法");
+        } catch (Exception ignored) {
+            // 新版算法出错，退回旧版算法
+            usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+        }
+
+        craftingSteps = usingSteps;
+
         this.storage = new ItemStorage();
 
         // 所有材料都能拿到
@@ -72,6 +88,11 @@ public class AutoCraftingTask implements IDisposable {
         }
 
         storage = info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
+
+        String TitleInfo = craftingSteps == newSteps ? "&2(新版算法)" : "&7(旧版算法)";
+        menu = new AEMenu("&e合成任务" + TitleInfo);
+        menu.setSize(54);
+        menu.addMenuCloseHandler(player -> dispose());
     }
 
     @Nonnull
@@ -91,6 +112,22 @@ public class AutoCraftingTask implements IDisposable {
     @Nonnull
     public List<CraftStep> getCraftingSteps() {
         return craftingSteps;
+    }
+
+    private boolean checkCraftStepsValid(List<CraftStep> steps, ItemStorage storage) {
+        for (CraftStep step : steps) {
+            for (Map.Entry<ItemKey, Long> input :
+                    step.getRecipe().getInputAmounts().keyEntrySet()) {
+                long amount = input.getValue() * step.getAmount();
+                if (amount > storage.getStorageUnsafe().getOrDefault(input.getKey(), 0L)) return false;
+                storage.takeItem(new ItemRequest(input.getKey(), amount));
+            }
+            for (Map.Entry<ItemKey, Long> output :
+                    step.getRecipe().getOutputAmounts().keyEntrySet()) {
+                storage.addItem(output.getKey(), output.getValue() * step.getAmount());
+            }
+        }
+        return true;
     }
 
     private List<CraftStep> match(CraftingRecipe recipe, long count, ItemStorage storage) {
@@ -167,6 +204,134 @@ public class AutoCraftingTask implements IDisposable {
 
             result.add(new CraftStep(recipe, count));
             return result;
+        } finally {
+            // 无论是否成功,都要从路径中移除当前配方
+            craftingPath.remove(recipe);
+        }
+    }
+
+    private class CraftTaskCalcData {
+        public class CraftTaskCalcItem {
+            Set<CraftingRecipe> before = new ConcurrentHashSet<>();
+            CraftingRecipe thisone;
+            long count;
+
+            CraftTaskCalcItem(CraftingRecipe recipe, long count) {
+                this.thisone = recipe;
+                this.count = count;
+            }
+        }
+
+        public final Map<CraftingRecipe, CraftTaskCalcItem> recipeMap = new ConcurrentHashMap<>();
+        public final List<CraftStep> result = new ArrayList<>();
+
+        public void addRecipe(CraftingRecipe recipe, long count, CraftingRecipe parent) {
+            recipeMap.get(parent).before.add(recipe);
+            if (recipeMap.containsKey(recipe)) { // 加到之前的合成上
+                recipeMap.get(recipe).count += count;
+            } else { // 第一次合成
+                recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
+            }
+        }
+
+        public void rootRecipe(CraftingRecipe recipe, long count) {
+            recipeMap.clear();
+            result.clear();
+            recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
+        }
+    }
+
+    private List<CraftStep> calcCraftSteps(CraftingRecipe recipe, long count, ItemStorage storage) {
+        recipeCalcData.rootRecipe(recipe, count);
+        calcCraftStep(recipe, count, storage);
+        unpackCraftSteps(recipe);
+        return recipeCalcData.result;
+    }
+
+    private void unpackCraftSteps(CraftingRecipe recipe) {
+        if (!craftingPath.add(recipe)) {
+            throw new IllegalStateException("新版算法出错，退回旧版算法");
+        }
+        CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
+        for (CraftingRecipe beforeRecipe : recipeInfo.before) {
+            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) unpackCraftSteps(beforeRecipe);
+        }
+        recipeCalcData.result.add(new CraftStep(recipe, recipeInfo.count));
+        recipeCalcData.recipeMap.remove(recipe);
+        craftingPath.remove(recipe);
+    }
+
+    private void calcCraftStep(CraftingRecipe recipe, long count, ItemStorage storage) {
+        if (!craftingPath.add(recipe)) {
+            throw new IllegalStateException("检测到循环依赖的合成配方");
+        }
+
+        try {
+            if (!info.getRecipes().contains(recipe)) {
+                // 记录直接缺少的材料
+                ItemStorage missing = new ItemStorage();
+                ItemHashMap<Long> in = recipe.getInputAmounts();
+                for (ItemStack template : in.keySet()) {
+                    long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
+                    long need = in.get(template) * count;
+                    if (amount < need) {
+                        missing.addItem(new ItemKey(template), need - amount);
+                    }
+                }
+                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
+            }
+
+            ItemStorage missing = new ItemStorage();
+            ItemHashMap<Long> in = recipe.getInputAmounts();
+
+            // 遍历所需材料
+            for (ItemKey key : in.sourceKeySet()) {
+                long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
+                long need = in.getKey(key) * count;
+
+                if (amount >= need) {
+                    storage.takeItem(new ItemRequest(key, need));
+                } else {
+                    long remainingNeed = need - amount;
+                    if (amount > 0) {
+                        storage.takeItem(new ItemRequest(key, amount));
+                    }
+
+                    // 尝试合成缺少的材料
+                    CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
+                    if (craftingRecipe == null) {
+                        missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
+                        continue;
+                    }
+
+                    ItemHashMap<Long> output = craftingRecipe.getOutputAmounts();
+                    ItemHashMap<Long> input = craftingRecipe.getInputAmounts();
+
+                    // 计算需要合成多少次
+                    long out = output.getKey(key) - input.getOrDefault(key, 0L);
+                    long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
+
+                    try {
+                        recipeCalcData.addRecipe(craftingRecipe, countToCraft, recipe);
+                        calcCraftStep(craftingRecipe, countToCraft, storage);
+                        for (Map.Entry<ItemKey, Long> o : output.keyEntrySet()) {
+                            storage.addItem(o.getKey(), o.getValue() * countToCraft);
+                        }
+                        storage.takeItem(new ItemRequest(key, remainingNeed));
+                    } catch (NoEnoughMaterialsException e) {
+                        // 合并子合成缺少的材料
+                        for (Map.Entry<ItemStack, Long> entry :
+                                e.getMissingMaterials().entrySet()) {
+                            missing.addItem(new ItemKey(entry.getKey()), entry.getValue());
+                        }
+                    }
+                }
+            }
+
+            // 如果有缺少的材料就抛出异常
+            if (!missing.getStorageUnsafe().isEmpty()) {
+                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
+            }
         } finally {
             // 无论是否成功,都要从路径中移除当前配方
             craftingPath.remove(recipe);
@@ -436,6 +601,9 @@ public class AutoCraftingTask implements IDisposable {
 
     @Override
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
+
         AutoCraftingTaskDisposingEvent e = new AutoCraftingTaskDisposingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
 
