@@ -720,17 +720,7 @@ public class ItemUtils {
             });
         }
 
-        NBT.modify(result, x -> {
-            x.setBoolean(DISPLAY_ITEM_KEY, true);
-        });
         return result;
-    }
-
-    @Nonnull
-    public static ItemStack getDisplayItem(@Nonnull ItemStack itemStack) {
-        return (ItemStack) NBT.get(itemStack, x -> {
-            return SerializeUtils.string2Object(x.getString(ITEM_KEY));
-        });
     }
 
     public static <T extends SlimefunItem> T setRecipeOutput(@Nonnull T item, @Nonnull ItemStack output) {
