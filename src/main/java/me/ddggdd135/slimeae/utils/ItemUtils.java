@@ -56,7 +56,6 @@ import org.bukkit.persistence.PersistentDataType;
  */
 public class ItemUtils {
     public static final String DISPLAY_ITEM_KEY = "display_item";
-    public static final String ITEM_KEY = "item";
     /**
      * 根据模板物品创建指定数量的物品堆数组
      *
@@ -714,11 +713,11 @@ public class ItemUtils {
             lore.add("&e物品数量 " + amount);
             if (addPinnedLore) lore.add("&e===已置顶===");
             result.setLore(CMIChatColor.translate(lore));
-
-            NBT.modify(result, x -> {
-                x.setString(ITEM_KEY, SerializeUtils.object2String(itemStack));
-            });
         }
+
+        NBT.modify(result, x -> {
+            x.setBoolean(DISPLAY_ITEM_KEY, true);
+        });
 
         return result;
     }
