@@ -85,7 +85,7 @@ public class StorageCollection implements IStorage {
         IStorage pushStorage = pushCache.get(key.getType());
         if (pushStorage != null) pushStorage.pushItem(itemStackCache);
 
-        if (itemStack.isEmpty()) return;
+        if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
 
         List<IStorage> tmp = new ArrayList<>(storages);
         List<ObjectIntImmutablePair<IStorage>> sorted = new ArrayList<>(tmp.size());
