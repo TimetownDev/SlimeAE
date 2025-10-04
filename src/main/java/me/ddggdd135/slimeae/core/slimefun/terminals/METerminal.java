@@ -1,7 +1,5 @@
 package me.ddggdd135.slimeae.core.slimefun.terminals;
 
-import com.balugaq.jeg.api.groups.SearchGroup;
-import com.balugaq.jeg.implementation.JustEnoughGuide;
 import com.github.houbb.pinyin.constant.enums.PinyinStyleEnum;
 import com.github.houbb.pinyin.util.PinyinHelper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
@@ -13,7 +11,6 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.inventory.InvUtils;
-import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.text.Collator;
@@ -27,10 +24,8 @@ import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.interfaces.IItemFilterFindableWithGuide;
 import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.api.items.CreativeItemMap;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -49,7 +44,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-public class METerminal extends TickingBlock implements IMEObject, InventoryBlock, IItemFilterFindableWithGuide {
+public class METerminal extends TickingBlock implements IMEObject, InventoryBlock {
     public static final Comparator<Map.Entry<ItemStack, Long>> ALPHABETICAL_SORT = Comparator.comparing(
             itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
             Collator.getInstance(Locale.CHINA)::compare);
@@ -161,21 +156,6 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         StorageCacheUtils.setData(block.getLocation(), SORT_KEY, String.valueOf(value));
     }
 
-    @Nonnull
-    public String getFilter(@Nonnull Block block) {
-        String filter = StorageCacheUtils.getData(block.getLocation(), FILTER_KEY);
-        if (filter == null) {
-            setFilter(block, "");
-            return "";
-        }
-
-        return filter;
-    }
-
-    public void setFilter(@Nonnull Block block, @Nonnull String filter) {
-        StorageCacheUtils.setData(block.getLocation(), FILTER_KEY, filter);
-    }
-
     public void updateGui(@Nonnull Block block) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
@@ -196,36 +176,20 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         Player player = (Player) blockMenu.getInventory().getViewers().get(0);
 
-        // 获取过滤器
-        String filter = getFilter(block).toLowerCase(Locale.ROOT);
-
         // 过滤和排序逻辑
         List<Map.Entry<ItemStack, Long>> items = new ArrayList<>(storage.entrySet());
-        if (!filter.isEmpty()) {
-            if (!SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded())
-                items.removeIf(x -> doFilterNoJEG(x, filter));
-            else {
-                boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
-                SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
-                List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
-                items.removeIf(x -> doFilterWithJEG(x, slimefunItems, filter));
-            }
-        }
-
-        if (storage instanceof CreativeItemMap) items.sort(MATERIAL_SORT);
-        else items.sort(getSort(block));
+        items.sort(MATERIAL_SORT);
 
         int pinnedCount = 0;
-        if (filter.isEmpty()) {
-            PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
-            List<ItemStack> pinnedItems = pinnedManager.getPinnedItems(player);
-            if (pinnedItems == null) pinnedItems = new ArrayList<>();
 
-            for (ItemStack pinned : pinnedItems) {
-                if (!storage.containsKey(pinned)) continue;
-                items.add(0, new AbstractMap.SimpleEntry<>(pinned, storage.get(pinned)));
-                pinnedCount++;
-            }
+        PinnedManager pinnedManager = SlimeAEPlugin.getPinnedManager();
+        List<ItemStack> pinnedItems = pinnedManager.getPinnedItems(player);
+        if (pinnedItems == null) pinnedItems = new ArrayList<>();
+
+        for (ItemStack pinned : pinnedItems) {
+            if (!storage.containsKey(pinned)) continue;
+            items.add(0, new AbstractMap.SimpleEntry<>(pinned, storage.get(pinned)));
+            pinnedCount++;
         }
 
         // 计算分页
@@ -349,6 +313,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             preset.addItem(slot, ChestMenuUtils.getBackground());
             preset.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }
+        preset.addItem(getJEGFindingButtonSlot(), ChestMenuUtils.getBackground());
+        preset.addMenuClickHandler(getJEGFindingButtonSlot(), ChestMenuUtils.getEmptyClickHandler());
         preset.setSize(54);
     }
 
@@ -382,33 +348,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         menu.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
         menu.addMenuClickHandler(getFilter(), (player, i, cursor, clickAction) -> {
-            if (clickAction.isShiftClicked()) {
-                String filter = getFilter(block);
-                if (filter.isEmpty()) {
-                    player.sendMessage(CMIChatColor.translate("&c&l你还没有设置过滤器"));
-                    player.closeInventory();
-                    return false;
-                }
-
-                player.chat("/sf search " + filter);
-                return false;
-            }
-
-            if (clickAction.isRightClicked()) {
-                setFilter(block, "");
-                return false;
-            }
-
             player.closeInventory();
-            player.sendMessage(ChatColor.YELLOW + "请输入你想要过滤的物品名称(显示名)或类型");
-            ChatUtils.awaitInput(player, filter -> {
-                if (filter.isBlank()) {
-                    return;
-                }
-                setFilter(block, filter.toLowerCase(Locale.ROOT));
-                player.sendMessage(ChatColor.GREEN + "已启用过滤器");
-                menu.open(player);
-            });
+            player.sendMessage(ChatColor.RED + "本服务器不支持过滤器");
 
             return false;
         });
@@ -436,8 +377,6 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 return false;
             });
         }
-
-        addJEGFindingButton(menu, getJEGFindingButtonSlot());
     }
 
     @Override
