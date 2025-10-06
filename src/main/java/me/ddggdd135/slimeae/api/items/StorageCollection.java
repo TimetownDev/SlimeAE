@@ -104,7 +104,7 @@ public class StorageCollection implements IStorage {
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             storage.left().pushItem(itemStackCache);
             pushCache.put(key.getType(), storage.left());
-            if (itemStack.getType().isAir() || itemStack.getAmount()== 0) return;
+            if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
         }
     }
 
