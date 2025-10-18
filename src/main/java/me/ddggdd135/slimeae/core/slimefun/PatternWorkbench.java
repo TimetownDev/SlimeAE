@@ -8,10 +8,14 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
@@ -37,7 +41,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
     }
 
     public int[] getBorderSlots() {
-        return new int[] {30, 31, 32, 33, 34, 35, 40, 44, 48, 49, 50, 51, 52, 53};
+        return new int[] {30, 31, 32, 33, 34, 35, 40, 44, 48, 49, 50, 52, 53};
     }
 
     @Override
@@ -60,6 +64,10 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
 
     public int getCraftButtonSlot() {
         return 42;
+    }
+
+    public int getCraftTypeSlot() {
+        return 51;
     }
 
     public int getPatternSlot() {
@@ -98,6 +106,15 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             makePattern(block);
             return false;
         });
+
+        blockMenu.replaceExistingItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
+        blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
+            ItemStack craftingTypeItem = blockMenu.getItemInSlot(i);
+            if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true))
+                blockMenu.replaceExistingItem(i, MenuItems.CRAFTING_TABLE);
+            else blockMenu.replaceExistingItem(i, MenuItems.COOKING);
+            return false;
+        });
     }
 
     private void makePattern(Block block) {
@@ -107,24 +124,51 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
         if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
+        ItemStack craftingTypeItem = blockMenu.getItemInSlot(getCraftTypeSlot());
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
 
-        List<ItemStack> inputList = new ArrayList<>();
-        for (int slot : getCraftSlots()) {
-            inputList.add(blockMenu.getItemInSlot(slot));
+        if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true)) {
+            toOut.setAmount(1);
+            ItemStack[] input = Arrays.stream(getCraftSlots())
+                    .mapToObj(blockMenu::getItemInSlot)
+                    .filter(Objects::nonNull)
+                    .filter(x -> !x.getType().isAir())
+                    .toArray(ItemStack[]::new);
+            ItemStack[] output = Arrays.stream(new int[] {getCraftOutputSlot()})
+                    .mapToObj(blockMenu::getItemInSlot)
+                    .filter(Objects::nonNull)
+                    .filter(x -> !x.getType().isAir())
+                    .toArray(ItemStack[]::new);
+            if (input.length == 0 || output.length == 0) return;
+            in.subtract();
+            CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
+            Pattern.setRecipe(toOut, recipe);
+        } else {
+            List<ItemStack> inputList = new ArrayList<>();
+            for (int slot : getCraftSlots()) {
+                inputList.add(blockMenu.getItemInSlot(slot));
+            }
+
+            ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
+
+            ItemStack[] outputs;
+            List<ItemStack> outputList = new ArrayList<>();
+            for (int slot : new int[] {getCraftOutputSlot()}) {
+                outputList.add(blockMenu.getItemInSlot(slot));
+            }
+
+            outputs = outputList.toArray(ItemStack[]::new);
+
+            CraftingRecipe recipe;
+            if (ItemUtils.trimItems(outputs).length != 0) recipe = RecipeUtils.getRecipe(inputs, outputs);
+            else recipe = RecipeUtils.getRecipe(inputs);
+
+            if (recipe == null) return;
+
+            toOut.setAmount(1);
+            in.subtract();
+            Pattern.setRecipe(toOut, recipe);
         }
-
-        ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
-
-        CraftingRecipe recipe =
-                RecipeUtils.getRecipe(ItemUtils.getAmounts(inputs), blockMenu.getItemInSlot(getCraftOutputSlot()));
-
-        if (recipe == null) return;
-
-        toOut.setAmount(1);
-        in.subtract();
-        Pattern.setRecipe(toOut, recipe);
-
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 
