@@ -20,7 +20,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class DrawerStorage implements IStorage {
     private StorageUnitData data;
-    private Block block;
     private boolean isReadOnly;
 
     public DrawerStorage(@Nonnull Block block) {
@@ -30,15 +29,13 @@ public class DrawerStorage implements IStorage {
     public DrawerStorage(@Nonnull Block block, boolean isReadOnly) {
         if (!SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded())
             throw new RuntimeException("NetworksExpansion is not loaded");
-        this.block = block;
         data = NetworksDrawer.getStorageData(block.getLocation());
         this.isReadOnly = isReadOnly;
     }
 
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        if (!isReadOnly && data != null)
-            data.depositItemStack(itemStackCache.getItemStack(), NetworksDrawer.isLocked(block.getLocation()));
+        if (!isReadOnly && data != null) data.depositItemStack(itemStackCache.getItemStack(), true);
     }
 
     @Override
@@ -46,7 +43,7 @@ public class DrawerStorage implements IStorage {
         if (!isReadOnly && data != null) {
             Map.Entry<ItemStack, Integer> entry =
                     new AbstractMap.SimpleEntry<>(itemInfo.getItemKey().getItemStack(), (int) itemInfo.getAmount());
-            data.depositItemStack(entry, NetworksDrawer.isLocked(block.getLocation()));
+            data.depositItemStack(entry, true);
             itemInfo.setAmount(entry.getValue());
         }
     }
