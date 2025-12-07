@@ -36,7 +36,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
 
     public int[] getCraftSlots() {
         return new int[] {
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
+            3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26
         };
     }
 
@@ -51,15 +51,15 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
 
     @Override
     public int[] getOutputSlots() {
-        return new int[] {getCraftOutputSlot()};
+        return getCraftOutputSlots();
     }
 
-    public int getCraftOutputSlot() {
-        return 37;
+    public int[] getCraftOutputSlots() {
+        return new int[] {0, 1, 9, 10, 18, 19, 27, 28, 36, 37, 45, 46};
     }
 
     public int[] getCraftOutputBorderSlots() {
-        return new int[] {27, 28, 29, 36, 38, 45, 46, 47};
+        return new int[] {2, 11, 20, 29, 38, 47};
     }
 
     public int getCraftButtonSlot() {
@@ -134,7 +134,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
                     .filter(Objects::nonNull)
                     .filter(x -> !x.getType().isAir())
                     .toArray(ItemStack[]::new);
-            ItemStack[] output = Arrays.stream(new int[] {getCraftOutputSlot()})
+            ItemStack[] output = Arrays.stream(getCraftOutputSlots())
                     .mapToObj(blockMenu::getItemInSlot)
                     .filter(Objects::nonNull)
                     .filter(x -> !x.getType().isAir())
@@ -153,7 +153,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
 
             ItemStack[] outputs;
             List<ItemStack> outputList = new ArrayList<>();
-            for (int slot : new int[] {getCraftOutputSlot()}) {
+            for (int slot : getCraftOutputSlots()) {
                 outputList.add(blockMenu.getItemInSlot(slot));
             }
 
@@ -182,7 +182,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
                 if (blockMenu == null) return;
 
                 blockMenu.dropItems(b.getLocation(), getCraftSlots());
-                blockMenu.dropItems(b.getLocation(), getCraftOutputSlot());
+                blockMenu.dropItems(b.getLocation(), getOutputSlots());
                 blockMenu.dropItems(b.getLocation(), getPatternSlot());
                 blockMenu.dropItems(b.getLocation(), getPatternOutputSlot());
             }
