@@ -35,9 +35,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
     }
 
     public int[] getCraftSlots() {
-        return new int[] {
-            3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26
-        };
+        return new int[] {3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24, 25, 26};
     }
 
     public int[] getBorderSlots() {
