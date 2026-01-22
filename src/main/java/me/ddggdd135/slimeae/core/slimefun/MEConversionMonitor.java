@@ -221,10 +221,10 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
 
             @Override
             public void onBlockBreak(@Nonnull Block b) {
+                removeHologram(b);
+                
                 setItem(b, null);
                 setLocked(b, false);
-
-                removeHologram(b);
             }
         };
     }
