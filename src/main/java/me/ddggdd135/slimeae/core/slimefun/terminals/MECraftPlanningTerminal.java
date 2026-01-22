@@ -170,7 +170,7 @@ public class MECraftPlanningTerminal extends METerminal {
                                 return false;
                             }
                             player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
-                            task.refreshGUI(54);
+                            task.refreshGUI(54, false);
                             task.start();
                             return false;
                         });

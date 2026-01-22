@@ -486,7 +486,7 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     public void refreshGUI(int maxSize) {
-        refreshGUI(maxSize, true);
+        refreshGUI(maxSize, false);
     }
 
     public void refreshGUI(int maxSize, boolean cancelButton) {

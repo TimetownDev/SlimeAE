@@ -33,7 +33,9 @@ public class SlimeAEItems {
             new AdvancedCustomItemStack(Material.PAPER),
             "&e信息",
             "",
-            "&e版本 " + SlimeAEPlugin.getInstance().getPluginVersion());
+            "&e版本 " + SlimeAEPlugin.getInstance().getPluginVersion(),
+            "&c&l请不要自行向SlimeAE开发者反馈问题,请优先前往服务器论坛反馈"
+    );
     public static final SlimefunItemStack CONTRIBUTOR1 = new SlimefunItemStack(
             "AE_CONTRIBUTOR1",
             "85fffd0a33794006c5bacfc3082e70d59e96153f247ea3f787b559004515a02",

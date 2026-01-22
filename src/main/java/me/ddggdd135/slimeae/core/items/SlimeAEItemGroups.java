@@ -12,19 +12,19 @@ import org.bukkit.inventory.ItemStack;
 
 public class SlimeAEItemGroups {
     public static final ItemStack MAIN_ITEM_GROUP_ICON =
-            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}应用能源2");
-    public static final ItemStack INFO_ICON = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息");
+            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Spring_Green}应用能源2(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
+    public static final ItemStack INFO_ICON = new AdvancedCustomItemStack(Material.BOOK, "&eSlimeAE信息(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
     public static final ItemStack CABLE_ICON =
-            new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}线缆");
+            new AdvancedCustomItemStack(SlimefunItems.ENERGY_CONNECTOR, "{#Vanilla_Ice}线缆(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
     public static final ItemStack MACHINE_ICON =
-            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器");
+            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#Sky_Blue}机器(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
     public static final ItemStack ADVANCED_MACHINE_ICON =
-            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#FFD700}高级机器").doGlow();
+            new AdvancedCustomItemStack(Material.BLACK_STAINED_GLASS, "{#FFD700}高级机器(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)").doGlow();
     public static final ItemStack MATERIAL_ICON = new AdvancedCustomItemStack(
             Version.getCurrent().isEqualOrHigher(Version.v1_17_R1) ? Material.AMETHYST_CLUSTER : Material.QUARTZ,
-            "{#Fuchsia_Pink}材料");
-    public static final ItemStack CELL_ICON = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件");
-    public static final ItemStack TOOL_ICON = new AdvancedCustomItemStack(Material.BLAZE_ROD, "&e工具");
+            "{#Fuchsia_Pink}材料(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
+    public static final ItemStack CELL_ICON = new AdvancedCustomItemStack(Material.SLIME_BALL, "{#3366ff}元件(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
+    public static final ItemStack TOOL_ICON = new AdvancedCustomItemStack(Material.BLAZE_ROD, "&e工具(本附属问题较多包括但不限于空白物品/无法合成/吞物品服务器无法修复建议使用网络)");
     public static final MainItemGroup MAIN_ITEM_GROUP =
             new MainItemGroup(new NamespacedKey(SlimeAEPlugin.getInstance(), "main"), MAIN_ITEM_GROUP_ICON);
     public static final DummyItemGroup INFO =
