@@ -180,13 +180,13 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
         if (!blockMenu.hasViewer()) return;
-        ItemStack[] display = new ItemStack[getDisplaySlots().length];
 
         NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
         if (info == null) {
             // 清空显示槽
             for (int slot : getDisplaySlots()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
             }
             return;
         }
@@ -243,6 +243,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         if (startIndex == endIndex) {
             for (int slot : getDisplaySlots()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
             }
         }
 
@@ -257,6 +258,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
             if (itemStack == null || itemStack.getType().isAir()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
                 continue;
             }
 
