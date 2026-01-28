@@ -84,7 +84,7 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
     public boolean isLocked(@Nonnull Block block) {
         SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
 
-        if (data == null) return false;
+        if (data == null || data.isPendingRemove()) return false;
         Slimefun.getDatabaseManager().getBlockDataController().loadBlockData(data);
 
         String locked = data.getData(LOCKED_KEY);
@@ -96,7 +96,7 @@ public class MEConversionMonitor extends SlimefunItem implements IMEObject, Holo
     public void setLocked(@Nonnull Block block, boolean locked) {
         SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
 
-        if (data == null) return;
+        if (data == null || data.isPendingRemove()) return;
         Slimefun.getDatabaseManager().getBlockDataController().loadBlockData(data);
 
         data.setData(LOCKED_KEY, SerializeUtils.boolToString(locked));
