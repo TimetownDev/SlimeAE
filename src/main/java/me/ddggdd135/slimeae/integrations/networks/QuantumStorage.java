@@ -142,7 +142,9 @@ public class QuantumStorage implements IStorage {
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
         ItemStack output = blockMenu.getItemInSlot(NetworkQuantumStorage.OUTPUT_SLOT);
-        if (quantumCache == null || (quantumCache.getAmount() < 0 && (output == null || output.getType().isAir()))) return -1;
+        if (quantumCache == null
+                || (quantumCache.getAmount() < 0
+                        && (output == null || output.getType().isAir()))) return -1;
         ItemStack storedItem = quantumCache.getItemStack();
         if (storedItem == null || storedItem.getType().isAir()) return -1;
         if (storedItem.getType() == itemStack.getItemStack().getType()) return 2000;
