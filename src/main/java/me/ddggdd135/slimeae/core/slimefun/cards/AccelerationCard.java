@@ -15,30 +15,42 @@ import org.bukkit.inventory.ItemStack;
 
 public class AccelerationCard extends Card {
 
+    protected final int accelerationMultiplier;
+
     public AccelerationCard(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+        this(itemGroup, item, recipeType, recipe, 1);
+    }
+
+    public AccelerationCard(
+            ItemGroup itemGroup,
+            SlimefunItemStack item,
+            RecipeType recipeType,
+            ItemStack[] recipe,
+            int accelerationMultiplier) {
         super(itemGroup, item, recipeType, recipe);
+        this.accelerationMultiplier = accelerationMultiplier;
     }
 
     @Override
     public void onTick(Block block, SlimefunItem item, SlimefunBlockData data) {
-        // 处理普通机器
         if (item instanceof MachineProcessHolder<?> processorHolder) {
             MachineOperation operation = processorHolder.getMachineProcessor().getOperation(block);
             if (operation != null && !operation.isFinished()) {
-                operation.addProgress(1);
+                operation.addProgress(accelerationMultiplier);
             }
             return;
         }
 
-        // 处理ME总线
         if (item instanceof MEBus meBus) {
-            // 额外调用一次onMEBusTick来加速处理
-            meBus.onMEBusTick(block, item, data);
+            for (int i = 0; i < accelerationMultiplier; i++) {
+                meBus.onMEBusTick(block, item, data);
+            }
         }
 
-        // 处理ME IO端口
         if (item instanceof MEIOPort meioPort) {
-            meioPort.onMEIOPortTick(block, item, data);
+            for (int i = 0; i < accelerationMultiplier; i++) {
+                meioPort.onMEIOPortTick(block, item, data);
+            }
         }
     }
 }
