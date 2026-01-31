@@ -16,9 +16,7 @@ import me.ddggdd135.slimeae.core.slimefun.assembler.AdvancedMolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.assembler.LargeMolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.assembler.MolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.buses.*;
-import me.ddggdd135.slimeae.core.slimefun.cards.AccelerationCard;
-import me.ddggdd135.slimeae.core.slimefun.cards.CraftingCard;
-import me.ddggdd135.slimeae.core.slimefun.cards.RedstoneCard;
+import me.ddggdd135.slimeae.core.slimefun.cards.*;
 import me.ddggdd135.slimeae.core.slimefun.terminals.*;
 import me.ddggdd135.slimeae.core.slimefun.tools.*;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -536,6 +534,22 @@ public class SlimeAEItems {
                                     ? Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE
                                     : Material.SHULKER_SHELL,
                             "{#33ccf3}加速卡")
+                    .addFlags(ItemFlag.values()));
+    public static final SlimefunItemStack ADVANCED_ACCELERATION_CARD = new SlimefunItemStack(
+            "ADVANCED_ACCELERATION_CARD",
+            new AdvancedCustomItemStack(
+                            Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                                    ? Material.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE
+                                    : Material.SHULKER_SHELL,
+                            "{#33aaf7}高级加速卡")
+                    .addFlags(ItemFlag.values()));
+    public static final SlimefunItemStack ULTIMATE_ACCELERATION_CARD = new SlimefunItemStack(
+            "ULTIMATE_ACCELERATION_CARD",
+            new AdvancedCustomItemStack(
+                            Version.getCurrent().isEqualOrHigher(Version.v1_20_R1)
+                                    ? Material.VEX_ARMOR_TRIM_SMITHING_TEMPLATE
+                                    : Material.SHULKER_SHELL,
+                            "{#3388fb}终极加速卡")
                     .addFlags(ItemFlag.values()));
     public static final SlimefunItemStack CRAFTING_CARD = new SlimefunItemStack(
             "CRAFTING_CARD",
@@ -1661,6 +1675,20 @@ public class SlimeAEItems {
                         ACCELERATION_CARD,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ADVANCED_CARD, CRYSTAL_FLUIX})
+                .register(plugin);
+        new AdvancedAccelerationCard(
+                        SlimeAEItemGroups.MATERIAL,
+                        ADVANCED_ACCELERATION_CARD,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ACCELERATION_CARD, ACCELERATION_CARD, ACCELERATION_CARD})
+                .register(plugin);
+        new UltimateAccelerationCard(
+                        SlimeAEItemGroups.MATERIAL,
+                        ULTIMATE_ACCELERATION_CARD,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ADVANCED_ACCELERATION_CARD, ADVANCED_ACCELERATION_CARD, ADVANCED_ACCELERATION_CARD
+                        })
                 .register(plugin);
         new CraftingCard(
                         SlimeAEItemGroups.MATERIAL, CRAFTING_CARD, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
