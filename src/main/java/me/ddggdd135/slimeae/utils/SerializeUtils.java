@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -33,6 +34,7 @@ public class SerializeUtils {
     @Nullable public static Object string2Object(@Nonnull String base64Str) {
         if (base64Str.startsWith("SLIMEFUN_")) {
             String id = base64Str.substring(9);
+            if (id.equals(MenuItems.EMPTY.getItemId())) return null;
             SlimefunItem slimefunItem = SlimefunItem.getById(id);
             if (slimefunItem == null) return null;
             return slimefunItem.getItem().clone();

@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,6 +15,7 @@ import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadWriteNBT;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBT;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
+import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import org.bukkit.inventory.ItemStack;
@@ -43,8 +45,12 @@ public class Pattern extends SlimefunItem {
                 ReadableNBT compound = x.getCompound(RECIPE_KEY);
                 return new CraftingRecipe(
                         compound.getEnum(CRAFTING_TYPE_KEY, CraftType.class),
-                        compound.getItemStackArray(INPUT_KEY),
-                        compound.getItemStackArray(OUTPUT_KEY));
+                        Arrays.stream(compound.getItemStackArray(INPUT_KEY))
+                                .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
+                                .toArray(ItemStack[]::new),
+                        Arrays.stream(compound.getItemStackArray(OUTPUT_KEY))
+                                .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
+                                .toArray(ItemStack[]::new));
             });
 
             if (craftingRecipe.getCraftType() == CraftType.CRAFTING_TABLE) {

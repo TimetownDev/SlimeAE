@@ -251,6 +251,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             int slot = getDisplaySlots()[i];
             if (i + startIndex >= items.size()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
                 continue;
             }
             Map.Entry<ItemStack, Long> entry = items.get(i + startIndex);

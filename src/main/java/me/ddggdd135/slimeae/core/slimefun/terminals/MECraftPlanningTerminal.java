@@ -47,6 +47,7 @@ public class MECraftPlanningTerminal extends METerminal {
             // 清空显示槽
             for (int slot : getDisplaySlots()) {
                 blockMenu.replaceExistingItem(slot, MenuItems.EMPTY);
+                blockMenu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
             }
             return;
         }
