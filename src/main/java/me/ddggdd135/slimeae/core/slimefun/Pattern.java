@@ -53,6 +53,8 @@ public class Pattern extends SlimefunItem {
                                 .toArray(ItemStack[]::new));
             });
 
+            setRecipe(itemStack, craftingRecipe);
+
             if (craftingRecipe.getCraftType() == CraftType.CRAFTING_TABLE) {
                 CraftingRecipe newRecipe = RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
                 if (newRecipe == null || !(newRecipe.equals(craftingRecipe))) craftingRecipe = null;

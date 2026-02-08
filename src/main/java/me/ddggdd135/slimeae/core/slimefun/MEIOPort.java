@@ -91,6 +91,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
                 if (itemStack != null
                         && !itemStack.getType().isAir()
+                        && itemStack.getAmount() == 1
                         && SlimefunItem.getByItem(itemStack) instanceof NetworkQuantumStorage) {
                     QuantumCache quantumCache = QuantumUtils.getQuantumCache(itemStack);
 
