@@ -57,6 +57,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private SlimeAECommand slimeAECommand = new SlimeAECommand();
     private PinnedManager pinnedManager;
     private Metrics metrics;
+    private static boolean debug = false;
 
     @Override
     public void onEnable() {
@@ -317,11 +318,22 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         return getInstance().pinnedManager;
     }
 
+    /**
+     * 判断是否开启了调试模式
+     * @return 是否开启调试模式
+     */
+    public static boolean isDebug() {
+        return debug;
+    }
+
     public void reloadConfig0() {
         // 保存默认配置
         saveDefaultConfig();
 
         reloadConfig();
+
+        // 重载调试模式配置
+        debug = getConfig().getBoolean("debug", false);
 
         // 重载网络配置
         NetworkInfo.reloadConfig();

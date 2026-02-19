@@ -20,6 +20,11 @@ public class StorageCollection implements IStorage {
     private final Map<ItemType, IStorage> pushCache;
     private final ItemHashSet notIncluded;
 
+    // === F3: getStorageUnsafe() 结果缓存 ===
+    private volatile ItemHashMap<Long> cachedStorage = null;
+    private volatile long lastCacheTime = 0;
+    private static final long STORAGE_CACHE_INTERVAL = 500; // 500ms 刷新一次
+
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
         this.takeCache = new HashMap<>();
@@ -38,10 +43,12 @@ public class StorageCollection implements IStorage {
         if (storage == null) return;
         if (storage instanceof StorageCollection storageCollection) {
             storages.addAll(storageCollection.getStorages());
+            invalidateStorageCache();
             return;
         }
         storages.add(storage);
         notIncluded.clear();
+        invalidateStorageCache();
     }
 
     public boolean removeStorage(@Nonnull IStorage storage) {
@@ -75,15 +82,23 @@ public class StorageCollection implements IStorage {
             pushCache.remove(toRemove.getKey());
         }
 
-        return storages.remove(storage);
+        boolean removed = storages.remove(storage);
+        if (removed) invalidateStorageCache();
+        return removed;
     }
 
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
 
+        // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
+        if (notIncluded.contains(key)) notIncluded.remove(key);
+
         IStorage pushStorage = pushCache.get(key.getType());
-        if (pushStorage != null) pushStorage.pushItem(itemStackCache);
+        if (pushStorage != null) {
+            pushStorage.pushItem(itemStackCache);
+            invalidateStorageCache();
+        }
 
         if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
 
@@ -104,6 +119,7 @@ public class StorageCollection implements IStorage {
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             storage.left().pushItem(itemStackCache);
             pushCache.put(key.getType(), storage.left());
+            invalidateStorageCache();
             if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
         }
     }
@@ -111,8 +127,14 @@ public class StorageCollection implements IStorage {
     public void pushItem(@Nonnull ItemInfo itemInfo) {
         ItemKey key = itemInfo.getItemKey();
 
+        // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
+        if (notIncluded.contains(key)) notIncluded.remove(key);
+
         IStorage pushStorage = pushCache.get(key.getType());
-        if (pushStorage != null) pushStorage.pushItem(itemInfo);
+        if (pushStorage != null) {
+            pushStorage.pushItem(itemInfo);
+            invalidateStorageCache();
+        }
 
         if (itemInfo.isEmpty()) return;
 
@@ -132,6 +154,7 @@ public class StorageCollection implements IStorage {
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             storage.left().pushItem(itemInfo);
+            invalidateStorageCache();
             if (itemInfo.isEmpty()) return;
         }
     }
@@ -189,12 +212,46 @@ public class StorageCollection implements IStorage {
             if (rest.keySet().isEmpty()) break;
         }
         notIncluded.addAll(rest.sourceKeySet());
+        invalidateStorageCache();
 
         return found;
     }
 
+    /**
+     * F3: 使存储缓存失效
+     */
+    public void invalidateStorageCache() {
+        cachedStorage = null;
+    }
+
+    /**
+     * 清除负面缓存（notIncluded 集合）。
+     * 当物品通过非 pushItem 路径（如 tempStorage.addItem）归还到子存储后，
+     * 需要调用此方法以确保后续 takeItem/contains 不会错误地跳过这些物品。
+     */
+    public void clearNotIncluded() {
+        notIncluded.clear();
+    }
+
+    /**
+     * 清除 takeCache 和 pushCache 路由缓存。
+     * 当存储内容发生重大变化（如 dispose 归还大量物品）时，
+     * 需要调用此方法以确保后续 takeItem/pushItem 不会使用过时的路由缓存。
+     */
+    public void clearTakeAndPushCache() {
+        takeCache.clear();
+        pushCache.clear();
+    }
+
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
+        // F3: 时间窗口内复用缓存结果
+        long now = System.currentTimeMillis();
+        ItemHashMap<Long> cached = cachedStorage;
+        if (cached != null && (now - lastCacheTime) < STORAGE_CACHE_INTERVAL) {
+            return cached;
+        }
+
         ItemHashMap<Long> result = new ItemHashMap<>();
 
         for (IStorage storage : storages) {
@@ -214,6 +271,9 @@ public class StorageCollection implements IStorage {
                 }
             }
         }
+
+        cachedStorage = result;
+        lastCacheTime = now;
         return result;
     }
 

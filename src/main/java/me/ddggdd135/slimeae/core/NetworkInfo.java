@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae.core;
 
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.*;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,11 +35,14 @@ public class NetworkInfo implements IDisposable {
     private final Map<Location, Set<CraftingRecipe>> recipeMap = new ConcurrentHashMap<>();
     private final Map<CraftType, Integer> virtualCraftingDeviceSpeeds = new ConcurrentHashMap<>();
     private final Map<CraftType, Integer> virtualCraftingDeviceUsed = new ConcurrentHashMap<>();
-    private StorageCollection storage = new StorageCollection();
-    private IStorage storageNoNetworks = new StorageCollection();
+    private volatile StorageCollection storage = new StorageCollection();
+    private volatile IStorage storageNoNetworks = new StorageCollection();
     private final ConcurrentHashSet<AutoCraftingTask> autoCraftingTasks = new ConcurrentHashSet<>();
     private final AEMenu autoCraftingMenu = new AEMenu("&e自动合成任务");
     private final ItemStorage tempStorage = new ItemStorage();
+
+    // === F9: 配方缓存 ===
+    private volatile Set<CraftingRecipe> cachedRecipes = null;
 
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
@@ -155,6 +159,10 @@ public class NetworkInfo implements IDisposable {
 
     @Nonnull
     public Set<CraftingRecipe> getRecipes() {
+        // F9: 使用缓存的配方集合
+        Set<CraftingRecipe> cached = cachedRecipes;
+        if (cached != null) return cached;
+
         Set<CraftingRecipe> recipes = new HashSet<>();
         for (Location location : craftingHolders) {
             // fix NullPointException in here
@@ -163,7 +171,25 @@ public class NetworkInfo implements IDisposable {
                 recipes.addAll(recipes1);
             }
         }
-        return recipes;
+        Set<CraftingRecipe> result = Collections.unmodifiableSet(recipes);
+        cachedRecipes = result;
+        return result;
+    }
+
+    /**
+     * 使配方缓存失效，当 recipeMap 或 craftingHolders 发生变化时调用
+     */
+    public void invalidateRecipeCache() {
+        cachedRecipes = null;
+    }
+
+    /**
+     * 直接设置配方缓存快照。
+     * 用于在 updateAutoCraft() 中原子替换底层数据时，先设置新缓存，
+     * 确保 getRecipes() 在 clear()+putAll() 之间不会返回空集合。
+     */
+    public void setRecipeCache(@Nonnull Set<CraftingRecipe> cache) {
+        cachedRecipes = cache;
     }
 
     @Nullable public CraftingRecipe getRecipeFor(@Nonnull ItemStack output) {

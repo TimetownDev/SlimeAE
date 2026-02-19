@@ -3,6 +3,9 @@ auto-update: true
 #自动保存间隔(s)
 auto-save-period: 300
 
+#调试模式
+debug: false
+
 #接入蓬松科技
 support-fluffy-machines: true
 

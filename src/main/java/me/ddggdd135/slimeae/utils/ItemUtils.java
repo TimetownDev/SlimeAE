@@ -799,8 +799,14 @@ public class ItemUtils {
                 if (y == null) y = new ItemStack(Material.AIR);
             }
 
-            if (x.getType().isAir()) x.setAmount(0);
-            if (y.getType().isAir()) y.setAmount(0);
+            // 不要直接修改原始 ItemStack 的 amount（会破坏 CraftItemStack 的 hashCode 稳定性），
+            // 改为创建副本
+            if (x.getType().isAir()) {
+                x = new ItemStack(Material.AIR, 0);
+            }
+            if (y.getType().isAir()) {
+                y = new ItemStack(Material.AIR, 0);
+            }
 
             if (!SlimefunUtils.isItemSimilar(x, y, true, checkAmount)) {
                 return false;

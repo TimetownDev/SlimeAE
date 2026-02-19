@@ -26,6 +26,7 @@ import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
+import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -66,13 +67,57 @@ public class AutoCraftingTask implements IDisposable {
         List<CraftStep> newSteps = null;
 
         List<CraftStep> usingSteps;
+        // 强制使存储缓存失效，确保获取最新数据快照
+        // （防止 dispose 归还物品后 F3 缓存仍保存旧数据）
+        info.getStorage().invalidateStorageCache();
+        info.getStorage().clearNotIncluded();
+
+        // === 调试日志 ===
+        java.util.logging.Logger debugLog = SlimeAEPlugin.getInstance().getLogger();
+        if (SlimeAEPlugin.isDebug()) {
+            debugLog.info("[AutoCraft-Debug] === 开始创建合成任务 ===");
+            debugLog.info("[AutoCraft-Debug] 配方输出: " + ItemUtils.getItemName(recipe.getOutput()[0]) + " x" + count);
+            debugLog.info("[AutoCraft-Debug] recipe在getRecipes中: " + info.getRecipes().contains(recipe));
+            debugLog.info("[AutoCraft-Debug] getRecipes大小: " + info.getRecipes().size());
+            ItemHashMap<Long> debugSnapshot = info.getStorage().getStorageUnsafe();
+            for (Map.Entry<ItemKey, Long> de : debugSnapshot.keyEntrySet()) {
+                if (de.getValue() > 0) {
+                    debugLog.info("[AutoCraft-Debug] 存储内容: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                }
+            }
+        }
+        // === 调试日志结束 ===
+
         try {
             newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
             if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
             else throw new IllegalStateException("新版算法出错，退回旧版算法");
         } catch (Exception ignored) {
             // 新版算法出错，退回旧版算法
-            usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+            if (SlimeAEPlugin.isDebug()) {
+                debugLog.info("[AutoCraft-Debug] 新版算法异常: " + ignored.getClass().getSimpleName() + " - " + ignored.getMessage());
+                if (ignored instanceof NoEnoughMaterialsException nee) {
+                    debugLog.info("[AutoCraft-Debug] 新版算法缺失材料:");
+                    for (Map.Entry<ItemStack, Long> me : nee.getMissingMaterials().entrySet()) {
+                        debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
+                    }
+                }
+                debugLog.info("[AutoCraft-Debug] 回退到旧版算法 match()");
+            }
+            try {
+                usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+                if (SlimeAEPlugin.isDebug()) {
+                    debugLog.info("[AutoCraft-Debug] 旧版算法成功，步骤数: " + usingSteps.size());
+                }
+            } catch (NoEnoughMaterialsException matchEx) {
+                if (SlimeAEPlugin.isDebug()) {
+                    debugLog.info("[AutoCraft-Debug] 旧版算法也失败了! 缺失材料:");
+                    for (Map.Entry<ItemStack, Long> me : matchEx.getMissingMaterials().entrySet()) {
+                        debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
+                    }
+                }
+                throw matchEx;
+            }
         }
 
         craftingSteps = usingSteps;
@@ -137,14 +182,20 @@ public class AutoCraftingTask implements IDisposable {
 
         try {
             if (!info.getRecipes().contains(recipe)) {
-                // 记录直接缺少的材料
+                // 配方不可用，记录所有所需材料作为缺失
                 ItemStorage missing = new ItemStorage();
                 ItemHashMap<Long> in = recipe.getInputAmounts();
-                for (ItemStack template : in.keySet()) {
-                    long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
-                    long need = in.get(template) * count;
+                for (ItemKey key : in.sourceKeySet()) {
+                    long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
+                    long need = in.getKey(key) * count;
                     if (amount < need) {
-                        missing.addItem(new ItemKey(template), need - amount);
+                        missing.addItem(key, need - amount);
+                    }
+                }
+                // 如果所有材料够用但配方不可用，仍然报告所有输入为缺失
+                if (missing.getStorageUnsafe().isEmpty()) {
+                    for (ItemKey key : in.sourceKeySet()) {
+                        missing.addItem(key, in.getKey(key) * count);
                     }
                 }
                 throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
@@ -268,14 +319,20 @@ public class AutoCraftingTask implements IDisposable {
 
         try {
             if (!info.getRecipes().contains(recipe)) {
-                // 记录直接缺少的材料
+                // 配方不可用，记录所有所需材料作为缺失
                 ItemStorage missing = new ItemStorage();
                 ItemHashMap<Long> in = recipe.getInputAmounts();
-                for (ItemStack template : in.keySet()) {
-                    long amount = storage.getStorageUnsafe().getOrDefault(template, 0L);
-                    long need = in.get(template) * count;
+                for (ItemKey key : in.sourceKeySet()) {
+                    long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
+                    long need = in.getKey(key) * count;
                     if (amount < need) {
-                        missing.addItem(new ItemKey(template), need - amount);
+                        missing.addItem(key, need - amount);
+                    }
+                }
+                // 如果所有材料够用但配方不可用，仍然报告所有输入为缺失
+                if (missing.getStorageUnsafe().isEmpty()) {
+                    for (ItemKey key : in.sourceKeySet()) {
+                        missing.addItem(key, in.getKey(key) * count);
                     }
                 }
                 throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
@@ -284,10 +341,31 @@ public class AutoCraftingTask implements IDisposable {
             ItemStorage missing = new ItemStorage();
             ItemHashMap<Long> in = recipe.getInputAmounts();
 
+            java.util.logging.Logger cLog = SlimeAEPlugin.getInstance().getLogger();
+            if (SlimeAEPlugin.isDebug()) {
+                cLog.info("[AutoCraft-Debug] calcCraftStep: 配方=" + ItemUtils.getItemName(recipe.getOutput()[0]) + " count=" + count);
+                cLog.info("[AutoCraft-Debug] calcCraftStep: storage快照大小=" + storage.getStorageUnsafe().size() + ", input种类=" + in.size());
+            }
+
             // 遍历所需材料
             for (ItemKey key : in.sourceKeySet()) {
                 long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
                 long need = in.getKey(key) * count;
+
+                if (SlimeAEPlugin.isDebug()) {
+                    cLog.info("[AutoCraft-Debug] calcCraftStep: 材料=" + ItemUtils.getItemName(key.getItemStack())
+                        + " amount(存储中)=" + amount + " need=" + need
+                        + " keyHash=" + key.hashCode());
+                    // 额外检查：遍历 storage 的 key 看看是否有"同物品但不同hash"的情况
+                    for (Map.Entry<ItemKey, Long> se : storage.getStorageUnsafe().keyEntrySet()) {
+                        if (se.getValue() > 0) {
+                            boolean eq = key.equals(se.getKey());
+                            cLog.info("[AutoCraft-Debug]   storage key: " + ItemUtils.getItemName(se.getKey().getItemStack())
+                                + "=" + se.getValue() + " hash=" + se.getKey().hashCode()
+                                + " equals=" + eq);
+                        }
+                    }
+                }
 
                 if (amount >= need) {
                     storage.takeItem(new ItemRequest(key, need));
@@ -299,6 +377,10 @@ public class AutoCraftingTask implements IDisposable {
 
                     // 尝试合成缺少的材料
                     CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
+                    if (SlimeAEPlugin.isDebug()) {
+                        cLog.info("[AutoCraft-Debug] calcCraftStep: 尝试子合成 " + ItemUtils.getItemName(key.getItemStack())
+                            + " craftingRecipe=" + (craftingRecipe != null ? "found" : "null"));
+                    }
                     if (craftingRecipe == null) {
                         missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
                         continue;
@@ -330,6 +412,9 @@ public class AutoCraftingTask implements IDisposable {
 
             // 如果有缺少的材料就抛出异常
             if (!missing.getStorageUnsafe().isEmpty()) {
+                if (SlimeAEPlugin.isDebug()) {
+                    cLog.info("[AutoCraft-Debug] calcCraftStep: 缺失材料! 将抛出异常");
+                }
                 throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
             }
         } finally {
@@ -608,7 +693,64 @@ public class AutoCraftingTask implements IDisposable {
         Bukkit.getPluginManager().callEvent(e);
 
         info.getAutoCraftingSessions().remove(this);
-        info.getTempStorage().addItem(storage.getStorageUnsafe(), true);
+
+        // 把材料直接推回 StorageCollection（而非通过 tempStorage 间接转移），
+        // 确保物品立即回到真实存储中，避免以下问题：
+        // 1. tempStorage 的 addItem 与 updateTempStorage 的 takeItem 并发竞态导致物品丢失或不可见
+        // 2. getStorageUnsafe() 缓存 (F3) 过期导致快照中不含已归还物品
+        // 3. notIncluded 负面缓存导致 takeItem/contains 错误跳过已归还物品
+        ItemHashMap<Long> toReturn = new ItemHashMap<>(storage.getStorageUnsafe());
+
+        // === 调试日志 ===
+        java.util.logging.Logger debugLog = SlimeAEPlugin.getInstance().getLogger();
+        if (SlimeAEPlugin.isDebug()) {
+            debugLog.info("[AutoCraft-Debug] === dispose() 开始归还物品 ===");
+            for (Map.Entry<ItemKey, Long> de : toReturn.keyEntrySet()) {
+                if (de.getValue() > 0) {
+                    debugLog.info("[AutoCraft-Debug] 待归还: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                }
+            }
+        }
+        // === 调试日志结束 ===
+
+        StorageCollection currentStorage = info.getStorage();
+        currentStorage.clearNotIncluded();
+        currentStorage.clearTakeAndPushCache();
+        currentStorage.pushItem(toReturn);
+        // pushItem 会将剩余量写回 toReturn 的 entry 中，
+        // 推不进去的物品放入 tempStorage 作为后备
+        ItemUtils.trim(toReturn);
+
+        // === 调试日志 ===
+        if (!toReturn.isEmpty()) {
+            if (SlimeAEPlugin.isDebug()) {
+                debugLog.info("[AutoCraft-Debug] pushItem后仍有剩余（将放入tempStorage）:");
+                for (Map.Entry<ItemKey, Long> de : toReturn.keyEntrySet()) {
+                    debugLog.info("[AutoCraft-Debug]   剩余: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                }
+            }
+            info.getTempStorage().addItem(toReturn, true);
+        } else {
+            if (SlimeAEPlugin.isDebug()) {
+                debugLog.info("[AutoCraft-Debug] 所有物品已成功推回存储");
+            }
+        }
+        // === 调试日志结束 ===
+
+        currentStorage.invalidateStorageCache();
+
+        // === 调试日志: 验证归还后存储 ===
+        if (SlimeAEPlugin.isDebug()) {
+            currentStorage.invalidateStorageCache();
+            ItemHashMap<Long> afterReturn = currentStorage.getStorageUnsafe();
+            debugLog.info("[AutoCraft-Debug] 归还后存储快照:");
+            for (Map.Entry<ItemKey, Long> de : afterReturn.keyEntrySet()) {
+                if (de.getValue() > 0) {
+                    debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                }
+            }
+            debugLog.info("[AutoCraft-Debug] === dispose() 完成 ===");
+        }
 
         Bukkit.getScheduler()
                 .runTask(SlimeAEPlugin.getInstance(), () -> menu.getInventory().close());

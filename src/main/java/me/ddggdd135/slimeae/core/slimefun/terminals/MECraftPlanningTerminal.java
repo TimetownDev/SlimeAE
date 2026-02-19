@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.core.slimefun.terminals;
 
-import com.balugaq.jeg.api.groups.SearchGroup;
 import com.balugaq.jeg.implementation.JustEnoughGuide;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -11,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.*;
+import java.util.HashSet;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
@@ -241,9 +241,11 @@ public class MECraftPlanningTerminal extends METerminal {
         if (filter.isEmpty()) return;
         if (SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded()) {
             boolean isPinyinSearch = JustEnoughGuide.getConfigManager().isPinyinSearch();
-            SearchGroup group = new SearchGroup(null, player, filter, isPinyinSearch);
-            List<SlimefunItem> slimefunItems = group.filterItems(player, filter, isPinyinSearch);
-            entries.removeIf(entry -> doFilterWithJEG(entry.getItemStack(), slimefunItems, filter));
+            // F1: 使用缓存的搜索结果
+            List<SlimefunItem> slimefunItemsList = getCachedFilterItems(player, filter, isPinyinSearch);
+            // F4: List→HashSet 优化 contains 查找为 O(1)
+            Set<SlimefunItem> slimefunItemSet = new HashSet<>(slimefunItemsList);
+            entries.removeIf(entry -> doFilterWithJEG(entry.getItemStack(), slimefunItemSet, filter));
         } else {
             entries.removeIf(entry -> doFilterNoJEG(entry.getItemStack(), filter));
         }
