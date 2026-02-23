@@ -31,3 +31,6 @@ target/
 
 .git-versioned-pom.xml
 .dependency-reduced-pom.xml
+
+# Addon Files
+/NetworksExpansion/

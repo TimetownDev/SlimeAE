@@ -75,8 +75,19 @@ public class QuantumStorage implements IStorage {
             return;
         }
         if (StackUtils.itemsMatch(quantumCache, itemStack)) {
-            int leftover = quantumCache.increaseAmount(itemStack.getAmount());
-            itemStack.setAmount(leftover);
+            long toDeposit = itemInfo.getAmount();
+            long remaining = toDeposit;
+            // increaseAmount 接受 int，需要分批推入
+            while (remaining > 0) {
+                int batch = (int) Math.min(remaining, Integer.MAX_VALUE);
+                int leftover = quantumCache.increaseAmount(batch);
+                remaining = remaining - batch + leftover;
+                // 如果有放不下的，说明已满，停止推入
+                if (leftover > 0) {
+                    break;
+                }
+            }
+            itemInfo.setAmount(remaining);
         }
     }
 

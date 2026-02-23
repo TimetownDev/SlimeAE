@@ -4,7 +4,7 @@
   <groupId>me.ddggdd135.slimeae</groupId>
   <artifactId>SlimeAE</artifactId>
   <name>SlimeAEPlugin</name>
-  <version>465b8c7-Beta</version>
+  <version>c522bd5-Beta</version>
   <build>
     <defaultGoal>clean package</defaultGoal>
     <resources>
@@ -196,12 +196,12 @@
   <properties>
     <git.ref.slug>master</git.ref.slug>
     <java.version>16</java.version>
-    <git.commit.timestamp>1770537967</git.commit.timestamp>
+    <git.commit.timestamp>1771520455</git.commit.timestamp>
     <git.ref>master</git.ref>
-    <git.commit.short>465b8c7</git.commit.short>
-    <git.commit.timestamp.datetime>2026-02-08T08:06:07Z</git.commit.timestamp.datetime>
+    <git.commit.short>c522bd5</git.commit.short>
+    <git.commit.timestamp.datetime>2026-02-19T17:00:55Z</git.commit.timestamp.datetime>
     <git.worktree>D:\minecraft\aa\sf\SlimeAE</git.worktree>
-    <git.commit>465b8c71082a3853ffecca870704a6985bf91f30</git.commit>
+    <git.commit>c522bd5493c69604f0d7b48d3501f3ecbd50c744</git.commit>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
