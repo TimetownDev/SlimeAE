@@ -77,12 +77,14 @@ public class AutoCraftingTask implements IDisposable {
         if (SlimeAEPlugin.isDebug()) {
             debugLog.info("[AutoCraft-Debug] === 开始创建合成任务 ===");
             debugLog.info("[AutoCraft-Debug] 配方输出: " + ItemUtils.getItemName(recipe.getOutput()[0]) + " x" + count);
-            debugLog.info("[AutoCraft-Debug] recipe在getRecipes中: " + info.getRecipes().contains(recipe));
+            debugLog.info(
+                    "[AutoCraft-Debug] recipe在getRecipes中: " + info.getRecipes().contains(recipe));
             debugLog.info("[AutoCraft-Debug] getRecipes大小: " + info.getRecipes().size());
             ItemHashMap<Long> debugSnapshot = info.getStorage().getStorageUnsafe();
             for (Map.Entry<ItemKey, Long> de : debugSnapshot.keyEntrySet()) {
                 if (de.getValue() > 0) {
-                    debugLog.info("[AutoCraft-Debug] 存储内容: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                    debugLog.info("[AutoCraft-Debug] 存储内容: "
+                            + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
                 }
             }
         }
@@ -95,11 +97,14 @@ public class AutoCraftingTask implements IDisposable {
         } catch (Exception ignored) {
             // 新版算法出错，退回旧版算法
             if (SlimeAEPlugin.isDebug()) {
-                debugLog.info("[AutoCraft-Debug] 新版算法异常: " + ignored.getClass().getSimpleName() + " - " + ignored.getMessage());
+                debugLog.info("[AutoCraft-Debug] 新版算法异常: " + ignored.getClass().getSimpleName() + " - "
+                        + ignored.getMessage());
                 if (ignored instanceof NoEnoughMaterialsException nee) {
                     debugLog.info("[AutoCraft-Debug] 新版算法缺失材料:");
-                    for (Map.Entry<ItemStack, Long> me : nee.getMissingMaterials().entrySet()) {
-                        debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
+                    for (Map.Entry<ItemStack, Long> me :
+                            nee.getMissingMaterials().entrySet()) {
+                        debugLog.info(
+                                "[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
                     }
                 }
                 debugLog.info("[AutoCraft-Debug] 回退到旧版算法 match()");
@@ -112,8 +117,10 @@ public class AutoCraftingTask implements IDisposable {
             } catch (NoEnoughMaterialsException matchEx) {
                 if (SlimeAEPlugin.isDebug()) {
                     debugLog.info("[AutoCraft-Debug] 旧版算法也失败了! 缺失材料:");
-                    for (Map.Entry<ItemStack, Long> me : matchEx.getMissingMaterials().entrySet()) {
-                        debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
+                    for (Map.Entry<ItemStack, Long> me :
+                            matchEx.getMissingMaterials().entrySet()) {
+                        debugLog.info(
+                                "[AutoCraft-Debug]   " + ItemUtils.getItemName(me.getKey()) + " x " + me.getValue());
                     }
                 }
                 throw matchEx;
@@ -343,8 +350,10 @@ public class AutoCraftingTask implements IDisposable {
 
             java.util.logging.Logger cLog = SlimeAEPlugin.getInstance().getLogger();
             if (SlimeAEPlugin.isDebug()) {
-                cLog.info("[AutoCraft-Debug] calcCraftStep: 配方=" + ItemUtils.getItemName(recipe.getOutput()[0]) + " count=" + count);
-                cLog.info("[AutoCraft-Debug] calcCraftStep: storage快照大小=" + storage.getStorageUnsafe().size() + ", input种类=" + in.size());
+                cLog.info("[AutoCraft-Debug] calcCraftStep: 配方=" + ItemUtils.getItemName(recipe.getOutput()[0])
+                        + " count=" + count);
+                cLog.info("[AutoCraft-Debug] calcCraftStep: storage快照大小="
+                        + storage.getStorageUnsafe().size() + ", input种类=" + in.size());
             }
 
             // 遍历所需材料
@@ -354,15 +363,18 @@ public class AutoCraftingTask implements IDisposable {
 
                 if (SlimeAEPlugin.isDebug()) {
                     cLog.info("[AutoCraft-Debug] calcCraftStep: 材料=" + ItemUtils.getItemName(key.getItemStack())
-                        + " amount(存储中)=" + amount + " need=" + need
-                        + " keyHash=" + key.hashCode());
+                            + " amount(存储中)=" + amount + " need=" + need
+                            + " keyHash=" + key.hashCode());
                     // 额外检查：遍历 storage 的 key 看看是否有"同物品但不同hash"的情况
-                    for (Map.Entry<ItemKey, Long> se : storage.getStorageUnsafe().keyEntrySet()) {
+                    for (Map.Entry<ItemKey, Long> se :
+                            storage.getStorageUnsafe().keyEntrySet()) {
                         if (se.getValue() > 0) {
                             boolean eq = key.equals(se.getKey());
-                            cLog.info("[AutoCraft-Debug]   storage key: " + ItemUtils.getItemName(se.getKey().getItemStack())
-                                + "=" + se.getValue() + " hash=" + se.getKey().hashCode()
-                                + " equals=" + eq);
+                            cLog.info("[AutoCraft-Debug]   storage key: "
+                                    + ItemUtils.getItemName(se.getKey().getItemStack())
+                                    + "=" + se.getValue() + " hash="
+                                    + se.getKey().hashCode()
+                                    + " equals=" + eq);
                         }
                     }
                 }
@@ -379,7 +391,7 @@ public class AutoCraftingTask implements IDisposable {
                     CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
                     if (SlimeAEPlugin.isDebug()) {
                         cLog.info("[AutoCraft-Debug] calcCraftStep: 尝试子合成 " + ItemUtils.getItemName(key.getItemStack())
-                            + " craftingRecipe=" + (craftingRecipe != null ? "found" : "null"));
+                                + " craftingRecipe=" + (craftingRecipe != null ? "found" : "null"));
                     }
                     if (craftingRecipe == null) {
                         missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
@@ -707,7 +719,8 @@ public class AutoCraftingTask implements IDisposable {
             debugLog.info("[AutoCraft-Debug] === dispose() 开始归还物品 ===");
             for (Map.Entry<ItemKey, Long> de : toReturn.keyEntrySet()) {
                 if (de.getValue() > 0) {
-                    debugLog.info("[AutoCraft-Debug] 待归还: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                    debugLog.info("[AutoCraft-Debug] 待归还: "
+                            + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
                 }
             }
         }
@@ -726,7 +739,8 @@ public class AutoCraftingTask implements IDisposable {
             if (SlimeAEPlugin.isDebug()) {
                 debugLog.info("[AutoCraft-Debug] pushItem后仍有剩余（将放入tempStorage）:");
                 for (Map.Entry<ItemKey, Long> de : toReturn.keyEntrySet()) {
-                    debugLog.info("[AutoCraft-Debug]   剩余: " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                    debugLog.info("[AutoCraft-Debug]   剩余: "
+                            + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
                 }
             }
             info.getTempStorage().addItem(toReturn, true);
@@ -746,7 +760,8 @@ public class AutoCraftingTask implements IDisposable {
             debugLog.info("[AutoCraft-Debug] 归还后存储快照:");
             for (Map.Entry<ItemKey, Long> de : afterReturn.keyEntrySet()) {
                 if (de.getValue() > 0) {
-                    debugLog.info("[AutoCraft-Debug]   " + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
+                    debugLog.info("[AutoCraft-Debug]   "
+                            + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
                 }
             }
             debugLog.info("[AutoCraft-Debug] === dispose() 完成 ===");

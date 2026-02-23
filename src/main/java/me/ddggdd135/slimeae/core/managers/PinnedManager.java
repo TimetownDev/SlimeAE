@@ -286,8 +286,7 @@ public class PinnedManager implements IManager {
         }
     }
 
-    @Nullable
-    private <T, R> R operateController(@Nonnull Function<ProfileDataController, R> function) {
+    @Nullable private <T, R> R operateController(@Nonnull Function<ProfileDataController, R> function) {
         if (controller != null) {
             return function.apply(controller);
         }

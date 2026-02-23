@@ -24,8 +24,7 @@ public final class PinyinCache {
      */
     @Nonnull
     public static String toPinyinFull(@Nonnull String text) {
-        return pinyinFullCache.computeIfAbsent(text,
-            k -> PinyinHelper.toPinyin(k, PinyinStyleEnum.INPUT, ""));
+        return pinyinFullCache.computeIfAbsent(text, k -> PinyinHelper.toPinyin(k, PinyinStyleEnum.INPUT, ""));
     }
 
     /**
@@ -36,8 +35,8 @@ public final class PinyinCache {
      */
     @Nonnull
     public static String toPinyinFirstLetter(@Nonnull String text) {
-        return pinyinFirstLetterCache.computeIfAbsent(text,
-            k -> PinyinHelper.toPinyin(k, PinyinStyleEnum.FIRST_LETTER, ""));
+        return pinyinFirstLetterCache.computeIfAbsent(
+                text, k -> PinyinHelper.toPinyin(k, PinyinStyleEnum.FIRST_LETTER, ""));
     }
 
     /**

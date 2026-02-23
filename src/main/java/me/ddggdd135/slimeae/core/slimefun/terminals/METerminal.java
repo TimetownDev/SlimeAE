@@ -230,7 +230,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         int pinnedCount = 0;
 
         if (cachedResult != null
-                && cachedResult.isValid(filter, sortId, storageSize, storageTotalAmount, storage instanceof CreativeItemMap)) {
+                && cachedResult.isValid(
+                        filter, sortId, storageSize, storageTotalAmount, storage instanceof CreativeItemMap)) {
             // F5+F7: 缓存命中，数据未变化，复用上次的过滤+排序结果
             items = cachedResult.items;
             pinnedCount = cachedResult.pinnedCount;
@@ -266,8 +267,16 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             }
 
             // 更新缓存
-            sortedItemsCacheMap.put(loc, new SortedItemsCache(
-                    filter, sortId, storageSize, storageTotalAmount, storage instanceof CreativeItemMap, items, pinnedCount));
+            sortedItemsCacheMap.put(
+                    loc,
+                    new SortedItemsCache(
+                            filter,
+                            sortId,
+                            storageSize,
+                            storageTotalAmount,
+                            storage instanceof CreativeItemMap,
+                            items,
+                            pinnedCount));
         }
 
         // 计算分页
@@ -323,9 +332,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 continue; // 跳过未变化的槽位
             }
 
-            blockMenu.replaceExistingItem(
-                    slot,
-                    ItemUtils.createDisplayItem(itemStack, amount, true, isPinned));
+            blockMenu.replaceExistingItem(slot, ItemUtils.createDisplayItem(itemStack, amount, true, isPinned));
             blockMenu.addMenuClickHandler(slot, handleGuiClick(block, blockMenu, itemStack));
             slotCache.update(slot, itemStack, amount, isPinned);
         }
@@ -614,8 +621,14 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         final long createTime;
         private static final long CACHE_TTL = 500; // 500ms 缓存超时
 
-        SortedItemsCache(String filter, int sortId, int storageSize, long storageTotalAmount,
-                         boolean isCreative, List<Map.Entry<ItemStack, Long>> items, int pinnedCount) {
+        SortedItemsCache(
+                String filter,
+                int sortId,
+                int storageSize,
+                long storageTotalAmount,
+                boolean isCreative,
+                List<Map.Entry<ItemStack, Long>> items,
+                int pinnedCount) {
             this.filter = filter;
             this.sortId = sortId;
             this.storageSize = storageSize;
