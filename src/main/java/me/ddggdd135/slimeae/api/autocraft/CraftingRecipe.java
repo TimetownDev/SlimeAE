@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.api.autocraft;
 
-import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
