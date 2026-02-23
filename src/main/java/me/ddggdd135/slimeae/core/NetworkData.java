@@ -121,6 +121,16 @@ public class NetworkData {
             }
         }
 
+        // 先计算新的配方缓存快照
+        Set<CraftingRecipe> newCachedRecipes = new HashSet<>();
+        for (Set<CraftingRecipe> recipes : newRecipeMap.values()) {
+            newCachedRecipes.addAll(recipes);
+        }
+
+        // 原子地替换底层数据：先设置 F9 缓存快照，使 getRecipes() 返回新结果，
+        // 然后再更新底层数据结构。这避免了 clear()+putAll() 之间的竞态条件。
+        info.setRecipeCache(Collections.unmodifiableSet(newCachedRecipes));
+
         info.getCraftingHolders().clear();
         info.getCraftingHolders().addAll(newCraftingHolders);
         info.getRecipeMap().clear();

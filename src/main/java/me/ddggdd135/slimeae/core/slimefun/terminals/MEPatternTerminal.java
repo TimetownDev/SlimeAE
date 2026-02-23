@@ -210,6 +210,8 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
                     blockMenu.dropItems(b.getLocation(), getPatternSlot());
                     blockMenu.dropItems(b.getLocation(), getPatternOutputSlot());
                 }
+                // 清理缓存，防止内存泄漏
+                clearSortedItemsCache(b.getLocation());
             }
         };
     }

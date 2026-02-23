@@ -6,14 +6,13 @@ import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.utils.CraftItemStackUtils;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftingRecipe {
     private final CraftType craftType;
     private final ItemStack[] input;
     private final ItemStack[] output;
-    private ItemHashMap<Long> inputAmounts;
-    private ItemHashMap<Long> outputAmounts;
 
     public CraftingRecipe(@Nonnull CraftType craftType, @Nonnull ItemStack[] input, @Nonnull ItemStack[] output) {
         this.craftType = craftType;
@@ -42,16 +41,32 @@ public class CraftingRecipe {
 
     @Nonnull
     public ItemHashMap<Long> getInputAmounts() {
-        if (inputAmounts == null) inputAmounts = ItemUtils.getAmounts(input);
-
-        return inputAmounts;
+        return ItemUtils.getAmounts(toBukkitCopy(input));
     }
 
     @Nonnull
     public ItemHashMap<Long> getOutputAmounts() {
-        if (outputAmounts == null) outputAmounts = ItemUtils.getAmounts(output);
+        return ItemUtils.getAmounts(toBukkitCopy(output));
+    }
 
-        return outputAmounts;
+    /**
+     * 将 CraftItemStack 数组转换为纯 Bukkit ItemStack 数组。
+     * 避免 ItemKey 内部持有 CraftItemStack 的 NMS 引用，
+     * 防止 NMS 对象被外部操作修改导致 ItemKey.equals() 失效。
+     */
+    private static ItemStack[] toBukkitCopy(ItemStack[] craftStacks) {
+        ItemStack[] result = new ItemStack[craftStacks.length];
+        for (int i = 0; i < craftStacks.length; i++) {
+            ItemStack cs = craftStacks[i];
+            if (cs == null || cs.getType().isAir()) {
+                result[i] = new ItemStack(Material.AIR);
+            } else {
+                // 使用 new ItemStack(cs) 创建纯 Bukkit ItemStack 副本，
+                // 与 CraftItemStack 完全解耦
+                result[i] = new ItemStack(cs);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -67,8 +82,26 @@ public class CraftingRecipe {
     @Override
     public int hashCode() {
         int result = Objects.hash(craftType);
-        result = 31 * result + Arrays.hashCode(input);
-        result = 31 * result + Arrays.hashCode(output);
+        result = 31 * result + stableArrayHashCode(input);
+        result = 31 * result + stableArrayHashCode(output);
         return result;
+    }
+
+    /**
+     * 计算 ItemStack 数组的稳定 hashCode。
+     * 对 AIR 类型统一使用固定 hashCode（与 equals 中 AIR amount=0 的处理保持一致），
+     * 避免因 CraftItemStack 的可变 amount 导致 hashCode 不稳定。
+     */
+    private static int stableArrayHashCode(ItemStack[] array) {
+        if (array == null) return 0;
+        int h = 1;
+        for (ItemStack item : array) {
+            if (item == null || item.getType().isAir()) {
+                h = 31 * h; // AIR/null 统一为 0
+            } else {
+                h = 31 * h + item.hashCode();
+            }
+        }
+        return h;
     }
 }

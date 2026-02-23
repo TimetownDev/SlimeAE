@@ -7,6 +7,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -30,11 +32,18 @@ public class PinnedManager implements IManager {
             Slimefun.getDatabaseManager().getProfileDataController();
     private final NamespacedKey PINNED_KEY;
 
+    // === F6: 置顶物品查询缓存 ===
+    private final ConcurrentHashMap<UUID, List<ItemStack>> pinnedCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long> pinnedCacheTime = new ConcurrentHashMap<>();
+    private static final long PINNED_CACHE_TTL = 3000; // 3秒 TTL
+
     public PinnedManager() {
         this.PINNED_KEY = new NamespacedKey(SlimeAEPlugin.getInstance(), "pinned");
     }
 
     public void addPinned(@Nonnull Player player, @Nonnull ItemStack itemStack) {
+        // F6: 主动使缓存失效
+        invalidatePinnedCache(player);
         PlayerBackpack backpack = getOrCreateBookmarkBackpack(player);
         if (backpack == null) {
             return;
@@ -44,6 +53,8 @@ public class PinnedManager implements IManager {
     }
 
     public void removePinned(@Nonnull Player player, @Nonnull ItemStack itemStack) {
+        // F6: 主动使缓存失效
+        invalidatePinnedCache(player);
         PlayerBackpack backpack = getOrCreateBookmarkBackpack(player);
         if (backpack == null) {
             return;
@@ -104,6 +115,40 @@ public class PinnedManager implements IManager {
     }
 
     @Nullable public List<ItemStack> getPinnedItems(@Nonnull Player player) {
+        // F6: 检查缓存
+        UUID uuid = player.getUniqueId();
+        Long cachedTime = pinnedCacheTime.get(uuid);
+        if (cachedTime != null && (System.currentTimeMillis() - cachedTime) < PINNED_CACHE_TTL) {
+            List<ItemStack> cached = pinnedCache.get(uuid);
+            if (cached != null) return cached;
+        }
+
+        List<ItemStack> result = getPinnedItemsInternal(player);
+
+        // 缓存结果（包括null，用空列表代替）
+        pinnedCache.put(uuid, result != null ? result : new ArrayList<>());
+        pinnedCacheTime.put(uuid, System.currentTimeMillis());
+        return result;
+    }
+
+    /**
+     * 使指定玩家的置顶缓存失效
+     */
+    public void invalidatePinnedCache(@Nonnull Player player) {
+        UUID uuid = player.getUniqueId();
+        pinnedCache.remove(uuid);
+        pinnedCacheTime.remove(uuid);
+    }
+
+    /**
+     * 清空所有置顶缓存
+     */
+    public void clearPinnedCache() {
+        pinnedCache.clear();
+        pinnedCacheTime.clear();
+    }
+
+    @Nullable private List<ItemStack> getPinnedItemsInternal(@Nonnull Player player) {
         PlayerBackpack backpack = getPinnedBackpack(player);
         if (backpack == null) {
             return null;
@@ -241,7 +286,8 @@ public class PinnedManager implements IManager {
         }
     }
 
-    private <T, R> @Nullable R operateController(@Nonnull Function<ProfileDataController, R> function) {
+    @Nullable
+    private <T, R> R operateController(@Nonnull Function<ProfileDataController, R> function) {
         if (controller != null) {
             return function.apply(controller);
         }
