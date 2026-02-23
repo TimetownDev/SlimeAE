@@ -30,7 +30,7 @@ replay_pid*
 target/
 
 .git-versioned-pom.xml
-.dependency-reduced-pom.xml
+dependency-reduced-pom.xml
 
 # Addon Files
 /NetworksExpansion/
