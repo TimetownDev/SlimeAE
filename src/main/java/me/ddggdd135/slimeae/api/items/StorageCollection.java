@@ -94,10 +94,12 @@ public class StorageCollection implements IStorage {
         // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
         if (notIncluded.contains(key)) notIncluded.remove(key);
 
+        int amountBefore = itemStack.getAmount();
         IStorage pushStorage = pushCache.get(key.getType());
         if (pushStorage != null) {
             pushStorage.pushItem(itemStackCache);
-            invalidateStorageCache();
+            int pushed = amountBefore - itemStack.getAmount();
+            if (pushed > 0) adjustCache(key, pushed);
         }
 
         if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
@@ -117,9 +119,11 @@ public class StorageCollection implements IStorage {
                 .reversed());
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
+            int beforeAmount = itemStack.getAmount();
             storage.left().pushItem(itemStackCache);
             pushCache.put(key.getType(), storage.left());
-            invalidateStorageCache();
+            int pushed = beforeAmount - itemStack.getAmount();
+            if (pushed > 0) adjustCache(key, pushed);
             if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
         }
     }
@@ -130,10 +134,12 @@ public class StorageCollection implements IStorage {
         // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
         if (notIncluded.contains(key)) notIncluded.remove(key);
 
+        long amountBefore = itemInfo.getAmount();
         IStorage pushStorage = pushCache.get(key.getType());
         if (pushStorage != null) {
             pushStorage.pushItem(itemInfo);
-            invalidateStorageCache();
+            long pushed = amountBefore - itemInfo.getAmount();
+            if (pushed > 0) adjustCache(key, pushed);
         }
 
         if (itemInfo.isEmpty()) return;
@@ -153,8 +159,10 @@ public class StorageCollection implements IStorage {
                 .reversed());
 
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
+            long beforeAmount = itemInfo.getAmount();
             storage.left().pushItem(itemInfo);
-            invalidateStorageCache();
+            long pushed = beforeAmount - itemInfo.getAmount();
+            if (pushed > 0) adjustCache(key, pushed);
             if (itemInfo.isEmpty()) return;
         }
     }
@@ -212,7 +220,14 @@ public class StorageCollection implements IStorage {
             if (rest.keySet().isEmpty()) break;
         }
         notIncluded.addAll(rest.sourceKeySet());
-        invalidateStorageCache();
+        // 性能优化：使用增量更新而非完全重建缓存
+        ItemHashMap<Long> foundStorage = found.getStorageUnsafe();
+        for (ItemKey key : foundStorage.sourceKeySet()) {
+            Long takenAmount = foundStorage.getKey(key);
+            if (takenAmount != null && takenAmount > 0) {
+                adjustCache(key, -takenAmount);
+            }
+        }
 
         return found;
     }
@@ -222,6 +237,24 @@ public class StorageCollection implements IStorage {
      */
     public void invalidateStorageCache() {
         cachedStorage = null;
+    }
+
+    /**
+     * F3+: 增量更新缓存，避免完全重建。
+     * 当已知某个物品的数量变化量时，直接在缓存上调整，而不是丢弃整个缓存。
+     * @param key 变化的物品
+     * @param delta 数量变化（正值=增加，负值=减少）
+     */
+    private void adjustCache(@Nonnull ItemKey key, long delta) {
+        ItemHashMap<Long> cached = cachedStorage;
+        if (cached == null || cached instanceof CreativeItemMap) return;
+        Long current = cached.getKey(key);
+        long newValue = (current != null ? current : 0L) + delta;
+        if (newValue <= 0) {
+            cached.removeKey(key);
+        } else {
+            cached.putKey(key, newValue);
+        }
     }
 
     /**
