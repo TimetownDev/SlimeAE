@@ -75,6 +75,10 @@ public class MenuItems {
     public static final SlimefunItemStack JEG_FINDING_BUTTON = new SlimefunItemStack(
             "_AE_JEG_FINDING_BUTTON_",
             new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "&6高级物品查找", "&7点击打开高级物品查找界面"));
+    public static final SlimefunItemStack JEG_PATTERN_ENCODE_BUTTON = new SlimefunItemStack(
+            "_AE_JEG_PATTERN_ENCODE_BUTTON_",
+            new AdvancedCustomItemStack(
+                    Material.KNOWLEDGE_BOOK, "&6配方编码", "&7点击打开粘液科技指南", "&7选择物品后自动编码样板"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
 
     static {

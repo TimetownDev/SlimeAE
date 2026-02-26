@@ -1,10 +1,12 @@
 package me.ddggdd135.slimeae.core.slimefun;
 
+import com.balugaq.jeg.utils.GuideUtil;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
@@ -14,11 +16,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
+import me.ddggdd135.slimeae.core.listeners.JEGCompatibleListener;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -39,7 +44,11 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
     }
 
     public int[] getBorderSlots() {
-        return new int[] {30, 31, 32, 33, 34, 35, 40, 44, 48, 49, 50, 52, 53};
+        return new int[] {30, 31, 32, 33, 34, 35, 44, 48, 49, 50, 52, 53};
+    }
+
+    public int getGuideEncodeSlot() {
+        return 40;
     }
 
     @Override
@@ -105,6 +114,29 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             return false;
         });
 
+        if (SlimeAEPlugin.getJustEnoughGuideIntegration().isLoaded()) {
+            blockMenu.replaceExistingItem(getGuideEncodeSlot(), MenuItems.JEG_PATTERN_ENCODE_BUTTON);
+            blockMenu.addMenuClickHandler(getGuideEncodeSlot(), (player, i, itemStack, clickAction) -> {
+                GuideUtil.openMainMenuAsync(player, SlimefunGuideMode.SURVIVAL_MODE, 1);
+                JEGCompatibleListener.addCallback(player.getUniqueId(), ((event, profile) -> {
+                    BlockMenu actualMenu = StorageCacheUtils.getMenu(block.getLocation());
+                    if (actualMenu == null) return;
+                    if (!actualMenu
+                            .getPreset()
+                            .getID()
+                            .equals(blockMenu.getPreset().getID())) return;
+
+                    encodePatternFromGuide(actualMenu, event.getClickedItem());
+                    event.setCancelled(true);
+
+                    player.updateInventory();
+                    actualMenu.open(player);
+                }));
+                JEGCompatibleListener.tagGuideOpen(player);
+                return false;
+            });
+        }
+
         blockMenu.replaceExistingItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
         blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
             ItemStack craftingTypeItem = blockMenu.getItemInSlot(i);
@@ -145,7 +177,6 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
             Pattern.setRecipe(toOut, recipe);
         } else if (SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.LARGE, true)) {
-            // 大型配方模式：根据输出槽中的物品匹配大型配方
             ItemStack[] outputItems = Arrays.stream(getCraftOutputSlots())
                     .mapToObj(blockMenu::getItemInSlot)
                     .filter(Objects::nonNull)
@@ -185,6 +216,21 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             in.subtract();
             Pattern.setRecipe(toOut, recipe);
         }
+        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+    }
+
+    private void encodePatternFromGuide(@Nonnull BlockMenu blockMenu, @Nullable ItemStack clickedItem) {
+        if (clickedItem == null || clickedItem.getType().isAir()) return;
+        ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
+        if (out != null && !out.getType().isAir()) return;
+        ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
+        if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
+        CraftingRecipe recipe = RecipeUtils.getRecipe(clickedItem);
+        if (recipe == null) return;
+        ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
+        toOut.setAmount(1);
+        in.subtract();
+        Pattern.setRecipe(toOut, recipe);
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 
