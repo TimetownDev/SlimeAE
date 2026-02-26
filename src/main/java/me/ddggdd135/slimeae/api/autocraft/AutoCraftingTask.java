@@ -594,10 +594,9 @@ public class AutoCraftingTask implements IDisposable {
             process2 = process.subList(maxSize, process.size());
             process = process.subList(0, maxSize);
         }
-        for (int i = 0; i < maxSize; i++) {
-            menu.replaceExistingItem(i, null);
-            menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
-        }
+
+        int filledUpTo = -1;
+
         for (int i = 0; i < process.size(); i++) {
             CraftStep item = process.get(i);
             ItemStack[] itemStacks = item.getRecipe().getOutput();
@@ -623,8 +622,9 @@ public class AutoCraftingTask implements IDisposable {
             NBT.modify(itemStack, x -> {
                 x.setBoolean(CRAFTING_KEY, true);
             });
-            menu.addItem(i, itemStack);
+            menu.replaceExistingItem(i, itemStack);
             menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
+            filledUpTo = i;
         }
         // 优化，防止任务依赖配方过多时 lore 超限
         if (!process2.isEmpty()) {
@@ -658,11 +658,19 @@ public class AutoCraftingTask implements IDisposable {
             NBT.modify(itemStack, x -> {
                 x.setBoolean(CRAFTING_KEY, true);
             });
-            menu.addItem(maxSize - 1, itemStack);
+            menu.replaceExistingItem(maxSize - 1, itemStack);
+            menu.addMenuClickHandler(maxSize - 1, ChestMenuUtils.getEmptyClickHandler());
+            filledUpTo = maxSize - 1;
+        }
+
+        // 只清空多余的槽位（之前有内容但现在不再需要的位置），避免闪烁
+        for (int i = filledUpTo + 1; i < maxSize; i++) {
+            menu.replaceExistingItem(i, null);
+            menu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
         }
 
         if (cancelButton) {
-            menu.addItem(maxSize, MenuItems.CANCEL);
+            menu.replaceExistingItem(maxSize, MenuItems.CANCEL);
             menu.addMenuClickHandler(maxSize, (player, i1, itemStack, clickAction) -> {
                 if (isCancelling) {
                     dispose();

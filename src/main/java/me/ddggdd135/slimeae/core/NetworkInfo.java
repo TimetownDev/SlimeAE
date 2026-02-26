@@ -213,16 +213,9 @@ public class NetworkInfo implements IDisposable {
     }
 
     public void updateAutoCraftingMenu() {
-        for (ItemStack content : autoCraftingMenu.getContents()) {
-            if (content == null) continue;
-            content.setType(Material.AIR);
-        }
         List<AutoCraftingTask> tasks = getAutoCraftingSessions().toList();
         if (tasks.size() > 53) tasks = tasks.subList(tasks.size() - 53, tasks.size());
-        for (int i = 0; i < 54; i++) {
-            autoCraftingMenu.replaceExistingItem(i, null);
-            autoCraftingMenu.addMenuClickHandler(i, ChestMenuUtils.getEmptyClickHandler());
-        }
+
         int i = 0;
         for (AutoCraftingTask task : tasks) {
             ItemStack[] itemStacks = task.getRecipe().getOutput();
@@ -253,6 +246,11 @@ public class NetworkInfo implements IDisposable {
                 return false;
             });
             i++;
+        }
+
+        for (int j = i; j < 54; j++) {
+            autoCraftingMenu.replaceExistingItem(j, null);
+            autoCraftingMenu.addMenuClickHandler(j, ChestMenuUtils.getEmptyClickHandler());
         }
         autoCraftingMenu.getContents();
     }

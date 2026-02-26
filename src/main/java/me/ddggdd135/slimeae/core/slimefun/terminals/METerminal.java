@@ -220,8 +220,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         Location loc = block.getLocation();
         int storageSize = storage.size();
         long storageTotalAmount = 0;
-        for (Map.Entry<ItemStack, Long> e : storage.entrySet()) {
-            storageTotalAmount += e.getValue();
+        for (Long v : storage.values()) {
+            storageTotalAmount += v;
         }
 
         // F7: 检查排序结果缓存
@@ -363,9 +363,8 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                         if (pinned == null) pinned = new ArrayList<>();
                         if (!pinned.contains(template.asOne())) pinnedManager.addPinned(player, template);
                         else pinnedManager.removePinned(player, template);
-                        // F7: 置顶变化，使排序缓存失效
+                        // F7: 置顶变化，使排序缓存失效，让 tick 刷新 GUI
                         clearSortedItemsCache(block.getLocation());
-                        updateGui(block);
                         return false;
                     }
 
@@ -390,7 +389,9 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                         }
                     }
                 }
-                updateGui(block);
+                // 性能优化：不再在每次点击后立即调用 updateGui，
+                // 让 tick 循环自然刷新 GUI，避免快速点击导致的 TPS 骤降
+                clearSortedItemsCache(block.getLocation());
                 return false;
             }
 
