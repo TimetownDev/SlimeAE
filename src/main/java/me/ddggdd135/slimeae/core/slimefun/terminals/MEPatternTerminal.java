@@ -127,9 +127,12 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
         blockMenu.replaceExistingItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
         blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
             ItemStack craftingTypeItem = blockMenu.getItemInSlot(i);
-            if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true))
-                blockMenu.replaceExistingItem(i, MenuItems.CRAFTING_TABLE);
-            else blockMenu.replaceExistingItem(i, MenuItems.COOKING);
+            if (craftingTypeItem == null
+                    || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.CRAFTING_TABLE, true))
+                blockMenu.replaceExistingItem(i, MenuItems.COOKING);
+            else if (SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true))
+                blockMenu.replaceExistingItem(i, MenuItems.LARGE);
+            else blockMenu.replaceExistingItem(i, MenuItems.CRAFTING_TABLE);
             return false;
         });
         blockMenu.addMenuClickHandler(getCraftButtonSlot(), (player, i, itemStack, clickAction) -> {
@@ -165,6 +168,20 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
             if (input.length == 0 || output.length == 0) return;
             in.subtract();
             CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
+            Pattern.setRecipe(toOut, recipe);
+        } else if (SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.LARGE, true)) {
+            ItemStack[] outputItems = Arrays.stream(getCraftOutputSlots())
+                    .mapToObj(blockMenu::getItemInSlot)
+                    .filter(Objects::nonNull)
+                    .filter(x -> !x.getType().isAir())
+                    .toArray(ItemStack[]::new);
+            if (outputItems.length == 0) return;
+
+            CraftingRecipe recipe = RecipeUtils.getRecipe(outputItems[0], RecipeUtils.LARGE_TYPES);
+            if (recipe == null || recipe.getCraftType() != CraftType.LARGE) return;
+
+            toOut.setAmount(1);
+            in.subtract();
             Pattern.setRecipe(toOut, recipe);
         } else {
             List<ItemStack> inputList = new ArrayList<>();

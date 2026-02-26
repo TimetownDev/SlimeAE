@@ -53,7 +53,8 @@ public class MenuItems {
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
     public static final ItemStack CRAFTING_TABLE;
     public static final ItemStack PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE;
-    public static final ItemStack COOKING = new CustomItemStack(Material.FURNACE, "&e流程配方", "", "&7> 单击切换为工作台配方");
+    public static final ItemStack COOKING;
+    public static final ItemStack LARGE;
     public static final SlimefunItemStack ACCEPT = new SlimefunItemStack(
             "_AE_MN_ACCEPT_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l确认"));
     public static final SlimefunItemStack CANCEL = new SlimefunItemStack(
@@ -142,6 +143,26 @@ public class MenuItems {
 
         CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
         CRAFTING_TABLE = new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", CRAFTING_TABLE_LORE);
+
+        List<String> COOKING_LORE = new ArrayList<>(List.of("", "&7> 单击切换为大型配方"));
+        COOKING = new AdvancedCustomItemStack(Material.FURNACE, "&e流程配方", COOKING_LORE);
+
+        List<String> LARGE_LORE = new ArrayList<>(List.of("", "&e支持以下大型配方:"));
+        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            LARGE_LORE.add("&6  - 无尽工作台");
+            LARGE_LORE.add("&7  - 生物芯片注入器");
+        }
+        if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
+            LARGE_LORE.add("&f  - 星系装配台");
+        }
+        if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
+            LARGE_LORE.add("&l&5  - 黑曜石锻造桌");
+        }
+        LARGE_LORE.add("");
+        LARGE_LORE.add("&a将产物放入输出槽位，自动匹配配方");
+        LARGE_LORE.add("&7> 单击切换为工作台配方");
+        LARGE = new AdvancedCustomItemStack(Material.SMITHING_TABLE, "&e大型配方", LARGE_LORE);
+
         PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE = new AdvancedCustomItemStack(
                 Material.RESPAWN_ANCHOR, "&e所有支持的配方", PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE);
     }
