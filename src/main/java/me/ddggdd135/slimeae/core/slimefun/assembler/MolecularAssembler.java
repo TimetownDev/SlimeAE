@@ -21,7 +21,7 @@ import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEVirtualCraftDevice;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
-import me.ddggdd135.slimeae.core.items.SlimeAEItems;
+import me.ddggdd135.slimeae.core.slimefun.cards.AccelerationCard;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -198,7 +198,6 @@ public class MolecularAssembler extends TickingBlock
 
     @Override
     public int getSpeed(@Nonnull Block block) {
-        Card accelerationCard = (Card) SlimefunItem.getByItem(SlimeAEItems.ACCELERATION_CARD);
         SlimefunBlockData data = StorageCacheUtils.getBlock(block.getLocation());
 
         BlockMenu menu = data.getBlockMenu();
@@ -210,7 +209,17 @@ public class MolecularAssembler extends TickingBlock
             amount = cache.get(block.getLocation());
         }
 
-        return amount.getOrDefault(accelerationCard, 0) + 1;
+        return calcAccelerationSpeed(amount) + 1;
+    }
+
+    protected static int calcAccelerationSpeed(Map<Card, Integer> amount) {
+        int speed = 0;
+        for (Map.Entry<Card, Integer> entry : amount.entrySet()) {
+            if (entry.getKey() instanceof AccelerationCard acc) {
+                speed += entry.getValue() * acc.getAccelerationMultiplier();
+            }
+        }
+        return speed;
     }
 
     @Override
