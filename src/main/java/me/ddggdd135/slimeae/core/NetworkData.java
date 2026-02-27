@@ -1,18 +1,22 @@
 package me.ddggdd135.slimeae.core;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
+import me.ddggdd135.slimeae.core.slimefun.MEDrive;
+import me.ddggdd135.slimeae.core.slimefun.assembler.LargeMolecularAssembler;
+import me.ddggdd135.slimeae.core.slimefun.assembler.MolecularAssembler;
 import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
@@ -70,6 +74,15 @@ public class NetworkData {
 
         info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
 
+        Set<Location> tickable = new HashSet<>();
+        for (Location loc : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(loc);
+            if (obj instanceof MEDrive || obj instanceof MolecularAssembler || obj instanceof LargeMolecularAssembler) {
+                tickable.add(loc);
+            }
+        }
+        info.setTickableChildren(tickable);
+
         return true;
     }
 
@@ -100,19 +113,44 @@ public class NetworkData {
     public boolean updateAutoCraft(@Nonnull NetworkInfo info) {
         Set<Location> newCraftingHolders = new ConcurrentHashSet<>();
         Map<Location, Set<CraftingRecipe>> newRecipeMap = new ConcurrentHashMap<>();
+        Map<Location, Block[]> devicesCache = new HashMap<>();
         for (Location location : info.getChildren()) {
             if (!AllCraftHolders.containsKey(location)) continue;
             IMECraftHolder slimefunItem = AllCraftHolders.get(location);
             newCraftingHolders.add(location);
-            newRecipeMap.put(location, new HashSet<>(List.of(slimefunItem.getSupportedRecipes(location.getBlock()))));
+            Block[] devices = slimefunItem.getCraftingDevices(location.getBlock());
+            devicesCache.put(location, devices);
+            Set<CraftingRecipe> supported = new HashSet<>();
+            CraftingRecipe[] holderRecipes;
+            if (slimefunItem instanceof me.ddggdd135.slimeae.core.slimefun.MEInterface meInterface) {
+                holderRecipes = meInterface.getRecipes(location.getBlock());
+            } else if (slimefunItem
+                    instanceof me.ddggdd135.slimeae.core.slimefun.MEPatternInterface mePatternInterface) {
+                holderRecipes = mePatternInterface.getRecipes(location.getBlock());
+            } else {
+                holderRecipes = slimefunItem.getSupportedRecipes(location.getBlock());
+            }
+            for (Block device : devices) {
+                SlimefunBlockData blockData =
+                        Slimefun.getDatabaseManager().getBlockDataController().getBlockData(device.getLocation());
+                if (blockData == null) continue;
+                SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                if (sfItem instanceof IMECraftDevice craftDevice) {
+                    for (CraftingRecipe recipe : holderRecipes) {
+                        if (!supported.contains(recipe) && craftDevice.isSupport(device, recipe)) {
+                            supported.add(recipe);
+                        }
+                    }
+                }
+            }
+            newRecipeMap.put(location, supported);
         }
 
         Map<CraftType, Integer> newSpeeds = new ConcurrentHashMap<>();
-        for (Location location : info.getRecipeMap().keySet()) {
-            IMECraftHolder holder =
-                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            if (holder == null) continue;
-            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
+        for (Location location : newRecipeMap.keySet()) {
+            Block[] devices = devicesCache.get(location);
+            if (devices == null) continue;
+            for (Block deviceBlock : devices) {
                 IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
                 if (!(imeCraftDevice instanceof IMEVirtualCraftDevice device)) continue;
@@ -146,6 +184,7 @@ public class NetworkData {
         info.setRecipeCache(Collections.unmodifiableSet(newCachedRecipes));
         info.setOutputIndex(newOutputIndex);
         info.setRecipeToHolders(newRecipeToHolders);
+        info.setCachedCraftingDevices(devicesCache);
 
         info.getCraftingHolders().clear();
         info.getCraftingHolders().addAll(newCraftingHolders);

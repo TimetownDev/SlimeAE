@@ -92,7 +92,7 @@ public class NetworkTickerTask implements Runnable {
                     }
 
                     NetworkInfo finalInfo = info;
-                    new HashSet<>(info.getChildren()).forEach(x -> {
+                    new HashSet<>(info.getTickableChildren()).forEach(x -> {
                         int times = errorTimes.getOrDefault(x, 0);
                         if (times >= 4) {
                             return;
@@ -129,7 +129,7 @@ public class NetworkTickerTask implements Runnable {
                     for (AutoCraftingTask task : tasks) {
                         if (!task.hasNext()) {
                             task.dispose();
-                        } else task.moveNext(2048, taskCountByType);
+                        } else task.moveNext(NetworkInfo.getMaxDevicesPerTick(), taskCountByType);
                     }
                     info.updateAutoCraftingMenu();
                 }

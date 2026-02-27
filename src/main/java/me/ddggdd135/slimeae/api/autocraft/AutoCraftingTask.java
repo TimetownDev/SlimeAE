@@ -306,34 +306,37 @@ public class AutoCraftingTask implements IDisposable {
         }
         List<Location> holderLocations = info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
 
-        for (Location location : holderLocations) {
-            IMECraftHolder holder =
-                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            if (holder == null) continue;
-            if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(nextRecipe)))
-                continue;
-            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
-                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
-                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
-                if (!device.isSupport(deviceBlock, nextRecipe)) continue;
-                if (running < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
-                    // 缓存 getInputAmounts 结果和 createRequests，避免重复计算
-                    ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
-                    if (storage.contains(inputRequests)) {
-                        storage.takeItem(inputRequests);
-                        device.startCrafting(deviceBlock, nextRecipe);
-                        running++;
-                        next.decreaseAmount(1);
-                        if (next.getAmount() <= 0) doCraft = false;
+        if (craftType == CraftType.COOKING) {
+            Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
+            for (Location location : holderLocations) {
+                IMECraftHolder holder =
+                        SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+                if (holder == null) continue;
+                Block[] devices = deviceCache.get(location);
+                if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
+                for (Block deviceBlock : devices) {
+                    IMECraftDevice imeCraftDevice =
+                            (IMECraftDevice) SlimefunItem.getById(StorageCacheUtils.getBlock(deviceBlock.getLocation())
+                                    .getSfId());
+                    if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
+                    if (!device.isSupport(deviceBlock, nextRecipe)) continue;
+                    if (running < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
+                        ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
+                        if (storage.contains(inputRequests)) {
+                            storage.takeItem(inputRequests);
+                            device.startCrafting(deviceBlock, nextRecipe);
+                            running++;
+                            next.decreaseAmount(1);
+                            if (next.getAmount() <= 0) doCraft = false;
+                        }
+                    } else if (running > 0
+                            && device.isFinished(deviceBlock)
+                            && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
+                        CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                        device.finishCrafting(deviceBlock);
+                        storage.addItem(finished.getOutput());
+                        running--;
                     }
-                } else if (running > 0
-                        && device.isFinished(deviceBlock)
-                        && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
-                    CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
-                    device.finishCrafting(deviceBlock);
-                    storage.addItem(finished.getOutput());
-                    running--;
                 }
             }
         }

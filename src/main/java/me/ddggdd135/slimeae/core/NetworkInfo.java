@@ -48,8 +48,13 @@ public class NetworkInfo implements IDisposable {
 
     private volatile Map<CraftingRecipe, List<Location>> recipeToHolders = new ConcurrentHashMap<>();
 
+    private volatile Map<Location, Block[]> cachedCraftingDevices = Collections.emptyMap();
+
+    private volatile Set<Location> tickableChildren = Collections.emptySet();
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
+    private static int maxDevicesPerTick;
 
     public static int getMaxCraftingSessions() {
         return maxCraftingSessions;
@@ -59,10 +64,15 @@ public class NetworkInfo implements IDisposable {
         return maxCraftingAmount;
     }
 
+    public static int getMaxDevicesPerTick() {
+        return maxDevicesPerTick;
+    }
+
     // 重载配置
     public static void reloadConfig() {
         maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-tasks", 32);
         maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 100000);
+        maxDevicesPerTick = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-devices-per-tick", 16384);
     }
 
     // 静态初始化块,在类加载时加载配置
@@ -221,6 +231,24 @@ public class NetworkInfo implements IDisposable {
 
     public void setRecipeToHolders(@Nonnull Map<CraftingRecipe, List<Location>> map) {
         this.recipeToHolders = map;
+    }
+
+    @Nonnull
+    public Map<Location, Block[]> getCachedCraftingDevices() {
+        return cachedCraftingDevices;
+    }
+
+    public void setCachedCraftingDevices(@Nonnull Map<Location, Block[]> map) {
+        this.cachedCraftingDevices = map;
+    }
+
+    @Nonnull
+    public Set<Location> getTickableChildren() {
+        return tickableChildren;
+    }
+
+    public void setTickableChildren(@Nonnull Set<Location> set) {
+        this.tickableChildren = set;
     }
 
     @Nonnull

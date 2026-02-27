@@ -52,7 +52,6 @@ public class LargeMolecularAssembler extends TickingBlock
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         BlockMenu menu = slimefunBlockData.getBlockMenu();
         if (menu == null) return;
-        tickCards(block, SlimefunItem.getById(slimefunBlockData.getSfId()), slimefunBlockData);
         if (!menu.hasViewer()) return;
 
         CraftingRecipe recipe = null;
