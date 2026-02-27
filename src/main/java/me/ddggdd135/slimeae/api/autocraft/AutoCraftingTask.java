@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
@@ -20,7 +19,6 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskDisposingEvent;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
@@ -57,7 +55,6 @@ public class AutoCraftingTask implements IDisposable {
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private ItemStorage storage;
     private int failTimes;
-    private CraftTaskCalcData recipeCalcData = new CraftTaskCalcData();
     private boolean disposed;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
@@ -92,11 +89,20 @@ public class AutoCraftingTask implements IDisposable {
         // === 调试日志结束 ===
 
         try {
-            // 缓存存储引用，避免多次调用 info.getStorage()
             StorageCollection baseStorage = info.getStorage();
-            newSteps = calcCraftSteps(recipe, count, new ItemStorage(baseStorage));
-            if (checkCraftStepsValid(newSteps, new ItemStorage(baseStorage))) usingSteps = newSteps;
-            else throw new IllegalStateException("新版算法出错，退回旧版算法");
+            ItemStorage calcStorage = new ItemStorage(baseStorage);
+            IterativeCraftCalculator calculator = new IterativeCraftCalculator(info, recipe, count, calcStorage);
+            calculator.processAll();
+            if (calculator.getState() == IterativeCraftCalculator.State.COMPLETED) {
+                newSteps = calculator.getResult();
+                if (!checkCraftStepsValid(newSteps, new ItemStorage(baseStorage)))
+                    throw new IllegalStateException("新版算法出错，退回旧版算法");
+                usingSteps = newSteps;
+            } else if (calculator.getFailureException() != null) {
+                throw calculator.getFailureException();
+            } else {
+                throw new IllegalStateException("新版算法出错，退回旧版算法");
+            }
         } catch (Exception ignored) {
             // 新版算法出错，退回旧版算法
             if (SlimeAEPlugin.isDebug()) {
@@ -265,173 +271,6 @@ public class AutoCraftingTask implements IDisposable {
 
             result.add(new CraftStep(recipe, count));
             return result;
-        } finally {
-            // 无论是否成功,都要从路径中移除当前配方
-            craftingPath.remove(recipe);
-        }
-    }
-
-    private class CraftTaskCalcData {
-        public class CraftTaskCalcItem {
-            Set<CraftingRecipe> before = new ConcurrentHashSet<>();
-            CraftingRecipe thisone;
-            long count;
-
-            CraftTaskCalcItem(CraftingRecipe recipe, long count) {
-                this.thisone = recipe;
-                this.count = count;
-            }
-        }
-
-        public final Map<CraftingRecipe, CraftTaskCalcItem> recipeMap = new ConcurrentHashMap<>();
-        public final List<CraftStep> result = new ArrayList<>();
-
-        public void addRecipe(CraftingRecipe recipe, long count, CraftingRecipe parent) {
-            recipeMap.get(parent).before.add(recipe);
-            if (recipeMap.containsKey(recipe)) { // 加到之前的合成上
-                recipeMap.get(recipe).count += count;
-            } else { // 第一次合成
-                recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
-            }
-        }
-
-        public void rootRecipe(CraftingRecipe recipe, long count) {
-            recipeMap.clear();
-            result.clear();
-            recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
-        }
-    }
-
-    private List<CraftStep> calcCraftSteps(CraftingRecipe recipe, long count, ItemStorage storage) {
-        recipeCalcData.rootRecipe(recipe, count);
-        calcCraftStep(recipe, count, storage);
-        unpackCraftSteps(recipe);
-        return recipeCalcData.result;
-    }
-
-    private void unpackCraftSteps(CraftingRecipe recipe) {
-        if (!craftingPath.add(recipe)) {
-            throw new IllegalStateException("新版算法出错，退回旧版算法");
-        }
-        CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
-        for (CraftingRecipe beforeRecipe : recipeInfo.before) {
-            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) unpackCraftSteps(beforeRecipe);
-        }
-        recipeCalcData.result.add(new CraftStep(recipe, recipeInfo.count));
-        recipeCalcData.recipeMap.remove(recipe);
-        craftingPath.remove(recipe);
-    }
-
-    private void calcCraftStep(CraftingRecipe recipe, long count, ItemStorage storage) {
-        if (!craftingPath.add(recipe)) {
-            throw new IllegalStateException("检测到循环依赖的合成配方");
-        }
-
-        try {
-            if (!info.getRecipes().contains(recipe)) {
-                // 配方不可用，记录所有所需材料作为缺失
-                ItemStorage missing = new ItemStorage();
-                ItemHashMap<Long> in = recipe.getInputAmounts();
-                for (ItemKey key : in.sourceKeySet()) {
-                    long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
-                    long need = in.getKey(key) * count;
-                    if (amount < need) {
-                        missing.addItem(key, need - amount);
-                    }
-                }
-                // 如果所有材料够用但配方不可用，仍然报告所有输入为缺失
-                if (missing.getStorageUnsafe().isEmpty()) {
-                    for (ItemKey key : in.sourceKeySet()) {
-                        missing.addItem(key, in.getKey(key) * count);
-                    }
-                }
-                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
-            }
-
-            ItemStorage missing = new ItemStorage();
-            ItemHashMap<Long> in = recipe.getInputAmounts();
-
-            java.util.logging.Logger cLog = SlimeAEPlugin.getInstance().getLogger();
-            if (SlimeAEPlugin.isDebug()) {
-                cLog.info("[AutoCraft-Debug] calcCraftStep: 配方=" + ItemUtils.getItemName(recipe.getOutput()[0])
-                        + " count=" + count);
-                cLog.info("[AutoCraft-Debug] calcCraftStep: storage快照大小="
-                        + storage.getStorageUnsafe().size() + ", input种类=" + in.size());
-            }
-
-            // 遍历所需材料
-            for (ItemKey key : in.sourceKeySet()) {
-                long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
-                long need = in.getKey(key) * count;
-
-                if (SlimeAEPlugin.isDebug()) {
-                    cLog.info("[AutoCraft-Debug] calcCraftStep: 材料=" + ItemUtils.getItemName(key.getItemStack())
-                            + " amount(存储中)=" + amount + " need=" + need
-                            + " keyHash=" + key.hashCode());
-                    // 额外检查：遍历 storage 的 key 看看是否有"同物品但不同hash"的情况
-                    for (Map.Entry<ItemKey, Long> se :
-                            storage.getStorageUnsafe().keyEntrySet()) {
-                        if (se.getValue() > 0) {
-                            boolean eq = key.equals(se.getKey());
-                            cLog.info("[AutoCraft-Debug]   storage key: "
-                                    + ItemUtils.getItemName(se.getKey().getItemStack())
-                                    + "=" + se.getValue() + " hash="
-                                    + se.getKey().hashCode()
-                                    + " equals=" + eq);
-                        }
-                    }
-                }
-
-                if (amount >= need) {
-                    storage.takeItem(new ItemRequest(key, need));
-                } else {
-                    long remainingNeed = need - amount;
-                    if (amount > 0) {
-                        storage.takeItem(new ItemRequest(key, amount));
-                    }
-
-                    // 尝试合成缺少的材料
-                    CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
-                    if (SlimeAEPlugin.isDebug()) {
-                        cLog.info("[AutoCraft-Debug] calcCraftStep: 尝试子合成 " + ItemUtils.getItemName(key.getItemStack())
-                                + " craftingRecipe=" + (craftingRecipe != null ? "found" : "null"));
-                    }
-                    if (craftingRecipe == null) {
-                        missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
-                        continue;
-                    }
-
-                    ItemHashMap<Long> output = craftingRecipe.getOutputAmounts();
-                    ItemHashMap<Long> input = craftingRecipe.getInputAmounts();
-
-                    // 计算需要合成多少次
-                    long out = output.getKey(key) - input.getOrDefault(key, 0L);
-                    long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
-
-                    try {
-                        recipeCalcData.addRecipe(craftingRecipe, countToCraft, recipe);
-                        calcCraftStep(craftingRecipe, countToCraft, storage);
-                        for (Map.Entry<ItemKey, Long> o : output.keyEntrySet()) {
-                            storage.addItem(o.getKey(), o.getValue() * countToCraft);
-                        }
-                        storage.takeItem(new ItemRequest(key, remainingNeed));
-                    } catch (NoEnoughMaterialsException e) {
-                        // 合并子合成缺少的材料
-                        for (Map.Entry<ItemStack, Long> entry :
-                                e.getMissingMaterials().entrySet()) {
-                            missing.addItem(new ItemKey(entry.getKey()), entry.getValue());
-                        }
-                    }
-                }
-            }
-
-            // 如果有缺少的材料就抛出异常
-            if (!missing.getStorageUnsafe().isEmpty()) {
-                if (SlimeAEPlugin.isDebug()) {
-                    cLog.info("[AutoCraft-Debug] calcCraftStep: 缺失材料! 将抛出异常");
-                }
-                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
-            }
         } finally {
             // 无论是否成功,都要从路径中移除当前配方
             craftingPath.remove(recipe);

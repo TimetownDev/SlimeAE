@@ -62,7 +62,7 @@ public class NetworkInfo implements IDisposable {
     // 重载配置
     public static void reloadConfig() {
         maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-tasks", 32);
-        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 32768);
+        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 100000);
     }
 
     // 静态初始化块,在类加载时加载配置
