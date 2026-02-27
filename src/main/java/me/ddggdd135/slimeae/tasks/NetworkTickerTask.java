@@ -6,12 +6,15 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.enums.AETaskType;
 import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
 import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
@@ -116,10 +119,17 @@ public class NetworkTickerTask implements Runnable {
 
                     // tick autoCrafting
                     Set<AutoCraftingTask> tasks = new HashSet<>(info.getAutoCraftingSessions());
+                    Map<CraftType, Integer> taskCountByType = new HashMap<>();
+                    for (AutoCraftingTask task : tasks) {
+                        if (task.getCraftingSteps().isEmpty()) continue;
+                        CraftType ct =
+                                task.getCraftingSteps().get(0).getRecipe().getCraftType();
+                        taskCountByType.merge(ct, 1, Integer::sum);
+                    }
                     for (AutoCraftingTask task : tasks) {
                         if (!task.hasNext()) {
                             task.dispose();
-                        } else task.moveNext(2048);
+                        } else task.moveNext(2048, taskCountByType);
                     }
                     info.updateAutoCraftingMenu();
                 }

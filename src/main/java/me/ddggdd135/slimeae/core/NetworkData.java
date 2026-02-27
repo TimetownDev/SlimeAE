@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
@@ -16,6 +17,7 @@ import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 
 public class NetworkData {
     public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
@@ -121,6 +123,18 @@ public class NetworkData {
             }
         }
 
+        Map<ItemKey, CraftingRecipe> newOutputIndex = new HashMap<>();
+        Map<CraftingRecipe, List<Location>> newRecipeToHolders = new HashMap<>();
+        for (Map.Entry<Location, Set<CraftingRecipe>> entry : newRecipeMap.entrySet()) {
+            Location loc = entry.getKey();
+            for (CraftingRecipe r : entry.getValue()) {
+                for (ItemStack output : r.getOutput()) {
+                    newOutputIndex.putIfAbsent(new ItemKey(output.asOne()), r);
+                }
+                newRecipeToHolders.computeIfAbsent(r, k -> new ArrayList<>()).add(loc);
+            }
+        }
+
         // 先计算新的配方缓存快照
         Set<CraftingRecipe> newCachedRecipes = new HashSet<>();
         for (Set<CraftingRecipe> recipes : newRecipeMap.values()) {
@@ -130,6 +144,8 @@ public class NetworkData {
         // 原子地替换底层数据：先设置 F9 缓存快照，使 getRecipes() 返回新结果，
         // 然后再更新底层数据结构。这避免了 clear()+putAll() 之间的竞态条件。
         info.setRecipeCache(Collections.unmodifiableSet(newCachedRecipes));
+        info.setOutputIndex(newOutputIndex);
+        info.setRecipeToHolders(newRecipeToHolders);
 
         info.getCraftingHolders().clear();
         info.getCraftingHolders().addAll(newCraftingHolders);

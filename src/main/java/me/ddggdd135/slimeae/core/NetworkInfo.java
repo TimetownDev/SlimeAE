@@ -44,6 +44,10 @@ public class NetworkInfo implements IDisposable {
     // === F9: 配方缓存 ===
     private volatile Set<CraftingRecipe> cachedRecipes = null;
 
+    private volatile Map<ItemKey, CraftingRecipe> outputIndex = new ConcurrentHashMap<>();
+
+    private volatile Map<CraftingRecipe, List<Location>> recipeToHolders = new ConcurrentHashMap<>();
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
 
@@ -193,6 +197,10 @@ public class NetworkInfo implements IDisposable {
     }
 
     @Nullable public CraftingRecipe getRecipeFor(@Nonnull ItemStack output) {
+        ItemKey key = new ItemKey(output.asOne());
+        CraftingRecipe indexed = outputIndex.get(key);
+        if (indexed != null) return indexed;
+
         for (CraftingRecipe recipe : getRecipes()) {
             for (ItemStack itemStack : recipe.getOutput()) {
                 if (itemStack.asOne().equals(output.asOne())) return recipe;
@@ -200,6 +208,19 @@ public class NetworkInfo implements IDisposable {
         }
 
         return null;
+    }
+
+    @Nonnull
+    public Map<CraftingRecipe, List<Location>> getRecipeToHolders() {
+        return recipeToHolders;
+    }
+
+    public void setOutputIndex(@Nonnull Map<ItemKey, CraftingRecipe> index) {
+        this.outputIndex = index;
+    }
+
+    public void setRecipeToHolders(@Nonnull Map<CraftingRecipe, List<Location>> map) {
+        this.recipeToHolders = map;
     }
 
     @Nonnull

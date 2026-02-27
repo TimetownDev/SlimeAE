@@ -5,6 +5,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +92,10 @@ public class AutoCraftingTask implements IDisposable {
         // === 调试日志结束 ===
 
         try {
-            newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
-            if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
+            // 缓存存储引用，避免多次调用 info.getStorage()
+            StorageCollection baseStorage = info.getStorage();
+            newSteps = calcCraftSteps(recipe, count, new ItemStorage(baseStorage));
+            if (checkCraftStepsValid(newSteps, new ItemStorage(baseStorage))) usingSteps = newSteps;
             else throw new IllegalStateException("新版算法出错，退回旧版算法");
         } catch (Exception ignored) {
             // 新版算法出错，退回旧版算法
@@ -444,9 +447,14 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     public synchronized void moveNext(int maxDevices) {
+        moveNext(maxDevices, null);
+    }
+
+    public synchronized void moveNext(int maxDevices, @Nullable Map<CraftType, Integer> taskCountByType) {
         if (!hasNext()) return;
         CraftStep next = craftingSteps.get(0);
-        CraftType craftType = next.getRecipe().getCraftType();
+        CraftingRecipe nextRecipe = next.getRecipe();
+        CraftType craftType = nextRecipe.getCraftType();
         boolean doCraft = !isCancelling;
         if (running <= 0 && virtualRunning <= 0 && isCancelling) dispose();
         if (next.getAmount() <= 0) {
@@ -457,15 +465,12 @@ public class AutoCraftingTask implements IDisposable {
 
             doCraft = false;
         }
-        Location[] locations = info.getRecipeMap().entrySet().stream()
-                .filter(x -> x.getValue().contains(next.getRecipe()))
-                .map(Map.Entry::getKey)
-                .toArray(Location[]::new);
+        List<Location> holderLocations = info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
 
-        for (Location location : locations) {
+        for (Location location : holderLocations) {
             IMECraftHolder holder =
                     SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            CraftingRecipe nextRecipe = next.getRecipe();
+            if (holder == null) continue;
             if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(nextRecipe)))
                 continue;
             for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
@@ -473,15 +478,16 @@ public class AutoCraftingTask implements IDisposable {
                         StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
                 if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
                 if (!device.isSupport(deviceBlock, nextRecipe)) continue;
-                if (running < maxDevices
-                        && doCraft
-                        && device.canStartCrafting(deviceBlock, nextRecipe)
-                        && storage.contains(ItemUtils.createRequests(nextRecipe.getInputAmounts()))) {
-                    storage.takeItem(ItemUtils.createRequests(nextRecipe.getInputAmounts()));
-                    device.startCrafting(deviceBlock, nextRecipe);
-                    running++;
-                    next.decreaseAmount(1);
-                    if (next.getAmount() <= 0) doCraft = false;
+                if (running < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
+                    // 缓存 getInputAmounts 结果和 createRequests，避免重复计算
+                    ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
+                    if (storage.contains(inputRequests)) {
+                        storage.takeItem(inputRequests);
+                        device.startCrafting(deviceBlock, nextRecipe);
+                        running++;
+                        next.decreaseAmount(1);
+                        if (next.getAmount() <= 0) doCraft = false;
+                    }
                 } else if (running > 0
                         && device.isFinished(deviceBlock)
                         && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
@@ -496,8 +502,7 @@ public class AutoCraftingTask implements IDisposable {
         // 计算虚拟设备
         if (isCancelling) {
             ItemHashMap<Long> resultItems = new ItemHashMap<>();
-            for (Map.Entry<ItemKey, Long> entry :
-                    next.getRecipe().getInputAmounts().keyEntrySet()) {
+            for (Map.Entry<ItemKey, Long> entry : nextRecipe.getInputAmounts().keyEntrySet()) {
                 resultItems.putKey(entry.getKey(), entry.getValue() * virtualRunning);
             }
             storage.addItem(resultItems);
@@ -511,11 +516,15 @@ public class AutoCraftingTask implements IDisposable {
         int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
                 - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
         if (available > 0) {
-            int tasks = 0;
-
-            for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
-                if (task.getCraftingSteps().isEmpty()) continue;
-                if (task.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) tasks++;
+            int tasks;
+            if (taskCountByType != null) {
+                tasks = taskCountByType.getOrDefault(craftType, 0);
+            } else {
+                tasks = 0;
+                for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
+                    if (task.getCraftingSteps().isEmpty()) continue;
+                    if (task.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) tasks++;
+                }
             }
 
             long neededSpeed = Math.min(virtualRunning * 4L, maxDevices * 4L);
@@ -533,22 +542,23 @@ public class AutoCraftingTask implements IDisposable {
         virtualProcess -= result * 4;
 
         virtualRunning -= result;
+        ItemHashMap<Long> outputAmounts = nextRecipe.getOutputAmounts();
+        ItemHashMap<Long> inputAmounts = nextRecipe.getInputAmounts();
         ItemHashMap<Long> resultItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry :
-                next.getRecipe().getOutputAmounts().keyEntrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : outputAmounts.keyEntrySet()) {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
         storage.addItem(resultItems);
 
         long actualAmount = Math.min(maxDevices - virtualRunning, next.getAmount());
         ItemHashMap<Long> neededItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry : next.getRecipe().getInputAmounts().keyEntrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : inputAmounts.keyEntrySet()) {
             neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
         }
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests)) {
-            if (doCraft && next.getRecipe().getCraftType() != CraftType.COOKING) {
+            if (doCraft && craftType != CraftType.COOKING) {
                 failTimes = 0;
                 storage.takeItem(requests);
                 virtualRunning += (int) actualAmount;
