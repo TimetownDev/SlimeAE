@@ -283,6 +283,7 @@ public class NetworkInfo implements IDisposable {
                 itemStack.setAmount((int) Math.min(64, task.getCount()));
             }
 
+            if (itemStack.isEmpty()) continue;
             List<String> lore = itemStack.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
