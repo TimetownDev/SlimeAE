@@ -137,7 +137,7 @@ public class RecipeUtils {
                         y = input1[i];
                         if (y == null) y = new ItemStack(Material.AIR);
                     }
-                    if (!SlimefunUtils.isItemSimilar(x, y, true, false)) {
+                    if (!SlimefunUtils.isItemSimilar(x, y, true, true)) {
                         continue in;
                     }
                 }
@@ -202,11 +202,11 @@ public class RecipeUtils {
             if (entry.getValue() == null) continue;
             in:
             for (ItemStack[] input1 : getInputs(entry.getKey())) {
-                if (!ItemUtils.matchesAll(input, input1, false)) continue in;
+                if (!ItemUtils.matchesAll(input, input1, true)) continue in;
 
                 ItemStack[] output1 = getOutputs(entry.getKey(), input1);
 
-                if (!ItemUtils.matchesAll(output, output1, false)) continue in;
+                if (!ItemUtils.matchesAll(output, output1, true)) continue in;
 
                 return new CraftingRecipe(getCraftType(entry.getKey()), input1, output1);
             }
