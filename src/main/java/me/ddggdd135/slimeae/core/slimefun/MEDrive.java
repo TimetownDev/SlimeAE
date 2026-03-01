@@ -135,6 +135,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
         int[] slots = getMEItemStorageCellSlots();
         long[] lastStored = lastStoredSnapshot.computeIfAbsent(block.getLocation(), k -> new long[slots.length]);
         boolean anyChanged = false;
+        boolean[] changedSlots = new boolean[slots.length];
 
         for (int i = 0; i < slots.length; i++) {
             ItemStack itemStack = blockMenu.getItemInSlot(slots[i]);
@@ -163,12 +164,13 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                 blockMenu.markDirty();
                 lastStored[i] = currentStored;
                 anyChanged = true;
+                changedSlots[i] = true;
             }
         }
 
         if (anyChanged) {
             for (int i = 0; i < slots.length; i++) {
-                if (lastStored[i] >= 0) {
+                if (changedSlots[i]) {
                     Slimefun.getDatabaseManager()
                             .getBlockDataController()
                             .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slots[i]);

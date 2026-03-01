@@ -52,7 +52,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class METerminal extends TickingBlock implements IMEObject, InventoryBlock, IItemFilterFindableWithGuide {
     public static final Comparator<Map.Entry<ItemStack, Long>> ALPHABETICAL_SORT = Comparator.comparing(
-            itemStackIntegerEntry -> CMIChatColor.stripColor(ItemUtils.getItemName(itemStackIntegerEntry.getKey())),
+            itemStackIntegerEntry -> getSortKey(itemStackIntegerEntry.getKey()),
             Collator.getInstance(Locale.CHINA)::compare);
 
     public static final Comparator<Map.Entry<ItemStack, Long>> NUMERICAL_SORT = Map.Entry.comparingByValue();
@@ -73,6 +73,9 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     // === F8: 每个槽位的上一次显示状态缓存 ===
     private static final Map<Location, DisplaySlotCache> displaySlotCacheMap = new ConcurrentHashMap<>();
+
+    private static final Map<ItemStack, String> sortKeyCache = new ConcurrentHashMap<>();
+    private static final int SORT_KEY_CACHE_MAX = 20000;
 
     public int[] getBorderSlots() {
         return new int[] {17, 26};
@@ -523,6 +526,10 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         return ALPHABETICAL_SORT;
     }
 
+    public static String getSortKey(ItemStack item) {
+        return sortKeyCache.computeIfAbsent(item, k -> CMIChatColor.stripColor(ItemUtils.getItemName(k)));
+    }
+
     protected boolean doFilterNoJEG(Map.Entry<ItemStack, Long> x, String filter) {
         String itemType = x.getKey().getType().toString().toLowerCase(Locale.ROOT);
         if (itemType.startsWith(filter)) {
@@ -604,6 +611,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public static void clearAllSortedItemsCache() {
         sortedItemsCacheMap.clear();
         displaySlotCacheMap.clear();
+        if (sortKeyCache.size() > SORT_KEY_CACHE_MAX) sortKeyCache.clear();
     }
 
     /**

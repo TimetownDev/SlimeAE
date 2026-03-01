@@ -71,7 +71,16 @@ public class NetworkTickerTask implements Runnable {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
                 for (NetworkInfo info : allNetworkData) {
                     if (info.isDisposed()) continue;
-                    if (tick % 16 == 0) info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
+                    if (tick % 160 == 0) {
+                        info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
+                        if (info == null) continue;
+                    } else if (info.needsStorageUpdate() || info.needsRecipeUpdate()) {
+                        if (info.needsStorageUpdate())
+                            SlimeAEPlugin.getNetworkData().updateStorage(info);
+                        if (info.needsRecipeUpdate())
+                            SlimeAEPlugin.getNetworkData().updateAutoCraft(info);
+                        info.clearDirtyFlags();
+                    }
                     SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(info.getController());
                     if (slimefunBlockData == null || !info.getController().isChunkLoaded()) {
                         info.dispose();
@@ -81,6 +90,7 @@ public class NetworkTickerTask implements Runnable {
                     SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
                     if (!(slimefunItem instanceof IMEController)) {
                         info.dispose();
+                        continue;
                     }
                     info.getVirtualCraftingDeviceUsed().clear();
                     info.updateTempStorage();

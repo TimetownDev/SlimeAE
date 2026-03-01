@@ -70,6 +70,8 @@ public class AutoCraftingTask implements IDisposable {
         info.getStorage().invalidateStorageCache();
         info.getStorage().clearNotIncluded();
 
+        ItemHashMap<Long> baseSnapshot = info.getStorage().getStorageUnsafe();
+
         // === 调试日志 ===
         java.util.logging.Logger debugLog = SlimeAEPlugin.getInstance().getLogger();
         if (SlimeAEPlugin.isDebug()) {
@@ -78,8 +80,7 @@ public class AutoCraftingTask implements IDisposable {
             debugLog.info(
                     "[AutoCraft-Debug] recipe在getRecipes中: " + info.getRecipes().contains(recipe));
             debugLog.info("[AutoCraft-Debug] getRecipes大小: " + info.getRecipes().size());
-            ItemHashMap<Long> debugSnapshot = info.getStorage().getStorageUnsafe();
-            for (Map.Entry<ItemKey, Long> de : debugSnapshot.keyEntrySet()) {
+            for (Map.Entry<ItemKey, Long> de : baseSnapshot.keyEntrySet()) {
                 if (de.getValue() > 0) {
                     debugLog.info("[AutoCraft-Debug] 存储内容: "
                             + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
@@ -89,13 +90,12 @@ public class AutoCraftingTask implements IDisposable {
         // === 调试日志结束 ===
 
         try {
-            StorageCollection baseStorage = info.getStorage();
-            ItemStorage calcStorage = new ItemStorage(baseStorage);
+            ItemStorage calcStorage = new ItemStorage(baseSnapshot);
             IterativeCraftCalculator calculator = new IterativeCraftCalculator(info, recipe, count, calcStorage);
             calculator.processAll();
             if (calculator.getState() == IterativeCraftCalculator.State.COMPLETED) {
                 newSteps = calculator.getResult();
-                if (!checkCraftStepsValid(newSteps, new ItemStorage(baseStorage)))
+                if (!checkCraftStepsValid(newSteps, new ItemStorage(baseSnapshot)))
                     throw new IllegalStateException("新版算法出错，退回旧版算法");
                 usingSteps = newSteps;
             } else if (calculator.getFailureException() != null) {
@@ -119,7 +119,7 @@ public class AutoCraftingTask implements IDisposable {
                 debugLog.info("[AutoCraft-Debug] 回退到旧版算法 match()");
             }
             try {
-                usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+                usingSteps = match(recipe, count, new ItemStorage(baseSnapshot));
                 if (SlimeAEPlugin.isDebug()) {
                     debugLog.info("[AutoCraft-Debug] 旧版算法成功，步骤数: " + usingSteps.size());
                 }

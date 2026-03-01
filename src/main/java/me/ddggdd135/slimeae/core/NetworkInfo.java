@@ -54,6 +54,9 @@ public class NetworkInfo implements IDisposable {
 
     private volatile boolean disposed = false;
 
+    private volatile boolean needsStorageUpdate = false;
+    private volatile boolean needsRecipeUpdate = false;
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
     private static int maxDevicesPerTick;
@@ -166,6 +169,27 @@ public class NetworkInfo implements IDisposable {
 
     public boolean isDisposed() {
         return disposed;
+    }
+
+    public boolean needsStorageUpdate() {
+        return needsStorageUpdate;
+    }
+
+    public void setNeedsStorageUpdate(boolean value) {
+        this.needsStorageUpdate = value;
+    }
+
+    public boolean needsRecipeUpdate() {
+        return needsRecipeUpdate;
+    }
+
+    public void setNeedsRecipeUpdate(boolean value) {
+        this.needsRecipeUpdate = value;
+    }
+
+    public void clearDirtyFlags() {
+        this.needsStorageUpdate = false;
+        this.needsRecipeUpdate = false;
     }
 
     @Override

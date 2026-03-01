@@ -66,8 +66,12 @@ public class NetworkListener implements Listener {
                 info.dispose();
             }
         } else {
-            NetworkInfo info = networkInfos.toArray(NetworkInfo[]::new)[0];
-            info.clearChildren();
+            NetworkInfo info = networkInfos.iterator().next();
+            Location placed = e.getBlockPlaced().getLocation();
+            info.getChildren().add(placed);
+            SlimeAEPlugin.getNetworkData().locationToNetwork.put(placed, info);
+            info.setNeedsStorageUpdate(true);
+            info.setNeedsRecipeUpdate(true);
         }
     }
 
@@ -78,10 +82,28 @@ public class NetworkListener implements Listener {
         SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(e.getBlock().getLocation());
         SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(e.getBlock().getLocation());
 
-        NetworkInfo networkInfo =
-                SlimeAEPlugin.getNetworkData().getNetworkInfo(e.getBlock().getLocation());
+        Location broken = e.getBlock().getLocation();
+        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(broken);
         if (networkInfo != null) {
-            networkInfo.clearChildren();
+            networkInfo.getChildren().remove(broken);
+            SlimeAEPlugin.getNetworkData().locationToNetwork.remove(broken, networkInfo);
+            if (broken.equals(networkInfo.getController())) {
+                networkInfo.dispose();
+            } else {
+                int adjacentCount = 0;
+                for (BlockFace blockFace : Valid_Faces) {
+                    Location adj = broken.clone().add(blockFace.getDirection());
+                    if (networkInfo.getChildren().contains(adj)) {
+                        adjacentCount++;
+                    }
+                }
+                if (adjacentCount >= 2) {
+                    networkInfo.dispose();
+                } else {
+                    networkInfo.setNeedsStorageUpdate(true);
+                    networkInfo.setNeedsRecipeUpdate(true);
+                }
+            }
         }
     }
 }
