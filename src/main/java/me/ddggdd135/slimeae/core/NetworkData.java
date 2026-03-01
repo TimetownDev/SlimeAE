@@ -24,21 +24,25 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class NetworkData {
-    public final Set<NetworkInfo> AllNetworkData = new HashSet<>();
+    public final Set<NetworkInfo> AllNetworkData = ConcurrentHashMap.newKeySet();
     public final Map<Location, IMEObject> AllNetworkBlocks = new ConcurrentHashMap<>();
     public final Map<Location, IMEController> AllControllers = new ConcurrentHashMap<>();
     public final Map<Location, IMEStorageObject> AllStorageObjects = new ConcurrentHashMap<>();
     public final Map<Location, IMECraftHolder> AllCraftHolders = new ConcurrentHashMap<>();
 
+    public final Map<Location, NetworkInfo> locationToNetwork = new ConcurrentHashMap<>();
+
     @Nullable public NetworkInfo getNetworkInfo(Location location) {
-        NetworkInfo re = null;
+        NetworkInfo info = locationToNetwork.get(location);
+        if (info != null) return info;
 
-        for (NetworkInfo info : AllNetworkData) {
-            if (info.getChildren().contains(location)) return info;
-            if (info.getController().equals(location)) return info;
+        for (NetworkInfo ni : AllNetworkData) {
+            if (ni.getController().equals(location)) {
+                locationToNetwork.put(location, ni);
+                return ni;
+            }
         }
-
-        return re;
+        return null;
     }
 
     public NetworkInfo refreshNetwork(Location controller) {
@@ -47,6 +51,7 @@ public class NetworkData {
         if (info == null) {
             info = new NetworkInfo(controller);
             AllNetworkData.add(info);
+            locationToNetwork.put(controller, info);
         }
 
         if (!updateChildren(info)) return null;
@@ -68,11 +73,16 @@ public class NetworkData {
                 }
             }
 
-            info.getChildren().clear();
-            info.getChildren().addAll(children);
+            info.replaceChildren(children);
         }
 
-        info.getChildren().removeIf(x -> !AllNetworkBlocks.containsKey(x));
+        info.getChildren().removeIf(x -> {
+            if (!AllNetworkBlocks.containsKey(x)) {
+                locationToNetwork.remove(x, info);
+                return true;
+            }
+            return false;
+        });
 
         Set<Location> tickable = new HashSet<>();
         for (Location loc : info.getChildren()) {

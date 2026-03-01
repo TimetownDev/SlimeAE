@@ -70,6 +70,7 @@ public class NetworkTickerTask implements Runnable {
 
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
                 for (NetworkInfo info : allNetworkData) {
+                    if (info.isDisposed()) continue;
                     if (tick % 16 == 0) info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
                     SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(info.getController());
                     if (slimefunBlockData == null || !info.getController().isChunkLoaded()) {

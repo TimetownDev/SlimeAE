@@ -52,6 +52,8 @@ public class NetworkInfo implements IDisposable {
 
     private volatile Set<Location> tickableChildren = Collections.emptySet();
 
+    private volatile boolean disposed = false;
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
     private static int maxDevicesPerTick;
@@ -90,6 +92,27 @@ public class NetworkInfo implements IDisposable {
         return children;
     }
 
+    public void clearChildren() {
+        NetworkData networkData = SlimeAEPlugin.getNetworkData();
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        children.clear();
+    }
+
+    public void replaceChildren(@Nonnull Set<Location> newChildren) {
+        NetworkData networkData = SlimeAEPlugin.getNetworkData();
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        children.clear();
+        children.addAll(newChildren);
+        for (Location loc : newChildren) {
+            networkData.locationToNetwork.put(loc, this);
+        }
+        networkData.locationToNetwork.put(controller, this);
+    }
+
     public NetworkInfo(@Nonnull Location controller) {
         this.controller = controller;
         autoCraftingMenu.setSize(54);
@@ -123,14 +146,26 @@ public class NetworkInfo implements IDisposable {
 
     @Override
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
+
         NetworkData networkData = SlimeAEPlugin.getNetworkData();
         networkData.AllNetworkData.remove(this);
+
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        networkData.locationToNetwork.remove(controller, this);
 
         for (AutoCraftingTask task : autoCraftingTasks) {
             task.dispose();
         }
 
         updateTempStorage();
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 
     @Override
