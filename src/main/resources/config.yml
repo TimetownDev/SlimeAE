@@ -41,6 +41,17 @@ me-crafting-trigger:
 level-emitter:
   default: 64
 
+# ME材质转换机设置
+reskin-machine:
+  # 是否启用材质转换功能
+  enable: true
+  # 是否允许使用玩家头颅纹理
+  allow-skull-textures: true
+  # 额外禁用的材质列表(除内置黑名单外)
+  material-blacklist: []
+  # 允许被转换的SlimeAE物品ID列表(留空则允许所有IMEObject物品)
+  allowed-targets: []
+
 # 世界生成设置
 world-gen:
   # 是否启用矿石生成
