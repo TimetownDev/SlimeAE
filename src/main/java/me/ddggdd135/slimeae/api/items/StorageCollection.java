@@ -20,10 +20,11 @@ public class StorageCollection implements IStorage {
     private final Map<ItemType, IStorage> pushCache;
     private final ItemHashSet notIncluded;
 
-    // === F3: getStorageUnsafe() 结果缓存 ===
     private volatile ItemHashMap<Long> cachedStorage = null;
     private volatile long lastCacheTime = 0;
-    private static final long STORAGE_CACHE_INTERVAL = 500; // 500ms 刷新一次
+    private static final long STORAGE_CACHE_INTERVAL = 200;
+    private volatile long changeVersion = 0;
+    private volatile long cachedVersion = -1;
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
@@ -232,19 +233,10 @@ public class StorageCollection implements IStorage {
         return found;
     }
 
-    /**
-     * F3: 使存储缓存失效
-     */
     public void invalidateStorageCache() {
-        cachedStorage = null;
+        changeVersion++;
     }
 
-    /**
-     * F3+: 增量更新缓存，避免完全重建。
-     * 当已知某个物品的数量变化量时，直接在缓存上调整，而不是丢弃整个缓存。
-     * @param key 变化的物品
-     * @param delta 数量变化（正值=增加，负值=减少）
-     */
     private void adjustCache(@Nonnull ItemKey key, long delta) {
         ItemHashMap<Long> cached = cachedStorage;
         if (cached == null || cached instanceof CreativeItemMap) return;
@@ -257,20 +249,10 @@ public class StorageCollection implements IStorage {
         }
     }
 
-    /**
-     * 清除负面缓存（notIncluded 集合）。
-     * 当物品通过非 pushItem 路径（如 tempStorage.addItem）归还到子存储后，
-     * 需要调用此方法以确保后续 takeItem/contains 不会错误地跳过这些物品。
-     */
     public void clearNotIncluded() {
         notIncluded.clear();
     }
 
-    /**
-     * 清除 takeCache 和 pushCache 路由缓存。
-     * 当存储内容发生重大变化（如 dispose 归还大量物品）时，
-     * 需要调用此方法以确保后续 takeItem/pushItem 不会使用过时的路由缓存。
-     */
     public void clearTakeAndPushCache() {
         takeCache.clear();
         pushCache.clear();
@@ -278,9 +260,12 @@ public class StorageCollection implements IStorage {
 
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
-        // F3: 时间窗口内复用缓存结果
-        long now = System.currentTimeMillis();
+        long currentVersion = changeVersion;
         ItemHashMap<Long> cached = cachedStorage;
+        if (cached != null && cachedVersion == currentVersion) {
+            return cached;
+        }
+        long now = System.currentTimeMillis();
         if (cached != null && (now - lastCacheTime) < STORAGE_CACHE_INTERVAL) {
             return cached;
         }
@@ -307,6 +292,7 @@ public class StorageCollection implements IStorage {
 
         cachedStorage = result;
         lastCacheTime = now;
+        cachedVersion = currentVersion;
         return result;
     }
 

@@ -13,6 +13,9 @@ public class CraftingRecipe {
     private final ItemStack[] input;
     private final ItemStack[] output;
 
+    private volatile ItemHashMap<Long> cachedInputAmounts;
+    private volatile ItemHashMap<Long> cachedOutputAmounts;
+
     public CraftingRecipe(@Nonnull CraftType craftType, @Nonnull ItemStack[] input, @Nonnull ItemStack[] output) {
         this.craftType = craftType;
         this.input = CraftItemStackUtils.asCraftCopy(input);
@@ -40,12 +43,20 @@ public class CraftingRecipe {
 
     @Nonnull
     public ItemHashMap<Long> getInputAmounts() {
-        return ItemUtils.getAmounts(toBukkitCopy(input));
+        ItemHashMap<Long> cached = cachedInputAmounts;
+        if (cached != null) return cached;
+        cached = ItemUtils.getAmounts(toBukkitCopy(input));
+        cachedInputAmounts = cached;
+        return cached;
     }
 
     @Nonnull
     public ItemHashMap<Long> getOutputAmounts() {
-        return ItemUtils.getAmounts(toBukkitCopy(output));
+        ItemHashMap<Long> cached = cachedOutputAmounts;
+        if (cached != null) return cached;
+        cached = ItemUtils.getAmounts(toBukkitCopy(output));
+        cachedOutputAmounts = cached;
+        return cached;
     }
 
     /**

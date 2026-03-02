@@ -1,6 +1,11 @@
 package me.ddggdd135.slimeae.api.database;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.api.MEStorageCellFilterData;
@@ -8,7 +13,7 @@ import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCellFilterDataController extends DatabaseController<MEStorageCellFilterData> {
-    public final Set<MEStorageCellFilterData> needSave = new HashSet<>();
+    public final Set<MEStorageCellFilterData> needSave = ConcurrentHashMap.newKeySet();
 
     public StorageCellFilterDataController() {
         super(MEStorageCellFilterData.class);
@@ -42,21 +47,40 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
     @Override
     public void update(MEStorageCellFilterData data) {
         cancelWriteTask(data);
-        delete(data);
-
-        for (ItemKey itemKey : data.getFilters()) {
-            executeSql("INSERT INTO " + getTableName() + " (uuid, field_name, data) VALUES ('"
-                    + data.getUuid().toString() + "', 'filter', '"
-                    + SerializeUtils.object2String(itemKey.getItemStack()) + "');");
+        try (Connection conn = ds.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement deleteStmt =
+                        conn.prepareStatement("DELETE FROM " + getTableName() + " WHERE uuid = ?")) {
+                    deleteStmt.setString(1, data.getUuid().toString());
+                    deleteStmt.executeUpdate();
+                }
+                try (PreparedStatement insertStmt = conn.prepareStatement(
+                        "INSERT INTO " + getTableName() + " (uuid, field_name, data) VALUES (?, ?, ?)")) {
+                    for (ItemKey itemKey : data.getFilters()) {
+                        insertStmt.setString(1, data.getUuid().toString());
+                        insertStmt.setString(2, "filter");
+                        insertStmt.setString(3, SerializeUtils.object2String(itemKey.getItemStack()));
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.setString(1, data.getUuid().toString());
+                    insertStmt.setString(2, "reversed");
+                    insertStmt.setString(3, SerializeUtils.boolToString(data.isReversed()));
+                    insertStmt.addBatch();
+                    insertStmt.setString(1, data.getUuid().toString());
+                    insertStmt.setString(2, "fuzzy");
+                    insertStmt.setString(3, SerializeUtils.boolToString(data.isFuzzy()));
+                    insertStmt.addBatch();
+                    insertStmt.executeBatch();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Failed to batch update filter data: " + e.getMessage());
         }
-
-        executeSql("INSERT INTO " + getTableName() + " (uuid, field_name, data) VALUES ('"
-                + data.getUuid().toString() + "', 'reversed', '"
-                + SerializeUtils.boolToString(data.isReversed()) + "');");
-
-        executeSql("INSERT INTO " + getTableName() + " (uuid, field_name, data) VALUES ('"
-                + data.getUuid().toString() + "', 'fuzzy', '"
-                + SerializeUtils.boolToString(data.isFuzzy()) + "');");
     }
 
     public void delete(MEStorageCellFilterData data) {
@@ -115,8 +139,11 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
     }
 
     public void saveAllAsync() {
-        Set<MEStorageCellFilterData> diff = new HashSet<>(needSave);
-        needSave.clear();
+        Set<MEStorageCellFilterData> diff = new HashSet<>();
+        needSave.removeIf(item -> {
+            diff.add(item);
+            return true;
+        });
 
         for (MEStorageCellFilterData data : diff) {
             updateAsync(data);

@@ -51,6 +51,7 @@ public class NetworkTimeConsumingTask implements Runnable {
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
 
                 for (NetworkInfo networkInfo : allNetworkData) {
+                    if (networkInfo.isDisposed()) continue;
                     networkInfo.getChildren().forEach(x -> {
                         IMEObject slimefunItem =
                                 SlimeAEPlugin.getNetworkData().AllNetworkBlocks.get(x);

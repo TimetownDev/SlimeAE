@@ -9,6 +9,8 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -21,10 +23,12 @@ import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
+    private static final Map<Location, long[]> lastStoredSnapshot = new ConcurrentHashMap<>();
 
     public MEDrive(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -55,6 +59,7 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                     }
                     blockMenu.dropItems(b.getLocation(), getMEItemStorageCellSlots());
                 }
+                lastStoredSnapshot.remove(b.getLocation());
             }
         };
     }
@@ -125,17 +130,51 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
-        for (int slot : getMEItemStorageCellSlots()) {
-            ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (itemStack != null
-                    && !itemStack.getType().isAir()
-                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    && MEItemStorageCell.isCurrentServer(itemStack)) {
+        if (!blockMenu.hasViewer()) return;
+
+        int[] slots = getMEItemStorageCellSlots();
+        long[] lastStored = lastStoredSnapshot.computeIfAbsent(block.getLocation(), k -> new long[slots.length]);
+        boolean anyChanged = false;
+        boolean[] changedSlots = new boolean[slots.length];
+
+        for (int i = 0; i < slots.length; i++) {
+            ItemStack itemStack = blockMenu.getItemInSlot(slots[i]);
+            if (itemStack == null || itemStack.getType().isAir()) {
+                lastStored[i] = -1;
+                continue;
+            }
+            if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) {
+                lastStored[i] = -1;
+                continue;
+            }
+            if (!MEItemStorageCell.isCurrentServer(itemStack)) {
+                lastStored[i] = -1;
+                continue;
+            }
+
+            MEStorageCellCache cache = MEItemStorageCell.getStorage(itemStack);
+            if (cache == null) {
+                lastStored[i] = -1;
+                continue;
+            }
+
+            long currentStored = cache.getStored();
+            if (currentStored != lastStored[i]) {
                 MEItemStorageCell.updateLore(itemStack);
                 blockMenu.markDirty();
-                Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slot);
+                lastStored[i] = currentStored;
+                anyChanged = true;
+                changedSlots[i] = true;
+            }
+        }
+
+        if (anyChanged) {
+            for (int i = 0; i < slots.length; i++) {
+                if (changedSlots[i]) {
+                    Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .saveBlockInventorySlot(StorageCacheUtils.getBlock(block.getLocation()), slots[i]);
+                }
             }
         }
     }

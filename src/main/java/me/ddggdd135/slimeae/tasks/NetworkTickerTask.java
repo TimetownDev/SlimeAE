@@ -6,12 +6,15 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.enums.AETaskType;
 import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
 import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
@@ -67,7 +70,17 @@ public class NetworkTickerTask implements Runnable {
 
                 Set<NetworkInfo> allNetworkData = new HashSet<>(SlimeAEPlugin.getNetworkData().AllNetworkData);
                 for (NetworkInfo info : allNetworkData) {
-                    if (tick % 16 == 0) info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
+                    if (info.isDisposed()) continue;
+                    if (tick % 160 == 0) {
+                        info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
+                        if (info == null) continue;
+                    } else if (info.needsStorageUpdate() || info.needsRecipeUpdate()) {
+                        if (info.needsStorageUpdate())
+                            SlimeAEPlugin.getNetworkData().updateStorage(info);
+                        if (info.needsRecipeUpdate())
+                            SlimeAEPlugin.getNetworkData().updateAutoCraft(info);
+                        info.clearDirtyFlags();
+                    }
                     SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(info.getController());
                     if (slimefunBlockData == null || !info.getController().isChunkLoaded()) {
                         info.dispose();
@@ -77,6 +90,7 @@ public class NetworkTickerTask implements Runnable {
                     SlimefunItem slimefunItem = SlimefunItem.getById(slimefunBlockData.getSfId());
                     if (!(slimefunItem instanceof IMEController)) {
                         info.dispose();
+                        continue;
                     }
                     info.getVirtualCraftingDeviceUsed().clear();
                     info.updateTempStorage();
@@ -89,7 +103,7 @@ public class NetworkTickerTask implements Runnable {
                     }
 
                     NetworkInfo finalInfo = info;
-                    new HashSet<>(info.getChildren()).forEach(x -> {
+                    new HashSet<>(info.getTickableChildren()).forEach(x -> {
                         int times = errorTimes.getOrDefault(x, 0);
                         if (times >= 4) {
                             return;
@@ -116,10 +130,17 @@ public class NetworkTickerTask implements Runnable {
 
                     // tick autoCrafting
                     Set<AutoCraftingTask> tasks = new HashSet<>(info.getAutoCraftingSessions());
+                    Map<CraftType, Integer> taskCountByType = new HashMap<>();
+                    for (AutoCraftingTask task : tasks) {
+                        if (task.getCraftingSteps().isEmpty()) continue;
+                        CraftType ct =
+                                task.getCraftingSteps().get(0).getRecipe().getCraftType();
+                        taskCountByType.merge(ct, 1, Integer::sum);
+                    }
                     for (AutoCraftingTask task : tasks) {
                         if (!task.hasNext()) {
                             task.dispose();
-                        } else task.moveNext(2048);
+                        } else task.moveNext(NetworkInfo.getMaxDevicesPerTick(), taskCountByType);
                     }
                     info.updateAutoCraftingMenu();
                 }

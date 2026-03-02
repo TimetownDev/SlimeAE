@@ -13,9 +13,9 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.libraries.paperlib.PaperLib;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -43,7 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock, ICardHolder, IDataBlock {
-    protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new HashMap<>();
+    protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new ConcurrentHashMap<>();
     private static final MEBusDataAdapter adapter = new MEBusDataAdapter();
 
     public int getNorthSlot() {

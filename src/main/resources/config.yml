@@ -14,7 +14,9 @@ auto-crafting:
   # 每个网络最大同时进行的自动合成任务数
   max-tasks: 32
   # 每个自动合成任务最大物品数量
-  max-amount: 32768
+  max-amount: 100000
+  # 每个自动合成任务每tick最大设备处理数
+  max-devices-per-tick: 16384
   # 合成卡冷却时间(tick)
   crafting-card-cooldown: 200
 

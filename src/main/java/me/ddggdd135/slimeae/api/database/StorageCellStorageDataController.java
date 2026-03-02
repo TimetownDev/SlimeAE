@@ -1,6 +1,11 @@
 package me.ddggdd135.slimeae.api.database;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.slimeae.api.MEStorageCellStorageData;
@@ -8,7 +13,7 @@ import me.ddggdd135.slimeae.utils.SerializeUtils;
 import org.bukkit.inventory.ItemStack;
 
 public class StorageCellStorageDataController extends DatabaseController<MEStorageCellStorageData> {
-    public final Set<MEStorageCellStorageData> needSave = new HashSet<>();
+    public final Set<MEStorageCellStorageData> needSave = ConcurrentHashMap.newKeySet();
 
     public StorageCellStorageDataController() {
         super(MEStorageCellStorageData.class);
@@ -43,12 +48,38 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
     @Override
     public void update(MEStorageCellStorageData data) {
         cancelWriteTask(data);
-        delete(data);
-
-        for (Map.Entry<ItemStack, Long> entry : data.getStorage().entrySet()) {
-            executeSql("INSERT INTO " + getTableName() + " (uuid, item_hash, item_base64, amount) VALUES ('"
-                    + data.getUuid().toString() + "', '" + getItemHash(entry.getKey()) + "', '"
-                    + SerializeUtils.object2String(entry.getKey()) + "', " + entry.getValue() + ");");
+        try (Connection conn = ds.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement deleteStmt =
+                        conn.prepareStatement("DELETE FROM " + getTableName() + " WHERE uuid = ?")) {
+                    deleteStmt.setString(1, data.getUuid().toString());
+                    deleteStmt.executeUpdate();
+                }
+                try (PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO " + getTableName()
+                        + " (uuid, item_hash, item_base64, amount) VALUES (?, ?, ?, ?)")) {
+                    int batch = 0;
+                    for (Map.Entry<ItemStack, Long> entry : data.getStorage().entrySet()) {
+                        insertStmt.setString(1, data.getUuid().toString());
+                        insertStmt.setLong(2, getItemHash(entry.getKey()));
+                        insertStmt.setString(3, SerializeUtils.object2String(entry.getKey()));
+                        insertStmt.setLong(4, entry.getValue());
+                        insertStmt.addBatch();
+                        if (++batch % 500 == 0) {
+                            insertStmt.executeBatch();
+                        }
+                    }
+                    if (batch % 500 != 0) {
+                        insertStmt.executeBatch();
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "Failed to batch update storage data: " + e.getMessage());
         }
     }
 
@@ -132,8 +163,11 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
     }
 
     public void saveAllAsync() {
-        Set<MEStorageCellStorageData> diff = new HashSet<>(needSave);
-        needSave.clear();
+        Set<MEStorageCellStorageData> diff = new HashSet<>();
+        needSave.removeIf(item -> {
+            diff.add(item);
+            return true;
+        });
 
         for (MEStorageCellStorageData data : diff) {
             updateAsync(data);

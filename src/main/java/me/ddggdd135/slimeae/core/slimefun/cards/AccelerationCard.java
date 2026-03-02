@@ -31,6 +31,10 @@ public class AccelerationCard extends Card {
         this.accelerationMultiplier = accelerationMultiplier;
     }
 
+    public int getAccelerationMultiplier() {
+        return accelerationMultiplier;
+    }
+
     @Override
     public void onTick(Block block, SlimefunItem item, SlimefunBlockData data) {
         if (item instanceof MachineProcessHolder<?> processorHolder) {

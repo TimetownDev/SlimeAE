@@ -220,11 +220,14 @@ public class MEInterface extends TickingBlock
         for (int slot : getPatternSlots()) {
             ItemStack patternItem = blockMenu.getItemInSlot(slot);
             if (patternItem == null || patternItem.getType().isAir()) continue;
-            SlimefunItem slimefunItem = SlimefunItem.getByItem(patternItem);
-            if (!(slimefunItem instanceof Pattern)) continue;
-            CraftingRecipe recipe = Pattern.getRecipe(patternItem);
-            if (recipe == null) continue;
-            result.add(recipe);
+            try {
+                SlimefunItem slimefunItem = SlimefunItem.getByItem(patternItem);
+                if (!(slimefunItem instanceof Pattern)) continue;
+                CraftingRecipe recipe = Pattern.getRecipe(patternItem);
+                if (recipe == null) continue;
+                result.add(recipe);
+            } catch (NullPointerException | IllegalStateException ignored) {
+            }
         }
         return result.toArray(CraftingRecipe[]::new);
     }

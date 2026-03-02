@@ -5,11 +5,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
@@ -19,7 +19,6 @@ import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
-import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskDisposingEvent;
 import me.ddggdd135.slimeae.api.events.AutoCraftingTaskStartingEvent;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
@@ -56,7 +55,6 @@ public class AutoCraftingTask implements IDisposable {
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private ItemStorage storage;
     private int failTimes;
-    private CraftTaskCalcData recipeCalcData = new CraftTaskCalcData();
     private boolean disposed;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
@@ -72,6 +70,8 @@ public class AutoCraftingTask implements IDisposable {
         info.getStorage().invalidateStorageCache();
         info.getStorage().clearNotIncluded();
 
+        ItemHashMap<Long> baseSnapshot = info.getStorage().getStorageUnsafe();
+
         // === 调试日志 ===
         java.util.logging.Logger debugLog = SlimeAEPlugin.getInstance().getLogger();
         if (SlimeAEPlugin.isDebug()) {
@@ -80,8 +80,7 @@ public class AutoCraftingTask implements IDisposable {
             debugLog.info(
                     "[AutoCraft-Debug] recipe在getRecipes中: " + info.getRecipes().contains(recipe));
             debugLog.info("[AutoCraft-Debug] getRecipes大小: " + info.getRecipes().size());
-            ItemHashMap<Long> debugSnapshot = info.getStorage().getStorageUnsafe();
-            for (Map.Entry<ItemKey, Long> de : debugSnapshot.keyEntrySet()) {
+            for (Map.Entry<ItemKey, Long> de : baseSnapshot.keyEntrySet()) {
                 if (de.getValue() > 0) {
                     debugLog.info("[AutoCraft-Debug] 存储内容: "
                             + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
@@ -91,9 +90,19 @@ public class AutoCraftingTask implements IDisposable {
         // === 调试日志结束 ===
 
         try {
-            newSteps = calcCraftSteps(recipe, count, new ItemStorage(info.getStorage()));
-            if (checkCraftStepsValid(newSteps, new ItemStorage(info.getStorage()))) usingSteps = newSteps;
-            else throw new IllegalStateException("新版算法出错，退回旧版算法");
+            ItemStorage calcStorage = new ItemStorage(baseSnapshot);
+            IterativeCraftCalculator calculator = new IterativeCraftCalculator(info, recipe, count, calcStorage);
+            calculator.processAll();
+            if (calculator.getState() == IterativeCraftCalculator.State.COMPLETED) {
+                newSteps = calculator.getResult();
+                if (!checkCraftStepsValid(newSteps, new ItemStorage(baseSnapshot)))
+                    throw new IllegalStateException("新版算法出错，退回旧版算法");
+                usingSteps = newSteps;
+            } else if (calculator.getFailureException() != null) {
+                throw calculator.getFailureException();
+            } else {
+                throw new IllegalStateException("新版算法出错，退回旧版算法");
+            }
         } catch (Exception ignored) {
             // 新版算法出错，退回旧版算法
             if (SlimeAEPlugin.isDebug()) {
@@ -110,7 +119,7 @@ public class AutoCraftingTask implements IDisposable {
                 debugLog.info("[AutoCraft-Debug] 回退到旧版算法 match()");
             }
             try {
-                usingSteps = match(recipe, count, new ItemStorage(info.getStorage()));
+                usingSteps = match(recipe, count, new ItemStorage(baseSnapshot));
                 if (SlimeAEPlugin.isDebug()) {
                     debugLog.info("[AutoCraft-Debug] 旧版算法成功，步骤数: " + usingSteps.size());
                 }
@@ -268,173 +277,6 @@ public class AutoCraftingTask implements IDisposable {
         }
     }
 
-    private class CraftTaskCalcData {
-        public class CraftTaskCalcItem {
-            Set<CraftingRecipe> before = new ConcurrentHashSet<>();
-            CraftingRecipe thisone;
-            long count;
-
-            CraftTaskCalcItem(CraftingRecipe recipe, long count) {
-                this.thisone = recipe;
-                this.count = count;
-            }
-        }
-
-        public final Map<CraftingRecipe, CraftTaskCalcItem> recipeMap = new ConcurrentHashMap<>();
-        public final List<CraftStep> result = new ArrayList<>();
-
-        public void addRecipe(CraftingRecipe recipe, long count, CraftingRecipe parent) {
-            recipeMap.get(parent).before.add(recipe);
-            if (recipeMap.containsKey(recipe)) { // 加到之前的合成上
-                recipeMap.get(recipe).count += count;
-            } else { // 第一次合成
-                recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
-            }
-        }
-
-        public void rootRecipe(CraftingRecipe recipe, long count) {
-            recipeMap.clear();
-            result.clear();
-            recipeMap.put(recipe, new CraftTaskCalcItem(recipe, count));
-        }
-    }
-
-    private List<CraftStep> calcCraftSteps(CraftingRecipe recipe, long count, ItemStorage storage) {
-        recipeCalcData.rootRecipe(recipe, count);
-        calcCraftStep(recipe, count, storage);
-        unpackCraftSteps(recipe);
-        return recipeCalcData.result;
-    }
-
-    private void unpackCraftSteps(CraftingRecipe recipe) {
-        if (!craftingPath.add(recipe)) {
-            throw new IllegalStateException("新版算法出错，退回旧版算法");
-        }
-        CraftTaskCalcData.CraftTaskCalcItem recipeInfo = recipeCalcData.recipeMap.get(recipe);
-        for (CraftingRecipe beforeRecipe : recipeInfo.before) {
-            if (recipeCalcData.recipeMap.containsKey(beforeRecipe)) unpackCraftSteps(beforeRecipe);
-        }
-        recipeCalcData.result.add(new CraftStep(recipe, recipeInfo.count));
-        recipeCalcData.recipeMap.remove(recipe);
-        craftingPath.remove(recipe);
-    }
-
-    private void calcCraftStep(CraftingRecipe recipe, long count, ItemStorage storage) {
-        if (!craftingPath.add(recipe)) {
-            throw new IllegalStateException("检测到循环依赖的合成配方");
-        }
-
-        try {
-            if (!info.getRecipes().contains(recipe)) {
-                // 配方不可用，记录所有所需材料作为缺失
-                ItemStorage missing = new ItemStorage();
-                ItemHashMap<Long> in = recipe.getInputAmounts();
-                for (ItemKey key : in.sourceKeySet()) {
-                    long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
-                    long need = in.getKey(key) * count;
-                    if (amount < need) {
-                        missing.addItem(key, need - amount);
-                    }
-                }
-                // 如果所有材料够用但配方不可用，仍然报告所有输入为缺失
-                if (missing.getStorageUnsafe().isEmpty()) {
-                    for (ItemKey key : in.sourceKeySet()) {
-                        missing.addItem(key, in.getKey(key) * count);
-                    }
-                }
-                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
-            }
-
-            ItemStorage missing = new ItemStorage();
-            ItemHashMap<Long> in = recipe.getInputAmounts();
-
-            java.util.logging.Logger cLog = SlimeAEPlugin.getInstance().getLogger();
-            if (SlimeAEPlugin.isDebug()) {
-                cLog.info("[AutoCraft-Debug] calcCraftStep: 配方=" + ItemUtils.getItemName(recipe.getOutput()[0])
-                        + " count=" + count);
-                cLog.info("[AutoCraft-Debug] calcCraftStep: storage快照大小="
-                        + storage.getStorageUnsafe().size() + ", input种类=" + in.size());
-            }
-
-            // 遍历所需材料
-            for (ItemKey key : in.sourceKeySet()) {
-                long amount = storage.getStorageUnsafe().getOrDefault(key, 0L);
-                long need = in.getKey(key) * count;
-
-                if (SlimeAEPlugin.isDebug()) {
-                    cLog.info("[AutoCraft-Debug] calcCraftStep: 材料=" + ItemUtils.getItemName(key.getItemStack())
-                            + " amount(存储中)=" + amount + " need=" + need
-                            + " keyHash=" + key.hashCode());
-                    // 额外检查：遍历 storage 的 key 看看是否有"同物品但不同hash"的情况
-                    for (Map.Entry<ItemKey, Long> se :
-                            storage.getStorageUnsafe().keyEntrySet()) {
-                        if (se.getValue() > 0) {
-                            boolean eq = key.equals(se.getKey());
-                            cLog.info("[AutoCraft-Debug]   storage key: "
-                                    + ItemUtils.getItemName(se.getKey().getItemStack())
-                                    + "=" + se.getValue() + " hash="
-                                    + se.getKey().hashCode()
-                                    + " equals=" + eq);
-                        }
-                    }
-                }
-
-                if (amount >= need) {
-                    storage.takeItem(new ItemRequest(key, need));
-                } else {
-                    long remainingNeed = need - amount;
-                    if (amount > 0) {
-                        storage.takeItem(new ItemRequest(key, amount));
-                    }
-
-                    // 尝试合成缺少的材料
-                    CraftingRecipe craftingRecipe = getRecipe(key.getItemStack());
-                    if (SlimeAEPlugin.isDebug()) {
-                        cLog.info("[AutoCraft-Debug] calcCraftStep: 尝试子合成 " + ItemUtils.getItemName(key.getItemStack())
-                                + " craftingRecipe=" + (craftingRecipe != null ? "found" : "null"));
-                    }
-                    if (craftingRecipe == null) {
-                        missing.addItem(new ItemKey(key.getItemStack()), remainingNeed);
-                        continue;
-                    }
-
-                    ItemHashMap<Long> output = craftingRecipe.getOutputAmounts();
-                    ItemHashMap<Long> input = craftingRecipe.getInputAmounts();
-
-                    // 计算需要合成多少次
-                    long out = output.getKey(key) - input.getOrDefault(key, 0L);
-                    long countToCraft = (long) Math.ceil(remainingNeed / (double) out);
-
-                    try {
-                        recipeCalcData.addRecipe(craftingRecipe, countToCraft, recipe);
-                        calcCraftStep(craftingRecipe, countToCraft, storage);
-                        for (Map.Entry<ItemKey, Long> o : output.keyEntrySet()) {
-                            storage.addItem(o.getKey(), o.getValue() * countToCraft);
-                        }
-                        storage.takeItem(new ItemRequest(key, remainingNeed));
-                    } catch (NoEnoughMaterialsException e) {
-                        // 合并子合成缺少的材料
-                        for (Map.Entry<ItemStack, Long> entry :
-                                e.getMissingMaterials().entrySet()) {
-                            missing.addItem(new ItemKey(entry.getKey()), entry.getValue());
-                        }
-                    }
-                }
-            }
-
-            // 如果有缺少的材料就抛出异常
-            if (!missing.getStorageUnsafe().isEmpty()) {
-                if (SlimeAEPlugin.isDebug()) {
-                    cLog.info("[AutoCraft-Debug] calcCraftStep: 缺失材料! 将抛出异常");
-                }
-                throw new NoEnoughMaterialsException(missing.getStorageUnsafe());
-            }
-        } finally {
-            // 无论是否成功,都要从路径中移除当前配方
-            craftingPath.remove(recipe);
-        }
-    }
-
     @Nullable private CraftingRecipe getRecipe(@Nonnull ItemStack itemStack) {
         return info.getRecipeFor(itemStack);
     }
@@ -444,9 +286,14 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     public synchronized void moveNext(int maxDevices) {
+        moveNext(maxDevices, null);
+    }
+
+    public synchronized void moveNext(int maxDevices, @Nullable Map<CraftType, Integer> taskCountByType) {
         if (!hasNext()) return;
         CraftStep next = craftingSteps.get(0);
-        CraftType craftType = next.getRecipe().getCraftType();
+        CraftingRecipe nextRecipe = next.getRecipe();
+        CraftType craftType = nextRecipe.getCraftType();
         boolean doCraft = !isCancelling;
         if (running <= 0 && virtualRunning <= 0 && isCancelling) dispose();
         if (next.getAmount() <= 0) {
@@ -457,38 +304,39 @@ public class AutoCraftingTask implements IDisposable {
 
             doCraft = false;
         }
-        Location[] locations = info.getRecipeMap().entrySet().stream()
-                .filter(x -> x.getValue().contains(next.getRecipe()))
-                .map(Map.Entry::getKey)
-                .toArray(Location[]::new);
+        List<Location> holderLocations = info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
 
-        for (Location location : locations) {
-            IMECraftHolder holder =
-                    SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-            CraftingRecipe nextRecipe = next.getRecipe();
-            if (Arrays.stream(holder.getSupportedRecipes(location.getBlock())).noneMatch(x -> x.equals(nextRecipe)))
-                continue;
-            for (Block deviceBlock : holder.getCraftingDevices(location.getBlock())) {
-                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
-                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
-                if (!device.isSupport(deviceBlock, nextRecipe)) continue;
-                if (running < maxDevices
-                        && doCraft
-                        && device.canStartCrafting(deviceBlock, nextRecipe)
-                        && storage.contains(ItemUtils.createRequests(nextRecipe.getInputAmounts()))) {
-                    storage.takeItem(ItemUtils.createRequests(nextRecipe.getInputAmounts()));
-                    device.startCrafting(deviceBlock, nextRecipe);
-                    running++;
-                    next.decreaseAmount(1);
-                    if (next.getAmount() <= 0) doCraft = false;
-                } else if (running > 0
-                        && device.isFinished(deviceBlock)
-                        && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
-                    CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
-                    device.finishCrafting(deviceBlock);
-                    storage.addItem(finished.getOutput());
-                    running--;
+        if (craftType == CraftType.COOKING) {
+            Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
+            for (Location location : holderLocations) {
+                IMECraftHolder holder =
+                        SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+                if (holder == null) continue;
+                Block[] devices = deviceCache.get(location);
+                if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
+                for (Block deviceBlock : devices) {
+                    IMECraftDevice imeCraftDevice =
+                            (IMECraftDevice) SlimefunItem.getById(StorageCacheUtils.getBlock(deviceBlock.getLocation())
+                                    .getSfId());
+                    if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
+                    if (!device.isSupport(deviceBlock, nextRecipe)) continue;
+                    if (running < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
+                        ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
+                        if (storage.contains(inputRequests)) {
+                            storage.takeItem(inputRequests);
+                            device.startCrafting(deviceBlock, nextRecipe);
+                            running++;
+                            next.decreaseAmount(1);
+                            if (next.getAmount() <= 0) doCraft = false;
+                        }
+                    } else if (running > 0
+                            && device.isFinished(deviceBlock)
+                            && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
+                        CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                        device.finishCrafting(deviceBlock);
+                        storage.addItem(finished.getOutput());
+                        running--;
+                    }
                 }
             }
         }
@@ -496,8 +344,7 @@ public class AutoCraftingTask implements IDisposable {
         // 计算虚拟设备
         if (isCancelling) {
             ItemHashMap<Long> resultItems = new ItemHashMap<>();
-            for (Map.Entry<ItemKey, Long> entry :
-                    next.getRecipe().getInputAmounts().keyEntrySet()) {
+            for (Map.Entry<ItemKey, Long> entry : nextRecipe.getInputAmounts().keyEntrySet()) {
                 resultItems.putKey(entry.getKey(), entry.getValue() * virtualRunning);
             }
             storage.addItem(resultItems);
@@ -511,11 +358,15 @@ public class AutoCraftingTask implements IDisposable {
         int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
                 - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
         if (available > 0) {
-            int tasks = 0;
-
-            for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
-                if (task.getCraftingSteps().isEmpty()) continue;
-                if (task.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) tasks++;
+            int tasks;
+            if (taskCountByType != null) {
+                tasks = taskCountByType.getOrDefault(craftType, 0);
+            } else {
+                tasks = 0;
+                for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
+                    if (task.getCraftingSteps().isEmpty()) continue;
+                    if (task.getCraftingSteps().get(0).getRecipe().getCraftType() == craftType) tasks++;
+                }
             }
 
             long neededSpeed = Math.min(virtualRunning * 4L, maxDevices * 4L);
@@ -533,22 +384,23 @@ public class AutoCraftingTask implements IDisposable {
         virtualProcess -= result * 4;
 
         virtualRunning -= result;
+        ItemHashMap<Long> outputAmounts = nextRecipe.getOutputAmounts();
+        ItemHashMap<Long> inputAmounts = nextRecipe.getInputAmounts();
         ItemHashMap<Long> resultItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry :
-                next.getRecipe().getOutputAmounts().keyEntrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : outputAmounts.keyEntrySet()) {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
         storage.addItem(resultItems);
 
         long actualAmount = Math.min(maxDevices - virtualRunning, next.getAmount());
         ItemHashMap<Long> neededItems = new ItemHashMap<>();
-        for (Map.Entry<ItemKey, Long> entry : next.getRecipe().getInputAmounts().keyEntrySet()) {
+        for (Map.Entry<ItemKey, Long> entry : inputAmounts.keyEntrySet()) {
             neededItems.putKey(entry.getKey(), entry.getValue() * actualAmount);
         }
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests)) {
-            if (doCraft && next.getRecipe().getCraftType() != CraftType.COOKING) {
+            if (doCraft && craftType != CraftType.COOKING) {
                 failTimes = 0;
                 storage.takeItem(requests);
                 virtualRunning += (int) actualAmount;

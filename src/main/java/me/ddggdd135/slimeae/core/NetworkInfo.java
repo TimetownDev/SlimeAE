@@ -44,8 +44,22 @@ public class NetworkInfo implements IDisposable {
     // === F9: 配方缓存 ===
     private volatile Set<CraftingRecipe> cachedRecipes = null;
 
+    private volatile Map<ItemKey, CraftingRecipe> outputIndex = new ConcurrentHashMap<>();
+
+    private volatile Map<CraftingRecipe, List<Location>> recipeToHolders = new ConcurrentHashMap<>();
+
+    private volatile Map<Location, Block[]> cachedCraftingDevices = Collections.emptyMap();
+
+    private volatile Set<Location> tickableChildren = Collections.emptySet();
+
+    private volatile boolean disposed = false;
+
+    private volatile boolean needsStorageUpdate = false;
+    private volatile boolean needsRecipeUpdate = false;
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
+    private static int maxDevicesPerTick;
 
     public static int getMaxCraftingSessions() {
         return maxCraftingSessions;
@@ -55,10 +69,15 @@ public class NetworkInfo implements IDisposable {
         return maxCraftingAmount;
     }
 
+    public static int getMaxDevicesPerTick() {
+        return maxDevicesPerTick;
+    }
+
     // 重载配置
     public static void reloadConfig() {
         maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-tasks", 32);
-        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 32768);
+        maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 100000);
+        maxDevicesPerTick = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-devices-per-tick", 16384);
     }
 
     // 静态初始化块,在类加载时加载配置
@@ -74,6 +93,27 @@ public class NetworkInfo implements IDisposable {
     @Nonnull
     public Set<Location> getChildren() {
         return children;
+    }
+
+    public void clearChildren() {
+        NetworkData networkData = SlimeAEPlugin.getNetworkData();
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        children.clear();
+    }
+
+    public void replaceChildren(@Nonnull Set<Location> newChildren) {
+        NetworkData networkData = SlimeAEPlugin.getNetworkData();
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        children.clear();
+        children.addAll(newChildren);
+        for (Location loc : newChildren) {
+            networkData.locationToNetwork.put(loc, this);
+        }
+        networkData.locationToNetwork.put(controller, this);
     }
 
     public NetworkInfo(@Nonnull Location controller) {
@@ -109,14 +149,47 @@ public class NetworkInfo implements IDisposable {
 
     @Override
     public void dispose() {
+        if (disposed) return;
+        disposed = true;
+
         NetworkData networkData = SlimeAEPlugin.getNetworkData();
         networkData.AllNetworkData.remove(this);
+
+        for (Location loc : children) {
+            networkData.locationToNetwork.remove(loc, this);
+        }
+        networkData.locationToNetwork.remove(controller, this);
 
         for (AutoCraftingTask task : autoCraftingTasks) {
             task.dispose();
         }
 
         updateTempStorage();
+    }
+
+    public boolean isDisposed() {
+        return disposed;
+    }
+
+    public boolean needsStorageUpdate() {
+        return needsStorageUpdate;
+    }
+
+    public void setNeedsStorageUpdate(boolean value) {
+        this.needsStorageUpdate = value;
+    }
+
+    public boolean needsRecipeUpdate() {
+        return needsRecipeUpdate;
+    }
+
+    public void setNeedsRecipeUpdate(boolean value) {
+        this.needsRecipeUpdate = value;
+    }
+
+    public void clearDirtyFlags() {
+        this.needsStorageUpdate = false;
+        this.needsRecipeUpdate = false;
     }
 
     @Override
@@ -193,6 +266,10 @@ public class NetworkInfo implements IDisposable {
     }
 
     @Nullable public CraftingRecipe getRecipeFor(@Nonnull ItemStack output) {
+        ItemKey key = new ItemKey(output.asOne());
+        CraftingRecipe indexed = outputIndex.get(key);
+        if (indexed != null) return indexed;
+
         for (CraftingRecipe recipe : getRecipes()) {
             for (ItemStack itemStack : recipe.getOutput()) {
                 if (itemStack.asOne().equals(output.asOne())) return recipe;
@@ -200,6 +277,37 @@ public class NetworkInfo implements IDisposable {
         }
 
         return null;
+    }
+
+    @Nonnull
+    public Map<CraftingRecipe, List<Location>> getRecipeToHolders() {
+        return recipeToHolders;
+    }
+
+    public void setOutputIndex(@Nonnull Map<ItemKey, CraftingRecipe> index) {
+        this.outputIndex = index;
+    }
+
+    public void setRecipeToHolders(@Nonnull Map<CraftingRecipe, List<Location>> map) {
+        this.recipeToHolders = map;
+    }
+
+    @Nonnull
+    public Map<Location, Block[]> getCachedCraftingDevices() {
+        return cachedCraftingDevices;
+    }
+
+    public void setCachedCraftingDevices(@Nonnull Map<Location, Block[]> map) {
+        this.cachedCraftingDevices = map;
+    }
+
+    @Nonnull
+    public Set<Location> getTickableChildren() {
+        return tickableChildren;
+    }
+
+    public void setTickableChildren(@Nonnull Set<Location> set) {
+        this.tickableChildren = set;
     }
 
     @Nonnull
@@ -234,6 +342,7 @@ public class NetworkInfo implements IDisposable {
                 itemStack.setAmount((int) Math.min(64, task.getCount()));
             }
 
+            if (itemStack.isEmpty()) continue;
             List<String> lore = itemStack.getLore();
             if (lore == null) lore = new ArrayList<>();
             lore.add("");
