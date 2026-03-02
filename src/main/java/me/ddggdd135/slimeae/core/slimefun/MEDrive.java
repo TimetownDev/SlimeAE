@@ -21,10 +21,16 @@ import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.NetworkInfo;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class MEDrive extends SlimefunItem implements IMEStorageObject, InventoryBlock {
@@ -104,14 +110,61 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
-        for (int slot : getMEItemStorageCellSlots()) {
+        int[] cellSlots = getMEItemStorageCellSlots();
+        menu.addPlayerInventoryClickHandler(new ChestMenu.AdvancedMenuClickHandler() {
+            @Override
+            public boolean onClick(
+                    InventoryClickEvent e, Player player, int slot, ItemStack cursor, ClickAction action) {
+                if (e.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                    return true;
+                }
+                ItemStack clickedItem = e.getCurrentItem();
+                if (clickedItem == null || clickedItem.getType().isAir()) return true;
+                if (!(SlimefunItem.getByItem(clickedItem) instanceof MEItemStorageCell)) return true;
+
+                boolean[] wasCellBefore = new boolean[cellSlots.length];
+                for (int idx = 0; idx < cellSlots.length; idx++) {
+                    ItemStack slotItem = menu.getItemInSlot(cellSlots[idx]);
+                    wasCellBefore[idx] = slotItem != null
+                            && !slotItem.getType().isAir()
+                            && SlimefunItem.getByItem(slotItem) instanceof MEItemStorageCell;
+                }
+
+                Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> {
+                    for (int idx = 0; idx < cellSlots.length; idx++) {
+                        ItemStack slotItem = menu.getItemInSlot(cellSlots[idx]);
+                        boolean isCellNow = slotItem != null
+                                && !slotItem.getType().isAir()
+                                && SlimefunItem.getByItem(slotItem) instanceof MEItemStorageCell;
+                        if (isCellNow != wasCellBefore[idx]) {
+                            NetworkInfo networkInfo =
+                                    SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+                            if (networkInfo != null) {
+                                networkInfo.setNeedsStorageUpdate(true);
+                            }
+                            return;
+                        }
+                    }
+                });
+
+                return true;
+            }
+
+            @Override
+            public boolean onClick(Player player, int slot, ItemStack item, ClickAction action) {
+                return true;
+            }
+        });
+
+        for (int slot : cellSlots) {
             menu.addMenuClickHandler(slot, (player, i, cursor, clickAction) -> {
                 ItemStack itemStack = menu.getItemInSlot(i);
-                if (itemStack != null
+                boolean wasCell = itemStack != null
                         && !itemStack.getType().isAir()
                         && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                        && MEItemStorageCell.isCurrentServer(itemStack)) {
+                        && MEItemStorageCell.isCurrentServer(itemStack);
 
+                if (wasCell) {
                     MEItemStorageCell.updateLore(itemStack);
                     NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
                     if (networkInfo == null) return true;
@@ -121,6 +174,21 @@ public class MEDrive extends SlimefunItem implements IMEStorageObject, Inventory
                         storageCollection.removeStorage(result);
                     }
                 }
+
+                Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> {
+                    ItemStack newItem = menu.getItemInSlot(i);
+                    boolean isCell = newItem != null
+                            && !newItem.getType().isAir()
+                            && SlimefunItem.getByItem(newItem) instanceof MEItemStorageCell
+                            && MEItemStorageCell.isCurrentServer(newItem);
+                    if (isCell != wasCell) {
+                        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+                        if (networkInfo != null) {
+                            networkInfo.setNeedsStorageUpdate(true);
+                        }
+                    }
+                });
+
                 return true;
             });
         }

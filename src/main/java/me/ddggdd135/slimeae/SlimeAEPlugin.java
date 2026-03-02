@@ -6,8 +6,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.api.abstracts.MEChainedBus;
+import me.ddggdd135.slimeae.api.database.ReskinDataController;
 import me.ddggdd135.slimeae.api.database.StorageCellFilterDataController;
 import me.ddggdd135.slimeae.api.database.StorageCellStorageDataController;
+import me.ddggdd135.slimeae.api.reskin.MaterialValidator;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.commands.SlimeAECommand;
@@ -50,6 +52,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
     private StorageCellStorageDataController storageCellStorageDataController;
     private StorageCellFilterDataController storageCellFilterDataController;
+    private ReskinDataController reskinDataController;
 
     private NetworkTickerTask networkTicker;
     private NetworkTimeConsumingTask networkTimeConsumingTask;
@@ -76,6 +79,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         storageCellStorageDataController = new StorageCellStorageDataController();
         storageCellFilterDataController = new StorageCellFilterDataController();
+        reskinDataController = new ReskinDataController();
 
         networkTicker = new NetworkTickerTask();
         networkTimeConsumingTask = new NetworkTimeConsumingTask();
@@ -124,6 +128,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         storageCellStorageDataController.init();
         storageCellFilterDataController.init();
+        reskinDataController.init();
+
+        Bukkit.getPluginManager().registerEvents(new ReskinListener(), this);
 
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().add(new SlimefunBlockPopulator());
@@ -165,6 +172,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         storageCellStorageDataController.shutdown();
         storageCellFilterDataController.shutdown();
+        reskinDataController.shutdown();
 
         SlimefunItemUtils.unregisterItemGroups(this);
         SlimefunItemUtils.unregisterAllItems(this);
@@ -293,6 +301,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         return getInstance().storageCellFilterDataController;
     }
 
+    /**
+     * 获取材质转换数据控制器
+     * @return 材质转换数据控制器实例
+     */
+    @Nonnull
+    public static ReskinDataController getReskinDataController() {
+        return getInstance().reskinDataController;
+    }
+
     @Nonnull
     public static NetworkTickerTask getNetworkTicker() {
         return getInstance().networkTicker;
@@ -358,5 +375,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
         // 重载ME标准发信器配置
         MELevelEmitter.reloadConfig();
+
+        // 重载材质转换机配置
+        MaterialValidator.reloadConfig();
     }
 }
