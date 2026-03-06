@@ -41,14 +41,19 @@ public class InfinityBarrelStorage implements IStorage {
         this.location = block.getLocation();
     }
 
+    private boolean isBlockValid() {
+        return StorageCacheUtils.getBlock(location) != null;
+    }
+
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        if (!isReadOnly && cache != null) cache.depositAll(new ItemStack[] {itemStackCache.getItemStack()}, true);
+        if (!isReadOnly && cache != null && isBlockValid())
+            cache.depositAll(new ItemStack[] {itemStackCache.getItemStack()}, true);
     }
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        if (cache == null) return false;
+        if (cache == null || !isBlockValid()) return false;
         boolean toReturn = true;
         for (ItemRequest request : requests) {
             if (cache.matches(request.getKey().getItemStack())) {
@@ -62,7 +67,7 @@ public class InfinityBarrelStorage implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        if (cache == null) return new ItemStorage();
+        if (cache == null || !isBlockValid()) return new ItemStorage();
         ItemStorage toReturn = new ItemStorage();
         for (ItemRequest request : requests) {
             if (cache.matches(request.getKey().getItemStack())) {
@@ -80,6 +85,7 @@ public class InfinityBarrelStorage implements IStorage {
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
+        if (cache == null || !isBlockValid()) return storage;
         Material material = cache.material();
         ItemMeta meta = cache.meta();
 
@@ -94,7 +100,7 @@ public class InfinityBarrelStorage implements IStorage {
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
         try {
-            if (cache == null || cache.amount() <= 0) return -1;
+            if (cache == null || !isBlockValid() || cache.amount() <= 0) return -1;
             if (cache.material() == itemStack.getItemStack().getType()) return 2000;
         } catch (Exception e) {
             SlimeAEPlugin.getInstance()

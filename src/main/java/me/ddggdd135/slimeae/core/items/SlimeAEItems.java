@@ -340,6 +340,10 @@ public class SlimeAEItems {
                     "",
                     "{#3366ff>}将SlimeAE机器的外观更换为其他材质{#33ccf3<}",
                     "{#3366ff>}支持普通方块和头颅{#33ccf3<}"));
+    public static final SlimefunItemStack PATTERN_RESET_MACHINE = new SlimefunItemStack(
+            "PATTERN_RESET_MACHINE",
+            new AdvancedCustomItemStack(
+                    Material.GRINDSTONE, "{#Vanilla_Ice}样板重置机", "", "{#3366ff>}将任意样板还原为空白样板{#33ccf3<}"));
 
     // MATERIAL
     public static final SlimefunItemStack CRYSTAL_CERTUS_QUARTZ = new SlimefunItemStack(
@@ -1177,6 +1181,22 @@ public class SlimeAEItems {
                             QUARTZ_GLASS
                         })
                 .register(plugin);
+        new PatternResetMachine(
+                        SlimeAEItemGroups.MACHINE,
+                        PATTERN_RESET_MACHINE,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            QUARTZ_GLASS,
+                            null,
+                            QUARTZ_GLASS,
+                            ANNIHILATION_CORE,
+                            new ItemStack(Material.GRINDSTONE),
+                            FORMATION_CORE,
+                            QUARTZ_GLASS,
+                            CALCULATION_PROCESSOR,
+                            QUARTZ_GLASS
+                        })
+                .register(plugin);
         // Materials
 
         SlimefunItem crystal_certus_quartz = new SlimefunItem(
@@ -1917,9 +1937,11 @@ public class SlimeAEItems {
                         new ItemStack[] {ME_STORAGE_HOUSING, ME_ITEM_STORAGE_COMPONENT_INFINITY},
                         Long.MAX_VALUE)
                 .register(plugin);
-        new MECreativeItemStorageCell(
-                        SlimeAEItemGroups.CELL, ME_CREATIVE_ITEM_STORAGE_CELL, RecipeType.NULL, new ItemStack[0])
-                .register(plugin);
+        if (SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_creative_cell", true)) {
+            new MECreativeItemStorageCell(
+                            SlimeAEItemGroups.CELL, ME_CREATIVE_ITEM_STORAGE_CELL, RecipeType.NULL, new ItemStack[0])
+                    .register(plugin);
+        }
         // TOOLS
 
         new MemoryCard(SlimeAEItemGroups.TOOL, MEMORY_CARD, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {

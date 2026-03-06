@@ -219,12 +219,14 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         String sortKey = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
         int sortId = (sortKey != null) ? Integer.parseInt(sortKey) : 0;
 
-        // F5: 计算存储内容的轻量级哈希（size + 总量和）用于脏检测
+        // F5: 计算存储内容的轻量级哈希（size + 总量和 + 物品类型哈希）用于脏检测
         Location loc = block.getLocation();
         int storageSize = storage.size();
         long storageTotalAmount = 0;
-        for (Long v : storage.values()) {
-            storageTotalAmount += v;
+        int storageKeyHash = 0;
+        for (Map.Entry<ItemStack, Long> entry : storage.entrySet()) {
+            storageTotalAmount += entry.getValue();
+            storageKeyHash = storageKeyHash * 31 + entry.getKey().getType().hashCode();
         }
 
         // F7: 检查排序结果缓存
@@ -234,7 +236,12 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         if (cachedResult != null
                 && cachedResult.isValid(
-                        filter, sortId, storageSize, storageTotalAmount, storage instanceof CreativeItemMap)) {
+                        filter,
+                        sortId,
+                        storageSize,
+                        storageTotalAmount,
+                        storageKeyHash,
+                        storage instanceof CreativeItemMap)) {
             // F5+F7: 缓存命中，数据未变化，复用上次的过滤+排序结果
             items = cachedResult.items;
             pinnedCount = cachedResult.pinnedCount;
@@ -277,6 +284,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                             sortId,
                             storageSize,
                             storageTotalAmount,
+                            storageKeyHash,
                             storage instanceof CreativeItemMap,
                             items,
                             pinnedCount));
@@ -431,6 +439,16 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     @Override
     @OverridingMethodsMustInvokeSuper
     public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block block) {
+        menu.addMenuOpeningHandler(player -> {
+            NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+            if (info != null) {
+                info.getStorage().invalidateStorageCache();
+                info.getStorage().clearTakeAndPushCache();
+                info.setNeedsStorageUpdate(true);
+            }
+            clearSortedItemsCache(block.getLocation());
+        });
+
         menu.replaceExistingItem(getPageNext(), MenuItems.PAGE_NEXT_STACK);
         menu.addMenuClickHandler(getPageNext(), (player, i, cursor, clickAction) -> {
             setPage(block, getPage(block) + 1);
@@ -624,6 +642,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
         final int sortId;
         final int storageSize;
         final long storageTotalAmount;
+        final int storageKeyHash;
         final boolean isCreative;
         final List<Map.Entry<ItemStack, Long>> items;
         final int pinnedCount;
@@ -635,6 +654,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
                 int sortId,
                 int storageSize,
                 long storageTotalAmount,
+                int storageKeyHash,
                 boolean isCreative,
                 List<Map.Entry<ItemStack, Long>> items,
                 int pinnedCount) {
@@ -642,18 +662,26 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             this.sortId = sortId;
             this.storageSize = storageSize;
             this.storageTotalAmount = storageTotalAmount;
+            this.storageKeyHash = storageKeyHash;
             this.isCreative = isCreative;
             this.items = items;
             this.pinnedCount = pinnedCount;
             this.createTime = System.currentTimeMillis();
         }
 
-        boolean isValid(String filter, int sortId, int storageSize, long storageTotalAmount, boolean isCreative) {
+        boolean isValid(
+                String filter,
+                int sortId,
+                int storageSize,
+                long storageTotalAmount,
+                int storageKeyHash,
+                boolean isCreative) {
             if (System.currentTimeMillis() - createTime > CACHE_TTL) return false;
             return this.filter.equals(filter)
                     && this.sortId == sortId
                     && this.storageSize == storageSize
                     && this.storageTotalAmount == storageTotalAmount
+                    && this.storageKeyHash == storageKeyHash
                     && this.isCreative == isCreative;
         }
     }

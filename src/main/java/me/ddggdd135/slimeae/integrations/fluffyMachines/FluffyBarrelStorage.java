@@ -42,11 +42,15 @@ public class FluffyBarrelStorage implements IStorage {
         this.isReadOnly = isReadOnly;
     }
 
+    private boolean isBlockValid() {
+        return StorageCacheUtils.getBlock(block.getLocation()) != null;
+    }
+
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
         ItemStack itemStack = itemStackCache.getItemStack();
 
-        if (!isReadOnly && blockMenu != null && barrel != null && barrel.getStored(block) > 0) {
+        if (!isReadOnly && blockMenu != null && barrel != null && isBlockValid() && barrel.getStored(block) > 0) {
             int stored = barrel.getStored(block);
             int size = barrel.getCapacity(block);
             if (stored >= size) return;
@@ -62,7 +66,7 @@ public class FluffyBarrelStorage implements IStorage {
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return false;
+        if (blockMenu == null || barrel == null || !isBlockValid() || barrel.getStored(block) <= 0) return false;
         int stored = barrel.getStored(block) - 1;
         ItemStack storedItem = barrel.getStoredItem(block);
         boolean toReturn = true;
@@ -77,7 +81,8 @@ public class FluffyBarrelStorage implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return new ItemStorage();
+        if (blockMenu == null || barrel == null || !isBlockValid() || barrel.getStored(block) <= 0)
+            return new ItemStorage();
         int stored = barrel.getStored(block) - 1;
         ItemStack storedItem = barrel.getStoredItem(block);
         ItemStorage toReturn = new ItemStorage();
@@ -97,7 +102,7 @@ public class FluffyBarrelStorage implements IStorage {
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
         ItemHashMap<Long> storage = new ItemHashMap<>();
-        if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return storage;
+        if (blockMenu == null || barrel == null || !isBlockValid() || barrel.getStored(block) <= 0) return storage;
         storage.put(barrel.getStoredItem(block).asOne(), (long) (barrel.getStored(block) - 1));
         return storage;
     }
@@ -105,7 +110,7 @@ public class FluffyBarrelStorage implements IStorage {
     @Override
     public int getTier(@Nonnull ItemKey itemStack) {
         try {
-            if (blockMenu == null || barrel == null || barrel.getStored(block) <= 0) return -1;
+            if (blockMenu == null || barrel == null || !isBlockValid() || barrel.getStored(block) <= 0) return -1;
             ItemStack storedItem = barrel.getStoredItem(block);
             if (storedItem == null || storedItem.getType().isAir()) return -1;
             if (itemStack.getItemStack().getType() == storedItem.getType()) return 2000;

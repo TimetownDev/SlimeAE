@@ -22,6 +22,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.blockdata.MEBusData;
 import me.ddggdd135.slimeae.api.blockdata.MEBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.*;
@@ -291,6 +292,12 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
     public void setDirection(BlockMenu blockMenu, BlockFace blockFace) {
         SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), blockFace);
         StorageCacheUtils.setData(blockMenu.getBlock().getLocation(), dataKey, blockFace.name());
+
+        NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData()
+                .getNetworkInfo(blockMenu.getBlock().getLocation());
+        if (networkInfo != null) {
+            networkInfo.setNeedsStorageUpdate(true);
+        }
     }
 
     @ParametersAreNonnullByDefault
