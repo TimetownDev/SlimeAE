@@ -25,6 +25,7 @@ public class QuantumStorage implements IStorage {
     private BlockMenu blockMenu;
     private boolean isReadOnly;
     private final Location location;
+    private final SlimefunBlockData originalBlockData;
 
     public QuantumStorage(@Nonnull Block block) {
         this(block, false);
@@ -37,6 +38,7 @@ public class QuantumStorage implements IStorage {
 
         this.location = block.getLocation();
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
+        this.originalBlockData = blockData;
         if (blockData != null && SlimefunItem.getById(blockData.getSfId()) instanceof NetworkQuantumStorage) {
             blockMenu = blockData.getBlockMenu();
             quantumCache = NetworkQuantumStorage.getCaches().get(block.getLocation());
@@ -46,7 +48,7 @@ public class QuantumStorage implements IStorage {
     }
 
     private boolean isBlockValid() {
-        return StorageCacheUtils.getBlock(location) != null;
+        return originalBlockData != null && StorageCacheUtils.getBlock(location) == originalBlockData;
     }
 
     @Override

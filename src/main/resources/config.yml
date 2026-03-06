@@ -52,6 +52,10 @@ reskin-machine:
   # 允许被转换的SlimeAE物品ID列表(留空则允许所有IMEObject物品)
   allowed-targets: []
 
+# 存储元件Lore前缀
+# 支持&颜色代码和&#RRGGBB十六进制颜色, 例如: &b, &e, &#EEDC82
+storage-cell-lore-prefix: "&#EEDC82"
+
 # 创造存储元件
 enable_creative_cell: true
 

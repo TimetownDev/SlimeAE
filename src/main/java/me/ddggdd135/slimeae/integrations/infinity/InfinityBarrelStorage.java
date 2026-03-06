@@ -26,6 +26,7 @@ public class InfinityBarrelStorage implements IStorage {
     private StorageCache cache;
     private Location location;
     private boolean isReadOnly;
+    private final SlimefunBlockData originalBlockData;
 
     public InfinityBarrelStorage(@Nonnull Block block) {
         this(block, false);
@@ -34,6 +35,7 @@ public class InfinityBarrelStorage implements IStorage {
     public InfinityBarrelStorage(@Nonnull Block block, boolean isReadOnly) {
         if (!SlimeAEPlugin.getInfinityIntegration().isLoaded()) throw new RuntimeException("Infinity is not loaded");
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
+        this.originalBlockData = blockData;
         if (blockData != null && SlimefunItem.getById(blockData.getSfId()) instanceof StorageUnit storageUnit) {
             cache = storageUnit.getCache(block.getLocation());
         }
@@ -42,7 +44,7 @@ public class InfinityBarrelStorage implements IStorage {
     }
 
     private boolean isBlockValid() {
-        return StorageCacheUtils.getBlock(location) != null;
+        return originalBlockData != null && StorageCacheUtils.getBlock(location) == originalBlockData;
     }
 
     @Override

@@ -25,6 +25,7 @@ public class FluffyBarrelStorage implements IStorage {
     private BlockMenu blockMenu;
     private Block block;
     private boolean isReadOnly;
+    private final SlimefunBlockData originalBlockData;
 
     public FluffyBarrelStorage(@Nonnull Block block) {
         this(block, false);
@@ -35,6 +36,7 @@ public class FluffyBarrelStorage implements IStorage {
             throw new RuntimeException("FluffyMachines is not loaded");
         this.block = block;
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(block.getLocation());
+        this.originalBlockData = blockData;
         if (blockData != null && SlimefunItem.getById(blockData.getSfId()) instanceof Barrel barrel) {
             blockMenu = blockData.getBlockMenu();
             this.barrel = barrel;
@@ -43,7 +45,7 @@ public class FluffyBarrelStorage implements IStorage {
     }
 
     private boolean isBlockValid() {
-        return StorageCacheUtils.getBlock(block.getLocation()) != null;
+        return originalBlockData != null && StorageCacheUtils.getBlock(block.getLocation()) == originalBlockData;
     }
 
     @Override

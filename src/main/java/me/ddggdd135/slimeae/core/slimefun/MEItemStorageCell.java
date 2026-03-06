@@ -28,7 +28,12 @@ import org.bukkit.inventory.ItemStack;
 public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static final String UUID_KEY = "uuid";
     public static final String SERVER_UUID_KEY = "server_uuid";
+    private static String lorePrefix = "&#EEDC82";
     private long size;
+
+    public static void reloadConfig() {
+        lorePrefix = SlimeAEPlugin.getInstance().getConfig().getString("storage-cell-lore-prefix", "&#EEDC82");
+    }
 
     public MEItemStorageCell(
             ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, long size) {
@@ -89,7 +94,8 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
                 break;
             }
             lines++;
-            lores.add(CMIChatColor.translate("&e" + ItemUtils.getItemName(entry.getKey()) + " - " + entry.getValue()));
+            lores.add(CMIChatColor.translate(
+                    lorePrefix + ItemUtils.getItemName(entry.getKey()) + " - " + entry.getValue() + "&r"));
         }
         itemStack.setLore(lores);
     }
