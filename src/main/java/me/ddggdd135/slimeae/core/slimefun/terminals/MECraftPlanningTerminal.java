@@ -52,7 +52,9 @@ public class MECraftPlanningTerminal extends METerminal {
             return;
         }
 
-        Player player = (Player) blockMenu.getInventory().getViewers().get(0);
+        List<?> viewers = blockMenu.getInventory().getViewers();
+        if (viewers.isEmpty()) return;
+        Player player = (Player) viewers.get(0);
 
         // 获取合成配方，创建RecipeEntry对象映射配方和item的关系，避免在置顶和搜索时被打乱顺序.
         Set<CraftingRecipe> recipes = info.getRecipes();
