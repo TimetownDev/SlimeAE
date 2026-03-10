@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.api.interfaces.IMEObject;
 import me.ddggdd135.slimeae.api.interfaces.IMEStorageObject;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.slimefun.buses.MEStorageBus;
+import me.ddggdd135.slimeae.utils.NetworkUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -66,17 +67,26 @@ public class NetworkListener implements Listener {
             }
         }
 
-        if (networkInfos.size() != 1) {
-            for (NetworkInfo info : networkInfos) {
-                info.dispose();
-            }
-        } else {
+        if (networkInfos.size() == 1) {
             NetworkInfo info = networkInfos.iterator().next();
             Location placed = e.getBlockPlaced().getLocation();
             info.getChildren().add(placed);
             SlimeAEPlugin.getNetworkData().locationToNetwork.put(placed, info);
             info.setNeedsStorageUpdate(true);
             info.setNeedsRecipeUpdate(true);
+        } else if (networkInfos.size() >= 2) {
+            for (NetworkInfo info : networkInfos) {
+                info.dispose();
+            }
+        } else {
+            Location placed = e.getBlockPlaced().getLocation();
+            NetworkInfo found = NetworkUtils.findNetworkByBFS(placed);
+            if (found != null) {
+                found.getChildren().add(placed);
+                SlimeAEPlugin.getNetworkData().locationToNetwork.put(placed, found);
+                found.setNeedsStorageUpdate(true);
+                found.setNeedsRecipeUpdate(true);
+            }
         }
     }
 

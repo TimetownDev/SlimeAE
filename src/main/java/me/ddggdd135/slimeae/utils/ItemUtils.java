@@ -476,7 +476,12 @@ public class ItemUtils {
         }
         BlockMenu inv = StorageCacheUtils.getMenu(block.getLocation());
         if (inv != null) {
-            int[] outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
+            int[] outputSlots;
+            try {
+                outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(inv, ItemTransportFlow.WITHDRAW, null);
+            } catch (IllegalArgumentException e) {
+                outputSlots = inv.getPreset().getSlotsAccessedByItemTransport(ItemTransportFlow.WITHDRAW);
+            }
             if (outputSlots == null) return null;
             for (int slot : outputSlots) {
                 ItemStack item = inv.getItemInSlot(slot);

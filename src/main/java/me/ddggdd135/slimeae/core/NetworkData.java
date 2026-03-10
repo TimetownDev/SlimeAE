@@ -21,6 +21,7 @@ import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class NetworkData {
@@ -38,6 +39,13 @@ public class NetworkData {
 
         for (NetworkInfo ni : AllNetworkData) {
             if (ni.getController().equals(location)) {
+                locationToNetwork.put(location, ni);
+                return ni;
+            }
+        }
+
+        for (NetworkInfo ni : AllNetworkData) {
+            if (ni.getChildren().contains(location)) {
                 locationToNetwork.put(location, ni);
                 return ni;
             }
@@ -64,7 +72,22 @@ public class NetworkData {
     public boolean updateChildren(@Nonnull NetworkInfo info) {
         Location controller = info.getController();
 
-        if (info.getChildren().size() == 1 || info.getChildren().isEmpty()) {
+        boolean needsScan = info.getChildren().size() <= 1;
+
+        if (!needsScan) {
+            for (Location child : info.getChildren()) {
+                for (BlockFace face : IMEObject.Valid_Faces) {
+                    Location adj = child.clone().add(face.getDirection());
+                    if (AllNetworkBlocks.containsKey(adj) && !info.getChildren().contains(adj)) {
+                        needsScan = true;
+                        break;
+                    }
+                }
+                if (needsScan) break;
+            }
+        }
+
+        if (needsScan) {
             Set<Location> children = NetworkUtils.scan(controller.getBlock());
             for (Location location : children) {
                 if (AllControllers.containsKey(location) && !location.equals(controller)) {

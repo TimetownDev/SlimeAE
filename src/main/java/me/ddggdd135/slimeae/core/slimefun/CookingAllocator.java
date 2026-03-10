@@ -81,14 +81,26 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (block.getBlockData().getMaterial().isAir()) return false;
         if (blockMenu != null) {
-            int[] inputSlots =
-                    blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, null);
+            ItemStack[] inputs = ItemUtils.trimItems(recipe.getInput());
+            ItemStack[] outputs = ItemUtils.trimItems(recipe.getOutput());
+            if (inputs.length == 0 || outputs.length == 0) return false;
 
-            int[] outputSlots =
-                    blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, null);
+            int[] inputSlots;
+            int[] outputSlots;
+            try {
+                inputSlots = blockMenu
+                        .getPreset()
+                        .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.INSERT, inputs[0]);
+                outputSlots = blockMenu
+                        .getPreset()
+                        .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, outputs[0]);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+            if (inputSlots == null || outputSlots == null) return false;
 
-            return InvUtils.fitAll(blockMenu.getInventory(), recipe.getInput(), inputSlots)
-                    && InvUtils.fitAll(blockMenu.getInventory(), recipe.getOutput(), outputSlots);
+            return InvUtils.fitAll(blockMenu.getInventory(), inputs, inputSlots)
+                    && InvUtils.fitAll(blockMenu.getInventory(), outputs, outputSlots);
         }
 
         return false;
