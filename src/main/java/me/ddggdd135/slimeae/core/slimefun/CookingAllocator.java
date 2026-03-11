@@ -14,7 +14,6 @@ import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
-import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -67,7 +66,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
 
     @Override
     public boolean isSupport(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        return recipe.getCraftType() == CraftType.COOKING;
+        return recipe.getCraftType().isProcess();
     }
 
     @Override

@@ -10,12 +10,16 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
+import me.ddggdd135.slimeae.api.autocraft.CraftTypeRegistry;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
 import me.ddggdd135.slimeae.api.interfaces.IMEVirtualCraftDevice;
@@ -57,7 +61,9 @@ public class MolecularAssembler extends TickingBlock
         CraftingRecipe recipe = null;
         for (AutoCraftingTask autoCraftingTask : networkInfo.getAutoCraftingSessions()) {
             if (autoCraftingTask.getCraftingSteps().isEmpty()) continue;
-            if (autoCraftingTask.getCraftingSteps().get(0).getRecipe().getCraftType() == getCraftingType()) {
+            CraftType stepType =
+                    autoCraftingTask.getCraftingSteps().get(0).getRecipe().getCraftType();
+            if (getSupportedCraftTypes().contains(stepType)) {
                 recipe = autoCraftingTask.getCraftingSteps().get(0).getRecipe();
             }
         }
@@ -219,6 +225,21 @@ public class MolecularAssembler extends TickingBlock
             }
         }
         return speed;
+    }
+
+    @Nullable private volatile Set<CraftType> supportedCraftTypesCache;
+
+    @Nonnull
+    @Override
+    public Set<CraftType> getSupportedCraftTypes() {
+        Set<CraftType> cached = supportedCraftTypesCache;
+        if (cached == null) {
+            cached = CraftTypeRegistry.getSmallTypes().stream()
+                    .filter(t -> !t.isVanilla())
+                    .collect(Collectors.toUnmodifiableSet());
+            supportedCraftTypesCache = cached;
+        }
+        return cached;
     }
 
     @Override

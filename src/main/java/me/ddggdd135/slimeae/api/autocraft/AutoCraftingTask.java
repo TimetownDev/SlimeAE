@@ -306,7 +306,7 @@ public class AutoCraftingTask implements IDisposable {
         }
         List<Location> holderLocations = info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
 
-        if (craftType == CraftType.COOKING) {
+        if (craftType.isProcess()) {
             Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
             for (Location location : holderLocations) {
                 IMECraftHolder holder =
@@ -400,7 +400,7 @@ public class AutoCraftingTask implements IDisposable {
 
         ItemRequest[] requests = ItemUtils.createRequests(neededItems);
         if (storage.contains(requests)) {
-            if (doCraft && craftType != CraftType.COOKING) {
+            if (doCraft && !craftType.isProcess()) {
                 failTimes = 0;
                 storage.takeItem(requests);
                 virtualRunning += (int) actualAmount;

@@ -147,6 +147,23 @@ public class NetworkData {
         Set<Location> newCraftingHolders = new ConcurrentHashSet<>();
         Map<Location, Set<CraftingRecipe>> newRecipeMap = new ConcurrentHashMap<>();
         Map<Location, Block[]> devicesCache = new HashMap<>();
+
+        Set<CraftType> networkWideSupportedTypes = new HashSet<>();
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof IMECraftDevice)) continue;
+            SlimefunBlockData bd =
+                    Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
+            if (bd == null) continue;
+            SlimefunItem si = SlimefunItem.getById(bd.getSfId());
+            if (si instanceof IMEVirtualCraftDevice vcd) {
+                networkWideSupportedTypes.addAll(vcd.getSupportedCraftTypes());
+            } else if (si instanceof IMECraftDevice) {
+                // 非 IMEVirtualCraftDevice 的 IMECraftDevice，无法提前知道支持哪些类型
+                // 但这种情况在当前代码中很少见，忽略即可
+            }
+        }
+
         for (Location location : info.getChildren()) {
             if (!AllCraftHolders.containsKey(location)) continue;
             IMECraftHolder slimefunItem = AllCraftHolders.get(location);
@@ -163,6 +180,7 @@ public class NetworkData {
             } else {
                 holderRecipes = slimefunItem.getSupportedRecipes(location.getBlock());
             }
+            // 先用邻接设备匹配
             for (Block device : devices) {
                 SlimefunBlockData blockData =
                         Slimefun.getDatabaseManager().getBlockDataController().getBlockData(device.getLocation());
@@ -176,21 +194,25 @@ public class NetworkData {
                     }
                 }
             }
+            for (CraftingRecipe recipe : holderRecipes) {
+                if (!supported.contains(recipe) && networkWideSupportedTypes.contains(recipe.getCraftType())) {
+                    supported.add(recipe);
+                }
+            }
             newRecipeMap.put(location, supported);
         }
 
         Map<CraftType, Integer> newSpeeds = new ConcurrentHashMap<>();
-        for (Location location : newRecipeMap.keySet()) {
-            Block[] devices = devicesCache.get(location);
-            if (devices == null) continue;
-            for (Block deviceBlock : devices) {
-                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
-                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (!(imeCraftDevice instanceof IMEVirtualCraftDevice device)) continue;
-                CraftType craftType = device.getCraftingType();
-                int speed = newSpeeds.getOrDefault(craftType, 0);
-                speed += device.getSpeed(deviceBlock);
-                newSpeeds.put(craftType, speed);
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof IMECraftDevice)) continue;
+            SlimefunBlockData bd = StorageCacheUtils.getBlock(location);
+            if (bd == null) continue;
+            SlimefunItem si = SlimefunItem.getById(bd.getSfId());
+            if (!(si instanceof IMEVirtualCraftDevice device)) continue;
+            int speed = device.getSpeed(location.getBlock());
+            for (CraftType craftType : device.getSupportedCraftTypes()) {
+                newSpeeds.merge(craftType, speed, Integer::sum);
             }
         }
 

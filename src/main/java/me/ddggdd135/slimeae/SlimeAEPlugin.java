@@ -26,6 +26,7 @@ import me.ddggdd135.slimeae.core.slimefun.NetworksExpansionSwitch;
 import me.ddggdd135.slimeae.core.slimefun.cards.CraftingCard;
 import me.ddggdd135.slimeae.integrations.*;
 import me.ddggdd135.slimeae.tasks.*;
+import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.ddggdd135.slimeae.utils.SlimefunItemUtils;
 import net.guizhanss.minecraft.guizhanlib.updater.GuizhanUpdater;
 import org.bstats.bukkit.Metrics;
@@ -110,6 +111,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         // Plugin startup logic
         SlimeAEItemGroups.onSetup(this);
         SlimeAEItems.onSetup(this);
+        RecipeUtils.init();
 
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
         Bukkit.getPluginManager().registerEvents(new CardListener(), this);
@@ -160,7 +162,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
 
     @Override
     public void onDisable() {
-        metrics.shutdown();
+        if (metrics != null) metrics.shutdown();
         // Plugin shutdown logic
         for (World world : Bukkit.getWorlds()) {
             world.getPopulators().removeIf(x -> x instanceof SlimefunBlockPopulator);

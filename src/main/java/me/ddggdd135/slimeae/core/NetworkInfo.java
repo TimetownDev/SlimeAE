@@ -105,7 +105,8 @@ public class NetworkInfo implements IDisposable {
 
     public void replaceChildren(@Nonnull Set<Location> newChildren) {
         NetworkData networkData = SlimeAEPlugin.getNetworkData();
-        ConcurrentHashSet<Location> newSet = new ConcurrentHashSet<>(newChildren);
+        ConcurrentHashSet<Location> newSet = new ConcurrentHashSet<>();
+        newSet.addAll(newChildren);
         for (Location loc : newChildren) {
             networkData.locationToNetwork.put(loc, this);
         }
