@@ -57,9 +57,13 @@ public class NetworkInfo implements IDisposable {
     private volatile boolean needsStorageUpdate = false;
     private volatile boolean needsRecipeUpdate = false;
 
+    private volatile int parallelProcessorCount = 0;
+
     private static int maxCraftingSessions;
     private static int maxCraftingAmount;
     private static int maxDevicesPerTick;
+    private static boolean parallelEnabled;
+    private static int maxParallelism;
 
     public static int getMaxCraftingSessions() {
         return maxCraftingSessions;
@@ -73,11 +77,21 @@ public class NetworkInfo implements IDisposable {
         return maxDevicesPerTick;
     }
 
+    public static boolean isParallelEnabled() {
+        return parallelEnabled;
+    }
+
+    public static int getMaxParallelism() {
+        return maxParallelism;
+    }
+
     // 重载配置
     public static void reloadConfig() {
         maxCraftingSessions = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-tasks", 32);
         maxCraftingAmount = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-amount", 100000);
         maxDevicesPerTick = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.max-devices-per-tick", 16384);
+        parallelEnabled = SlimeAEPlugin.getInstance().getConfig().getBoolean("auto-crafting.parallel.enabled", true);
+        maxParallelism = SlimeAEPlugin.getInstance().getConfig().getInt("auto-crafting.parallel.max-parallelism", 16);
     }
 
     // 静态初始化块,在类加载时加载配置
@@ -189,6 +203,14 @@ public class NetworkInfo implements IDisposable {
 
     public void setNeedsRecipeUpdate(boolean value) {
         this.needsRecipeUpdate = value;
+    }
+
+    public int getParallelProcessorCount() {
+        return parallelProcessorCount;
+    }
+
+    public void setParallelProcessorCount(int count) {
+        this.parallelProcessorCount = count;
     }
 
     public void clearDirtyFlags() {

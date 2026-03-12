@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.autocraft.CraftStep;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.enums.AETaskType;
 import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
@@ -132,10 +133,10 @@ public class NetworkTickerTask implements Runnable {
                     Set<AutoCraftingTask> tasks = new HashSet<>(info.getAutoCraftingSessions());
                     Map<CraftType, Integer> taskCountByType = new HashMap<>();
                     for (AutoCraftingTask task : tasks) {
-                        if (task.getCraftingSteps().isEmpty()) continue;
-                        CraftType ct =
-                                task.getCraftingSteps().get(0).getRecipe().getCraftType();
-                        taskCountByType.merge(ct, 1, Integer::sum);
+                        for (CraftStep step : task.getActiveSteps()) {
+                            CraftType ct = step.getRecipe().getCraftType();
+                            taskCountByType.merge(ct, 1, Integer::sum);
+                        }
                     }
                     for (AutoCraftingTask task : tasks) {
                         if (!task.hasNext()) {

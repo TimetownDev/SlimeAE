@@ -15,6 +15,7 @@ import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.slimefun.MEDrive;
+import me.ddggdd135.slimeae.core.slimefun.ParallelDriver;
 import me.ddggdd135.slimeae.core.slimefun.assembler.LargeMolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.assembler.MolecularAssembler;
 import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
@@ -110,7 +111,10 @@ public class NetworkData {
         Set<Location> tickable = new HashSet<>();
         for (Location loc : info.getChildren()) {
             IMEObject obj = AllNetworkBlocks.get(loc);
-            if (obj instanceof MEDrive || obj instanceof MolecularAssembler || obj instanceof LargeMolecularAssembler) {
+            if (obj instanceof MEDrive
+                    || obj instanceof MolecularAssembler
+                    || obj instanceof LargeMolecularAssembler
+                    || obj instanceof ParallelDriver) {
                 tickable.add(loc);
             }
         }
@@ -215,6 +219,14 @@ public class NetworkData {
                 newSpeeds.merge(craftType, speed, Integer::sum);
             }
         }
+
+        int totalParallelProcessors = 0;
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof ParallelDriver driver)) continue;
+            totalParallelProcessors += driver.getProcessorCount(location.getBlock());
+        }
+        info.setParallelProcessorCount(totalParallelProcessors);
 
         Map<ItemKey, CraftingRecipe> newOutputIndex = new HashMap<>();
         Map<CraftingRecipe, List<Location>> newRecipeToHolders = new HashMap<>();

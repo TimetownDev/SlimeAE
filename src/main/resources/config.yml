@@ -19,6 +19,10 @@ auto-crafting:
   max-devices-per-tick: 16384
   # 合成卡冷却时间(tick)
   crafting-card-cooldown: 200
+  # 并行合成设置
+  parallel:
+    enabled: true
+    max-parallelism: 16
 
 # 链式总线相关设置
 chained-bus:

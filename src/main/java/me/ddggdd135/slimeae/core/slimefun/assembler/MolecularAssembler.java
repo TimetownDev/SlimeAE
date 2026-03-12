@@ -18,6 +18,7 @@ import me.ddggdd135.guguslimefunlib.api.abstracts.TickingBlock;
 import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.autocraft.CraftStep;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftTypeRegistry;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -60,12 +61,14 @@ public class MolecularAssembler extends TickingBlock
 
         CraftingRecipe recipe = null;
         for (AutoCraftingTask autoCraftingTask : networkInfo.getAutoCraftingSessions()) {
-            if (autoCraftingTask.getCraftingSteps().isEmpty()) continue;
-            CraftType stepType =
-                    autoCraftingTask.getCraftingSteps().get(0).getRecipe().getCraftType();
-            if (getSupportedCraftTypes().contains(stepType)) {
-                recipe = autoCraftingTask.getCraftingSteps().get(0).getRecipe();
+            for (CraftStep activeStep : autoCraftingTask.getActiveSteps()) {
+                CraftType stepType = activeStep.getRecipe().getCraftType();
+                if (getSupportedCraftTypes().contains(stepType)) {
+                    recipe = activeStep.getRecipe();
+                    break;
+                }
             }
+            if (recipe != null) break;
         }
 
         for (int slot : getCraftingInputSlots()) {

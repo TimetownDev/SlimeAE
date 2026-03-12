@@ -60,6 +60,14 @@ public class IterativeCraftCalculator {
         return finalSteps;
     }
 
+    @Nonnull
+    public Map<CraftingRecipe, Set<CraftingRecipe>> getDependencyMap() {
+        if (state != State.COMPLETED) {
+            throw new IllegalStateException("Calculation not completed");
+        }
+        return Collections.unmodifiableMap(dependencyMap);
+    }
+
     public void processAll() {
         while (state == State.RUNNING) {
             processSlice(Long.MAX_VALUE);
@@ -164,7 +172,6 @@ public class IterativeCraftCalculator {
                     }
                     storage.takeItem(new ItemRequest(key, remainingNeed));
 
-                    mergeResult(childRecipe, countToCraft);
                     addDependency(frame.recipe, childRecipe);
                 }
 

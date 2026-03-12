@@ -449,6 +449,10 @@ public class SlimeAEItems {
                                     : Material.SHULKER_SHELL,
                             "{#Sky_Blue}工程处理器")
                     .addFlags(ItemFlag.values()));
+    public static final SlimefunItemStack PARALLEL_PROCESSOR = new SlimefunItemStack(
+            "PARALLEL_PROCESSOR", new AdvancedCustomItemStack(Material.ECHO_SHARD, "{#FFD700}并行处理器"));
+    public static final SlimefunItemStack PARALLEL_DRIVER = new SlimefunItemStack(
+            "PARALLEL_DRIVER", new AdvancedCustomItemStack(Material.RESPAWN_ANCHOR, "{#FFD700}并行驱动器"));
     public static final SlimefunItemStack WIRELESS_RECEIVER =
             new SlimefunItemStack("WIRELESS_RECEIVER", new AdvancedCustomItemStack(Material.REDSTONE_TORCH, "&d无线接收器"));
     public static final SlimefunItemStack ME_STORAGE_HOUSING = new SlimefunItemStack(
@@ -827,6 +831,38 @@ public class SlimeAEItems {
                             FORMATION_CORE,
                             new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.GLASS),
+                            new ItemStack(Material.IRON_INGOT)
+                        })
+                .register(plugin);
+        new SlimefunItem(
+                        SlimeAEItemGroups.MATERIAL,
+                        PARALLEL_PROCESSOR,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            ME_ITEM_STORAGE_CELL_256M,
+                            ENGINEERING_PROCESSOR,
+                            ME_ITEM_STORAGE_CELL_256M,
+                            ENGINEERING_PROCESSOR,
+                            CRYSTAL_CERTUS_QUARTZ,
+                            ENGINEERING_PROCESSOR,
+                            ME_ITEM_STORAGE_CELL_256M,
+                            ENGINEERING_PROCESSOR,
+                            ME_ITEM_STORAGE_CELL_256M
+                        })
+                .register(plugin);
+        new ParallelDriver(
+                        SlimeAEItemGroups.ADVANCED_MACHINE,
+                        PARALLEL_DRIVER,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            new ItemStack(Material.IRON_INGOT),
+                            ENGINEERING_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
+                            PARALLEL_PROCESSOR,
+                            ME_ITEM_STORAGE_CELL_256M,
+                            PARALLEL_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
+                            ENGINEERING_PROCESSOR,
                             new ItemStack(Material.IRON_INGOT)
                         })
                 .register(plugin);
