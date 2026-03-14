@@ -263,11 +263,10 @@ public class StorageCollection implements IStorage {
         long currentVersion = changeVersion;
         ItemHashMap<Long> cached = cachedStorage;
         if (cached != null && cachedVersion == currentVersion) {
-            return cached;
-        }
-        long now = System.currentTimeMillis();
-        if (cached != null && (now - lastCacheTime) < STORAGE_CACHE_INTERVAL) {
-            return cached;
+            long now = System.currentTimeMillis();
+            if ((now - lastCacheTime) < STORAGE_CACHE_INTERVAL) {
+                return cached;
+            }
         }
 
         ItemHashMap<Long> result = new ItemHashMap<>();
@@ -291,7 +290,7 @@ public class StorageCollection implements IStorage {
         }
 
         cachedStorage = result;
-        lastCacheTime = now;
+        lastCacheTime = System.currentTimeMillis();
         cachedVersion = currentVersion;
         return result;
     }
