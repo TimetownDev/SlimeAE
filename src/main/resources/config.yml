@@ -63,6 +63,28 @@ storage-cell-lore-prefix: "&#EEDC82"
 # 创造存储元件
 enable_creative_cell: true
 
+#自动合成-addon
+#无尽
+enable_InfinityExpansion: true
+#星系
+enable_Galactifun: true
+#黑曜石科技
+enable_ObsidianExpansion: true
+#抑郁花园
+enable_ExoticGarden: true
+#网络拓展
+enable_NetworksExpansion: true
+#网络量子工作台
+enable_NTW_QUANTUM_WORKBENCH: true
+#末地科技
+enable_TranscEndence: true
+#逻辑
+enable_LogiTech: true
+#乱序矩阵合成台
+enable_FinalTECH: true
+#乱序不合理合成台
+enable_FinalTECH_BedrockCraftTable: true
+
 # 世界生成设置
 world-gen:
   # 是否启用矿石生成

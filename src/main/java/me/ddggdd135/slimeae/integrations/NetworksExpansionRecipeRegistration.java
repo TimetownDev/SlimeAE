@@ -4,6 +4,8 @@ import com.balugaq.netex.api.data.SuperRecipe;
 import com.ytdd9527.networksexpansion.core.items.machines.AbstractManualCrafter;
 import com.ytdd9527.networksexpansion.implementation.ExpansionItemStacks;
 import com.ytdd9527.networksexpansion.implementation.machines.manual.ExpansionWorkbench;
+import io.github.sefiraat.networks.slimefun.NetworksSlimefunItemStacks;
+import io.github.sefiraat.networks.slimefun.network.NetworkQuantumWorkbench;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.List;
@@ -17,6 +19,13 @@ public final class NetworksExpansionRecipeRegistration {
                 CraftType.NETWORKS_EXPANSION_WORKBENCH,
                 ExpansionWorkbench.TYPE,
                 SlimefunItem.getByItem(ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH));
+    }
+
+    public static void registerQuantumWorkbench() {
+        RecipeUtils.registerType(
+                CraftType.QUANTUM_WORKBENCH,
+                NetworkQuantumWorkbench.TYPE,
+                SlimefunItem.getByItem(NetworksSlimefunItemStacks.NETWORK_QUANTUM_WORKBENCH));
     }
 
     public static boolean isAbstractManualCrafter(SlimefunItem slimefunItem) {

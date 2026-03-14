@@ -50,6 +50,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private GalactifunIntegration galactifunIntegration;
     private ObsidianExpansionIntegration obsidianExpansionIntegration;
     private ExoticGardenIntegration exoticGardenIntegration;
+    private LogiTechIntegration logiTechIntegration;
+    private FinalTechIntegration finalTechIntegration;
 
     private StorageCellStorageDataController storageCellStorageDataController;
     private StorageCellFilterDataController storageCellFilterDataController;
@@ -77,6 +79,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         galactifunIntegration = new GalactifunIntegration();
         obsidianExpansionIntegration = new ObsidianExpansionIntegration();
         exoticGardenIntegration = new ExoticGardenIntegration();
+        logiTechIntegration = new LogiTechIntegration();
+        finalTechIntegration = new FinalTechIntegration();
 
         storageCellStorageDataController = new StorageCellStorageDataController();
         storageCellFilterDataController = new StorageCellFilterDataController();
@@ -130,6 +134,8 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (galactifunIntegration.isLoaded()) getLogger().info("星系已接入");
         if (obsidianExpansionIntegration.isLoaded()) getLogger().info("黑曜石科技已接入");
         if (exoticGardenIntegration.isLoaded()) getLogger().info("异域花园已接入");
+        if (logiTechIntegration.isLoaded()) getLogger().info("逻辑工艺已接入");
+        if (finalTechIntegration.isLoaded()) getLogger().info("乱序技艺已接入");
 
         storageCellStorageDataController.init();
         storageCellFilterDataController.init();
@@ -294,6 +300,16 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public static ExoticGardenIntegration getExoticGardenIntegration() {
         return getInstance().exoticGardenIntegration;
+    }
+
+    @Nonnull
+    public static LogiTechIntegration getLogiTechIntegration() {
+        return getInstance().logiTechIntegration;
+    }
+
+    @Nonnull
+    public static FinalTechIntegration getFinalTechIntegration() {
+        return getInstance().finalTechIntegration;
     }
 
     @Nonnull

@@ -102,7 +102,7 @@ public final class CraftTypeSelector {
             case PROCESS -> modeLore = "&7模式: &e流程配方";
             default -> modeLore = "&7模式: 未知";
         }
-        return new AdvancedCustomItemStack(type.getIcon(), type.getDisplayName(), "", modeLore, "&7> 单击选择");
+        return new AdvancedCustomItemStack(type.getIconItem(), type.getDisplayName(), "", modeLore, "&7> 单击选择");
     }
 
     @Nonnull
