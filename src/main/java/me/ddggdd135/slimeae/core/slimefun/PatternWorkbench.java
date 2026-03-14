@@ -10,7 +10,6 @@ import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +23,7 @@ import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.listeners.JEGCompatibleListener;
+import me.ddggdd135.slimeae.core.slimefun.terminals.CraftTypeSelector;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -32,6 +32,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
+    private static final String CRAFT_TYPE_KEY = "craft_type";
 
     public PatternWorkbench(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -85,10 +86,6 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         return 43;
     }
 
-    public int getAllSupportedRecipeSlot() {
-        return 39;
-    }
-
     @Override
     public void init(@Nonnull BlockMenuPreset preset) {
         for (int slot : getBorderSlots()) {
@@ -102,9 +99,6 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         }
 
         preset.addItem(getCraftButtonSlot(), MenuItems.CRAFT_ITEM);
-
-        preset.addItem(getAllSupportedRecipeSlot(), MenuItems.PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE);
-        preset.addMenuClickHandler(getAllSupportedRecipeSlot(), ChestMenuUtils.getEmptyClickHandler());
     }
 
     @Override
@@ -137,17 +131,35 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             });
         }
 
-        blockMenu.replaceExistingItem(getCraftTypeSlot(), MenuItems.CRAFTING_TABLE);
+        CraftType initialType = getSelectedCraftType(block);
+        blockMenu.replaceExistingItem(getCraftTypeSlot(), CraftTypeSelector.createTypeIcon(initialType));
         blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
-            ItemStack craftingTypeItem = blockMenu.getItemInSlot(i);
-            if (craftingTypeItem == null
-                    || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.CRAFTING_TABLE, true))
-                blockMenu.replaceExistingItem(i, MenuItems.COOKING);
-            else if (SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true))
-                blockMenu.replaceExistingItem(i, MenuItems.LARGE);
-            else blockMenu.replaceExistingItem(i, MenuItems.CRAFTING_TABLE);
+            CraftTypeSelector.open(player, selectedType -> {
+                StorageCacheUtils.setData(block.getLocation(), CRAFT_TYPE_KEY, selectedType.name());
+                BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
+                if (menu != null) {
+                    menu.replaceExistingItem(getCraftTypeSlot(), CraftTypeSelector.createTypeIcon(selectedType));
+                    menu.open(player);
+                }
+            });
             return false;
         });
+    }
+
+    @Nonnull
+    private CraftType getSelectedCraftType(@Nonnull Block block) {
+        String stored = StorageCacheUtils.getData(block.getLocation(), CRAFT_TYPE_KEY);
+        if (stored == null || stored.isEmpty()) {
+            return CraftType.ENHANCED_CRAFTING_TABLE;
+        }
+        CraftType type = CraftType.fromName(stored);
+        if (type == null) {
+            return CraftType.ENHANCED_CRAFTING_TABLE;
+        }
+        if (type == CraftType.CRAFTING_TABLE) {
+            return CraftType.ENHANCED_CRAFTING_TABLE;
+        }
+        return type;
     }
 
     private void makePattern(Block block) {
@@ -157,65 +169,80 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
         if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
-        ItemStack craftingTypeItem = blockMenu.getItemInSlot(getCraftTypeSlot());
+
+        CraftType selectedType = getSelectedCraftType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
 
-        if (craftingTypeItem == null || SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.COOKING, true)) {
-            toOut.setAmount(1);
-            ItemStack[] input = Arrays.stream(getCraftSlots())
-                    .mapToObj(blockMenu::getItemInSlot)
-                    .filter(Objects::nonNull)
-                    .filter(x -> !x.getType().isAir())
-                    .toArray(ItemStack[]::new);
-            ItemStack[] output = Arrays.stream(getCraftOutputSlots())
-                    .mapToObj(blockMenu::getItemInSlot)
-                    .filter(Objects::nonNull)
-                    .filter(x -> !x.getType().isAir())
-                    .toArray(ItemStack[]::new);
-            if (input.length == 0 || output.length == 0) return;
-            in.subtract();
-            CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
-            Pattern.setRecipe(toOut, recipe);
-        } else if (SlimefunUtils.isItemSimilar(craftingTypeItem, MenuItems.LARGE, true)) {
-            ItemStack[] outputItems = Arrays.stream(getCraftOutputSlots())
-                    .mapToObj(blockMenu::getItemInSlot)
-                    .filter(Objects::nonNull)
-                    .filter(x -> !x.getType().isAir())
-                    .toArray(ItemStack[]::new);
-            if (outputItems.length == 0) return;
-
-            CraftingRecipe recipe = RecipeUtils.getRecipe(outputItems[0], RecipeUtils.LARGE_TYPES);
-            if (recipe == null || recipe.getCraftType() != CraftType.LARGE) return;
-
-            toOut.setAmount(1);
-            in.subtract();
-            Pattern.setRecipe(toOut, recipe);
+        if (selectedType.isProcess()) {
+            makeProcessPattern(blockMenu, in, toOut);
+        } else if (selectedType.isLarge()) {
+            makeLargePattern(blockMenu, in, toOut);
         } else {
-            List<ItemStack> inputList = new ArrayList<>();
-            for (int slot : getCraftSlots()) {
-                inputList.add(blockMenu.getItemInSlot(slot));
-            }
-
-            ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
-
-            ItemStack[] outputs;
-            List<ItemStack> outputList = new ArrayList<>();
-            for (int slot : getCraftOutputSlots()) {
-                outputList.add(blockMenu.getItemInSlot(slot));
-            }
-
-            outputs = outputList.toArray(ItemStack[]::new);
-
-            CraftingRecipe recipe;
-            if (ItemUtils.trimItems(outputs).length != 0) recipe = RecipeUtils.getRecipe(inputs, outputs);
-            else recipe = RecipeUtils.getRecipe(inputs);
-
-            if (recipe == null) return;
-
-            toOut.setAmount(1);
-            in.subtract();
-            Pattern.setRecipe(toOut, recipe);
+            makeSmallPattern(blockMenu, in, toOut);
         }
+    }
+
+    private void makeProcessPattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
+        toOut.setAmount(1);
+        ItemStack[] input = Arrays.stream(getCraftSlots())
+                .mapToObj(blockMenu::getItemInSlot)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .toArray(ItemStack[]::new);
+        ItemStack[] output = Arrays.stream(getCraftOutputSlots())
+                .mapToObj(blockMenu::getItemInSlot)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .toArray(ItemStack[]::new);
+        if (input.length == 0 || output.length == 0) return;
+        patternIn.subtract();
+        CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
+        Pattern.setRecipe(toOut, recipe);
+        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+    }
+
+    private void makeLargePattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
+        ItemStack[] outputItems = Arrays.stream(getCraftOutputSlots())
+                .mapToObj(blockMenu::getItemInSlot)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .toArray(ItemStack[]::new);
+        if (outputItems.length == 0) return;
+
+        CraftingRecipe recipe = RecipeUtils.getRecipe(outputItems[0], RecipeUtils.LARGE_TYPES);
+        if (recipe == null || !recipe.getCraftType().isLarge()) return;
+
+        toOut.setAmount(1);
+        patternIn.subtract();
+        Pattern.setRecipe(toOut, recipe);
+        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+    }
+
+    private void makeSmallPattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
+        List<ItemStack> inputList = new ArrayList<>();
+        for (int slot : getCraftSlots()) {
+            inputList.add(blockMenu.getItemInSlot(slot));
+        }
+        ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
+
+        List<ItemStack> outputList = new ArrayList<>();
+        for (int slot : getCraftOutputSlots()) {
+            outputList.add(blockMenu.getItemInSlot(slot));
+        }
+        ItemStack[] outputs = outputList.toArray(ItemStack[]::new);
+
+        CraftingRecipe recipe;
+        if (ItemUtils.trimItems(outputs).length != 0) {
+            recipe = RecipeUtils.getRecipe(inputs, outputs);
+        } else {
+            recipe = RecipeUtils.getRecipe(inputs);
+        }
+
+        if (recipe == null) return;
+
+        toOut.setAmount(1);
+        patternIn.subtract();
+        Pattern.setRecipe(toOut, recipe);
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 

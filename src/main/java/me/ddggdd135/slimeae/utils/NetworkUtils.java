@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -65,6 +66,26 @@ public class NetworkUtils {
         Set<Location> result = new HashSet<>();
         scan(block, result);
         return result;
+    }
+
+    @Nullable public static NetworkInfo findNetworkByBFS(Location start) {
+        Set<Location> visited = new HashSet<>();
+        Stack<Location> stack = new Stack<>();
+        stack.push(start);
+        visited.add(start);
+        while (!stack.empty()) {
+            Location next = stack.pop();
+            for (BlockFace blockFace : Valid_Faces) {
+                Location testLocation = next.clone().add(blockFace.getDirection());
+                if (visited.contains(testLocation)) continue;
+                if (!SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) continue;
+                visited.add(testLocation);
+                NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(testLocation);
+                if (info != null) return info;
+                stack.push(testLocation);
+            }
+        }
+        return null;
     }
 
     public static void doCraft(@Nonnull NetworkInfo networkInfo, @Nonnull ItemStack itemStack, long amount) {

@@ -1,5 +1,6 @@
 package me.ddggdd135.slimeae.api.interfaces;
 
+import java.util.Set;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
@@ -10,8 +11,13 @@ public interface IMEVirtualCraftDevice extends IMECraftDevice {
 
     CraftType getCraftingType();
 
+    @Nonnull
+    default Set<CraftType> getSupportedCraftTypes() {
+        return Set.of(getCraftingType());
+    }
+
     @Override
     default boolean isSupport(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
-        return recipe.getCraftType() == getCraftingType();
+        return getSupportedCraftTypes().contains(recipe.getCraftType());
     }
 }

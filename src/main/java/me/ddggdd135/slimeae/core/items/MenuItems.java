@@ -1,10 +1,7 @@
 package me.ddggdd135.slimeae.core.items;
 
-import com.ytdd9527.networksexpansion.implementation.ExpansionItemStacks;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.items.CustomItemStack;
-import java.util.ArrayList;
-import java.util.List;
 import me.ddggdd135.guguslimefunlib.items.AdvancedCustomItemStack;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import org.bukkit.Material;
@@ -51,10 +48,18 @@ public class MenuItems {
             "_AE_MN_PUSH_BACK_", new AdvancedCustomItemStack(Material.BARRIER, "&c&l点击将物品返回ME网络"));
     public static final ItemStack CRAFT_ITEM =
             new CustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a合成按钮", "", "&7> 单击合成");
-    public static final ItemStack CRAFTING_TABLE;
-    public static final ItemStack PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE;
-    public static final ItemStack COOKING;
-    public static final ItemStack LARGE;
+    public static final ItemStack RECIPE_SELECT =
+            new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "&a选择配方", "", "&e放入材料后点击", "&e点击搜索可合成的配方", "&7> 单击打开");
+    public static final ItemStack VANILLA_CRAFTING_TABLE =
+            new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e原版工作台", "", "&e支持原版工作台配方", "&7> 单击切换类型");
+    public static final ItemStack VANILLA_FURNACE =
+            new AdvancedCustomItemStack(Material.FURNACE, "&6原版熔炉", "", "&e支持原版熔炉配方", "&7> 单击切换类型");
+    public static final ItemStack VANILLA_BLAST_FURNACE =
+            new AdvancedCustomItemStack(Material.BLAST_FURNACE, "&b原版高炉", "", "&e支持原版高炉配方", "&7> 单击切换类型");
+    public static final ItemStack VANILLA_SMOKER =
+            new AdvancedCustomItemStack(Material.SMOKER, "&e原版烟熏炉", "", "&e支持原版烟熏炉配方", "&7> 单击切换类型");
+    public static final ItemStack VANILLA_STONECUTTER = new AdvancedCustomItemStack(
+            Material.STONECUTTER, "&7原版切石机", "", "&e支持原版切石机配方", "&a放入材料后自动匹配产物", "&7> 单击切换类型");
     public static final SlimefunItemStack ACCEPT = new SlimefunItemStack(
             "_AE_MN_ACCEPT_", new AdvancedCustomItemStack(Material.LIME_STAINED_GLASS_PANE, "&a&l确认"));
     public static final SlimefunItemStack CANCEL = new SlimefunItemStack(
@@ -79,94 +84,4 @@ public class MenuItems {
             "_AE_JEG_PATTERN_ENCODE_BUTTON_",
             new AdvancedCustomItemStack(Material.KNOWLEDGE_BOOK, "&6配方编码", "&7点击打开粘液科技指南", "&7选择物品后自动编码样板"));
     public static final NamespacedKey MENU_ITEM = new NamespacedKey(SlimeAEPlugin.getInstance(), "menu_item");
-
-    static {
-        List<String> CRAFTING_TABLE_LORE = new ArrayList<>(List.of(
-                "",
-                "&e支持以下合成配方:",
-                "&e  - 原版工作台",
-                "&b  - 增强型工作台",
-                "&e  - 充能器",
-                "&7  - 压印机",
-                "&d  - 魔法工作台",
-                "&6  - 盔甲锻造台",
-                "&e  - 冶炼炉",
-                "&a  - 压缩机",
-                "&7  - 磨石",
-                "&c  - 古代祭坛",
-                "&5  - 榨汁机",
-                "&6  - 矿物粉碎机",
-                "&f  - 压力机",
-                "&c  - 加热压力舱"));
-        List<String> PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE = new ArrayList<>(List.of(
-                "",
-                "&e支持以下合成配方:",
-                "&b  - 增强型工作台",
-                "&e  - 充能器",
-                "&7  - 压印机",
-                "&d  - 魔法工作台",
-                "&6  - 盔甲锻造台",
-                "&e  - 冶炼炉",
-                "&a  - 压缩机",
-                "&7  - 磨石",
-                "&c  - 古代祭坛",
-                "&5  - 榨汁机",
-                "&6  - 矿物粉碎机",
-                "&f  - 压力机",
-                "&c  - 加热压力舱"));
-
-        if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
-            CRAFTING_TABLE_LORE.add("{#299482}  - 纳米工作台");
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("{#299482}  - 纳米工作台");
-        }
-
-        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&6  - 无尽工作台");
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&7  - 生物芯片注入器");
-        }
-
-        if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&f  - 星系装配台");
-        }
-
-        if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&l&5  - 黑曜石锻造桌");
-        }
-
-        if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()) {
-            CRAFTING_TABLE_LORE.add("&e  - 厨房");
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add("&e  - 厨房");
-        }
-
-        if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-            CRAFTING_TABLE_LORE.add("&e  - " + ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH.getDisplayName());
-            PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE.add(
-                    "&e  - " + ExpansionItemStacks.NETWORKS_EXPANSION_WORKBENCH.getDisplayName());
-        }
-
-        CRAFTING_TABLE_LORE.add("&7> 单击切换为流程配方");
-        CRAFTING_TABLE = new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&e工作台配方", CRAFTING_TABLE_LORE);
-
-        List<String> COOKING_LORE = new ArrayList<>(List.of("", "&7> 单击切换为大型配方"));
-        COOKING = new AdvancedCustomItemStack(Material.FURNACE, "&e流程配方", COOKING_LORE);
-
-        List<String> LARGE_LORE = new ArrayList<>(List.of("", "&e支持以下大型配方:"));
-        if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-            LARGE_LORE.add("&6  - 无尽工作台");
-            LARGE_LORE.add("&7  - 生物芯片注入器");
-        }
-        if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
-            LARGE_LORE.add("&f  - 星系装配台");
-        }
-        if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
-            LARGE_LORE.add("&l&5  - 黑曜石锻造桌");
-        }
-        LARGE_LORE.add("");
-        LARGE_LORE.add("&a将产物放入输出槽位，自动匹配配方");
-        LARGE_LORE.add("&7> 单击切换为工作台配方");
-        LARGE = new AdvancedCustomItemStack(Material.SMITHING_TABLE, "&e大型配方", LARGE_LORE);
-
-        PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE = new AdvancedCustomItemStack(
-                Material.RESPAWN_ANCHOR, "&e所有支持的配方", PATTERN_WORKBENCH_ALL_SUPPORTED_RECIPE_LORE);
-    }
 }

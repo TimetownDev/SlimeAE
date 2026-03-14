@@ -15,12 +15,14 @@ import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.*;
 import me.ddggdd135.slimeae.api.items.StorageCollection;
 import me.ddggdd135.slimeae.core.slimefun.MEDrive;
+import me.ddggdd135.slimeae.core.slimefun.ParallelDriver;
 import me.ddggdd135.slimeae.core.slimefun.assembler.LargeMolecularAssembler;
 import me.ddggdd135.slimeae.core.slimefun.assembler.MolecularAssembler;
 import me.ddggdd135.slimeae.integrations.networks.NetworksStorage;
 import me.ddggdd135.slimeae.utils.NetworkUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class NetworkData {
@@ -38,6 +40,13 @@ public class NetworkData {
 
         for (NetworkInfo ni : AllNetworkData) {
             if (ni.getController().equals(location)) {
+                locationToNetwork.put(location, ni);
+                return ni;
+            }
+        }
+
+        for (NetworkInfo ni : AllNetworkData) {
+            if (ni.getChildren().contains(location)) {
                 locationToNetwork.put(location, ni);
                 return ni;
             }
@@ -64,7 +73,22 @@ public class NetworkData {
     public boolean updateChildren(@Nonnull NetworkInfo info) {
         Location controller = info.getController();
 
-        if (info.getChildren().size() == 1 || info.getChildren().isEmpty()) {
+        boolean needsScan = info.getChildren().size() <= 1;
+
+        if (!needsScan) {
+            for (Location child : info.getChildren()) {
+                for (BlockFace face : IMEObject.Valid_Faces) {
+                    Location adj = child.clone().add(face.getDirection());
+                    if (AllNetworkBlocks.containsKey(adj) && !info.getChildren().contains(adj)) {
+                        needsScan = true;
+                        break;
+                    }
+                }
+                if (needsScan) break;
+            }
+        }
+
+        if (needsScan) {
             Set<Location> children = NetworkUtils.scan(controller.getBlock());
             for (Location location : children) {
                 if (AllControllers.containsKey(location) && !location.equals(controller)) {
@@ -87,7 +111,10 @@ public class NetworkData {
         Set<Location> tickable = new HashSet<>();
         for (Location loc : info.getChildren()) {
             IMEObject obj = AllNetworkBlocks.get(loc);
-            if (obj instanceof MEDrive || obj instanceof MolecularAssembler || obj instanceof LargeMolecularAssembler) {
+            if (obj instanceof MEDrive
+                    || obj instanceof MolecularAssembler
+                    || obj instanceof LargeMolecularAssembler
+                    || obj instanceof ParallelDriver) {
                 tickable.add(loc);
             }
         }
@@ -124,6 +151,23 @@ public class NetworkData {
         Set<Location> newCraftingHolders = new ConcurrentHashSet<>();
         Map<Location, Set<CraftingRecipe>> newRecipeMap = new ConcurrentHashMap<>();
         Map<Location, Block[]> devicesCache = new HashMap<>();
+
+        Set<CraftType> networkWideSupportedTypes = new HashSet<>();
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof IMECraftDevice)) continue;
+            SlimefunBlockData bd =
+                    Slimefun.getDatabaseManager().getBlockDataController().getBlockData(location);
+            if (bd == null) continue;
+            SlimefunItem si = SlimefunItem.getById(bd.getSfId());
+            if (si instanceof IMEVirtualCraftDevice vcd) {
+                networkWideSupportedTypes.addAll(vcd.getSupportedCraftTypes());
+            } else if (si instanceof IMECraftDevice) {
+                // 非 IMEVirtualCraftDevice 的 IMECraftDevice，无法提前知道支持哪些类型
+                // 但这种情况在当前代码中很少见，忽略即可
+            }
+        }
+
         for (Location location : info.getChildren()) {
             if (!AllCraftHolders.containsKey(location)) continue;
             IMECraftHolder slimefunItem = AllCraftHolders.get(location);
@@ -140,6 +184,7 @@ public class NetworkData {
             } else {
                 holderRecipes = slimefunItem.getSupportedRecipes(location.getBlock());
             }
+            // 先用邻接设备匹配
             for (Block device : devices) {
                 SlimefunBlockData blockData =
                         Slimefun.getDatabaseManager().getBlockDataController().getBlockData(device.getLocation());
@@ -153,23 +198,35 @@ public class NetworkData {
                     }
                 }
             }
+            for (CraftingRecipe recipe : holderRecipes) {
+                if (!supported.contains(recipe) && networkWideSupportedTypes.contains(recipe.getCraftType())) {
+                    supported.add(recipe);
+                }
+            }
             newRecipeMap.put(location, supported);
         }
 
         Map<CraftType, Integer> newSpeeds = new ConcurrentHashMap<>();
-        for (Location location : newRecipeMap.keySet()) {
-            Block[] devices = devicesCache.get(location);
-            if (devices == null) continue;
-            for (Block deviceBlock : devices) {
-                IMECraftDevice imeCraftDevice = (IMECraftDevice) SlimefunItem.getById(
-                        StorageCacheUtils.getBlock(deviceBlock.getLocation()).getSfId());
-                if (!(imeCraftDevice instanceof IMEVirtualCraftDevice device)) continue;
-                CraftType craftType = device.getCraftingType();
-                int speed = newSpeeds.getOrDefault(craftType, 0);
-                speed += device.getSpeed(deviceBlock);
-                newSpeeds.put(craftType, speed);
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof IMECraftDevice)) continue;
+            SlimefunBlockData bd = StorageCacheUtils.getBlock(location);
+            if (bd == null) continue;
+            SlimefunItem si = SlimefunItem.getById(bd.getSfId());
+            if (!(si instanceof IMEVirtualCraftDevice device)) continue;
+            int speed = device.getSpeed(location.getBlock());
+            for (CraftType craftType : device.getSupportedCraftTypes()) {
+                newSpeeds.merge(craftType, speed, Integer::sum);
             }
         }
+
+        int totalParallelProcessors = 0;
+        for (Location location : info.getChildren()) {
+            IMEObject obj = AllNetworkBlocks.get(location);
+            if (!(obj instanceof ParallelDriver driver)) continue;
+            totalParallelProcessors += driver.getProcessorCount(location.getBlock());
+        }
+        info.setParallelProcessorCount(totalParallelProcessors);
 
         Map<ItemKey, CraftingRecipe> newOutputIndex = new HashMap<>();
         Map<CraftingRecipe, List<Location>> newRecipeToHolders = new HashMap<>();

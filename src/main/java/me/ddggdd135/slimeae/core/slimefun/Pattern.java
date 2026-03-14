@@ -43,21 +43,33 @@ public class Pattern extends SlimefunItem {
             craftingRecipe = NBT.get(itemStack, x -> {
                 if (!x.hasTag(RECIPE_KEY, NBTType.NBTTagCompound)) return null;
                 ReadableNBT compound = x.getCompound(RECIPE_KEY);
-                return new CraftingRecipe(
-                        compound.getEnum(CRAFTING_TYPE_KEY, CraftType.class),
-                        Arrays.stream(compound.getItemStackArray(INPUT_KEY))
-                                .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
-                                .toArray(ItemStack[]::new),
-                        Arrays.stream(compound.getItemStackArray(OUTPUT_KEY))
-                                .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
-                                .toArray(ItemStack[]::new));
+                String typeName = compound.getString(CRAFTING_TYPE_KEY);
+                CraftType craftType = CraftType.fromName(typeName);
+                if (craftType == null) {
+                    craftType = CraftType.COOKING;
+                }
+                ItemStack[] parsedInput = Arrays.stream(compound.getItemStackArray(INPUT_KEY))
+                        .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
+                        .toArray(ItemStack[]::new);
+                ItemStack[] parsedOutput = Arrays.stream(compound.getItemStackArray(OUTPUT_KEY))
+                        .filter(y -> !SlimefunUtils.isItemSimilar(y, MenuItems.EMPTY, false, false))
+                        .toArray(ItemStack[]::new);
+                return new CraftingRecipe(craftType, parsedInput, parsedOutput);
             });
 
             setRecipe(itemStack, craftingRecipe);
 
-            if (craftingRecipe.getCraftType() == CraftType.CRAFTING_TABLE) {
-                CraftingRecipe newRecipe = RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
-                if (newRecipe == null || !(newRecipe.equals(craftingRecipe))) craftingRecipe = null;
+            if (craftingRecipe != null) {
+                if (!craftingRecipe.getCraftType().isVanilla() && craftingRecipe.getCraftType() != CraftType.COOKING) {
+                    CraftingRecipe newRecipe =
+                            RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
+                    if (newRecipe == null) {
+                        craftingRecipe = null;
+                    } else if (!newRecipe.equals(craftingRecipe)) {
+                        craftingRecipe = newRecipe;
+                        setRecipe(itemStack, craftingRecipe);
+                    }
+                }
             }
 
             cache.put(uuid, craftingRecipe);
@@ -71,7 +83,7 @@ public class Pattern extends SlimefunItem {
         ItemMeta meta = itemStack.getItemMeta();
         ItemStack[] inputs = recipe.getInput();
         List<String> lore = new ArrayList<>();
-        if (recipe.getCraftType() == CraftType.LARGE) {
+        if (recipe.getCraftType().isLarge()) {
             lore.add("&e大型配方");
             lore.add("");
             inputs = ItemUtils.createItems(ItemUtils.getAmounts(inputs));
@@ -96,7 +108,7 @@ public class Pattern extends SlimefunItem {
         NBT.modify(itemStack, x -> {
             if (x.hasTag(RECIPE_KEY)) x.removeKey(RECIPE_KEY);
             ReadWriteNBT compound = x.getOrCreateCompound(RECIPE_KEY);
-            compound.setEnum(CRAFTING_TYPE_KEY, recipe.getCraftType());
+            compound.setString(CRAFTING_TYPE_KEY, recipe.getCraftType().name());
             compound.setItemStackArray(INPUT_KEY, recipe.getInput());
             compound.setItemStackArray(OUTPUT_KEY, recipe.getOutput());
             x.setUUID(UUID_KEY, uuid);

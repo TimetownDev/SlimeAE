@@ -13,27 +13,32 @@ import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
-import me.ddggdd135.slimeae.api.interfaces.IRecipeCompletableWithGuide;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
-import me.ddggdd135.slimeae.utils.ItemUtils;
-import me.ddggdd135.slimeae.utils.RecipeUtils;
+import me.ddggdd135.slimeae.utils.VanillaRecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class MEPatternTerminal extends METerminal implements IRecipeCompletableWithGuide {
-    private static final String CRAFT_TYPE_KEY = "craft_type";
+public class MEVanillaPatternTerminal extends METerminal {
+    private static final String CRAFT_TYPE_KEY = "vanilla_craft_type";
+    private static final CraftType[] VANILLA_TYPES = {
+        CraftType.VANILLA_CRAFTING_TABLE,
+        CraftType.VANILLA_FURNACE,
+        CraftType.VANILLA_BLAST_FURNACE,
+        CraftType.VANILLA_SMOKER,
+        CraftType.VANILLA_STONECUTTER
+    };
 
-    public MEPatternTerminal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
+    public MEVanillaPatternTerminal(
+            ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
     }
 
@@ -118,7 +123,8 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
     public void newInstance(@Nonnull BlockMenu blockMenu, @Nonnull Block block) {
         super.newInstance(blockMenu, block);
         blockMenu.addMenuClickHandler(getReturnItemSlot(), (player, i, itemStack, clickAction) -> {
-            NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+            NetworkInfo info =
+                    me.ddggdd135.slimeae.SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
             if (info == null) return false;
             IStorage networkStorage = info.getStorage();
             for (int slot : getCraftSlots()) {
@@ -132,17 +138,12 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
             return false;
         });
 
-        CraftType initialType = getSelectedCraftType(block);
-        blockMenu.replaceExistingItem(getCraftTypeSlot(), CraftTypeSelector.createTypeIcon(initialType));
+        blockMenu.replaceExistingItem(getCraftTypeSlot(), getVanillaTypeIcon(getStoredVanillaType(block)));
         blockMenu.addMenuClickHandler(getCraftTypeSlot(), (player, i, cursor, clickAction) -> {
-            CraftTypeSelector.open(player, selectedType -> {
-                StorageCacheUtils.setData(block.getLocation(), CRAFT_TYPE_KEY, selectedType.name());
-                BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
-                if (menu != null) {
-                    menu.replaceExistingItem(getCraftTypeSlot(), CraftTypeSelector.createTypeIcon(selectedType));
-                    menu.open(player);
-                }
-            });
+            CraftType current = getStoredVanillaType(block);
+            CraftType next = getNextVanillaType(current);
+            StorageCacheUtils.setData(block.getLocation(), CRAFT_TYPE_KEY, next.name());
+            blockMenu.replaceExistingItem(i, getVanillaTypeIcon(next));
             return false;
         });
 
@@ -155,24 +156,36 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
             handleRecipeSelect(block, player, clickAction.isShiftClicked());
             return false;
         });
-
-        addJEGRecipeButton(blockMenu, getJEGRecipeButtonSlot());
     }
 
     @Nonnull
-    private CraftType getSelectedCraftType(@Nonnull Block block) {
+    private CraftType getStoredVanillaType(@Nonnull Block block) {
         String stored = StorageCacheUtils.getData(block.getLocation(), CRAFT_TYPE_KEY);
-        if (stored == null || stored.isEmpty()) {
-            return CraftType.ENHANCED_CRAFTING_TABLE;
-        }
+        if (stored == null || stored.isEmpty()) return CraftType.VANILLA_CRAFTING_TABLE;
         CraftType type = CraftType.fromName(stored);
-        if (type == null) {
-            return CraftType.ENHANCED_CRAFTING_TABLE;
-        }
-        if (type == CraftType.CRAFTING_TABLE) {
-            return CraftType.ENHANCED_CRAFTING_TABLE;
-        }
+        if (type == null || !type.isVanilla()) return CraftType.VANILLA_CRAFTING_TABLE;
         return type;
+    }
+
+    @Nonnull
+    private CraftType getNextVanillaType(@Nonnull CraftType current) {
+        for (int i = 0; i < VANILLA_TYPES.length; i++) {
+            if (VANILLA_TYPES[i] == current) {
+                return VANILLA_TYPES[(i + 1) % VANILLA_TYPES.length];
+            }
+        }
+        return VANILLA_TYPES[0];
+    }
+
+    @Nonnull
+    private ItemStack getVanillaTypeIcon(@Nonnull CraftType type) {
+        return switch (type) {
+            case VANILLA_FURNACE -> MenuItems.VANILLA_FURNACE.clone();
+            case VANILLA_BLAST_FURNACE -> MenuItems.VANILLA_BLAST_FURNACE.clone();
+            case VANILLA_SMOKER -> MenuItems.VANILLA_SMOKER.clone();
+            case VANILLA_STONECUTTER -> MenuItems.VANILLA_STONECUTTER.clone();
+            default -> MenuItems.VANILLA_CRAFTING_TABLE.clone();
+        };
     }
 
     private void makePattern(Block block) {
@@ -183,88 +196,76 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
         if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
 
-        CraftType selectedType = getSelectedCraftType(block);
+        CraftType vanillaType = getStoredVanillaType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
+        toOut.setAmount(1);
 
-        if (selectedType.isProcess()) {
-            makeProcessPattern(blockMenu, in, toOut);
-        } else if (selectedType.isLarge()) {
-            makeLargePattern(blockMenu, in, toOut);
+        CraftingRecipe recipe = null;
+        if (vanillaType == CraftType.VANILLA_CRAFTING_TABLE) {
+            recipe = makeVanillaCraftingPattern(blockMenu);
         } else {
-            makeSmallPattern(blockMenu, in, toOut);
+            recipe = makeProcessPattern(blockMenu, vanillaType);
         }
-    }
 
-    private void makeProcessPattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
-        toOut.setAmount(1);
-        ItemStack[] input = Arrays.stream(getCraftSlots())
-                .mapToObj(blockMenu::getItemInSlot)
-                .filter(Objects::nonNull)
-                .filter(x -> !x.getType().isAir())
-                .toArray(ItemStack[]::new);
-        ItemStack[] output = Arrays.stream(getCraftOutputSlots())
-                .mapToObj(blockMenu::getItemInSlot)
-                .filter(Objects::nonNull)
-                .filter(x -> !x.getType().isAir())
-                .toArray(ItemStack[]::new);
-        if (input.length == 0 || output.length == 0) return;
-        patternIn.subtract();
-        CraftingRecipe recipe = new CraftingRecipe(CraftType.COOKING, input, output);
+        if (recipe == null) return;
+        in.subtract();
         Pattern.setRecipe(toOut, recipe);
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 
-    private void makeLargePattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
-        ItemStack[] outputItems = Arrays.stream(getCraftOutputSlots())
-                .mapToObj(blockMenu::getItemInSlot)
-                .filter(Objects::nonNull)
-                .filter(x -> !x.getType().isAir())
-                .toArray(ItemStack[]::new);
-        if (outputItems.length == 0) return;
-
-        CraftingRecipe recipe = RecipeUtils.getRecipe(outputItems[0], RecipeUtils.LARGE_TYPES);
-        if (recipe == null || !recipe.getCraftType().isLarge()) return;
-
-        toOut.setAmount(1);
-        patternIn.subtract();
-        Pattern.setRecipe(toOut, recipe);
-        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
-    }
-
-    private void makeSmallPattern(BlockMenu blockMenu, ItemStack patternIn, ItemStack toOut) {
+    private CraftingRecipe makeVanillaCraftingPattern(BlockMenu blockMenu) {
         List<ItemStack> inputList = new ArrayList<>();
         for (int slot : getCraftSlots()) {
             inputList.add(blockMenu.getItemInSlot(slot));
         }
         ItemStack[] inputs = inputList.toArray(ItemStack[]::new);
 
-        List<ItemStack> outputList = new ArrayList<>();
-        for (int slot : getCraftOutputSlots()) {
-            outputList.add(blockMenu.getItemInSlot(slot));
+        boolean hasSlimefunItem = Arrays.stream(inputs)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .anyMatch(x -> SlimefunItem.getByItem(x) != null);
+        if (hasSlimefunItem) return null;
+
+        return VanillaRecipeUtils.getCraftingTableRecipe(inputs);
+    }
+
+    private CraftingRecipe makeProcessPattern(BlockMenu blockMenu, CraftType type) {
+        ItemStack[] inputs = Arrays.stream(getCraftSlots())
+                .mapToObj(blockMenu::getItemInSlot)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .toArray(ItemStack[]::new);
+        ItemStack[] outputs = Arrays.stream(getCraftOutputSlots())
+                .mapToObj(blockMenu::getItemInSlot)
+                .filter(Objects::nonNull)
+                .filter(x -> !x.getType().isAir())
+                .toArray(ItemStack[]::new);
+        if (inputs.length == 0 || outputs.length == 0) return null;
+
+        ItemStack input = inputs[0];
+        ItemStack output = outputs[0];
+
+        if (SlimefunItem.getByItem(input) != null) return null;
+
+        CraftingRecipe found = VanillaRecipeUtils.findRecipeByOutput(input, output, type);
+        if (found != null) return found;
+
+        List<CraftingRecipe> recipes = VanillaRecipeUtils.getRecipesForType(input, type);
+        if (recipes.isEmpty()) return null;
+        for (CraftingRecipe recipe : recipes) {
+            if (recipe.getOutput().length > 0 && recipe.getOutput()[0].getType() == output.getType()) {
+                return recipe;
+            }
         }
-        ItemStack[] outputs = outputList.toArray(ItemStack[]::new);
-
-        CraftingRecipe recipe;
-        if (ItemUtils.trimItems(outputs).length != 0) {
-            recipe = RecipeUtils.getRecipe(inputs, outputs);
-        } else {
-            recipe = RecipeUtils.getRecipe(inputs);
-        }
-
-        if (recipe == null) return;
-
-        toOut.setAmount(1);
-        patternIn.subtract();
-        Pattern.setRecipe(toOut, recipe);
-        blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
+        return null;
     }
 
     private void handleRecipeSelect(@Nonnull Block block, @Nonnull Player player, boolean shiftClick) {
         BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
         if (blockMenu == null) return;
 
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        CraftType selectedType = getSelectedCraftType(block);
+        NetworkInfo info = me.ddggdd135.slimeae.SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        CraftType vanillaType = getStoredVanillaType(block);
 
         List<ItemStack> inputList = new ArrayList<>();
         for (int slot : getCraftSlots()) {
@@ -277,7 +278,7 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
             if (menu != null) menu.open(player);
         };
 
-        RecipeSelectMenu.open(player, inputs, selectedType, backAction, recipe -> {
+        RecipeSelectMenu.open(player, inputs, vanillaType, backAction, recipe -> {
             BlockMenu actualMenu = StorageCacheUtils.getMenu(block.getLocation());
             if (actualMenu == null) return;
 
@@ -311,11 +312,9 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
     @Override
     protected BlockBreakHandler onBlockBreak() {
         return new SimpleBlockBreakHandler() {
-
             @Override
             public void onBlockBreak(@Nonnull Block b) {
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
-
                 if (blockMenu != null) {
                     blockMenu.dropItems(b.getLocation(), getInputSlot());
                     blockMenu.dropItems(b.getLocation(), getCraftSlots());
@@ -323,7 +322,6 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
                     blockMenu.dropItems(b.getLocation(), getPatternSlot());
                     blockMenu.dropItems(b.getLocation(), getPatternOutputSlot());
                 }
-                // 清理缓存，防止内存泄漏
                 clearSortedItemsCache(b.getLocation());
             }
         };
@@ -332,15 +330,6 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
     @Override
     public boolean fastInsert() {
         return super.fastInsert();
-    }
-
-    @Override
-    public int[] getIngredientSlots() {
-        return getCraftSlots();
-    }
-
-    public int getJEGRecipeButtonSlot() {
-        return 35;
     }
 
     @Override
