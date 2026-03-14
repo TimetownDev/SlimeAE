@@ -25,9 +25,11 @@ public class Pattern extends SlimefunItem {
     private static final Map<UUID, CraftingRecipe> cache = new HashMap<>();
     public static final String UUID_KEY = "uuid";
     public static final String RECIPE_KEY = "recipe";
+    public static final String DEPRECATED_KEY = "deprecated";
     public static final String INPUT_KEY = "input";
     public static final String OUTPUT_KEY = "output";
     public static final String CRAFTING_TYPE_KEY = "crafting_type";
+    private static final String DEPRECATED_LORE = "&c已废弃：配方不存在";
 
     public Pattern(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -37,6 +39,20 @@ public class Pattern extends SlimefunItem {
         UUID uuid = NBT.get(itemStack, x -> {
             return x.getUUID(UUID_KEY);
         });
+
+        if (uuid != null && cache.containsKey(uuid)) {
+            return cache.get(uuid);
+        }
+
+        boolean deprecated = NBT.get(itemStack, x -> {
+            return x.hasTag(DEPRECATED_KEY, NBTType.NBTTagByte);
+        });
+        if (deprecated) {
+            if (uuid != null) {
+                cache.put(uuid, null);
+            }
+            return null;
+        }
 
         CraftingRecipe craftingRecipe = cache.get(uuid);
         if (craftingRecipe == null) {
@@ -57,25 +73,64 @@ public class Pattern extends SlimefunItem {
                 return new CraftingRecipe(craftType, parsedInput, parsedOutput);
             });
 
-            setRecipe(itemStack, craftingRecipe);
+            if (craftingRecipe == null) {
+                markDeprecated(itemStack, uuid);
+                return null;
+            }
 
             if (craftingRecipe != null) {
                 if (!craftingRecipe.getCraftType().isVanilla() && craftingRecipe.getCraftType() != CraftType.COOKING) {
                     CraftingRecipe newRecipe =
                             RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
                     if (newRecipe == null) {
-                        craftingRecipe = null;
+                        markDeprecated(itemStack, uuid);
+                        return null;
                     } else if (!newRecipe.equals(craftingRecipe)) {
                         craftingRecipe = newRecipe;
                         setRecipe(itemStack, craftingRecipe);
+                        uuid = NBT.get(itemStack, x -> {
+                            return x.getUUID(UUID_KEY);
+                        });
                     }
                 }
             }
 
-            cache.put(uuid, craftingRecipe);
+            if (uuid != null) {
+                cache.put(uuid, craftingRecipe);
+            }
         }
 
         return craftingRecipe;
+    }
+
+    private static void markDeprecated(@Nonnull ItemStack itemStack, @Nullable UUID oldUuid) {
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.getLore() == null ? new ArrayList<>() : new ArrayList<>(meta.getLore());
+            boolean hasDeprecatedLore =
+                    lore.stream().anyMatch(line -> CMIChatColor.stripColor(line).contains("已废弃"));
+            if (!hasDeprecatedLore) {
+                lore.add(DEPRECATED_LORE);
+                meta.setLore(CMIChatColor.translate(lore));
+                itemStack.setItemMeta(meta);
+            }
+        }
+
+        NBT.modify(itemStack, x -> {
+            x.setBoolean(DEPRECATED_KEY, true);
+            if (x.hasTag(RECIPE_KEY)) {
+                x.removeKey(RECIPE_KEY);
+            }
+        });
+
+        UUID currentUuid = NBT.get(itemStack, x -> {
+            return x.getUUID(UUID_KEY);
+        });
+        if (currentUuid != null) {
+            cache.put(currentUuid, null);
+        } else if (oldUuid != null) {
+            cache.put(oldUuid, null);
+        }
     }
 
     @Nonnull
@@ -106,6 +161,7 @@ public class Pattern extends SlimefunItem {
         UUID uuid = UUID.randomUUID();
 
         NBT.modify(itemStack, x -> {
+            if (x.hasTag(DEPRECATED_KEY)) x.removeKey(DEPRECATED_KEY);
             if (x.hasTag(RECIPE_KEY)) x.removeKey(RECIPE_KEY);
             ReadWriteNBT compound = x.getOrCreateCompound(RECIPE_KEY);
             compound.setString(CRAFTING_TYPE_KEY, recipe.getCraftType().name());
