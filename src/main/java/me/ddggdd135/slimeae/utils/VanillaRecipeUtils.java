@@ -71,7 +71,9 @@ public final class VanillaRecipeUtils {
     @Nonnull
     public static List<CraftingRecipe> getFurnaceRecipes(@Nonnull ItemStack input) {
         List<CraftingRecipe> results = new ArrayList<>();
-        for (Recipe recipe : Bukkit.getRecipesFor(input)) {
+        Iterator<Recipe> iter = Bukkit.getServer().recipeIterator();
+        while (iter.hasNext()) {
+            Recipe recipe = iter.next();
             if (recipe instanceof FurnaceRecipe furnaceRecipe) {
                 if (!furnaceRecipe.getInputChoice().test(input)) continue;
                 results.add(new CraftingRecipe(
@@ -88,7 +90,9 @@ public final class VanillaRecipeUtils {
     @Nonnull
     public static List<CraftingRecipe> getBlastingRecipes(@Nonnull ItemStack input) {
         List<CraftingRecipe> results = new ArrayList<>();
-        for (Recipe recipe : Bukkit.getRecipesFor(input)) {
+        Iterator<Recipe> iter = Bukkit.getServer().recipeIterator();
+        while (iter.hasNext()) {
+            Recipe recipe = iter.next();
             if (recipe instanceof BlastingRecipe blastingRecipe) {
                 if (!blastingRecipe.getInputChoice().test(input)) continue;
                 results.add(new CraftingRecipe(
@@ -105,7 +109,9 @@ public final class VanillaRecipeUtils {
     @Nonnull
     public static List<CraftingRecipe> getSmokingRecipes(@Nonnull ItemStack input) {
         List<CraftingRecipe> results = new ArrayList<>();
-        for (Recipe recipe : Bukkit.getRecipesFor(input)) {
+        Iterator<Recipe> iter = Bukkit.getServer().recipeIterator();
+        while (iter.hasNext()) {
+            Recipe recipe = iter.next();
             if (recipe instanceof SmokingRecipe smokingRecipe) {
                 if (!smokingRecipe.getInputChoice().test(input)) continue;
                 results.add(new CraftingRecipe(

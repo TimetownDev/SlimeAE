@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.utils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AltarRecipe;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientAltar;
@@ -68,43 +69,81 @@ public class RecipeUtils {
                 SlimefunItem.getByItem(SlimefunItems.HEATED_PRESSURE_CHAMBER));
 
         try {
-            if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getInfinityIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_InfinityExpansion", true)) {
                 InfinityRecipeRegistration.register();
             }
         } catch (Throwable ignored) {
         }
 
         try {
-            if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getGalactifunIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_Galactifun", true)) {
                 GalactifunRecipeRegistration.register();
             }
         } catch (Throwable ignored) {
         }
 
         try {
-            if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getObsidianExpansionIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_ObsidianExpansion", true)) {
                 ObsidianExpansionRecipeRegistration.register();
             }
         } catch (Throwable ignored) {
         }
 
         try {
-            if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getExoticGardenIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_ExoticGarden", true)) {
                 ExoticGardenRecipeRegistration.register();
             }
         } catch (Throwable ignored) {
         }
 
         try {
-            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_NetworksExpansion", true)) {
                 NetworksExpansionRecipeRegistration.register();
             }
         } catch (Throwable ignored) {
         }
 
         try {
-            if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()) {
+            if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_NTW_QUANTUM_WORKBENCH", true)) {
+                NetworksExpansionRecipeRegistration.registerQuantumWorkbench();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (SlimeAEPlugin.getTranscEndenceIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_TranscEndence", true)) {
                 TranscEndenceRecipeRegistration.register();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (SlimeAEPlugin.getLogiTechIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_LogiTech", true)) {
+                LogiTechRecipeRegistration.register();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (SlimeAEPlugin.getFinalTechIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_FinalTECH", true)) {
+                FinalTechRecipeRegistration.register();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (SlimeAEPlugin.getFinalTechIntegration().isLoaded()
+                    && SlimeAEPlugin.getInstance().getConfig().getBoolean("enable_FinalTECH_BedrockCraftTable", true)) {
+                FinalTechRecipeRegistration.registerBedrockCraftTable();
             }
         } catch (Throwable ignored) {
         }
@@ -410,7 +449,13 @@ public class RecipeUtils {
                     .toList();
         }
 
-        return new ArrayList<>();
+        List<ItemStack[]> fallback = new ArrayList<>();
+        for (SlimefunItem item : Slimefun.getRegistry().getEnabledSlimefunItems()) {
+            if (!item.isDisabled() && recipeType.equals(item.getRecipeType())) {
+                fallback.add(item.getRecipe());
+            }
+        }
+        return fallback;
     }
 
     public static ItemStack[] getOutputs(RecipeType recipeType, ItemStack[] inputs) {
@@ -521,6 +566,14 @@ public class RecipeUtils {
                 }
 
                 return new ItemStack[] {recipe.getOutput()};
+            }
+        }
+
+        for (SlimefunItem item : Slimefun.getRegistry().getEnabledSlimefunItems()) {
+            if (!item.isDisabled() && recipeType.equals(item.getRecipeType())) {
+                ItemStack[] in = item.getRecipe();
+                if (!ItemUtils.matchesAll(inputs, in, true)) continue;
+                return new ItemStack[] {item.getRecipeOutput()};
             }
         }
 

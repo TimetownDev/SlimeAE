@@ -57,7 +57,7 @@ public class AutoCraftingTask implements IDisposable {
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private ItemStorage storage;
-    private boolean disposed;
+    private volatile boolean disposed;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         this.info = info;
@@ -312,7 +312,7 @@ public class AutoCraftingTask implements IDisposable {
         return info.getRecipeFor(itemStack);
     }
 
-    public boolean hasNext() {
+    public synchronized boolean hasNext() {
         if (craftingSteps.isEmpty()) return false;
         for (CraftStep step : craftingSteps) {
             if (!step.isCompleted()) return true;
@@ -471,6 +471,7 @@ public class AutoCraftingTask implements IDisposable {
         CraftingRecipe nextRecipe = step.getRecipe();
         CraftType craftType = nextRecipe.getCraftType();
         boolean doCraft = !isCancelling;
+        boolean hasProgress = false;
 
         if (step.getAmount() <= 0) {
             if (step.isIdle()) {
@@ -502,6 +503,7 @@ public class AutoCraftingTask implements IDisposable {
                             device.startCrafting(deviceBlock, nextRecipe);
                             step.incrementRunning();
                             step.decreaseAmount(1);
+                            hasProgress = true;
                             if (step.getAmount() <= 0) doCraft = false;
                         }
                     } else if (step.getRunning() > 0
@@ -511,6 +513,7 @@ public class AutoCraftingTask implements IDisposable {
                         device.finishCrafting(deviceBlock);
                         storage.addItem(finished.getOutput());
                         step.decrementRunning();
+                        hasProgress = true;
                     }
                 }
             }
@@ -554,6 +557,7 @@ public class AutoCraftingTask implements IDisposable {
             resultItems.putKey(entry.getKey(), entry.getValue() * result);
         }
         storage.addItem(resultItems);
+        if (result > 0) hasProgress = true;
 
         long actualAmount = Math.min(maxDevices - step.getVirtualRunning(), step.getAmount());
         if (actualAmount > 0) {
@@ -564,7 +568,24 @@ public class AutoCraftingTask implements IDisposable {
 
             ItemRequest[] requests = ItemUtils.createRequests(neededItems);
             if (storage.contains(requests)) {
-                if (doCraft && !craftType.isProcess()) {
+                boolean hasRealDevices = false;
+                if (craftType.isProcess()) {
+                    for (Location loc : holderLocations) {
+                        Block[] devs = info.getCachedCraftingDevices().get(loc);
+                        if (devs != null) {
+                            for (Block db : devs) {
+                                SlimefunItem si = SlimefunItem.getById(StorageCacheUtils.getBlock(db.getLocation())
+                                        .getSfId());
+                                if (si instanceof IMERealCraftDevice) {
+                                    hasRealDevices = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasRealDevices) break;
+                    }
+                }
+                if (doCraft && (!craftType.isProcess() || !hasRealDevices)) {
                     storage.takeItem(requests);
                     step.setVirtualRunning(step.getVirtualRunning() + (int) actualAmount);
                     step.decreaseAmount(actualAmount);
@@ -573,7 +594,9 @@ public class AutoCraftingTask implements IDisposable {
             }
         }
 
-        return false;
+        if (!step.isIdle()) hasProgress = true;
+
+        return hasProgress;
     }
 
     public void showGUI(Player player) {
@@ -705,7 +728,7 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         if (disposed) return;
         disposed = true;
 

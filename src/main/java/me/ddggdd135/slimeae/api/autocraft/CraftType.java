@@ -1,9 +1,12 @@
 package me.ddggdd135.slimeae.api.autocraft;
 
+import io.github.thebusybiscuit.slimefun4.libraries.dough.skins.PlayerHead;
+import io.github.thebusybiscuit.slimefun4.libraries.dough.skins.PlayerSkin;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public enum CraftType {
     CRAFTING_TABLE("&e工作台配方", Material.CRAFTING_TABLE, GridSize.SMALL_3x3),
@@ -36,7 +39,15 @@ public enum CraftType {
     INFINITY_WORKBENCH("&6无尽工作台", Material.RESPAWN_ANCHOR, GridSize.LARGE_6x6),
     MOB_DATA_INFUSER("&7生物芯片注入器", Material.LODESTONE, GridSize.LARGE_6x6),
     ASSEMBLY_TABLE("&f星系装配台", Material.SMITHING_TABLE, GridSize.LARGE_6x6),
-    OBSIDIAN_FORGE("&5黑曜石锻造桌", Material.SMITHING_TABLE, GridSize.LARGE_6x6);
+    OBSIDIAN_FORGE("&5黑曜石锻造桌", Material.SMITHING_TABLE, GridSize.LARGE_6x6),
+    QUANTUM_WORKBENCH("&b量子工作台", Material.DRIED_KELP_BLOCK, GridSize.SMALL_3x3),
+    BUG_CRAFTER(
+            "&cBUG工作台",
+            PlayerHead.getItemStack(
+                    PlayerSkin.fromHashCode("f2fdb5a1477cb38109030fc9e41691668e4fe05c86aad46c6ad01f4ce4dabd52")),
+            GridSize.LARGE_6x6),
+    MATRIX_CRAFTING_TABLE("&d矩阵合成台", Material.LECTERN, GridSize.LARGE_6x6),
+    BEDROCK_CRAFT_TABLE("&c基岩合成台", Material.CRAFTING_TABLE, GridSize.LARGE_6x6);
 
     private static final Map<String, CraftType> BY_NAME = new HashMap<>();
 
@@ -47,12 +58,18 @@ public enum CraftType {
     }
 
     private final String displayName;
-    private final Material icon;
+    private final ItemStack iconItem;
     private final GridSize gridSize;
 
     CraftType(@Nonnull String displayName, @Nonnull Material icon, @Nonnull GridSize gridSize) {
         this.displayName = displayName;
-        this.icon = icon;
+        this.iconItem = new ItemStack(icon);
+        this.gridSize = gridSize;
+    }
+
+    CraftType(@Nonnull String displayName, @Nonnull ItemStack iconItem, @Nonnull GridSize gridSize) {
+        this.displayName = displayName;
+        this.iconItem = iconItem;
         this.gridSize = gridSize;
     }
 
@@ -63,7 +80,12 @@ public enum CraftType {
 
     @Nonnull
     public Material getIcon() {
-        return icon;
+        return iconItem.getType();
+    }
+
+    @Nonnull
+    public ItemStack getIconItem() {
+        return iconItem.clone();
     }
 
     @Nonnull
