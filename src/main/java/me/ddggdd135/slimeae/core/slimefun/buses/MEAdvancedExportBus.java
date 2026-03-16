@@ -101,7 +101,9 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
                     ItemStack[] taken = networkStorage
                             .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                             .toItemStacks();
-                    if (taken.length != 0) {
+                    if (taken.length != 0
+                            && taken[0] != null
+                            && !taken[0].getType().isAir()) {
                         targetInv.pushItem(taken[0], inputSlots);
                     }
                 }

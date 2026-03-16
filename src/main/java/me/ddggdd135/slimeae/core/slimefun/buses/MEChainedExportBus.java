@@ -99,7 +99,9 @@ public class MEChainedExportBus extends MEChainedBus implements ISettingSlotHold
                     ItemStack[] taken = networkStorage
                             .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                             .toItemStacks();
-                    if (taken.length != 0) {
+                    if (taken.length != 0
+                            && taken[0] != null
+                            && !taken[0].getType().isAir()) {
                         targetInv.pushItem(taken[0], inputSlots);
                     }
                 }

@@ -514,6 +514,26 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
             menu.replaceExistingItem(slot, MenuItems.EMPTY);
         }
 
+        menu.addMenuClickHandler(getInputSlot(), (player, slot, cursor, clickAction) -> {
+            NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+            if (info == null) {
+                return true;
+            }
+
+            ItemStack cursorItem = player.getItemOnCursor();
+            if (cursorItem != null && !cursorItem.getType().isAir()) {
+                info.getStorage().pushItem(cursorItem);
+                player.setItemOnCursor(cursorItem.getAmount() <= 0 ? null : cursorItem);
+            }
+
+            ItemStack slotItem = menu.getItemInSlot(getInputSlot());
+            if (slotItem != null && !slotItem.getType().isAir()) {
+                info.getStorage().pushItem(slotItem);
+            }
+
+            return false;
+        });
+
         if (fastInsert()) {
             menu.addPlayerInventoryClickHandler((p, s, itemStack, a) -> {
                 if (!a.isShiftClicked() || a.isRightClicked()) {
