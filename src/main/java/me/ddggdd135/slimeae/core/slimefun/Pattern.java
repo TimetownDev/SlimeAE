@@ -79,7 +79,9 @@ public class Pattern extends SlimefunItem {
             }
 
             if (craftingRecipe != null) {
-                if (!craftingRecipe.getCraftType().isVanilla() && craftingRecipe.getCraftType() != CraftType.COOKING) {
+                if (craftingRecipe.getCraftType().isSmall()
+                        && !craftingRecipe.getCraftType().isVanilla()
+                        && craftingRecipe.getCraftType() != CraftType.COOKING) {
                     CraftingRecipe newRecipe =
                             RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
                     if (newRecipe == null) {

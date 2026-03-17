@@ -91,6 +91,7 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
                 }
 
                 ItemStack itemStack = setting.getFirstValue().getItemStack();
+                if (itemStack == null || itemStack.getType().isAir() || !itemStack.hasItemMeta()) continue;
 
                 int[] inputSlots = targetInv
                         .getPreset()
