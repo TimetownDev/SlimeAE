@@ -98,15 +98,18 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
                         .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, itemStack);
                 if (inputSlots == null || inputSlots.length == 0) continue;
 
-                if (targetInv.fits(itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
-                    ItemStack[] taken = networkStorage
-                            .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
-                            .toItemStacks();
-                    if (taken.length != 0
-                            && taken[0] != null
-                            && !taken[0].getType().isAir()) {
-                        targetInv.pushItem(taken[0], inputSlots);
+                try {
+                    if (targetInv.fits(itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
+                        ItemStack[] taken = networkStorage
+                                .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
+                                .toItemStacks();
+                        if (taken.length != 0
+                                && taken[0] != null
+                                && !taken[0].getType().isAir()) {
+                            targetInv.pushItem(taken[0], inputSlots);
+                        }
                     }
+                } catch (IllegalArgumentException ignored) {
                 }
             }
         }
