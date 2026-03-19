@@ -57,6 +57,7 @@ public class MEAdvancedVanillaExportBus extends MEAdvancedExportBus {
                 }
 
                 ItemStack itemStack = setting.getFirstValue().getItemStack();
+                if (itemStack == null || itemStack.getType().isAir()) continue;
 
                 Inventory inventory = container.getInventory();
 
@@ -67,8 +68,14 @@ public class MEAdvancedVanillaExportBus extends MEAdvancedExportBus {
                     ItemStack[] taken = networkStorage
                             .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                             .toItemStacks();
-                    if (taken.length != 0) {
-                        inventory.addItem(taken[0]);
+                    for (ItemStack takenItem : taken) {
+                        if (takenItem == null || takenItem.getType().isAir()) continue;
+                        java.util.HashMap<Integer, ItemStack> leftover = inventory.addItem(takenItem);
+                        for (ItemStack remain : leftover.values()) {
+                            if (remain != null && !remain.getType().isAir()) {
+                                networkStorage.pushItem(remain);
+                            }
+                        }
                     }
                 }
             }

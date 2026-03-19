@@ -37,6 +37,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHolder {
     private static final MEAdvancedExportBusDataAdapter adapter = new MEAdvancedExportBusDataAdapter();
+    private static final int[] SETTING_SLOTS = {3, 4, 5, 12, 13, 14, 21, 22, 23};
+    private static final int[] BORDER_SLOTS = {
+        0, 1, 2, 6, 7, 8, 9, 10, 11, 15, 16, 17, 18, 19, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+        40, 41, 42, 43, 44, 48, 49, 50, 51, 52, 53
+    };
 
     public MEAdvancedExportBus(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -103,10 +108,12 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
                         ItemStack[] taken = networkStorage
                                 .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
                                 .toItemStacks();
-                        if (taken.length != 0
-                                && taken[0] != null
-                                && !taken[0].getType().isAir()) {
-                            targetInv.pushItem(taken[0], inputSlots);
+                        for (ItemStack takenItem : taken) {
+                            if (takenItem == null || takenItem.getType().isAir()) continue;
+                            ItemStack remainder = targetInv.pushItem(takenItem, inputSlots);
+                            if (remainder != null && !remainder.getType().isAir()) {
+                                networkStorage.pushItem(remainder);
+                            }
                         }
                     }
                 } catch (IllegalArgumentException ignored) {
@@ -177,53 +184,11 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
 
     @Override
     public int[] getBorderSlots() {
-        return new int[] {
-            0,
-            1,
-            2,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            15,
-            16,
-            17,
-            18,
-            19,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39,
-            40,
-            41,
-            42,
-            43,
-            44,
-            48,
-            49,
-            50,
-            51,
-            52,
-            53 // 移除45,46,47用于卡槽
-        };
+        return BORDER_SLOTS;
     }
 
     public int[] getSettingSlots() {
-        return new int[] {3, 4, 5, 12, 13, 14, 21, 22, 23};
+        return SETTING_SLOTS;
     }
 
     @Nullable public MEAdvancedExportBusData getData(@Nonnull Location location) {
