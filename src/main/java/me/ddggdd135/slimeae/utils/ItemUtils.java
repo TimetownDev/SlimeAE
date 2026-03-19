@@ -359,23 +359,23 @@ public class ItemUtils {
                 return null;
             }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                if (slimefunItem instanceof StorageUnit) {
                     return new InfinityBarrelStorage(block);
                 }
             }
             if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                if (slimefunItem instanceof Barrel) {
                     return new FluffyBarrelStorage(block);
                 }
             }
             if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
                     || SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
+                if (slimefunItem instanceof NetworkQuantumStorage) {
                     return new QuantumStorage(block);
                 }
             }
             if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer
+                if (slimefunItem instanceof NetworksDrawer
                         && NetworksDrawer.getStorageData(block.getLocation()) != null) {
                     return new DrawerStorage(block);
                 }

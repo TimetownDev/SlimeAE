@@ -123,13 +123,7 @@ public class MEExportBus extends MEBus implements ISettingSlotHolder {
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
     public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation());
-        if (inv == null) return;
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(data.getLocation());
-        if (info == null) return;
-
         onExport(data.getLocation().getBlock());
     }
 

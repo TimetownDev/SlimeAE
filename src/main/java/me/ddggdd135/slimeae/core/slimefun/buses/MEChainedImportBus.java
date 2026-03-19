@@ -40,10 +40,10 @@ public class MEChainedImportBus extends MEChainedBus {
         if (current == BlockFace.SELF) return;
 
         int distance = getDistance(block.getLocation());
+        IStorage networkStorage = info.getStorage();
         Block transportBlock = block.getRelative(current);
 
         for (int i = 0; i < distance; i++) {
-            IStorage networkStorage = info.getStorage();
             if (ItemUtils.getStorage(transportBlock) == null) return;
 
             ItemStack itemStack = ItemUtils.getItemStack(transportBlock);

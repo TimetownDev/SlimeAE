@@ -76,12 +76,11 @@ public class MEChainedExportBus extends MEChainedBus implements ISettingSlotHold
         if (direction == BlockFace.SELF) return;
 
         int distance = getDistance(block.getLocation());
+        IStorage networkStorage = info.getStorage();
         Block target = block.getRelative(direction);
         for (int i = 0; i < distance; i++) {
             BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
             if (targetInv == null) return;
-
-            IStorage networkStorage = info.getStorage();
 
             if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
                 ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
@@ -128,13 +127,7 @@ public class MEChainedExportBus extends MEChainedBus implements ISettingSlotHold
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
     public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        BlockMenu inv = StorageCacheUtils.getMenu(data.getLocation());
-        if (inv == null) return;
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(data.getLocation());
-        if (info == null) return;
-
         onExport(data.getLocation().getBlock());
     }
 
