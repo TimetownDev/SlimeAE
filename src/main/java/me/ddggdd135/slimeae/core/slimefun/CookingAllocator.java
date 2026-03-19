@@ -51,6 +51,8 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     private void saveState(@Nonnull Location location, @Nonnull CraftingRecipe recipe) {
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        if (blockData == null) return;
         StorageCacheUtils.setData(location, DATA_KEY_RUNNING, "true");
         StorageCacheUtils.setData(
                 location, DATA_KEY_RECIPE_TYPE, recipe.getCraftType().name());
@@ -73,13 +75,17 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     private void clearState(@Nonnull Location location) {
-        StorageCacheUtils.setData(location, DATA_KEY_RUNNING, null);
-        StorageCacheUtils.setData(location, DATA_KEY_RECIPE_TYPE, null);
-        StorageCacheUtils.setData(location, DATA_KEY_RECIPE_INPUT, null);
-        StorageCacheUtils.setData(location, DATA_KEY_RECIPE_OUTPUT, null);
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        if (blockData == null) return;
+        StorageCacheUtils.removeData(location, DATA_KEY_RUNNING);
+        StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_TYPE);
+        StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_INPUT);
+        StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_OUTPUT);
     }
 
     private void restoreState(@Nonnull Location location) {
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        if (blockData == null) return;
         String running = StorageCacheUtils.getData(location, DATA_KEY_RUNNING);
         if (!"true".equals(running)) return;
 

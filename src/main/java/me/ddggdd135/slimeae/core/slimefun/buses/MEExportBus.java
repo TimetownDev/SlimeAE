@@ -87,7 +87,7 @@ public class MEExportBus extends MEBus implements ISettingSlotHolder {
             }
 
             ItemStack itemStack = setting.getFirstValue().getItemStack();
-            if (itemStack == null || itemStack.getType().isAir() || !itemStack.hasItemMeta()) continue;
+            if (itemStack == null || itemStack.getType().isAir()) continue;
 
             int[] inputSlots = targetInv
                     .getPreset()
