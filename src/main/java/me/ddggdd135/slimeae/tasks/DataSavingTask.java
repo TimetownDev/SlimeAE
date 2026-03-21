@@ -81,6 +81,10 @@ public class DataSavingTask implements Runnable {
         return paused;
     }
 
+    public boolean isRunning() {
+        return running;
+    }
+
     public void setPaused(boolean paused) {
         this.paused = paused;
     }

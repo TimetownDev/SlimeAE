@@ -27,6 +27,7 @@ public abstract class DatabaseController<TData> {
     protected final Map<TData, Queue<Runnable>> scheduledWriteTasks;
     protected final AtomicInteger activeWriteTasks = new AtomicInteger(0);
     protected final Logger logger;
+    protected volatile boolean shutdownInProgress = false;
 
     public DatabaseController(Class<TData> clazz) {
         this.clazz = clazz;
@@ -48,35 +49,53 @@ public abstract class DatabaseController<TData> {
 
     @OverridingMethodsMustInvokeSuper
     public void shutdown() {
+        shutdownInProgress = true;
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
 
         writeExecutor.shutdown();
         try {
             int waitSeconds = 0;
-            while (scheduledWriteTasks.size() > 0 || activeWriteTasks.get() > 0) {
-                int pending = scheduledWriteTasks.size();
-                int active = activeWriteTasks.get();
-                logger.log(Level.INFO, "数据保存中，请稍候... 排队 {0} 个，执行中 {1} 个", new Object[] {pending, active});
+            while (activeWriteTasks.get() > 0) {
+                logger.log(Level.INFO, "数据保存中... 队列中还有: {0} 个", activeWriteTasks.get());
                 TimeUnit.SECONDS.sleep(1);
-                waitSeconds++;
-                if (waitSeconds >= 120) {
-                    logger.log(Level.WARNING, "数据保存等待超时（120秒），强制关闭。排队 {0}，执行中 {1}", new Object[] {
-                        scheduledWriteTasks.size(), activeWriteTasks.get()
-                    });
+                if (++waitSeconds >= 300) {
+                    logger.log(Level.WARNING, "写入任务超时 (300s), 剩余任务: {0}", activeWriteTasks.get());
                     break;
                 }
             }
 
-            if (!writeExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
-                logger.warning("写入线程池在30秒内未能完全终止，强制关闭。");
+            if (!writeExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
                 writeExecutor.shutdownNow();
+                writeExecutor.awaitTermination(5, TimeUnit.SECONDS);
             }
-
-            logger.info("数据保存完成.");
         } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "数据保存被中断: ", e);
+            logger.log(Level.WARNING, "数据保存被中断", e);
             writeExecutor.shutdownNow();
+        }
+
+        drainScheduledTasks();
+        logger.info("数据保存成功.");
+    }
+
+    private void drainScheduledTasks() {
+        Map<TData, Queue<Runnable>> remaining;
+        synchronized (scheduledWriteTasks) {
+            remaining = new HashMap<>(scheduledWriteTasks);
+            scheduledWriteTasks.clear();
+        }
+        if (remaining.isEmpty()) return;
+
+        logger.log(Level.INFO, "正在处理 {0} 个剩余的计划写入任务", remaining.size());
+        for (Queue<Runnable> tasks : remaining.values()) {
+            Runnable task;
+            while ((task = tasks.poll()) != null) {
+                try {
+                    task.run();
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "同步写入失败: " + e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -120,38 +139,54 @@ public abstract class DatabaseController<TData> {
     }
 
     public void submitWriteTask(TData data, Runnable runnable) {
-        Queue<Runnable> queue;
-        synchronized (scheduledWriteTasks) {
-            if (scheduledWriteTasks.containsKey(data)) {
-                queue = scheduledWriteTasks.get(data);
-                queue.add(runnable);
-            } else {
-                queue = new ConcurrentLinkedQueue<>();
-                queue.add(runnable);
-                scheduledWriteTasks.put(data, queue);
-            }
+        if (shutdownInProgress) {
+            runSafely(runnable);
+            return;
         }
 
-        writeExecutor.submit(() -> {
-            Queue<Runnable> tasks;
+        synchronized (scheduledWriteTasks) {
+            scheduledWriteTasks
+                    .computeIfAbsent(data, k -> new ConcurrentLinkedQueue<>())
+                    .add(runnable);
+        }
+
+        try {
+            writeExecutor.submit(() -> {
+                Queue<Runnable> tasks;
+                synchronized (scheduledWriteTasks) {
+                    tasks = scheduledWriteTasks.remove(data);
+                }
+                if (tasks == null) return;
+                activeWriteTasks.incrementAndGet();
+                try {
+                    Runnable next;
+                    while ((next = tasks.poll()) != null) {
+                        runSafely(next);
+                    }
+                } finally {
+                    activeWriteTasks.decrementAndGet();
+                }
+            });
+        } catch (RejectedExecutionException e) {
+            logger.log(Level.WARNING, "写入任务被拒绝，正在同步执行");
             synchronized (scheduledWriteTasks) {
-                tasks = scheduledWriteTasks.remove(data);
-            }
-            if (tasks == null) return;
-            activeWriteTasks.incrementAndGet();
-            try {
-                while (!tasks.isEmpty()) {
-                    Runnable next = tasks.remove();
-                    try {
-                        next.run();
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "写入任务执行异常: " + e.getMessage(), e);
+                Queue<Runnable> tasks = scheduledWriteTasks.remove(data);
+                if (tasks != null) {
+                    Runnable next;
+                    while ((next = tasks.poll()) != null) {
+                        runSafely(next);
                     }
                 }
-            } finally {
-                activeWriteTasks.decrementAndGet();
             }
-        });
+        }
+    }
+
+    private void runSafely(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "写入任务失败: " + e.getMessage(), e);
+        }
     }
 
     public void cancelWriteTask(TData data) {

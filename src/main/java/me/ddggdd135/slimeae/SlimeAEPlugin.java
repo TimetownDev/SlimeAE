@@ -181,6 +181,15 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         dataSavingTask.setPaused(true);
         dataSavingTask.halt();
 
+        int waitCount = 0;
+        while (dataSavingTask.isRunning() && waitCount < 30) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+            waitCount++;
+        }
+
         storageCellStorageDataController.shutdown();
         storageCellFilterDataController.shutdown();
         reskinDataController.shutdown();

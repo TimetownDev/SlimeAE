@@ -43,8 +43,27 @@ public class ReskinDataController extends DatabaseController<String> {
     @Override
     @OverridingMethodsMustInvokeSuper
     public void shutdown() {
-        saveAllAsync();
+        saveAllSync();
         super.shutdown();
+    }
+
+    public void saveAllSync() {
+        Set<String> diff = new HashSet<>();
+        needSave.removeIf(item -> {
+            diff.add(item);
+            return true;
+        });
+
+        if (!diff.isEmpty()) {
+            logger.log(Level.INFO, "正在同步保存 {0} 个皮肤数据...", diff.size());
+            for (String key : diff) {
+                try {
+                    update(key);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "无法同步保存皮肤数据 (" + key + "): " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     @Nonnull
@@ -122,7 +141,6 @@ public class ReskinDataController extends DatabaseController<String> {
         int y = Integer.parseInt(parts[2]);
         int z = Integer.parseInt(parts[3]);
 
-        cancelWriteTask(key);
         try (Connection conn = ds.getConnection()) {
             conn.setAutoCommit(false);
             try {
@@ -155,7 +173,6 @@ public class ReskinDataController extends DatabaseController<String> {
     }
 
     public void updateAsync(String key) {
-        cancelWriteTask(key);
         submitWriteTask(key, () -> update(key));
     }
 
