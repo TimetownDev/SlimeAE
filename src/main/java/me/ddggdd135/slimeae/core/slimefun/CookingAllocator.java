@@ -17,7 +17,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
-import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
@@ -84,63 +83,12 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     private void restoreState(@Nonnull Location location) {
-        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
-        if (blockData == null) return;
-        String running = StorageCacheUtils.getData(location, DATA_KEY_RUNNING);
-        if (!"true".equals(running)) return;
-
-        String typeName = StorageCacheUtils.getData(location, DATA_KEY_RECIPE_TYPE);
-        String inputData = StorageCacheUtils.getData(location, DATA_KEY_RECIPE_INPUT);
-        String outputData = StorageCacheUtils.getData(location, DATA_KEY_RECIPE_OUTPUT);
-
-        if (typeName == null || inputData == null || outputData == null) {
-            clearState(location);
-            return;
-        }
-
-        CraftType craftType = CraftType.fromName(typeName);
-        if (craftType == null) {
-            clearState(location);
-            return;
-        }
-
-        try {
-            ItemStack[] inputs = deserializeItemStacks(inputData);
-            ItemStack[] outputs = deserializeItemStacks(outputData);
-            if (inputs.length == 0 || outputs.length == 0) {
-                clearState(location);
-                return;
-            }
-
-            CraftingRecipe recipe = new CraftingRecipe(craftType, inputs, outputs);
-            recipeCache.put(location, recipe);
-            runningCache.add(location);
-        } catch (Exception e) {
-            SlimeAEPlugin.getInstance()
-                    .getLogger()
-                    .log(Level.WARNING, "Failed to restore CookingAllocator state at " + location, e);
-            clearState(location);
-        }
+        clearState(location);
     }
 
     @Nonnull
     private String serializeItemStack(@Nonnull ItemStack itemStack) {
         return SerializeUtils.object2String(itemStack);
-    }
-
-    @Nonnull
-    private ItemStack[] deserializeItemStacks(@Nonnull String data) {
-        if (data.isEmpty()) return new ItemStack[0];
-        String[] parts = data.split("\\|");
-        List<ItemStack> items = new ArrayList<>();
-        for (String part : parts) {
-            if (part.isEmpty()) continue;
-            Object obj = SerializeUtils.string2Object(part);
-            if (obj instanceof ItemStack item && !item.getType().isAir()) {
-                items.add(item);
-            }
-        }
-        return items.toArray(new ItemStack[0]);
     }
 
     @Nullable private Block getTargetBlock(@Nonnull Block block) {

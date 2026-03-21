@@ -8,6 +8,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -24,6 +25,7 @@ public abstract class DatabaseController<TData> {
     protected ExecutorService writeExecutor;
     protected ExecutorService callbackExecutor;
     protected final Map<TData, Queue<Runnable>> scheduledWriteTasks;
+    protected final AtomicInteger activeWriteTasks = new AtomicInteger(0);
     protected final Logger logger;
 
     public DatabaseController(Class<TData> clazz) {
@@ -48,21 +50,34 @@ public abstract class DatabaseController<TData> {
     public void shutdown() {
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
+
+        writeExecutor.shutdown();
         try {
-            float totalTask = scheduledWriteTasks.size();
-            var pendingTask = scheduledWriteTasks.size();
-            while (pendingTask > 0) {
-                var doneTaskPercent = String.format("%.1f", (totalTask - pendingTask) / totalTask * 100);
-                logger.log(Level.INFO, "数据保存中，请稍候... 剩余 {0} 个任务 ({1}%)", new Object[] {pendingTask, doneTaskPercent});
+            int waitSeconds = 0;
+            while (scheduledWriteTasks.size() > 0 || activeWriteTasks.get() > 0) {
+                int pending = scheduledWriteTasks.size();
+                int active = activeWriteTasks.get();
+                logger.log(Level.INFO, "数据保存中，请稍候... 排队 {0} 个，执行中 {1} 个", new Object[] {pending, active});
                 TimeUnit.SECONDS.sleep(1);
-                pendingTask = scheduledWriteTasks.size();
+                waitSeconds++;
+                if (waitSeconds >= 120) {
+                    logger.log(Level.WARNING, "数据保存等待超时（120秒），强制关闭。排队 {0}，执行中 {1}", new Object[] {
+                        scheduledWriteTasks.size(), activeWriteTasks.get()
+                    });
+                    break;
+                }
+            }
+
+            if (!writeExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+                logger.warning("写入线程池在30秒内未能完全终止，强制关闭。");
+                writeExecutor.shutdownNow();
             }
 
             logger.info("数据保存完成.");
         } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Exception thrown while saving data: ", e);
+            logger.log(Level.WARNING, "数据保存被中断: ", e);
+            writeExecutor.shutdownNow();
         }
-        writeExecutor.shutdownNow();
     }
 
     public void executeSql(String sql) {
@@ -122,13 +137,19 @@ public abstract class DatabaseController<TData> {
             synchronized (scheduledWriteTasks) {
                 tasks = scheduledWriteTasks.remove(data);
             }
-            while (!tasks.isEmpty()) {
-                Runnable next = tasks.remove();
-                try {
-                    next.run();
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, e.getMessage());
+            if (tasks == null) return;
+            activeWriteTasks.incrementAndGet();
+            try {
+                while (!tasks.isEmpty()) {
+                    Runnable next = tasks.remove();
+                    try {
+                        next.run();
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "写入任务执行异常: " + e.getMessage(), e);
+                    }
                 }
+            } finally {
+                activeWriteTasks.decrementAndGet();
             }
         });
     }
