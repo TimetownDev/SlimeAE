@@ -29,14 +29,24 @@ public class CreativeItemMap extends ItemHashMap<Long> {
     }
 
     public boolean containsKey(Object key) {
-        return key instanceof ItemStack;
+        return key instanceof ItemStack || key instanceof ItemKey;
     }
 
     public boolean containsValue(Object value) {
-        return value instanceof ItemStack;
+        return value instanceof Long;
     }
 
     public Long get(Object key) {
+        return amount;
+    }
+
+    @Override
+    public Long getKey(ItemKey key) {
+        return amount;
+    }
+
+    @Override
+    public Long getOrDefault(ItemKey key, Long defaultValue) {
         return amount;
     }
 
@@ -44,12 +54,22 @@ public class CreativeItemMap extends ItemHashMap<Long> {
         return amount;
     }
 
+    @Override
+    public Long putKey(ItemKey key, Long value) {
+        return amount;
+    }
+
     public Long remove(Object key) {
-        if (key instanceof ItemStack) {
+        if (key instanceof ItemStack || key instanceof ItemKey) {
             return amount;
         } else {
             return 0L;
         }
+    }
+
+    @Override
+    public Long removeKey(ItemKey key) {
+        return amount;
     }
 
     public void putAll(@Nonnull Map<? extends ItemStack, ? extends Long> m) {}

@@ -94,8 +94,9 @@ public class MESecurityTerminal extends METerminal {
         ItemStack out = blockMenu.getItemInSlot(getTerminalOutputSlot());
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getTerminalInputSlot());
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(in);
-        if (!(slimefunItem instanceof WirelessTerminal)) return;
+        WirelessTerminal wirelessTerminal =
+                me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, WirelessTerminal.class);
+        if (wirelessTerminal == null) return;
         NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
 
         if (networkInfo == null) return;

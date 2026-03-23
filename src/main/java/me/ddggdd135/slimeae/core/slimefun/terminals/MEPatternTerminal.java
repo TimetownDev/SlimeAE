@@ -2,7 +2,6 @@ package me.ddggdd135.slimeae.core.slimefun.terminals;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
@@ -181,7 +180,9 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
+        if (in == null
+                || in.getType().isAir()
+                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
 
         CraftType selectedType = getSelectedCraftType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -288,7 +289,7 @@ public class MEPatternTerminal extends METerminal implements IRecipeCompletableW
             ItemStack patternIn = actualMenu.getItemInSlot(getPatternSlot());
             if (patternIn == null
                     || patternIn.getType().isAir()
-                    || !(SlimefunItem.getByItem(patternIn) instanceof Pattern)) {
+                    || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(patternIn, Pattern.class) == null) {
                 actualMenu.open(player);
                 return;
             }

@@ -127,9 +127,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = ItemUtils.getSettingItem(inventory, i);
                 if (SlimefunUtils.isItemSimilar(current, MenuItems.STORAGE_CELL, true, false)) {
-                    if (cursor != null
-                            && !cursor.getType().isAir()
-                            && SlimefunItem.getByItem(cursor) instanceof MEItemStorageCell) {
+                    if (cursor != null && !cursor.getType().isAir() && MEItemStorageCell.isStorageCell(cursor)) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
                     }
@@ -137,7 +135,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                         inventory.setItem(i, MenuItems.STORAGE_CELL);
-                    } else if (SlimefunItem.getByItem(cursor) instanceof MEItemStorageCell) {
+                    } else if (MEItemStorageCell.isStorageCell(cursor)) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }

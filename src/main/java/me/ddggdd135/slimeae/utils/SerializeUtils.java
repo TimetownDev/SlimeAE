@@ -66,9 +66,12 @@ public class SerializeUtils {
 
     @Nullable public static String getId(@Nullable ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return "VANILLA_AIR";
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (slimefunItem != null && slimefunItem.getItem().asOne().equals(itemStack.asOne()))
-            return "SLIMEFUN_" + slimefunItem.getId();
+        String sfId = ItemUtils.getSlimefunId(itemStack);
+        if (sfId != null) {
+            SlimefunItem slimefunItem = SlimefunItem.getById(sfId);
+            if (slimefunItem != null && slimefunItem.getItem().asOne().equals(itemStack.asOne()))
+                return "SLIMEFUN_" + sfId;
+        }
 
         Material material = itemStack.getType();
 

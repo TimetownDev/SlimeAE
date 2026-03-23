@@ -3,7 +3,7 @@ package me.ddggdd135.slimeae.api.items;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -23,7 +23,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
-    private final ReentrantLock cellLock = new ReentrantLock();
+    private static volatile MEStorageCellCache creativeInstance;
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final MEStorageCellStorageData storageData;
     private final MEStorageCellFilterData filterData;
 
@@ -37,7 +38,9 @@ public class MEStorageCellCache implements IStorage {
             @Nonnull MEStorageCellStorageData storageData, @Nonnull MEStorageCellFilterData filterData) {
         this.storageData = storageData;
         this.filterData = filterData;
-        cache.put(storageData.getUuid(), this);
+        if (storageData.getUuid() != null) {
+            cache.put(storageData.getUuid(), this);
+        }
     }
 
     @Nonnull
@@ -72,6 +75,23 @@ public class MEStorageCellCache implements IStorage {
         return cache.getOrDefault(uuid, null);
     }
 
+    @Nonnull
+    public static MEStorageCellCache getCreativeInstance() {
+        MEStorageCellCache inst = creativeInstance;
+        if (inst != null) return inst;
+        synchronized (MEStorageCellCache.class) {
+            inst = creativeInstance;
+            if (inst != null) return inst;
+            MEStorageCellStorageData data = new MEStorageCellStorageData();
+            data.setSize(Integer.MAX_VALUE);
+            data.setStorages(new CreativeItemMap());
+            MEStorageCellFilterData filter = new MEStorageCellFilterData();
+            inst = new MEStorageCellCache(data, filter);
+            creativeInstance = inst;
+            return inst;
+        }
+    }
+
     public long getSize() {
         return storageData.getSize();
     }
@@ -91,7 +111,11 @@ public class MEStorageCellCache implements IStorage {
 
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        cellLock.lock();
+        ItemKey dirtyKey = null;
+        long dirtyAmount = 0;
+        boolean needsDirty = false;
+
+        rwLock.writeLock().lock();
         try {
             ItemStack itemStack = itemStackCache.getItemStack();
             ItemKey key = itemStackCache.getItemKey();
@@ -116,17 +140,27 @@ public class MEStorageCellCache implements IStorage {
             stored += toAdd;
             storageData.setStored(stored);
             storages.putKey(key, amount + toAdd);
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, amount + toAdd);
+            dirtyKey = key;
+            dirtyAmount = amount + toAdd;
+            needsDirty = true;
             itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
             trim(key);
         } finally {
-            cellLock.unlock();
+            rwLock.writeLock().unlock();
+        }
+
+        if (needsDirty) {
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, dirtyKey, dirtyAmount);
         }
     }
 
     @Override
     public void pushItem(@Nonnull ItemInfo itemInfo) {
-        cellLock.lock();
+        ItemKey dirtyKey = null;
+        long dirtyAmount = 0;
+        boolean needsDirty = false;
+
+        rwLock.writeLock().lock();
         try {
             ItemKey key = itemInfo.getItemKey();
             ItemHashMap<Long> storages = storageData.getStorage();
@@ -153,30 +187,44 @@ public class MEStorageCellCache implements IStorage {
             storageData.setStored(stored);
             storages.putKey(key, amount + toAdd);
             itemInfo.setAmount(itemInfo.getAmount() - toAdd);
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, amount + toAdd);
+            dirtyKey = key;
+            dirtyAmount = amount + toAdd;
+            needsDirty = true;
             trim(key);
         } finally {
-            cellLock.unlock();
+            rwLock.writeLock().unlock();
+        }
+
+        if (needsDirty) {
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, dirtyKey, dirtyAmount);
         }
     }
 
     @Override
     public boolean contains(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> storages = storageData.getStorage();
+        rwLock.readLock().lock();
+        try {
+            ItemHashMap<Long> storages = storageData.getStorage();
 
-        if (storages instanceof CreativeItemMap) return true;
+            if (storages instanceof CreativeItemMap) return true;
 
-        for (ItemRequest request : requests) {
-            if (!storages.containsKey(request.getKey())
-                    || storages.getOrDefault(request.getKey(), 0L) < request.getAmount()) return false;
+            for (ItemRequest request : requests) {
+                if (!storages.containsKey(request.getKey())
+                        || storages.getOrDefault(request.getKey(), 0L) < request.getAmount()) return false;
+            }
+            return true;
+        } finally {
+            rwLock.readLock().unlock();
         }
-        return true;
     }
 
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        cellLock.lock();
+        List<Map.Entry<ItemKey, Long>> dirtyBatch = null;
+        ItemStorage itemStacks;
+
+        rwLock.writeLock().lock();
         try {
             ItemHashMap<Long> storages = storageData.getStorage();
             long stored = storageData.getStored();
@@ -185,7 +233,8 @@ public class MEStorageCellCache implements IStorage {
                 return new ItemStorage(ItemUtils.getAmounts(requests));
             }
 
-            ItemStorage itemStacks = new ItemStorage();
+            itemStacks = new ItemStorage();
+            dirtyBatch = new ArrayList<>();
             for (ItemRequest request : requests) {
                 if (storages.containsKey(request.getKey())) {
                     long amount = storages.getKey(request.getKey());
@@ -200,23 +249,34 @@ public class MEStorageCellCache implements IStorage {
                     }
 
                     long remaining = storages.getOrDefault(request.getKey(), 0L);
-                    SlimeAEPlugin.getStorageCellStorageDataController()
-                            .markDirty(storageData, request.getKey(), remaining);
+                    dirtyBatch.add(Map.entry(request.getKey(), remaining));
                     trim(request.getKey());
                 }
             }
             storageData.setStored(stored);
-
-            return itemStacks;
         } finally {
-            cellLock.unlock();
+            rwLock.writeLock().unlock();
         }
+
+        if (dirtyBatch != null) {
+            for (Map.Entry<ItemKey, Long> entry : dirtyBatch) {
+                SlimeAEPlugin.getStorageCellStorageDataController()
+                        .markDirty(storageData, entry.getKey(), entry.getValue());
+            }
+        }
+
+        return itemStacks;
     }
 
     @Nonnull
     @Unsafe
     public ItemHashMap<Long> getStorageUnsafe() {
-        return storageData.getStorage();
+        rwLock.readLock().lock();
+        try {
+            return storageData.getStorage();
+        } finally {
+            rwLock.readLock().unlock();
+        }
     }
 
     @Override

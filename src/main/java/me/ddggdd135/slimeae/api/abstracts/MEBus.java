@@ -45,6 +45,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class MEBus extends TickingBlock implements IMEObject, InventoryBlock, ICardHolder, IDataBlock {
     protected static final Map<Location, BlockFace> SELECTED_DIRECTION_MAP = new ConcurrentHashMap<>();
+    protected static final Map<Location, long[]> GUI_FINGERPRINTS = new ConcurrentHashMap<>();
     private static final MEBusDataAdapter adapter = new MEBusDataAdapter();
 
     public int getNorthSlot() {
@@ -145,6 +146,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         addItemHandler(new SimpleBlockBreakHandler() {
             @Override
             public void onBlockBreak(@Nonnull Block b) {
+                cleanupCaches(b.getLocation());
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(b.getLocation());
                 if (blockMenu == null) return;
 
@@ -292,6 +294,7 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
     public void setDirection(BlockMenu blockMenu, BlockFace blockFace) {
         SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), blockFace);
         StorageCacheUtils.setData(blockMenu.getBlock().getLocation(), dataKey, blockFace.name());
+        GUI_FINGERPRINTS.remove(blockMenu.getLocation());
 
         NetworkInfo networkInfo = SlimeAEPlugin.getNetworkData()
                 .getNetworkInfo(blockMenu.getBlock().getLocation());
@@ -302,11 +305,12 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     @ParametersAreNonnullByDefault
     public BlockFace getDirection(BlockMenu blockMenu) {
-        if (SELECTED_DIRECTION_MAP.containsKey(blockMenu.getLocation()))
-            return SELECTED_DIRECTION_MAP.get(blockMenu.getLocation());
+        BlockFace cached = SELECTED_DIRECTION_MAP.get(blockMenu.getLocation());
+        if (cached != null) return cached;
         String blockFace = StorageCacheUtils.getData(blockMenu.getLocation(), dataKey);
-        if (blockFace == null) return BlockFace.SELF;
-        return BlockFace.valueOf(blockFace);
+        BlockFace dir = (blockFace != null) ? BlockFace.valueOf(blockFace) : BlockFace.SELF;
+        SELECTED_DIRECTION_MAP.put(blockMenu.getLocation().clone(), dir);
+        return dir;
     }
 
     private void openDirection(Player player, BlockMenu blockMenu, BlockFace blockFace) {
@@ -326,6 +330,25 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         }
     }
 
+    private static long computeSlotFingerprint(Block neighbor, boolean isActive) {
+        int materialOrd = neighbor.getType().ordinal();
+        SlimefunItem sfItem = StorageCacheUtils.getSfItem(neighbor.getLocation());
+        int sfHash = (sfItem != null) ? sfItem.getId().hashCode() : 0;
+        return ((long) materialOrd << 33) | ((long) (isActive ? 1 : 0) << 32) | (sfHash & 0xFFFFFFFFL);
+    }
+
+    protected int getSlotForFace(BlockFace face) {
+        return switch (face) {
+            case NORTH -> getNorthSlot();
+            case SOUTH -> getSouthSlot();
+            case EAST -> getEastSlot();
+            case WEST -> getWestSlot();
+            case UP -> getUpSlot();
+            case DOWN -> getDownSlot();
+            default -> throw new IllegalStateException("Unexpected face: " + face);
+        };
+    }
+
     void updateGui(SlimefunBlockData data) {
         BlockMenu blockMenu = data.getBlockMenu();
         if (blockMenu == null || !blockMenu.hasViewer()) {
@@ -339,44 +362,36 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
             direction = BlockFace.SELF;
         }
 
-        for (BlockFace blockFace : FACES) {
-            final Block block = blockMenu.getBlock().getRelative(blockFace);
-            final SlimefunItem slimefunItem = StorageCacheUtils.getSfItem(block.getLocation());
-            if (slimefunItem != null) {
-                switch (blockFace) {
-                    case NORTH -> blockMenu.replaceExistingItem(
-                            getNorthSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    case SOUTH -> blockMenu.replaceExistingItem(
-                            getSouthSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    case EAST -> blockMenu.replaceExistingItem(
-                            getEastSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    case WEST -> blockMenu.replaceExistingItem(
-                            getWestSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    case UP -> blockMenu.replaceExistingItem(
-                            getUpSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    case DOWN -> blockMenu.replaceExistingItem(
-                            getDownSlot(), getDirectionalSlotPane(blockFace, slimefunItem, blockFace == direction));
-                    default -> throw new IllegalStateException("Unexpected value: " + blockFace);
-                }
-            } else {
-                final Material material = block.getType();
-                switch (blockFace) {
-                    case NORTH -> blockMenu.replaceExistingItem(
-                            getNorthSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    case SOUTH -> blockMenu.replaceExistingItem(
-                            getSouthSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    case EAST -> blockMenu.replaceExistingItem(
-                            getEastSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    case WEST -> blockMenu.replaceExistingItem(
-                            getWestSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    case UP -> blockMenu.replaceExistingItem(
-                            getUpSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    case DOWN -> blockMenu.replaceExistingItem(
-                            getDownSlot(), getDirectionalSlotPane(blockFace, material, blockFace == direction));
-                    default -> throw new IllegalStateException("Unexpected value: " + blockFace);
-                }
+        Location loc = blockMenu.getLocation();
+        long[] oldFingerprints = GUI_FINGERPRINTS.get(loc);
+        long[] newFingerprints = new long[6];
+        boolean needsUpdate = (oldFingerprints == null);
+
+        for (int i = 0; i < FACES.length; i++) {
+            BlockFace face = FACES[i];
+            Block neighbor = blockMenu.getBlock().getRelative(face);
+            boolean isActive = (face == direction);
+            newFingerprints[i] = computeSlotFingerprint(neighbor, isActive);
+            if (!needsUpdate && newFingerprints[i] != oldFingerprints[i]) {
+                needsUpdate = true;
             }
         }
+
+        if (!needsUpdate) return;
+
+        for (int i = 0; i < FACES.length; i++) {
+            if (oldFingerprints != null && newFingerprints[i] == oldFingerprints[i]) continue;
+            BlockFace face = FACES[i];
+            Block neighbor = blockMenu.getBlock().getRelative(face);
+            boolean isActive = (face == direction);
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(neighbor.getLocation());
+            ItemStack displayItem = (sfItem != null)
+                    ? getDirectionalSlotPane(face, sfItem, isActive)
+                    : getDirectionalSlotPane(face, neighbor.getType(), isActive);
+            blockMenu.replaceExistingItem(getSlotForFace(face), displayItem);
+        }
+
+        GUI_FINGERPRINTS.put(loc, newFingerprints);
     }
 
     protected @Nullable int[] getOtherBorderSlots() {
@@ -389,10 +404,24 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
 
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        if (data.getBlockMenu().hasViewer()) updateGui(data);
+        BlockMenu blockMenu = data.getBlockMenu();
+        if (blockMenu == null) return;
 
-        tickCards(block, item, data);
-        onMEBusTick(block, item, data);
+        int totalMultiplier = computeAccelerationMultiplier(block, item, data);
+
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        BlockFace dir = getDirection(blockMenu);
+
+        BusTickContext context = new BusTickContext.Builder()
+                .block(block)
+                .blockMenu(blockMenu)
+                .networkInfo(info)
+                .direction(dir)
+                .tickMultiplier(totalMultiplier)
+                .build();
+
+        if (blockMenu.hasViewer()) updateGui(data);
+        onMEBusTick(block, item, data, context);
     }
 
     @Override
@@ -400,7 +429,16 @@ public abstract class MEBus extends TickingBlock implements IMEObject, Inventory
         return new int[] {45, 46, 47};
     }
 
-    public abstract void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data);
+    public abstract void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data, BusTickContext context);
+
+    @Deprecated
+    public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {}
+
+    protected static void cleanupCaches(@Nonnull Location loc) {
+        SELECTED_DIRECTION_MAP.remove(loc);
+        GUI_FINGERPRINTS.remove(loc);
+        ICardHolder.cache.remove(loc);
+    }
 
     @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}

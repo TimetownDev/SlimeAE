@@ -2,11 +2,13 @@ package me.ddggdd135.slimeae.api.database.v3;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Nonnull;
 
 public class DirtyTracker {
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Long, DirtyEntry>> dirtyMap = new ConcurrentHashMap<>();
     private volatile Map<UUID, Map<Long, DirtyEntry>> pendingFlush = null;
+    private final ReentrantLock flushLock = new ReentrantLock();
 
     public record DirtyEntry(char op, long newAmount, long timestamp) {}
 
@@ -22,27 +24,33 @@ public class DirtyTracker {
     }
 
     public List<JournalRow> drainPhase1() {
-        Map<UUID, Map<Long, DirtyEntry>> snapshot;
-        synchronized (this) {
+        flushLock.lock();
+        try {
             if (dirtyMap.isEmpty()) return Collections.emptyList();
-            snapshot = new HashMap<>();
+            Map<UUID, Map<Long, DirtyEntry>> snapshot = new HashMap<>();
             for (var entry : dirtyMap.entrySet()) {
                 snapshot.put(entry.getKey(), new HashMap<>(entry.getValue()));
             }
             dirtyMap.clear();
             pendingFlush = snapshot;
+            return toJournalRows(snapshot);
+        } finally {
+            flushLock.unlock();
         }
-        return toJournalRows(snapshot);
     }
 
     public void commitFlush() {
-        synchronized (this) {
+        flushLock.lock();
+        try {
             pendingFlush = null;
+        } finally {
+            flushLock.unlock();
         }
     }
 
     public void rollbackFlush() {
-        synchronized (this) {
+        flushLock.lock();
+        try {
             if (pendingFlush == null) return;
             for (var cellEntry : pendingFlush.entrySet()) {
                 UUID cellUUID = cellEntry.getKey();
@@ -56,6 +64,8 @@ public class DirtyTracker {
                 }
             }
             pendingFlush = null;
+        } finally {
+            flushLock.unlock();
         }
     }
 
@@ -64,10 +74,13 @@ public class DirtyTracker {
     }
 
     public List<JournalRow> drainCell(UUID cellUUID) {
-        synchronized (this) {
+        flushLock.lock();
+        try {
             ConcurrentHashMap<Long, DirtyEntry> cellMap = dirtyMap.remove(cellUUID);
             if (cellMap == null) return Collections.emptyList();
             return toJournalRows(Map.of(cellUUID, new HashMap<>(cellMap)));
+        } finally {
+            flushLock.unlock();
         }
     }
 

@@ -188,11 +188,14 @@ public class Pattern extends SlimefunItem {
 
     @Nullable private static ItemStack compactItemStack(@Nullable ItemStack item) {
         if (item == null || item.getType().isAir()) return item;
-        SlimefunItem sfItem = SlimefunItem.getByItem(item);
-        if (sfItem != null) {
-            ItemStack canonical = sfItem.getItem().clone();
-            canonical.setAmount(item.getAmount());
-            return canonical;
+        String sfId = me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(item);
+        if (sfId != null) {
+            SlimefunItem sfItem = SlimefunItem.getById(sfId);
+            if (sfItem != null) {
+                ItemStack canonical = sfItem.getItem().clone();
+                canonical.setAmount(item.getAmount());
+                return canonical;
+            }
         }
         return item;
     }

@@ -68,9 +68,9 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
     public void update(MEStorageCellStorageData data) {
         Map<ItemStack, Long> snapshot;
         try {
-            synchronized (data.getStorage()) {
-                snapshot = new LinkedHashMap<>(data.getStorage());
-            }
+            // 无需 synchronized：ItemHashMap 在快照时的短暂不一致是可接受的，
+            // 因为 dirtyTracker 持有精确的增量数据，下次 flush 会修正
+            snapshot = new LinkedHashMap<>(data.getStorage());
         } catch (Exception e) {
             logger.log(Level.WARNING, "无法快照存储元件数据 " + data.getUuid() + ": " + e.getMessage(), e);
             return;

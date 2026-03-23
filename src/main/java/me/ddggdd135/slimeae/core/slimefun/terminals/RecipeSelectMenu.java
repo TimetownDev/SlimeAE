@@ -1,6 +1,5 @@
 package me.ddggdd135.slimeae.core.slimefun.terminals;
 
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
@@ -133,7 +132,8 @@ public final class RecipeSelectMenu {
             @Nonnull ItemStack[] trimmed,
             @Nonnull CraftType type,
             @Nonnull List<CraftingRecipe> matches) {
-        boolean hasSlimefunItem = Arrays.stream(trimmed).anyMatch(x -> SlimefunItem.getByItem(x) != null);
+        boolean hasSlimefunItem =
+                Arrays.stream(trimmed).anyMatch(x -> me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(x) != null);
         if (hasSlimefunItem) return;
 
         if (type == CraftType.VANILLA_CRAFTING_TABLE) {

@@ -168,7 +168,9 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
+        if (in == null
+                || in.getType().isAir()
+                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
 
         CraftType selectedType = getSelectedCraftType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -251,7 +253,9 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
+        if (in == null
+                || in.getType().isAir()
+                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
         CraftingRecipe recipe = RecipeUtils.getRecipe(clickedItem);
         if (recipe == null) return;
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();

@@ -2,6 +2,7 @@ package me.ddggdd135.slimeae.api.items;
 
 import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -28,8 +29,8 @@ public class StorageCollection implements IStorage {
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
-        this.takeCache = new HashMap<>();
-        this.pushCache = new HashMap<>();
+        this.takeCache = new ConcurrentHashMap<>();
+        this.pushCache = new ConcurrentHashMap<>();
         this.notIncluded = new ItemHashSet();
         for (IStorage storage : storages) {
             addStorage(storage);
@@ -184,44 +185,89 @@ public class StorageCollection implements IStorage {
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         ItemStorage found = new ItemStorage();
 
-        ItemHashMap<Long> rest = new ItemHashMap<>();
-        // init rest
-        for (ItemRequest request : requests) {
-            if (notIncluded.contains(request.getKey())) continue;
-
-            long amount = rest.getOrDefault(request.getKey(), 0L);
-            amount += request.getAmount();
-            rest.putKey(request.getKey(), amount);
+        long[] remaining = new long[requests.length];
+        for (int i = 0; i < requests.length; i++) {
+            remaining[i] = notIncluded.contains(requests[i].getKey()) ? 0 : requests[i].getAmount();
         }
-        ItemUtils.trim(rest);
-        for (Map.Entry<ItemKey, Long> entry : rest.keyEntrySet()) {
-            if (takeCache.containsKey(entry.getKey())) {
-                IStorage storage = takeCache.get(entry.getKey().getType());
-                ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-                found.addItem(itemStacks.getStorageUnsafe());
+
+        Map<IStorage, List<int[]>> cacheGroups = new HashMap<>();
+        for (int i = 0; i < requests.length; i++) {
+            if (remaining[i] <= 0) continue;
+            IStorage cached = takeCache.get(requests[i].getKey().getType());
+            if (cached == null) continue;
+            cacheGroups.computeIfAbsent(cached, k -> new ArrayList<>()).add(new int[] {i});
+        }
+        for (Map.Entry<IStorage, List<int[]>> group : cacheGroups.entrySet()) {
+            List<int[]> idxList = group.getValue();
+            ItemRequest[] subReqs = new ItemRequest[idxList.size()];
+            for (int j = 0; j < idxList.size(); j++) {
+                int idx = idxList.get(j)[0];
+                subReqs[j] = new ItemRequest(requests[idx].getKey(), remaining[idx]);
             }
-        }
-
-        rest = ItemUtils.takeItems(rest, found.getStorageUnsafe());
-        ItemUtils.trim(rest);
-        if (rest.isEmpty()) return found;
-
-        for (IStorage storage : storages) {
-            ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-            for (ItemKey key : itemStacks.getStorageUnsafe().sourceKeySet()) {
-                ItemStack itemStack = key.getItemStack();
-                if (itemStack != null && !itemStack.getType().isAir()) {
-                    takeCache.put(key.getType(), storage);
+            ItemStorage result = group.getKey().takeItem(subReqs);
+            ItemHashMap<Long> resultMap = result.getStorageUnsafe();
+            for (int j = 0; j < idxList.size(); j++) {
+                int idx = idxList.get(j)[0];
+                long takenAmount = resultMap.getOrDefault(requests[idx].getKey(), 0L);
+                if (takenAmount > 0) {
+                    found.addItem(requests[idx].getKey(), takenAmount);
+                    remaining[idx] -= takenAmount;
                 }
             }
-
-            found.addItem(itemStacks.getStorageUnsafe());
-            rest = ItemUtils.takeItems(rest, itemStacks.getStorageUnsafe());
-            ItemUtils.trim(rest);
-            if (rest.keySet().isEmpty()) break;
         }
-        notIncluded.addAll(rest.sourceKeySet());
-        // 性能优化：使用增量更新而非完全重建缓存
+
+        boolean allSatisfied = true;
+        for (long r : remaining) {
+            if (r > 0) {
+                allSatisfied = false;
+                break;
+            }
+        }
+
+        if (!allSatisfied) {
+            for (IStorage storage : storages) {
+                List<ItemRequest> subRequests = new ArrayList<>();
+                int[] indices = new int[requests.length];
+                int subCount = 0;
+                for (int i = 0; i < requests.length; i++) {
+                    if (remaining[i] > 0) {
+                        indices[subCount] = i;
+                        subRequests.add(new ItemRequest(requests[i].getKey(), remaining[i]));
+                        subCount++;
+                    }
+                }
+                if (subRequests.isEmpty()) break;
+
+                ItemStorage result = storage.takeItem(subRequests.toArray(new ItemRequest[0]));
+                ItemHashMap<Long> resultStorage = result.getStorageUnsafe();
+
+                for (int j = 0; j < subCount; j++) {
+                    int idx = indices[j];
+                    Long takenAmount = resultStorage.getKey(requests[idx].getKey());
+                    if (takenAmount != null && takenAmount > 0) {
+                        found.addItem(requests[idx].getKey(), takenAmount);
+                        remaining[idx] -= takenAmount;
+                        takeCache.put(requests[idx].getKey().getType(), storage);
+                    }
+                }
+
+                allSatisfied = true;
+                for (long r : remaining) {
+                    if (r > 0) {
+                        allSatisfied = false;
+                        break;
+                    }
+                }
+                if (allSatisfied) break;
+            }
+        }
+
+        for (int i = 0; i < requests.length; i++) {
+            if (remaining[i] > 0) {
+                notIncluded.add(requests[i].getKey());
+            }
+        }
+
         ItemHashMap<Long> foundStorage = found.getStorageUnsafe();
         for (ItemKey key : foundStorage.sourceKeySet()) {
             Long takenAmount = foundStorage.getKey(key);

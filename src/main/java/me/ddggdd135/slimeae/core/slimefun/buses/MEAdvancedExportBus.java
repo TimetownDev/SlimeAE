@@ -7,28 +7,22 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
-import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import me.ddggdd135.guguslimefunlib.items.ItemKey;
-import me.ddggdd135.slimeae.SlimeAEPlugin;
+import me.ddggdd135.slimeae.api.abstracts.BusTickContext;
 import me.ddggdd135.slimeae.api.abstracts.MEAdvancedBus;
 import me.ddggdd135.slimeae.api.blockdata.MEAdvancedExportBusData;
 import me.ddggdd135.slimeae.api.blockdata.MEAdvancedExportBusDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.IBlockData;
 import me.ddggdd135.slimeae.api.interfaces.IBlockDataAdapter;
 import me.ddggdd135.slimeae.api.interfaces.ISettingSlotHolder;
-import me.ddggdd135.slimeae.api.interfaces.IStorage;
-import me.ddggdd135.slimeae.api.items.ItemRequest;
+import me.ddggdd135.slimeae.api.operations.ExportOperation;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -49,6 +43,8 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
             @Override
             public void onBlockBreak(@Nonnull Block b) {
                 Location loc = b.getLocation();
+                cleanupCaches(loc);
+                ISettingSlotHolder.cache.remove(loc);
                 StorageCacheUtils.removeData(loc, DATA_KEY_DIRECTIONS);
                 MULTI_DIRECTION_MAP.remove(loc);
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(loc);
@@ -68,68 +64,15 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
     @Override
     public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
 
-    public void onExport(Block block) {
-        BlockMenu blockMenu = StorageCacheUtils.getMenu(block.getLocation());
-        if (blockMenu == null) return;
-
-        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
-        if (info == null) return;
-
-        Set<BlockFace> directions = getDirections(block.getLocation());
-        if (directions.isEmpty()) return;
-
-        IStorage networkStorage = info.getStorage();
-
-        for (BlockFace direction : directions) {
-            Block target = block.getRelative(direction);
-            BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
-            if (targetInv == null) continue;
-
-            if (!ISettingSlotHolder.cache.containsKey(block.getLocation()))
-                ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
-            List<Pair<ItemKey, Integer>> settings = ISettingSlotHolder.getCache(block.getLocation());
-            for (int i = 0; i < getSettingSlots().length; i++) {
-                Pair<ItemKey, Integer> setting = settings.get(i);
-
-                if (setting == null) {
-                    continue;
-                }
-
-                ItemStack itemStack = setting.getFirstValue().getItemStack();
-                if (itemStack == null || itemStack.getType().isAir()) continue;
-
-                int[] inputSlots = targetInv
-                        .getPreset()
-                        .getSlotsAccessedByItemTransport(targetInv, ItemTransportFlow.INSERT, itemStack);
-                if (inputSlots == null || inputSlots.length == 0) continue;
-
-                try {
-                    if (targetInv.fits(itemStack.asQuantity(setting.getSecondValue()), inputSlots)) {
-                        ItemStack[] taken = networkStorage
-                                .takeItem(new ItemRequest(setting.getFirstValue(), setting.getSecondValue()))
-                                .toItemStacks();
-                        for (ItemStack takenItem : taken) {
-                            if (takenItem == null || takenItem.getType().isAir()) continue;
-                            ItemStack remainder = targetInv.pushItem(takenItem, inputSlots);
-                            if (remainder != null && !remainder.getType().isAir()) {
-                                networkStorage.pushItem(remainder);
-                            }
-                        }
-                    }
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        }
-    }
-
     @Override
     public boolean isSynchronized() {
         return false;
     }
 
     @Override
-    public void onMEBusTick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        onExport(data.getLocation().getBlock());
+    public void onMEBusTick(
+            @Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data, BusTickContext context) {
+        ExportOperation.executeMultiDirection(context, block, this, false);
     }
 
     @Override
@@ -174,6 +117,7 @@ public class MEAdvancedExportBus extends MEAdvancedBus implements ISettingSlotHo
         super.newInstance(menu, block);
 
         initSettingSlots(menu);
+        ISettingSlotHolder.updateCache(block, this, StorageCacheUtils.getBlock(block.getLocation()));
     }
 
     @Override

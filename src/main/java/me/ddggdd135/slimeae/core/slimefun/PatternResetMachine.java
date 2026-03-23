@@ -209,8 +209,7 @@ public class PatternResetMachine extends SlimefunItem implements InventoryBlock 
     }
 
     private static boolean isPattern(ItemStack item) {
-        SlimefunItem sfItem = SlimefunItem.getByItem(item);
-        return sfItem instanceof Pattern;
+        return me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(item, Pattern.class) != null;
     }
 
     @Nonnull

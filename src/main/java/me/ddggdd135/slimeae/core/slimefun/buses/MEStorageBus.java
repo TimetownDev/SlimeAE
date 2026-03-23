@@ -79,7 +79,12 @@ public class MEStorageBus extends MEBus implements IMEStorageObject {
     }
 
     @Override
-    public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {
-        // ME存储总线不需要每tick处理，保持空实现
-    }
+    public void onMEBusTick(Block block, SlimefunItem item, SlimefunBlockData data) {}
+
+    @Override
+    public void onMEBusTick(
+            Block block,
+            SlimefunItem item,
+            SlimefunBlockData data,
+            me.ddggdd135.slimeae.api.abstracts.BusTickContext context) {}
 }

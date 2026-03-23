@@ -273,5 +273,14 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     @Override
+    public void onMEBusTick(
+            Block block,
+            SlimefunItem item,
+            SlimefunBlockData data,
+            me.ddggdd135.slimeae.api.abstracts.BusTickContext context) {
+        checkAndCleanup(block.getLocation());
+    }
+
+    @Override
     public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }
