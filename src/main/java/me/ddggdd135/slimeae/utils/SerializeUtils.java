@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTItem;
@@ -12,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 public class SerializeUtils {
     @Nonnull
@@ -24,7 +24,7 @@ public class SerializeUtils {
         var stream = new ByteArrayOutputStream();
         try (var bs = new BukkitObjectOutputStream(stream)) {
             bs.writeObject(object);
-            return Base64Coder.encodeLines(stream.toByteArray());
+            return Base64.getMimeEncoder().encodeToString(stream.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -50,7 +50,7 @@ public class SerializeUtils {
             return null;
         }
 
-        var stream = new ByteArrayInputStream(Base64Coder.decodeLines(base64Str));
+        var stream = new ByteArrayInputStream(Base64.getMimeDecoder().decode(base64Str));
         try (var bs = new BukkitObjectInputStream(stream)) {
             return bs.readObject();
         } catch (IOException | ClassNotFoundException e) {

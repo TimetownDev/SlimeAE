@@ -3,6 +3,7 @@ package me.ddggdd135.slimeae.api.items;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class MEStorageCellCache implements IStorage {
     private static final Map<UUID, MEStorageCellCache> cache = new ConcurrentHashMap<>();
+    private final ReentrantLock cellLock = new ReentrantLock();
     private final MEStorageCellStorageData storageData;
     private final MEStorageCellFilterData filterData;
 
@@ -83,69 +85,79 @@ public class MEStorageCellCache implements IStorage {
 
         if (storages.containsKey(key) && storages.getKey(key) == 0) {
             storages.removeKey(key);
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, 0);
         }
     }
 
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        ItemStack itemStack = itemStackCache.getItemStack();
-        ItemKey key = itemStackCache.getItemKey();
-        ItemHashMap<Long> storages = storageData.getStorage();
-        long stored = storageData.getStored();
-        long size = storageData.getSize();
+        cellLock.lock();
+        try {
+            ItemStack itemStack = itemStackCache.getItemStack();
+            ItemKey key = itemStackCache.getItemKey();
+            ItemHashMap<Long> storages = storageData.getStorage();
+            long stored = storageData.getStored();
+            long size = storageData.getSize();
 
-        if (storages instanceof CreativeItemMap) {
-            itemStack.setAmount(0);
-            return;
+            if (storages instanceof CreativeItemMap) {
+                itemStack.setAmount(0);
+                return;
+            }
+
+            if (!filterData.matches(key)) return;
+
+            if (SlimefunItem.getById(itemStackCache.getItemKey().getType().getId()) instanceof MEItemStorageCell
+                    || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+
+            long amount = storages.getOrDefault(key, 0L);
+            long toAdd;
+            if (stored + itemStack.getAmount() > size) toAdd = size - stored;
+            else toAdd = itemStack.getAmount();
+            stored += toAdd;
+            storageData.setStored(stored);
+            storages.putKey(key, amount + toAdd);
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, amount + toAdd);
+            itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
+            trim(key);
+        } finally {
+            cellLock.unlock();
         }
-
-        if (!filterData.matches(key)) return;
-
-        if (SlimefunItem.getById(itemStackCache.getItemKey().getType().getId()) instanceof MEItemStorageCell
-                || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
-
-        long amount = storages.getOrDefault(key, 0L);
-        long toAdd;
-        if (stored + itemStack.getAmount() > size) toAdd = size - stored;
-        else toAdd = itemStack.getAmount();
-        stored += toAdd;
-        storageData.setStored(stored);
-        storages.putKey(key, amount + toAdd);
-        SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
-        itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
-        trim(key);
     }
 
     @Override
     public void pushItem(@Nonnull ItemInfo itemInfo) {
-        ItemKey key = itemInfo.getItemKey();
-        ItemHashMap<Long> storages = storageData.getStorage();
-        long stored = storageData.getStored();
-        long size = storageData.getSize();
+        cellLock.lock();
+        try {
+            ItemKey key = itemInfo.getItemKey();
+            ItemHashMap<Long> storages = storageData.getStorage();
+            long stored = storageData.getStored();
+            long size = storageData.getSize();
 
-        if (storages instanceof CreativeItemMap) {
-            itemInfo.setAmount(0);
-            return;
+            if (storages instanceof CreativeItemMap) {
+                itemInfo.setAmount(0);
+                return;
+            }
+
+            ItemStack itemStack = key.getItemStack();
+
+            if (!filterData.matches(key)) return;
+
+            if (SlimefunItem.getById(key.getType().getId()) instanceof MEItemStorageCell
+                    || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
+
+            long amount = storages.getOrDefault(key, 0L);
+            long toAdd;
+            if (stored + itemInfo.getAmount() > size) toAdd = size - stored;
+            else toAdd = itemInfo.getAmount();
+            stored += toAdd;
+            storageData.setStored(stored);
+            storages.putKey(key, amount + toAdd);
+            itemInfo.setAmount(itemInfo.getAmount() - toAdd);
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, amount + toAdd);
+            trim(key);
+        } finally {
+            cellLock.unlock();
         }
-
-        ItemStack itemStack = key.getItemStack();
-
-        if (!filterData.matches(key)) return;
-
-        if (SlimefunItem.getById(key.getType().getId()) instanceof MEItemStorageCell
-                || (ShulkerBoxUtils.isShulkerBox(itemStack) && !ShulkerBoxUtils.isEmpty(itemStack))) return;
-
-        long amount = storages.getOrDefault(key, 0L);
-        long toAdd;
-        if (stored + itemInfo.getAmount() > size) toAdd = size - stored;
-        else toAdd = itemInfo.getAmount();
-        stored += toAdd;
-        storageData.setStored(stored);
-        storages.putKey(key, amount + toAdd);
-        itemInfo.setAmount(itemInfo.getAmount() - toAdd);
-        SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
-        trim(key);
     }
 
     @Override
@@ -164,34 +176,41 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> storages = storageData.getStorage();
-        long stored = storageData.getStored();
+        cellLock.lock();
+        try {
+            ItemHashMap<Long> storages = storageData.getStorage();
+            long stored = storageData.getStored();
 
-        if (storages instanceof CreativeItemMap) {
-            return new ItemStorage(ItemUtils.getAmounts(requests));
-        }
-
-        ItemStorage itemStacks = new ItemStorage();
-        for (ItemRequest request : requests) {
-            if (storages.containsKey(request.getKey())) {
-                long amount = storages.getKey(request.getKey());
-                if (amount >= request.getAmount()) {
-                    itemStacks.addItem(request.getKey(), request.getAmount());
-                    stored -= request.getAmount();
-                    storages.putKey(request.getKey(), amount - request.getAmount());
-                } else if (amount > 0) {
-                    itemStacks.addItem(request.getKey(), amount);
-                    stored -= amount;
-                    storages.removeKey(request.getKey());
-                }
-
-                SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData);
-                trim(request.getKey());
+            if (storages instanceof CreativeItemMap) {
+                return new ItemStorage(ItemUtils.getAmounts(requests));
             }
-        }
-        storageData.setStored(stored);
 
-        return itemStacks;
+            ItemStorage itemStacks = new ItemStorage();
+            for (ItemRequest request : requests) {
+                if (storages.containsKey(request.getKey())) {
+                    long amount = storages.getKey(request.getKey());
+                    if (amount >= request.getAmount()) {
+                        itemStacks.addItem(request.getKey(), request.getAmount());
+                        stored -= request.getAmount();
+                        storages.putKey(request.getKey(), amount - request.getAmount());
+                    } else if (amount > 0) {
+                        itemStacks.addItem(request.getKey(), amount);
+                        stored -= amount;
+                        storages.removeKey(request.getKey());
+                    }
+
+                    long remaining = storages.getOrDefault(request.getKey(), 0L);
+                    SlimeAEPlugin.getStorageCellStorageDataController()
+                            .markDirty(storageData, request.getKey(), remaining);
+                    trim(request.getKey());
+                }
+            }
+            storageData.setStored(stored);
+
+            return itemStacks;
+        } finally {
+            cellLock.unlock();
+        }
     }
 
     @Nonnull

@@ -6,9 +6,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.api.abstracts.MEChainedBus;
-import me.ddggdd135.slimeae.api.database.ReskinDataController;
-import me.ddggdd135.slimeae.api.database.StorageCellFilterDataController;
-import me.ddggdd135.slimeae.api.database.StorageCellStorageDataController;
+import me.ddggdd135.slimeae.api.database.v3.StorageConfig;
+import me.ddggdd135.slimeae.api.database.v3.V3DatabaseManager;
+import me.ddggdd135.slimeae.api.database.v3.V3FilterController;
+import me.ddggdd135.slimeae.api.database.v3.V3ReskinController;
+import me.ddggdd135.slimeae.api.database.v3.V3StorageCellController;
 import me.ddggdd135.slimeae.api.reskin.MaterialValidator;
 import me.ddggdd135.slimeae.core.NetworkData;
 import me.ddggdd135.slimeae.core.NetworkInfo;
@@ -53,9 +55,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     private LogiTechIntegration logiTechIntegration;
     private FinalTechIntegration finalTechIntegration;
 
-    private StorageCellStorageDataController storageCellStorageDataController;
-    private StorageCellFilterDataController storageCellFilterDataController;
-    private ReskinDataController reskinDataController;
+    private V3DatabaseManager v3DatabaseManager;
 
     private NetworkTickerTask networkTicker;
     private NetworkTimeConsumingTask networkTimeConsumingTask;
@@ -82,10 +82,6 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         logiTechIntegration = new LogiTechIntegration();
         finalTechIntegration = new FinalTechIntegration();
 
-        storageCellStorageDataController = new StorageCellStorageDataController();
-        storageCellFilterDataController = new StorageCellFilterDataController();
-        reskinDataController = new ReskinDataController();
-
         networkTicker = new NetworkTickerTask();
         networkTimeConsumingTask = new NetworkTimeConsumingTask();
         dataSavingTask = new DataSavingTask();
@@ -107,6 +103,9 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         Bukkit.getConsoleSender().sendMessage("############################################");
 
         reloadConfig0();
+
+        StorageConfig storageConfig = new StorageConfig(getConfig());
+        v3DatabaseManager = new V3DatabaseManager(storageConfig);
 
         if (getConfig().getBoolean("auto-update")) {
             tryUpdate();
@@ -137,9 +136,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         if (logiTechIntegration.isLoaded()) getLogger().info("逻辑工艺已接入");
         if (finalTechIntegration.isLoaded()) getLogger().info("乱序技艺已接入");
 
-        storageCellStorageDataController.init();
-        storageCellFilterDataController.init();
-        reskinDataController.init();
+        v3DatabaseManager.init();
 
         Bukkit.getPluginManager().registerEvents(new ReskinListener(), this);
 
@@ -158,6 +155,14 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
         slimeAECommand.addSubCommand(new SavedataCommand());
         slimeAECommand.addSubCommand(new UuidCommand());
         slimeAECommand.addSubCommand(new ViewitemsCommand());
+        slimeAECommand.addSubCommand(new MigrateCommand());
+        slimeAECommand.addSubCommand(new RollbackCommand());
+        slimeAECommand.addSubCommand(new RepairCommand());
+        slimeAECommand.addSubCommand(new ExportCommand());
+        slimeAECommand.addSubCommand(new ImportCommand());
+        slimeAECommand.addSubCommand(new ExportAllCommand());
+        slimeAECommand.addSubCommand(new ImportAllCommand());
+        slimeAECommand.addSubCommand(new StatusCommand());
 
         getCommand("SlimeAE").setExecutor(slimeAECommand);
         getCommand("SlimeAE").setTabCompleter(slimeAECommand);
@@ -190,9 +195,7 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
             waitCount++;
         }
 
-        storageCellStorageDataController.shutdown();
-        storageCellFilterDataController.shutdown();
-        reskinDataController.shutdown();
+        v3DatabaseManager.shutdown();
 
         SlimefunItemUtils.unregisterItemGroups(this);
         SlimefunItemUtils.unregisterAllItems(this);
@@ -322,13 +325,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
     }
 
     @Nonnull
-    public static StorageCellStorageDataController getStorageCellStorageDataController() {
-        return getInstance().storageCellStorageDataController;
+    public static V3StorageCellController getStorageCellStorageDataController() {
+        return getInstance().v3DatabaseManager.getStorageController();
     }
 
     @Nonnull
-    public static StorageCellFilterDataController getStorageCellFilterDataController() {
-        return getInstance().storageCellFilterDataController;
+    public static V3FilterController getStorageCellFilterDataController() {
+        return getInstance().v3DatabaseManager.getFilterController();
     }
 
     /**
@@ -336,8 +339,13 @@ public final class SlimeAEPlugin extends JavaPlugin implements SlimefunAddon {
      * @return 材质转换数据控制器实例
      */
     @Nonnull
-    public static ReskinDataController getReskinDataController() {
-        return getInstance().reskinDataController;
+    public static V3ReskinController getReskinDataController() {
+        return getInstance().v3DatabaseManager.getReskinController();
+    }
+
+    @Nonnull
+    public static V3DatabaseManager getV3DatabaseManager() {
+        return getInstance().v3DatabaseManager;
     }
 
     @Nonnull

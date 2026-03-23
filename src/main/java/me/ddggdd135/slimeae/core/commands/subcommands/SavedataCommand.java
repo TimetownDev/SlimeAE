@@ -36,8 +36,8 @@ public class SavedataCommand extends SubCommand {
             return false;
         }
 
-        SlimeAEPlugin.getStorageCellStorageDataController().saveAllAsync();
-        SlimeAEPlugin.getStorageCellFilterDataController().saveAllAsync();
+        SlimeAEPlugin.getV3DatabaseManager().saveAllAsync();
+        SlimeAEPlugin.getReskinDataController().saveAllAsync();
         commandSender.sendMessage(CMIChatColor.translate("&e成功保存ME存储元件数据"));
 
         return false;

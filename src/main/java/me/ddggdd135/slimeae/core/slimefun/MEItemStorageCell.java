@@ -66,10 +66,9 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
     public static void saveStorage(@Nonnull ItemStack itemStack) {
         if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
 
-        SlimeAEPlugin.getStorageCellStorageDataController()
-                .updateAsync(getStorage(itemStack).getStorageData());
-        SlimeAEPlugin.getStorageCellFilterDataController()
-                .updateAsync(getStorage(itemStack).getFilterData());
+        MEStorageCellCache cache = getStorage(itemStack);
+        SlimeAEPlugin.getStorageCellStorageDataController().markDirtyAll(cache.getStorageData());
+        SlimeAEPlugin.getStorageCellFilterDataController().markDirty(cache.getFilterData());
     }
 
     /**
