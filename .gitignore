@@ -37,3 +37,9 @@ dependency-reduced-pom.xml
 /LogiTech-master/
 /GuguSlimefunLib/
 /FinalTECH-Changed/
+
+# docs
+/docs/
+
+# reports
+report*.md

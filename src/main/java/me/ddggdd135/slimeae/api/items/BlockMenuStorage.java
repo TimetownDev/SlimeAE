@@ -75,7 +75,12 @@ public class BlockMenuStorage implements IStorage {
 
     @Override
     public @Nonnull ItemHashMap<Long> getStorageUnsafe() {
-        int[] slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(ItemTransportFlow.WITHDRAW);
+        int[] slots;
+        try {
+            slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, null);
+        } catch (IllegalArgumentException e) {
+            slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(ItemTransportFlow.WITHDRAW);
+        }
 
         return ItemUtils.getAmounts(
                 Arrays.stream(slots).mapToObj(blockMenu::getItemInSlot).toArray(ItemStack[]::new));

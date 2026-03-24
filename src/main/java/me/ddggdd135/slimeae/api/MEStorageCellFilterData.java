@@ -21,6 +21,8 @@ public class MEStorageCellFilterData {
     private boolean isReversed;
     private boolean isFuzzy;
 
+    public MEStorageCellFilterData() {}
+
     public MEStorageCellFilterData(@Nonnull ItemStack itemStack) {
         if (MEItemStorageCell.getSize(itemStack) == 0) throw new RuntimeException("ItemStack is not MEItemStorageCell");
 

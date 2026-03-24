@@ -30,6 +30,8 @@ public class NetworkTimeConsumingTask implements Runnable {
 
         run0();
 
+        if (halted) return;
+
         long elapsed = System.currentTimeMillis() - startTime;
         long nextDelay = Math.max(tickRate * 50L - elapsed, 0) / 50;
 

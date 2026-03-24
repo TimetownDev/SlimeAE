@@ -5,9 +5,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.core.items.MenuItems;
+import me.ddggdd135.slimeae.core.slimefun.cards.AccelerationCard;
 import me.ddggdd135.slimeae.utils.ItemUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
@@ -16,7 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public interface ICardHolder {
-    Map<Location, Map<Card, Integer>> cache = new HashMap<>();
+    Map<Location, Map<Card, Integer>> cache = new ConcurrentHashMap<>();
 
     static void updateCache(Block block, ICardHolder item, SlimefunBlockData data) {
         BlockMenu menu = data.getBlockMenu();
@@ -24,8 +26,8 @@ public interface ICardHolder {
         Map<Card, Integer> amount = new HashMap<>();
         for (int slot : item.getCardSlots()) {
             ItemStack itemStack = menu.getItemInSlot(slot);
-            SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-            if (slimefunItem instanceof Card card) {
+            Card card = ItemUtils.getSlimefunItemFast(itemStack, Card.class);
+            if (card != null) {
                 int a = amount.getOrDefault(card, 0);
                 a++;
                 amount.put(card, a);
@@ -54,6 +56,31 @@ public interface ICardHolder {
                 card.onTick(block, item, data);
             }
         }
+    }
+
+    default int computeAccelerationMultiplier(Block block, SlimefunItem item, SlimefunBlockData data) {
+        if (!(item instanceof ICardHolder iCardHolder)) return 1;
+
+        Map<Card, Integer> amount = cache.get(block.getLocation());
+        if (amount == null) {
+            updateCache(block, iCardHolder, data);
+            amount = cache.get(block.getLocation());
+            if (amount == null) return 1;
+        }
+
+        int totalMultiplier = 0;
+        for (Map.Entry<Card, Integer> entry : amount.entrySet()) {
+            Card card = entry.getKey();
+            int count = entry.getValue();
+            if (card instanceof AccelerationCard acc) {
+                totalMultiplier += acc.getAccelerationMultiplier() * count;
+            } else {
+                for (int j = 0; j < count; j++) {
+                    card.onTick(block, item, data);
+                }
+            }
+        }
+        return 1 + totalMultiplier;
     }
 
     default void initCardSlots(@Nonnull BlockMenu menu) {

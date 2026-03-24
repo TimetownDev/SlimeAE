@@ -79,7 +79,9 @@ public class Pattern extends SlimefunItem {
             }
 
             if (craftingRecipe != null) {
-                if (!craftingRecipe.getCraftType().isVanilla() && craftingRecipe.getCraftType() != CraftType.COOKING) {
+                if (craftingRecipe.getCraftType().isSmall()
+                        && !craftingRecipe.getCraftType().isVanilla()
+                        && craftingRecipe.getCraftType() != CraftType.COOKING) {
                     CraftingRecipe newRecipe =
                             RecipeUtils.getRecipe(craftingRecipe.getInput(), craftingRecipe.getOutput());
                     if (newRecipe == null) {
@@ -160,15 +162,41 @@ public class Pattern extends SlimefunItem {
 
         UUID uuid = UUID.randomUUID();
 
+        ItemStack[] compactInput = compactItemStacks(recipe.getInput());
+        ItemStack[] compactOutput = compactItemStacks(recipe.getOutput());
+
         NBT.modify(itemStack, x -> {
             if (x.hasTag(DEPRECATED_KEY)) x.removeKey(DEPRECATED_KEY);
             if (x.hasTag(RECIPE_KEY)) x.removeKey(RECIPE_KEY);
             ReadWriteNBT compound = x.getOrCreateCompound(RECIPE_KEY);
             compound.setString(CRAFTING_TYPE_KEY, recipe.getCraftType().name());
-            compound.setItemStackArray(INPUT_KEY, recipe.getInput());
-            compound.setItemStackArray(OUTPUT_KEY, recipe.getOutput());
+            compound.setItemStackArray(INPUT_KEY, compactInput);
+            compound.setItemStackArray(OUTPUT_KEY, compactOutput);
             x.setUUID(UUID_KEY, uuid);
         });
         cache.put(uuid, recipe);
+    }
+
+    @Nonnull
+    private static ItemStack[] compactItemStacks(@Nonnull ItemStack[] items) {
+        ItemStack[] result = new ItemStack[items.length];
+        for (int i = 0; i < items.length; i++) {
+            result[i] = compactItemStack(items[i]);
+        }
+        return result;
+    }
+
+    @Nullable private static ItemStack compactItemStack(@Nullable ItemStack item) {
+        if (item == null || item.getType().isAir()) return item;
+        String sfId = me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(item);
+        if (sfId != null) {
+            SlimefunItem sfItem = SlimefunItem.getById(sfId);
+            if (sfItem != null) {
+                ItemStack canonical = sfItem.getItem().clone();
+                canonical.setAmount(item.getAmount());
+                return canonical;
+            }
+        }
+        return item;
     }
 }

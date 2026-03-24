@@ -8,6 +8,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -24,7 +25,9 @@ public abstract class DatabaseController<TData> {
     protected ExecutorService writeExecutor;
     protected ExecutorService callbackExecutor;
     protected final Map<TData, Queue<Runnable>> scheduledWriteTasks;
+    protected final AtomicInteger activeWriteTasks = new AtomicInteger(0);
     protected final Logger logger;
+    protected volatile boolean shutdownInProgress = false;
 
     public DatabaseController(Class<TData> clazz) {
         this.clazz = clazz;
@@ -46,23 +49,54 @@ public abstract class DatabaseController<TData> {
 
     @OverridingMethodsMustInvokeSuper
     public void shutdown() {
+        shutdownInProgress = true;
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
+
+        writeExecutor.shutdown();
         try {
-            float totalTask = scheduledWriteTasks.size();
-            var pendingTask = scheduledWriteTasks.size();
-            while (pendingTask > 0) {
-                var doneTaskPercent = String.format("%.1f", (totalTask - pendingTask) / totalTask * 100);
-                logger.log(Level.INFO, "数据保存中，请稍候... 剩余 {0} 个任务 ({1}%)", new Object[] {pendingTask, doneTaskPercent});
+            int waitSeconds = 0;
+            while (activeWriteTasks.get() > 0) {
+                logger.log(Level.INFO, "数据保存中... 队列中还有: {0} 个", activeWriteTasks.get());
                 TimeUnit.SECONDS.sleep(1);
-                pendingTask = scheduledWriteTasks.size();
+                if (++waitSeconds >= 300) {
+                    logger.log(Level.WARNING, "写入任务超时 (300s), 剩余任务: {0}", activeWriteTasks.get());
+                    break;
+                }
             }
 
-            logger.info("数据保存完成.");
+            if (!writeExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                writeExecutor.shutdownNow();
+                writeExecutor.awaitTermination(5, TimeUnit.SECONDS);
+            }
         } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Exception thrown while saving data: ", e);
+            logger.log(Level.WARNING, "数据保存被中断", e);
+            writeExecutor.shutdownNow();
         }
-        writeExecutor.shutdownNow();
+
+        drainScheduledTasks();
+        logger.info("数据保存成功.");
+    }
+
+    private void drainScheduledTasks() {
+        Map<TData, Queue<Runnable>> remaining;
+        synchronized (scheduledWriteTasks) {
+            remaining = new HashMap<>(scheduledWriteTasks);
+            scheduledWriteTasks.clear();
+        }
+        if (remaining.isEmpty()) return;
+
+        logger.log(Level.INFO, "正在处理 {0} 个剩余的计划写入任务", remaining.size());
+        for (Queue<Runnable> tasks : remaining.values()) {
+            Runnable task;
+            while ((task = tasks.poll()) != null) {
+                try {
+                    task.run();
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "同步写入失败: " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     public void executeSql(String sql) {
@@ -105,32 +139,54 @@ public abstract class DatabaseController<TData> {
     }
 
     public void submitWriteTask(TData data, Runnable runnable) {
-        Queue<Runnable> queue;
-        synchronized (scheduledWriteTasks) {
-            if (scheduledWriteTasks.containsKey(data)) {
-                queue = scheduledWriteTasks.get(data);
-                queue.add(runnable);
-            } else {
-                queue = new ConcurrentLinkedQueue<>();
-                queue.add(runnable);
-                scheduledWriteTasks.put(data, queue);
-            }
+        if (shutdownInProgress) {
+            runSafely(runnable);
+            return;
         }
 
-        writeExecutor.submit(() -> {
-            Queue<Runnable> tasks;
-            synchronized (scheduledWriteTasks) {
-                tasks = scheduledWriteTasks.remove(data);
-            }
-            while (!tasks.isEmpty()) {
-                Runnable next = tasks.remove();
+        synchronized (scheduledWriteTasks) {
+            scheduledWriteTasks
+                    .computeIfAbsent(data, k -> new ConcurrentLinkedQueue<>())
+                    .add(runnable);
+        }
+
+        try {
+            writeExecutor.submit(() -> {
+                Queue<Runnable> tasks;
+                synchronized (scheduledWriteTasks) {
+                    tasks = scheduledWriteTasks.remove(data);
+                }
+                if (tasks == null) return;
+                activeWriteTasks.incrementAndGet();
                 try {
-                    next.run();
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, e.getMessage());
+                    Runnable next;
+                    while ((next = tasks.poll()) != null) {
+                        runSafely(next);
+                    }
+                } finally {
+                    activeWriteTasks.decrementAndGet();
+                }
+            });
+        } catch (RejectedExecutionException e) {
+            logger.log(Level.WARNING, "写入任务被拒绝，正在同步执行");
+            synchronized (scheduledWriteTasks) {
+                Queue<Runnable> tasks = scheduledWriteTasks.remove(data);
+                if (tasks != null) {
+                    Runnable next;
+                    while ((next = tasks.poll()) != null) {
+                        runSafely(next);
+                    }
                 }
             }
-        });
+        }
+    }
+
+    private void runSafely(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "写入任务失败: " + e.getMessage(), e);
+        }
     }
 
     public void cancelWriteTask(TData data) {

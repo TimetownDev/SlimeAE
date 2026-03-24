@@ -53,6 +53,7 @@ public abstract class MEAdvancedBus extends MEBus {
             @Override
             public void onBlockBreak(@Nonnull Block b) {
                 Location loc = b.getLocation();
+                cleanupCaches(loc);
                 StorageCacheUtils.removeData(loc, DATA_KEY_DIRECTIONS);
                 MULTI_DIRECTION_MAP.remove(loc);
                 BlockMenu blockMenu = StorageCacheUtils.getMenu(loc);
@@ -79,6 +80,7 @@ public abstract class MEAdvancedBus extends MEBus {
             directions.add(blockFace);
         }
         saveDirections(loc, directions);
+        GUI_FINGERPRINTS.remove(blockMenu.getLocation());
         updateGui(StorageCacheUtils.getBlock(loc));
     }
 
@@ -114,26 +116,47 @@ public abstract class MEAdvancedBus extends MEBus {
         updateGui(StorageCacheUtils.getBlock(loc));
     }
 
+    protected Set<BlockFace> ensureDirectionsCached(@Nonnull Location loc) {
+        Set<BlockFace> cached = MULTI_DIRECTION_MAP.get(loc);
+        if (cached != null) return cached;
+        Set<BlockFace> directions = new ConcurrentSkipListSet<>();
+        String dirData = StorageCacheUtils.getData(loc, DATA_KEY_DIRECTIONS);
+        if (dirData != null && !dirData.isEmpty()) {
+            for (String face : dirData.split(",")) {
+                if (face.trim().isEmpty()) continue;
+                directions.add(BlockFace.valueOf(face.trim()));
+            }
+        }
+        if (directions.isEmpty()) {
+            directions.add(BlockFace.SELF);
+        }
+        MULTI_DIRECTION_MAP.put(loc, directions);
+        return directions;
+    }
+
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
+        BlockMenu blockMenu = data.getBlockMenu();
+        if (blockMenu == null) return;
+
+        int totalMultiplier = computeAccelerationMultiplier(block, item, data);
+
         Location loc = block.getLocation();
-        if (!MULTI_DIRECTION_MAP.containsKey(loc)) {
-            // Set<BlockFace> directions = ConcurrentHashMap.newKeySet();
-            Set<BlockFace> directions = new ConcurrentSkipListSet<>();
-            String dirData = StorageCacheUtils.getData(loc, DATA_KEY_DIRECTIONS);
-            if (dirData != null && !dirData.isEmpty()) {
-                for (String face : dirData.split(",")) {
-                    if (face.trim().isEmpty()) continue;
-                    BlockFace blockFace = BlockFace.valueOf(face.trim());
-                    directions.add(blockFace);
-                }
-            }
-            if (directions.isEmpty()) {
-                directions.add(BlockFace.SELF);
-            }
-            MULTI_DIRECTION_MAP.put(loc, directions);
-        }
-        super.tick(block, item, data);
+        Set<BlockFace> directions = ensureDirectionsCached(loc);
+
+        me.ddggdd135.slimeae.core.NetworkInfo info =
+                me.ddggdd135.slimeae.SlimeAEPlugin.getNetworkData().getNetworkInfo(loc);
+
+        BusTickContext context = new BusTickContext.Builder()
+                .block(block)
+                .blockMenu(blockMenu)
+                .networkInfo(info)
+                .directions(directions)
+                .tickMultiplier(totalMultiplier)
+                .build();
+
+        if (blockMenu.hasViewer()) updateGui(data);
+        onMEBusTick(block, item, data, context);
     }
 
     @Override
@@ -142,29 +165,40 @@ public abstract class MEAdvancedBus extends MEBus {
         if (blockMenu == null || !blockMenu.hasViewer()) return;
 
         Set<BlockFace> directions = getDirections(blockMenu.getLocation());
+        Location loc = blockMenu.getLocation();
+        long[] oldFingerprints = GUI_FINGERPRINTS.get(loc);
+        long[] newFingerprints = new long[6];
+        boolean needsUpdate = (oldFingerprints == null);
 
-        for (BlockFace blockFace : FACES) {
-            Block targetBlock = blockMenu.getBlock().getRelative(blockFace);
-            SlimefunItem sfItem = StorageCacheUtils.getSfItem(targetBlock.getLocation());
-            boolean isActive = directions.contains(blockFace);
-
-            ItemStack displayItem;
-            if (sfItem != null) {
-                displayItem = getDirectionalSlotPane(blockFace, sfItem, isActive);
-            } else {
-                Material material = targetBlock.getType();
-                displayItem = getDirectionalSlotPane(blockFace, material, isActive);
-            }
-
-            switch (blockFace) {
-                case NORTH -> blockMenu.replaceExistingItem(getNorthSlot(), displayItem);
-                case SOUTH -> blockMenu.replaceExistingItem(getSouthSlot(), displayItem);
-                case EAST -> blockMenu.replaceExistingItem(getEastSlot(), displayItem);
-                case WEST -> blockMenu.replaceExistingItem(getWestSlot(), displayItem);
-                case UP -> blockMenu.replaceExistingItem(getUpSlot(), displayItem);
-                case DOWN -> blockMenu.replaceExistingItem(getDownSlot(), displayItem);
+        for (int i = 0; i < FACES.length; i++) {
+            BlockFace face = FACES[i];
+            Block neighbor = blockMenu.getBlock().getRelative(face);
+            boolean isActive = directions.contains(face);
+            int materialOrd = neighbor.getType().ordinal();
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(neighbor.getLocation());
+            int sfHash = (sfItem != null) ? sfItem.getId().hashCode() : 0;
+            newFingerprints[i] =
+                    ((long) materialOrd << 33) | ((long) (isActive ? 1 : 0) << 32) | (sfHash & 0xFFFFFFFFL);
+            if (!needsUpdate && newFingerprints[i] != oldFingerprints[i]) {
+                needsUpdate = true;
             }
         }
+
+        if (!needsUpdate) return;
+
+        for (int i = 0; i < FACES.length; i++) {
+            if (oldFingerprints != null && newFingerprints[i] == oldFingerprints[i]) continue;
+            BlockFace face = FACES[i];
+            Block neighbor = blockMenu.getBlock().getRelative(face);
+            boolean isActive = directions.contains(face);
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(neighbor.getLocation());
+            ItemStack displayItem = (sfItem != null)
+                    ? getDirectionalSlotPane(face, sfItem, isActive)
+                    : getDirectionalSlotPane(face, neighbor.getType(), isActive);
+            blockMenu.replaceExistingItem(getSlotForFace(face), displayItem);
+        }
+
+        GUI_FINGERPRINTS.put(loc, newFingerprints);
     }
 
     protected static final Map<Location, Set<BlockFace>> MULTI_DIRECTION_MAP = new ConcurrentHashMap<>();
