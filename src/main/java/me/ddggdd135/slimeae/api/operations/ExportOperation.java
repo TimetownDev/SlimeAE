@@ -17,6 +17,7 @@ import me.ddggdd135.slimeae.api.items.ItemRequest;
 import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
@@ -291,11 +292,134 @@ public final class ExportOperation {
     public static void executeChained(
             @Nonnull BusTickContext context, @Nonnull Block busBlock, @Nonnull ISettingSlotHolder settingHolder) {
         if (context.getDirection() == BlockFace.SELF) return;
-        Block target = context.getBlock().getRelative(context.getDirection());
+        if (!context.isValid()) return;
 
-        for (int i = 0; i < context.getChainDistance(); i++) {
-            executeToBlockMenu(context, busBlock, settingHolder, target);
-            target = target.getRelative(context.getDirection());
+        List<Pair<ItemKey, Integer>> settings = ensureSettingsCache(busBlock, settingHolder);
+        if (settings == null) return;
+
+        IStorage networkStorage = context.getNetworkStorage();
+        int tickMultiplier = context.getTickMultiplier();
+
+        int slotCount = settingHolder.getSettingSlots().length;
+        int uniqueCount = 0;
+        ItemKey[] uniqueKeys = new ItemKey[slotCount];
+        long[] baseAmounts = new long[slotCount];
+
+        for (int i = 0; i < slotCount; i++) {
+            Pair<ItemKey, Integer> setting = settings.get(i);
+            if (setting == null) continue;
+            ItemKey settingKey = setting.getFirstValue();
+            ItemStack itemStack = settingKey.getItemStack();
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+
+            int found = -1;
+            for (int j = 0; j < uniqueCount; j++) {
+                if (uniqueKeys[j].equals(settingKey)) {
+                    found = j;
+                    break;
+                }
+            }
+            if (found >= 0) {
+                baseAmounts[found] += (long) setting.getSecondValue() * tickMultiplier;
+            } else {
+                uniqueKeys[uniqueCount] = settingKey;
+                baseAmounts[uniqueCount] = (long) setting.getSecondValue() * tickMultiplier;
+                uniqueCount++;
+            }
+        }
+        if (uniqueCount == 0) return;
+
+        BlockFace dir = context.getDirection();
+        int dx = dir.getModX();
+        int dy = dir.getModY();
+        int dz = dir.getModZ();
+        Block origin = context.getBlock();
+        World world = origin.getWorld();
+        int bx = origin.getX() + dx;
+        int by = origin.getY() + dy;
+        int bz = origin.getZ() + dz;
+        int chainDist = context.getChainDistance();
+
+        int validCount = 0;
+        BlockMenu[] validMenus = new BlockMenu[chainDist];
+        int[][][] validSlotArrays = new int[chainDist][uniqueCount][];
+
+        for (int i = 0; i < chainDist; i++) {
+            Block target = world.getBlockAt(bx + dx * i, by + dy * i, bz + dz * i);
+            BlockMenu targetInv = StorageCacheUtils.getMenu(target.getLocation());
+            if (targetInv == null) continue;
+
+            int[][] slotsForTarget = new int[uniqueCount][];
+            boolean hasAnySlot = false;
+            for (int j = 0; j < uniqueCount; j++) {
+                try {
+                    slotsForTarget[j] = targetInv
+                            .getPreset()
+                            .getSlotsAccessedByItemTransport(
+                                    targetInv, ItemTransportFlow.INSERT, uniqueKeys[j].getItemStack());
+                } catch (IllegalArgumentException e) {
+                    slotsForTarget[j] = null;
+                }
+                if (slotsForTarget[j] != null && slotsForTarget[j].length > 0) hasAnySlot = true;
+            }
+            if (!hasAnySlot) continue;
+
+            validMenus[validCount] = targetInv;
+            validSlotArrays[validCount] = slotsForTarget;
+            validCount++;
+        }
+        if (validCount == 0) return;
+
+        ItemHashMap<Long> storageSnapshot = networkStorage.getStorageUnsafe();
+        long[] totalDemand = new long[uniqueCount];
+        for (int j = 0; j < uniqueCount; j++) {
+            totalDemand[j] = baseAmounts[j] * validCount;
+        }
+
+        int reqCount = 0;
+        int[] reqIndices = new int[uniqueCount];
+        ItemRequest[] batchReqs = new ItemRequest[uniqueCount];
+
+        for (int j = 0; j < uniqueCount; j++) {
+            Long available = storageSnapshot.getKey(uniqueKeys[j]);
+            if (available == null || available <= 0) continue;
+            long actualAmount = Math.min(totalDemand[j], available);
+            if (actualAmount <= 0) continue;
+            reqIndices[reqCount] = j;
+            batchReqs[reqCount] = new ItemRequest(uniqueKeys[j], actualAmount);
+            reqCount++;
+        }
+        if (reqCount == 0) return;
+
+        ItemRequest[] finalReqs =
+                reqCount == batchReqs.length ? batchReqs : java.util.Arrays.copyOf(batchReqs, reqCount);
+        ItemStorage taken = networkStorage.takeItem(finalReqs);
+        ItemHashMap<Long> takenMap = taken.getStorageUnsafe();
+
+        long[] remaining = new long[uniqueCount];
+        for (int r = 0; r < reqCount; r++) {
+            int idx = reqIndices[r];
+            Long takenAmount = takenMap.getKey(uniqueKeys[idx]);
+            if (takenAmount != null && takenAmount > 0) remaining[idx] = takenAmount;
+        }
+
+        for (int t = 0; t < validCount; t++) {
+            BlockMenu targetInv = validMenus[t];
+            for (int j = 0; j < uniqueCount; j++) {
+                if (remaining[j] <= 0) continue;
+                int[] inputSlots = validSlotArrays[t][j];
+                if (inputSlots == null || inputSlots.length == 0) continue;
+                long toPush = Math.min(remaining[j], baseAmounts[j]);
+                long leftover =
+                        pushToSlotsDirect(targetInv, uniqueKeys[j], uniqueKeys[j].getItemStack(), toPush, inputSlots);
+                remaining[j] -= (toPush - leftover);
+            }
+        }
+
+        for (int j = 0; j < uniqueCount; j++) {
+            if (remaining[j] > 0) {
+                networkStorage.pushItem(new ItemInfo(uniqueKeys[j], remaining[j]));
+            }
         }
     }
 
