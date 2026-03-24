@@ -221,6 +221,25 @@ public class MEStorageCellCache implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
+        rwLock.readLock().lock();
+        try {
+            ItemHashMap<Long> storages = storageData.getStorage();
+            if (storages instanceof CreativeItemMap) {
+                return new ItemStorage(ItemUtils.getAmounts(requests));
+            }
+            boolean anyMatch = false;
+            for (ItemRequest request : requests) {
+                Long amount = storages.getKey(request.getKey());
+                if (amount != null && amount > 0) {
+                    anyMatch = true;
+                    break;
+                }
+            }
+            if (!anyMatch) return new ItemStorage();
+        } finally {
+            rwLock.readLock().unlock();
+        }
+
         List<Map.Entry<ItemKey, Long>> dirtyBatch = null;
         ItemStorage itemStacks;
 
@@ -258,11 +277,8 @@ public class MEStorageCellCache implements IStorage {
             rwLock.writeLock().unlock();
         }
 
-        if (dirtyBatch != null) {
-            for (Map.Entry<ItemKey, Long> entry : dirtyBatch) {
-                SlimeAEPlugin.getStorageCellStorageDataController()
-                        .markDirty(storageData, entry.getKey(), entry.getValue());
-            }
+        if (dirtyBatch != null && !dirtyBatch.isEmpty()) {
+            SlimeAEPlugin.getStorageCellStorageDataController().markDirtyBatch(storageData, dirtyBatch);
         }
 
         return itemStacks;

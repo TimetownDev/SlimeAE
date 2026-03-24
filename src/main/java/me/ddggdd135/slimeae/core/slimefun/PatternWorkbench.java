@@ -20,18 +20,21 @@ import me.ddggdd135.guguslimefunlib.api.interfaces.InventoryBlock;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.CraftType;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
+import me.ddggdd135.slimeae.api.interfaces.IMEObject;
+import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.listeners.JEGCompatibleListener;
 import me.ddggdd135.slimeae.core.slimefun.terminals.CraftTypeSelector;
 import me.ddggdd135.slimeae.utils.ItemUtils;
+import me.ddggdd135.slimeae.utils.PatternUtils;
 import me.ddggdd135.slimeae.utils.RecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
+public class PatternWorkbench extends SlimefunItem implements InventoryBlock, IMEObject {
     private static final String CRAFT_TYPE_KEY = "craft_type";
 
     public PatternWorkbench(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -120,7 +123,7 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
                             .getID()
                             .equals(blockMenu.getPreset().getID())) return;
 
-                    encodePatternFromGuide(actualMenu, event.getClickedItem());
+                    encodePatternFromGuide(actualMenu, block, event.getClickedItem());
                     event.setCancelled(true);
 
                     player.updateInventory();
@@ -167,10 +170,8 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         if (blockMenu == null) return;
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
+        if (!PatternUtils.tryAutoFillBlankPattern(blockMenu, getPatternSlot(), block)) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null
-                || in.getType().isAir()
-                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
 
         CraftType selectedType = getSelectedCraftType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -248,14 +249,13 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
         blockMenu.replaceExistingItem(getPatternOutputSlot(), toOut);
     }
 
-    private void encodePatternFromGuide(@Nonnull BlockMenu blockMenu, @Nullable ItemStack clickedItem) {
+    private void encodePatternFromGuide(
+            @Nonnull BlockMenu blockMenu, @Nonnull Block block, @Nullable ItemStack clickedItem) {
         if (clickedItem == null || clickedItem.getType().isAir()) return;
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
+        if (!PatternUtils.tryAutoFillBlankPattern(blockMenu, getPatternSlot(), block)) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null
-                || in.getType().isAir()
-                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
         CraftingRecipe recipe = RecipeUtils.getRecipe(clickedItem);
         if (recipe == null) return;
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -281,4 +281,10 @@ public class PatternWorkbench extends SlimefunItem implements InventoryBlock {
             }
         };
     }
+
+    @Override
+    public void onNetworkUpdate(Block block, NetworkInfo networkInfo) {}
+
+    @Override
+    public void onNetworkTick(Block block, NetworkInfo networkInfo) {}
 }

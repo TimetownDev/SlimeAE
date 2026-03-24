@@ -13,11 +13,13 @@ import java.util.*;
 import java.util.HashSet;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.exceptions.NoEnoughMaterialsException;
+import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
@@ -56,24 +58,30 @@ public class MECraftPlanningTerminal extends METerminal {
         if (viewers.isEmpty()) return;
         Player player = (Player) viewers.get(0);
 
-        // 获取合成配方，创建RecipeEntry对象映射配方和item的关系，避免在置顶和搜索时被打乱顺序.
-        Set<CraftingRecipe> recipes = info.getRecipes();
-        ArrayList<RecipeEntry> recipeEntries = createRecipeEntries(recipes);
+        IStorage networkStorage = info.getStorage();
+        ItemHashMap<Long> storage = networkStorage.getStorageUnsafe();
 
-        // 过滤逻辑,排序
+        Set<CraftingRecipe> recipes = info.getRecipes();
+        ArrayList<RecipeEntry> recipeEntries = createRecipeEntries(recipes, storage);
+
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
+        updateFilterButton(blockMenu, filter);
         filterRecipeEntries(recipeEntries, player, filter);
         recipeEntries.sort(Comparator.comparing(RecipeEntry::getItemStack, getSort(block)));
 
-        // 置顶处理
         if (filter.isEmpty()) applyPinnedItems(player, recipeEntries);
         int page = fuckPage(block, recipeEntries.size());
 
-        // 菜单展示逻辑
-        displayPage(blockMenu, recipeEntries, page, info, block);
+        displayPage(blockMenu, recipeEntries, page, info, block, storage);
     }
 
-    private void displayPage(BlockMenu menu, List<RecipeEntry> entries, int page, NetworkInfo info, Block block) {
+    private void displayPage(
+            BlockMenu menu,
+            List<RecipeEntry> entries,
+            int page,
+            NetworkInfo info,
+            Block block,
+            ItemHashMap<Long> storage) {
         int slotPerPage = getDisplaySlots().length;
         int start = page * slotPerPage;
         int end = Math.min(start + slotPerPage, entries.size());
@@ -88,18 +96,22 @@ public class MECraftPlanningTerminal extends METerminal {
                 continue;
             }
             RecipeEntry entry = entries.get(entryIndex);
-            setupDisplayItem(menu, slot, entry, info, block);
+            setupDisplayItem(menu, slot, entry, info, block, storage);
         }
     }
 
-    private void setupDisplayItem(BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block) {
+    private void setupDisplayItem(
+            BlockMenu menu, int slot, RecipeEntry entry, NetworkInfo info, Block block, ItemHashMap<Long> storage) {
         ItemStack itemStack = entry.getItemStack().getKey();
         if (itemStack == null || itemStack.getType().isAir()) return;
         CraftingRecipe recipe = entry.getRecipe();
-        ItemStack displayItem = ItemUtils.createDisplayItem(itemStack, 1, false, false);
+        long stock = entry.getItemStack().getValue();
+        ItemStack displayItem = ItemUtils.createDisplayItem(itemStack, stock, false, false);
         ItemMeta meta = displayItem.getItemMeta();
         ArrayList<String> lore = new ArrayList<>();
-        setRecipeLore(recipe, lore);
+        lore.add("&7当前库存: &f" + stock);
+        lore.add("");
+        setRecipeLore(recipe, lore, storage);
         lore.add("");
         lore.add("  &e可合成");
         if (entry.isPinned()) lore.add("&e===已置顶===");
@@ -112,16 +124,26 @@ public class MECraftPlanningTerminal extends METerminal {
         });
     }
 
-    private static void setRecipeLore(CraftingRecipe recipe, List<String> lore) {
-        Map<String, Integer> materialCount = new HashMap<>();
+    private static void setRecipeLore(CraftingRecipe recipe, List<String> lore, ItemHashMap<Long> storage) {
+        Map<ItemStack, Integer> materialCount = new LinkedHashMap<>();
         for (ItemStack stack : recipe.getInput()) {
             if (stack == null || stack.getType().isAir()) continue;
-            String itemName = ItemUtils.getItemName(stack);
-            materialCount.put(itemName, materialCount.getOrDefault(itemName, 0) + stack.getAmount());
+            boolean found = false;
+            for (Map.Entry<ItemStack, Integer> existing : materialCount.entrySet()) {
+                if (existing.getKey().isSimilar(stack)) {
+                    materialCount.put(existing.getKey(), existing.getValue() + stack.getAmount());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) materialCount.put(stack, stack.getAmount());
         }
         lore.add("&7材料列表:");
-        for (Map.Entry<String, Integer> entry : materialCount.entrySet()) {
-            lore.add("  &f" + entry.getKey() + " &ex " + entry.getValue());
+        for (Map.Entry<ItemStack, Integer> entry : materialCount.entrySet()) {
+            String itemName = ItemUtils.getItemName(entry.getKey());
+            Long matStock = storage.get(entry.getKey());
+            long matStockVal = matStock != null ? matStock : 0L;
+            lore.add("  &f" + itemName + " &ex " + entry.getValue() + " &7(库存: &f" + matStockVal + "&7)");
         }
     }
 
@@ -137,7 +159,7 @@ public class MECraftPlanningTerminal extends METerminal {
             return;
         }
         player.closeInventory();
-        player.sendMessage(CMIChatColor.translate("&e输入合成数量"));
+        player.sendMessage(CMIChatColor.translate("&e输入合成数量 &7(输入cancel取消)"));
         ChatUtils.awaitInput(player, msg -> {
             if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
             Bukkit.getScheduler().runTaskAsynchronously(SlimeAEPlugin.getInstance(), () -> {
@@ -146,10 +168,12 @@ public class MECraftPlanningTerminal extends METerminal {
                     if (amount > NetworkInfo.getMaxCraftingAmount()) {
                         player.sendMessage(
                                 CMIChatColor.translate("&c&l一次最多只能合成" + NetworkInfo.getMaxCraftingAmount() + "个物品"));
+                        reopenTerminal(player, block);
                         return;
                     }
                     if (amount <= 0) {
                         player.sendMessage(CMIChatColor.translate("&c&l请输入大于0的数字"));
+                        reopenTerminal(player, block);
                         return;
                     }
 
@@ -181,12 +205,14 @@ public class MECraftPlanningTerminal extends METerminal {
                         menu.addMenuClickHandler(cancelSlot, (p, s, itemStack1, action) -> {
                             player.closeInventory();
                             task.dispose();
+                            reopenTerminal(player, block);
                             return false;
                         });
                         menu.open(player);
                     });
                 } catch (NumberFormatException e) {
                     player.sendMessage(CMIChatColor.translate("&c&l无效的数字"));
+                    reopenTerminal(player, block);
                 } catch (NoEnoughMaterialsException e) {
                     player.sendMessage(CMIChatColor.translate("&c&l没有足够的材料:"));
                     for (Map.Entry<ItemStack, Long> entry :
@@ -194,11 +220,22 @@ public class MECraftPlanningTerminal extends METerminal {
                         String itemName = ItemUtils.getItemName(entry.getKey());
                         player.sendMessage(CMIChatColor.translate("  &e- &f" + itemName + " &cx " + entry.getValue()));
                     }
+                    reopenTerminal(player, block);
                 } catch (Exception e) {
                     player.sendMessage(CMIChatColor.translate("&c&l" + e.getMessage()));
+                    reopenTerminal(player, block);
                 }
             });
             player.sendMessage(CMIChatColor.translate("&a&l计算中..."));
+        });
+    }
+
+    private void reopenTerminal(Player player, Block block) {
+        Bukkit.getScheduler().runTask(SlimeAEPlugin.getInstance(), () -> {
+            BlockMenu menu = StorageCacheUtils.getMenu(block.getLocation());
+            if (menu != null) {
+                menu.open(player);
+            }
         });
     }
 
@@ -221,7 +258,11 @@ public class MECraftPlanningTerminal extends METerminal {
 
         for (RecipeEntry entry : entries) {
             if (pinnedSet.contains(entry.getItemStack().getKey().asOne())) {
-                RecipeEntry pinned = new RecipeEntry(entry.getItemStack().getKey(), entry.getRecipe(), true);
+                RecipeEntry pinned = new RecipeEntry(
+                        entry.getItemStack().getKey(),
+                        entry.getRecipe(),
+                        entry.getItemStack().getValue(),
+                        true);
                 pinnedEntries.add(pinned);
             }
         }
@@ -253,11 +294,12 @@ public class MECraftPlanningTerminal extends METerminal {
         }
     }
 
-    private ArrayList<RecipeEntry> createRecipeEntries(Set<CraftingRecipe> recipes) {
+    private ArrayList<RecipeEntry> createRecipeEntries(Set<CraftingRecipe> recipes, ItemHashMap<Long> storage) {
         ArrayList<RecipeEntry> entries = new ArrayList<>();
         for (CraftingRecipe recipe : recipes) {
             ItemStack output = recipe.getOutput()[0];
-            entries.add(new RecipeEntry(output, recipe));
+            Long stock = storage.get(output);
+            entries.add(new RecipeEntry(output, recipe, stock != null ? stock : 0L));
         }
         return entries;
     }
@@ -270,13 +312,13 @@ public class MECraftPlanningTerminal extends METerminal {
         private final CraftingRecipe recipe;
         private boolean isPinned = false;
 
-        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe) {
-            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, 0L);
+        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe, long stock) {
+            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, stock);
             this.recipe = recipe;
         }
 
-        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe, boolean isPinned) {
-            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, 0L);
+        private RecipeEntry(ItemStack itemStack, CraftingRecipe recipe, long stock, boolean isPinned) {
+            this.itemStack = new AbstractMap.SimpleEntry<>(itemStack, stock);
             this.recipe = recipe;
             this.isPinned = isPinned;
         }

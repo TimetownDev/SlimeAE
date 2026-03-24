@@ -19,6 +19,7 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
+import me.ddggdd135.slimeae.utils.PatternUtils;
 import me.ddggdd135.slimeae.utils.VanillaRecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -192,10 +193,8 @@ public class MEVanillaPatternTerminal extends METerminal {
         if (blockMenu == null) return;
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
+        if (!PatternUtils.tryAutoFillBlankPattern(blockMenu, getPatternSlot(), block)) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null
-                || in.getType().isAir()
-                || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(in, Pattern.class) == null) return;
 
         CraftType vanillaType = getStoredVanillaType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -287,13 +286,11 @@ public class MEVanillaPatternTerminal extends METerminal {
                 NetworkRecipeFetch.moveRecipeFromNetwork(actualMenu, info.getStorage(), recipe, getCraftSlots(), false);
             }
 
-            ItemStack patternIn = actualMenu.getItemInSlot(getPatternSlot());
-            if (patternIn == null
-                    || patternIn.getType().isAir()
-                    || me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunItemFast(patternIn, Pattern.class) == null) {
+            if (!PatternUtils.tryAutoFillBlankPattern(actualMenu, getPatternSlot(), block)) {
                 actualMenu.open(player);
                 return;
             }
+            ItemStack patternIn = actualMenu.getItemInSlot(getPatternSlot());
 
             ItemStack patternOut = actualMenu.getItemInSlot(getPatternOutputSlot());
             if (patternOut != null && !patternOut.getType().isAir()) {

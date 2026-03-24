@@ -44,11 +44,15 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import net.guizhanss.minecraft.guizhanlib.gugu.minecraft.helpers.inventory.ItemStackHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class METerminal extends TickingBlock implements IMEObject, InventoryBlock, IItemFilterFindableWithGuide {
     public static final Comparator<Map.Entry<ItemStack, Long>> ALPHABETICAL_SORT = Comparator.comparing(
@@ -218,6 +222,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
         // 获取过滤器
         String filter = getFilter(block).toLowerCase(Locale.ROOT);
+        updateFilterButton(blockMenu, filter);
         String sortKey = StorageCacheUtils.getData(block.getLocation(), SORT_KEY);
         int sortId = (sortKey != null) ? Integer.parseInt(sortKey) : 0;
 
@@ -644,6 +649,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public static void clearSortedItemsCache(@Nonnull Location loc) {
         sortedItemsCacheMap.remove(loc);
         displaySlotCacheMap.remove(loc);
+        lastFilterDisplayMap.remove(loc);
     }
 
     /**
@@ -652,6 +658,7 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
     public static void clearAllSortedItemsCache() {
         sortedItemsCacheMap.clear();
         displaySlotCacheMap.clear();
+        lastFilterDisplayMap.clear();
         if (sortKeyCache.size() > SORT_KEY_CACHE_MAX) sortKeyCache.clear();
     }
 
@@ -764,5 +771,32 @@ public class METerminal extends TickingBlock implements IMEObject, InventoryBloc
 
     public int getJEGFindingButtonSlot() {
         return 17;
+    }
+
+    private static final Map<Location, String> lastFilterDisplayMap = new ConcurrentHashMap<>();
+
+    protected void updateFilterButton(BlockMenu blockMenu, String filter) {
+        Location loc = blockMenu.getLocation();
+        String last = lastFilterDisplayMap.get(loc);
+        if (filter.equals(last)) return;
+        lastFilterDisplayMap.put(loc, filter);
+        if (filter.isEmpty()) {
+            blockMenu.replaceExistingItem(getFilter(), MenuItems.FILTER_STACK);
+        } else {
+            blockMenu.replaceExistingItem(getFilter(), createSearchingFilterItem(filter));
+        }
+    }
+
+    private static ItemStack createSearchingFilterItem(String filter) {
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(CMIChatColor.translate("&a搜索中: &f" + filter));
+            meta.setLore(CMIChatColor.translate(List.of("", "&e左键修改过滤器", "&e右键清除过滤器", "&aShift点击将在粘液书中搜索当前物品")));
+            meta.addEnchant(Enchantment.LUCK, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 }

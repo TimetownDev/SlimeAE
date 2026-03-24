@@ -340,6 +340,9 @@ public class SlimeAEItems {
             "ME_CRAFTING_TERMINAL", new AdvancedCustomItemStack(Material.CRAFTING_TABLE, "&fME合成终端"));
     public static final SlimefunItemStack ME_CRAFT_PLANNING_TERMINAL = new SlimefunItemStack(
             "ME_CRAFT_PLANNING_TERMINAL", new AdvancedCustomItemStack(Material.SEA_LANTERN, "&fME合成计划终端"));
+    public static final SlimefunItemStack ME_ALL_IN_ONE_TERMINAL = new SlimefunItemStack(
+            "ME_ALL_IN_ONE_TERMINAL",
+            new AdvancedCustomItemStack(Material.SEA_LANTERN, "&fME综合终端", "", "{#3366ff>}左键/右键存取物品 中键下单合成{#33ccf3<}"));
     public static final SlimefunItemStack ME_PATTERN_TERMINAL = new SlimefunItemStack(
             "ME_PATTERN_TERMINAL",
             new AdvancedCustomItemStack(Material.LOOM, "&fME样板终端", "", "{#3366ff>}可以制作编码样板{#33ccf3<}"));
@@ -354,6 +357,15 @@ public class SlimeAEItems {
     public static final SlimefunItemStack ME_SECURITY_TERMINAL = new SlimefunItemStack(
             "ME_SECURITY_TERMINAL",
             new AdvancedCustomItemStack(Material.ENDER_CHEST, "&fME安全终端", "", "{#3366ff>}用于连接无线终端{#33ccf3<}"));
+    public static final SlimefunItemStack ME_PATTERN_MANAGEMENT_TERMINAL = new SlimefunItemStack(
+            "ME_PATTERN_MANAGEMENT_TERMINAL",
+            new AdvancedCustomItemStack(
+                    Material.LOOM,
+                    "&fME样板管理终端",
+                    "",
+                    "{#3366ff>}统一管理网络中所有样板{#33ccf3<}",
+                    "{#3366ff>}放入编码样板自动分发到接口{#33ccf3<}",
+                    "{#3366ff>}无法放入旁有流程分配器的接口{#33ccf3<}"));
     public static final SlimefunItemStack ME_CONVERSATION_MONITOR = new SlimefunItemStack(
             "ME_CONVERSATION_MONITOR",
             new AdvancedCustomItemStack(
@@ -658,6 +670,9 @@ public class SlimeAEItems {
             "CARD_REPLICATOR",
             new AdvancedCustomItemStack(
                     Material.PAPER, "&e升级卡复制器", "", "&e复制ME设备的升级卡设置", "", "&eShift右键 复制设置", "&e右键 应用设置"));
+    public static final SlimefunItemStack CARD_INSERTER = new SlimefunItemStack(
+            "CARD_INSERTER",
+            new AdvancedCustomItemStack(Material.DISPENSER, "&e塞卡器", "", "&e自动/手动为AE内机器插入升级卡", "&e支持从AE网络读取卡"));
     public static final SlimefunItemStack WIRELESS_TERMINAL = new SlimefunItemStack(
             "WIRELESS_TERMINAL",
             new AdvancedCustomItemStack(Material.ITEM_FRAME, "{#Sky_Blue}无线终端", "", "&e便捷的访问AE网络", "&e需要使用ME安全终端进行绑定"));
@@ -1221,6 +1236,12 @@ public class SlimeAEItems {
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_CRAFTING_TERMINAL, BLANK_PATTERN, CALCULATION_PROCESSOR})
                 .register(plugin);
+        new MEAllInOneTerminal(
+                        SlimeAEItemGroups.MACHINE,
+                        ME_ALL_IN_ONE_TERMINAL,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_CRAFT_PLANNING_TERMINAL, ME_TERMINAL, ENGINEERING_PROCESSOR})
+                .register(plugin);
         new MEPatternTerminal(
                         SlimeAEItemGroups.MACHINE,
                         ME_PATTERN_TERMINAL,
@@ -1232,6 +1253,12 @@ public class SlimeAEItems {
                         ME_VANILLA_PATTERN_TERMINAL,
                         RecipeType.ENHANCED_CRAFTING_TABLE,
                         new ItemStack[] {ME_PATTERN_TERMINAL, CALCULATION_PROCESSOR})
+                .register(plugin);
+        new MEPatternManagementTerminal(
+                        SlimeAEItemGroups.MACHINE,
+                        ME_PATTERN_MANAGEMENT_TERMINAL,
+                        RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {ME_PATTERN_TERMINAL, ME_INTERFACE, ENGINEERING_PROCESSOR})
                 .register(plugin);
         new MESecurityTerminal(
                         SlimeAEItemGroups.MACHINE,
@@ -2125,6 +2152,16 @@ public class SlimeAEItems {
                             new ItemStack(Material.IRON_INGOT),
                             new ItemStack(Material.GOLD_INGOT),
                             MEMORY_CARD,
+                            new ItemStack(Material.GOLD_INGOT)
+                        })
+                .register(plugin);
+        new CardInserterMachine(
+                        SlimeAEItemGroups.MACHINE, CARD_INSERTER, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                            LOGIC_PROCESSOR,
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.IRON_INGOT),
+                            new ItemStack(Material.GOLD_INGOT),
+                            CARD_REPLICATOR,
                             new ItemStack(Material.GOLD_INGOT)
                         })
                 .register(plugin);

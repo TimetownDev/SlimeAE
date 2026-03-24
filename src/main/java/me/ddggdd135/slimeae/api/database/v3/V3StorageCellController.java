@@ -58,6 +58,15 @@ public class V3StorageCellController {
         dirtyTracker.record(data.getUuid(), tplId, finalAmount, finalAmount > 0 ? 'P' : 'R');
     }
 
+    public void markDirtyBatch(
+            @Nonnull MEStorageCellStorageData data, @Nonnull List<Map.Entry<ItemKey, Long>> entries) {
+        UUID cellUUID = data.getUuid();
+        for (Map.Entry<ItemKey, Long> entry : entries) {
+            long tplId = bridge.getOrResolve(entry.getKey());
+            dirtyTracker.record(cellUUID, tplId, entry.getValue(), entry.getValue() > 0 ? 'P' : 'R');
+        }
+    }
+
     public void markDirtyAll(@Nonnull MEStorageCellStorageData data) {
         ItemHashMap<Long> storages = data.getStorage();
         UUID cellUUID = data.getUuid();

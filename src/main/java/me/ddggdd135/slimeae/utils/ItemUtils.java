@@ -734,6 +734,12 @@ public class ItemUtils {
     @Nonnull
     public static ItemStack createDisplayItem(
             @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore) {
+        return createDisplayItem(itemStack, amount, addLore, addPinnedLore, false);
+    }
+
+    @Nonnull
+    public static ItemStack createDisplayItem(
+            @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore, boolean craftable) {
         ItemStack result = itemStack.clone();
 
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
@@ -748,6 +754,7 @@ public class ItemUtils {
 
                 lore.add("");
                 lore.add("&e物品数量 " + amount);
+                if (craftable) lore.add("&b可下单");
                 if (addPinnedLore) lore.add("&e===已置顶===");
                 meta.setLore(CMIChatColor.translate(lore));
             }
