@@ -114,6 +114,7 @@ public class CheckpointTask implements Runnable {
     private void applyJournalEntry(Connection conn, String cellUuid, JournalEntry je) throws SQLException {
         switch (je.op) {
             case 'P': {
+                if (je.tplId == null || je.newAmount == null) break;
                 String sql = ddl.upsertCellItem();
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setString(1, cellUuid);
@@ -134,6 +135,7 @@ public class CheckpointTask implements Runnable {
                 break;
             }
             case 'R': {
+                if (je.tplId == null) break;
                 try (PreparedStatement ps =
                         conn.prepareStatement("DELETE FROM ae_v3_cell_items WHERE cell_uuid = ? AND tpl_id = ?")) {
                     ps.setString(1, cellUuid);
@@ -216,6 +218,7 @@ public class CheckpointTask implements Runnable {
         String sql = "SELECT journal_id, cell_uuid, op, tpl_id, new_amount, crc32, timestamp "
                 + "FROM ae_v3_journal WHERE applied = 0 AND journal_id <= ? ORDER BY journal_id LIMIT ?";
         List<JournalEntry> entries = new ArrayList<>();
+        List<Long> corruptedIds = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, maxJournalId);
             ps.setInt(2, checkpointBatchSize);
@@ -225,22 +228,20 @@ public class CheckpointTask implements Runnable {
                     je.journalId = rs.getLong("journal_id");
                     je.cellUuid = rs.getString("cell_uuid");
                     je.op = rs.getString("op").charAt(0);
-                    je.tplId = rs.getLong("tpl_id");
-                    if (rs.wasNull()) je.tplId = -1;
-                    je.newAmount = rs.getLong("new_amount");
-                    if (rs.wasNull()) je.newAmount = -1;
+                    long rawTplId = rs.getLong("tpl_id");
+                    je.tplId = rs.wasNull() ? null : rawTplId;
+                    long rawNewAmount = rs.getLong("new_amount");
+                    je.newAmount = rs.wasNull() ? null : rawNewAmount;
                     je.crc32 = rs.getInt("crc32");
                     je.timestamp = rs.getLong("timestamp");
 
-                    int expectedCrc = CRC32Utils.computeJournal(
-                            je.cellUuid,
-                            je.op,
-                            je.tplId >= 0 ? je.tplId : null,
-                            je.newAmount >= 0 ? je.newAmount : null);
+                    int expectedCrc = CRC32Utils.computeJournal(je.cellUuid, je.op, je.tplId, je.newAmount);
                     if (je.crc32 != expectedCrc) {
                         logger.warning("CRC32 mismatch on journal_id=" + je.journalId
                                 + " (expected=" + expectedCrc + ", actual=" + je.crc32
+                                + ", op=" + je.op + ", tplId=" + je.tplId + ", newAmount=" + je.newAmount
                                 + "), skipping corrupted entry");
+                        corruptedIds.add(je.journalId);
                         continue;
                     }
 
@@ -248,14 +249,31 @@ public class CheckpointTask implements Runnable {
                 }
             }
         }
+        if (!corruptedIds.isEmpty()) {
+            markCorruptedApplied(conn, corruptedIds);
+        }
         return entries;
+    }
+
+    private void markCorruptedApplied(Connection conn, List<Long> journalIds) {
+        try (PreparedStatement ps =
+                conn.prepareStatement("UPDATE ae_v3_journal SET applied = 1 WHERE journal_id = ?")) {
+            for (long id : journalIds) {
+                ps.setLong(1, id);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            logger.info("Marked " + journalIds.size() + " corrupted journal entries as applied");
+        } catch (SQLException e) {
+            logger.warning("Failed to mark corrupted entries as applied: " + e.getMessage());
+        }
     }
 
     private Map<String, Map<Long, JournalEntry>> groupByCell(List<JournalEntry> entries) {
         Map<String, Map<Long, JournalEntry>> grouped = new LinkedHashMap<>();
         for (JournalEntry je : entries) {
             grouped.computeIfAbsent(je.cellUuid, k -> new LinkedHashMap<>());
-            long key = je.op == 'D' ? -1L : je.tplId;
+            long key = je.op == 'D' ? -1L : (je.tplId != null ? je.tplId : -1L);
             JournalEntry existing = grouped.get(je.cellUuid).get(key);
             if (existing == null || je.journalId > existing.journalId) {
                 grouped.get(je.cellUuid).put(key, je);
@@ -372,8 +390,8 @@ public class CheckpointTask implements Runnable {
         long journalId;
         String cellUuid;
         char op;
-        long tplId;
-        long newAmount;
+        Long tplId;
+        Long newAmount;
         int crc32;
         long timestamp;
     }

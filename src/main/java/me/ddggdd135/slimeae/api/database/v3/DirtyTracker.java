@@ -91,7 +91,7 @@ public class DirtyTracker {
             for (var itemEntry : cellEntry.getValue().entrySet()) {
                 DirtyEntry de = itemEntry.getValue();
                 Long tplId = itemEntry.getKey() == -1L ? null : itemEntry.getKey();
-                Long newAmount = de.op() == 'D' ? null : de.newAmount();
+                Long newAmount = (de.op() == 'D' || de.op() == 'R') ? null : de.newAmount();
                 int crc = CRC32Utils.computeJournal(cellUuid, de.op(), tplId, newAmount);
                 rows.add(new JournalRow(cellUuid, de.op(), tplId, newAmount, crc, de.timestamp()));
             }
