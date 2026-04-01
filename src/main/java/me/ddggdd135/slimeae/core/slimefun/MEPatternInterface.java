@@ -139,8 +139,7 @@ public class MEPatternInterface extends SlimefunItem implements IMECraftHolder, 
             ItemStack patternItem = blockMenu.getItemInSlot(slot);
             if (patternItem == null || patternItem.getType().isAir()) continue;
             try {
-                SlimefunItem slimefunItem = SlimefunItem.getByItem(patternItem);
-                if (!(slimefunItem instanceof Pattern)) continue;
+                if (ItemUtils.getSlimefunItemFast(patternItem, Pattern.class) == null) continue;
                 CraftingRecipe recipe = Pattern.getRecipe(patternItem);
                 if (recipe == null) continue;
                 result.add(recipe);

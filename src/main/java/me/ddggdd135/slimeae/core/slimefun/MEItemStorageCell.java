@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.GuguSlimefunLib;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
 import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBTType;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.items.MEStorageCellCache;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -49,6 +50,34 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         this.size = size;
     }
 
+    public static boolean isCreativeCellItem(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+        String sfId = ItemUtils.getSlimefunId(itemStack);
+        if (sfId == null) return false;
+        SlimefunItem sfItem = SlimefunItem.getById(sfId);
+        return sfItem instanceof MECreativeItemStorageCell;
+    }
+
+    public static boolean isStorageCell(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return false;
+        boolean hasTag = NBT.get(itemStack, x -> {
+            return x.hasTag(SERVER_UUID_KEY, NBTType.NBTTagIntArray);
+        });
+        if (hasTag) return true;
+        String sfId = ItemUtils.getSlimefunId(itemStack);
+        if (sfId == null) return false;
+        SlimefunItem sfItem = SlimefunItem.getById(sfId);
+        if (sfItem instanceof MEItemStorageCell) {
+            getServerUUID(itemStack);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isCreativeCell(@Nonnull MEStorageCellCache cellCache) {
+        return cellCache.getSize() == Integer.MAX_VALUE;
+    }
+
     public static long getSize(@Nonnull ItemStack itemStack) {
         SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
         if (!(slimefunItem instanceof MEItemStorageCell meItemStorageCell)) {
@@ -56,20 +85,24 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
         } else return meItemStorageCell.getSize();
     }
 
-    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
-        if (!(SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell)) return null;
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell)
-            return new MEStorageCellCache(itemStack);
+    @Nullable public static MEStorageCellCache getStorageFast(@Nonnull ItemStack itemStack) {
+        if (isCreativeCellItem(itemStack)) return MEStorageCellCache.getCreativeInstance();
+        if (!isStorageCell(itemStack)) return null;
+        if (!isCurrentServer(itemStack)) return null;
         return MEStorageCellCache.getMEStorageCellCache(itemStack);
     }
 
-    public static void saveStorage(@Nonnull ItemStack itemStack) {
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
+    @Nullable public static MEStorageCellCache getStorage(@Nonnull ItemStack itemStack) {
+        return getStorageFast(itemStack);
+    }
 
-        SlimeAEPlugin.getStorageCellStorageDataController()
-                .updateAsync(getStorage(itemStack).getStorageData());
-        SlimeAEPlugin.getStorageCellFilterDataController()
-                .updateAsync(getStorage(itemStack).getFilterData());
+    public static void saveStorage(@Nonnull ItemStack itemStack) {
+        MEStorageCellCache cache = getStorageFast(itemStack);
+        if (cache == null) return;
+        if (isCreativeCell(cache)) return;
+
+        SlimeAEPlugin.getStorageCellStorageDataController().markDirtyAll(cache.getStorageData());
+        SlimeAEPlugin.getStorageCellFilterDataController().markDirty(cache.getFilterData());
     }
 
     /**
@@ -78,8 +111,9 @@ public class MEItemStorageCell extends SlimefunItem implements NotPlaceable {
      * @param itemStack 存储元件物品
      */
     public static void updateLore(@Nonnull ItemStack itemStack) {
-        if (SlimefunItem.getByItem(itemStack) instanceof MECreativeItemStorageCell) return;
-        MEStorageCellCache meStorageCellCache = MEStorageCellCache.getMEStorageCellCache(itemStack);
+        MEStorageCellCache meStorageCellCache = getStorageFast(itemStack);
+        if (meStorageCellCache == null) return;
+        if (isCreativeCell(meStorageCellCache)) return;
         List<String> lores = new ArrayList<>();
         lores.add(
                 CMIChatColor.translate("&e已存储 " + meStorageCellCache.getStored() + "/" + meStorageCellCache.getSize()));

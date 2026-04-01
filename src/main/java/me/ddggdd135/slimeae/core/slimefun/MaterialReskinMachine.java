@@ -156,10 +156,26 @@ public class MaterialReskinMachine extends SlimefunItem implements InventoryBloc
             }
         });
 
+        menu.addMenuClickHandler(PREVIEW_SLOT, new ChestMenu.AdvancedMenuClickHandler() {
+            @Override
+            public boolean onClick(
+                    InventoryClickEvent e, Player player, int slot, ItemStack cursor, ClickAction action) {
+                return false;
+            }
+
+            @Override
+            public boolean onClick(Player player, int slot, ItemStack item, ClickAction action) {
+                return false;
+            }
+        });
+
         menu.addPlayerInventoryClickHandler(new ChestMenu.AdvancedMenuClickHandler() {
             @Override
             public boolean onClick(
                     InventoryClickEvent e, Player player, int slot, ItemStack cursor, ClickAction action) {
+                if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+                    return false;
+                }
                 if (e.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
                     return true;
                 }
@@ -280,6 +296,7 @@ public class MaterialReskinMachine extends SlimefunItem implements InventoryBloc
 
         ItemStack preview = targetItem.clone();
         preview.setAmount(1);
+        addPreviewLore(preview);
         menu.replaceExistingItem(PREVIEW_SLOT, preview);
     }
 
@@ -328,7 +345,20 @@ public class MaterialReskinMachine extends SlimefunItem implements InventoryBloc
             } catch (IllegalArgumentException ignored) {
             }
         }
+        addPreviewLore(preview);
         return preview;
+    }
+
+    private static void addPreviewLore(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            java.util.List<String> lore =
+                    meta.getLore() != null ? new java.util.ArrayList<>(meta.getLore()) : new java.util.ArrayList<>();
+            lore.add("");
+            lore.add(ChatColor.YELLOW + "预览物品");
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+        }
     }
 
     private static ItemStack createInfoItem() {

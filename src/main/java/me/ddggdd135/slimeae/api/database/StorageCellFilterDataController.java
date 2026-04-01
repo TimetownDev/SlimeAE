@@ -35,8 +35,27 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
     @Override
     @OverridingMethodsMustInvokeSuper
     public void shutdown() {
-        saveAllAsync();
+        saveAllSync();
         super.shutdown();
+    }
+
+    public void saveAllSync() {
+        Set<MEStorageCellFilterData> diff = new HashSet<>();
+        needSave.removeIf(item -> {
+            diff.add(item);
+            return true;
+        });
+
+        if (!diff.isEmpty()) {
+            logger.log(Level.INFO, "正在同步保存 {0} 筛选器数据...", diff.size());
+            for (MEStorageCellFilterData data : diff) {
+                try {
+                    update(data);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "同步保存筛选器数据失败 (" + data.getUuid() + "): " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     @Override
@@ -46,7 +65,6 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
 
     @Override
     public void update(MEStorageCellFilterData data) {
-        cancelWriteTask(data);
         try (Connection conn = ds.getConnection()) {
             conn.setAutoCommit(false);
             try {
@@ -93,7 +111,6 @@ public class StorageCellFilterDataController extends DatabaseController<MEStorag
     }
 
     public void updateAsync(MEStorageCellFilterData data) {
-        cancelWriteTask(data);
         submitWriteTask(data, () -> update(data));
     }
 

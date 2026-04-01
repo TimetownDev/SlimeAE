@@ -19,6 +19,8 @@ import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.guguslimefunlib.libraries.colors.CMIChatColor;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.NBT;
+import me.ddggdd135.guguslimefunlib.libraries.nbtapi.iface.ReadableNBT;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.Card;
 import me.ddggdd135.slimeae.api.interfaces.ICardHolder;
@@ -56,6 +58,28 @@ import org.bukkit.persistence.PersistentDataType;
  */
 public class ItemUtils {
     public static final String DISPLAY_ITEM_KEY = "display_item";
+
+    @Nullable public static String getSlimefunId(@Nullable ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType().isAir()) return null;
+        return NBT.get(itemStack, x -> {
+            ReadableNBT publicBukkitValues = x.getCompound("PublicBukkitValues");
+            if (publicBukkitValues != null) {
+                String id = publicBukkitValues.getString("slimefun:slimefun_item");
+                if (id != null && !id.isEmpty()) return id;
+            }
+            return (String) null;
+        });
+    }
+
+    @Nullable public static <T extends SlimefunItem> T getSlimefunItemFast(
+            @Nullable ItemStack itemStack, @Nonnull Class<T> type) {
+        String id = getSlimefunId(itemStack);
+        if (id == null) return null;
+        SlimefunItem item = SlimefunItem.getById(id);
+        if (type.isInstance(item)) return type.cast(item);
+        return null;
+    }
+
     private static final NamespacedKey DISPLAY_ITEM_NS_KEY = new NamespacedKey("slimeae", DISPLAY_ITEM_KEY);
     /**
      * 根据模板物品创建指定数量的物品堆数组
@@ -359,23 +383,23 @@ public class ItemUtils {
                 return null;
             }
             if (SlimeAEPlugin.getInfinityIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof StorageUnit) {
+                if (slimefunItem instanceof StorageUnit) {
                     return new InfinityBarrelStorage(block);
                 }
             }
             if (SlimeAEPlugin.getFluffyMachinesIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof Barrel) {
+                if (slimefunItem instanceof Barrel) {
                     return new FluffyBarrelStorage(block);
                 }
             }
             if (SlimeAEPlugin.getNetworksIntegration().isLoaded()
                     || SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworkQuantumStorage) {
+                if (slimefunItem instanceof NetworkQuantumStorage) {
                     return new QuantumStorage(block);
                 }
             }
             if (SlimeAEPlugin.getNetworksExpansionIntegration().isLoaded()) {
-                if (SlimefunItem.getById(slimefunBlockData.getSfId()) instanceof NetworksDrawer
+                if (slimefunItem instanceof NetworksDrawer
                         && NetworksDrawer.getStorageData(block.getLocation()) != null) {
                     return new DrawerStorage(block);
                 }
@@ -583,7 +607,7 @@ public class ItemUtils {
                 if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.PATTERN, true, false)) {
                     if (cursor != null
                             && !cursor.getType().isAir()
-                            && SlimefunItem.getByItem(cursor) instanceof Pattern) {
+                            && getSlimefunItemFast(cursor, Pattern.class) != null) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
                     }
@@ -591,7 +615,7 @@ public class ItemUtils {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                         inventory.setItem(i, MenuItems.PATTERN);
-                    } else if (SlimefunItem.getByItem(cursor) instanceof Pattern) {
+                    } else if (getSlimefunItemFast(cursor, Pattern.class) != null) {
                         inventory.setItem(i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
@@ -620,7 +644,9 @@ public class ItemUtils {
                 Inventory inventory = inventoryClickEvent.getClickedInventory();
                 ItemStack current = getSettingItem(inventory, i);
                 if (current != null && SlimefunUtils.isItemSimilar(current, MenuItems.CARD, true, false)) {
-                    if (cursor != null && !cursor.getType().isAir() && SlimefunItem.getByItem(cursor) instanceof Card) {
+                    if (cursor != null
+                            && !cursor.getType().isAir()
+                            && getSlimefunItemFast(cursor, Card.class) != null) {
                         setSettingItem(inventory, i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(null);
                     }
@@ -628,7 +654,7 @@ public class ItemUtils {
                     if (cursor == null || cursor.getType().isAir()) {
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                         setSettingItem(inventory, i, MenuItems.CARD);
-                    } else if (SlimefunItem.getByItem(cursor) instanceof Card) {
+                    } else if (getSlimefunItemFast(cursor, Card.class) != null) {
                         setSettingItem(inventory, i, cursor);
                         inventoryClickEvent.getWhoClicked().setItemOnCursor(current);
                     }
@@ -708,6 +734,12 @@ public class ItemUtils {
     @Nonnull
     public static ItemStack createDisplayItem(
             @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore) {
+        return createDisplayItem(itemStack, amount, addLore, addPinnedLore, false);
+    }
+
+    @Nonnull
+    public static ItemStack createDisplayItem(
+            @Nonnull ItemStack itemStack, long amount, boolean addLore, boolean addPinnedLore, boolean craftable) {
         ItemStack result = itemStack.clone();
 
         result.setAmount((int) Math.min(itemStack.getMaxStackSize(), Math.max(1, amount)));
@@ -722,6 +754,7 @@ public class ItemUtils {
 
                 lore.add("");
                 lore.add("&e物品数量 " + amount);
+                if (craftable) lore.add("&b可下单");
                 if (addPinnedLore) lore.add("&e===已置顶===");
                 meta.setLore(CMIChatColor.translate(lore));
             }
@@ -740,14 +773,39 @@ public class ItemUtils {
     public static String getItemName(@Nullable ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) return "";
 
-        String displayName = itemStack.getItemMeta().getDisplayName();
-        if (!displayName.isEmpty()) return displayName;
-        SlimefunItem slimefunItem = SlimefunItem.getByItem(itemStack);
-        if (slimefunItem != null) {
-            return slimefunItem.getItemName();
-        } else {
-            return ItemStackHelper.getName(itemStack);
+        // 使用 NBT API 读取 Slimefun ID，避免昂贵的 getByItem() → getItemMeta() 深拷贝
+        String sfId = NBT.get(itemStack, x -> {
+            ReadableNBT publicBukkitValues = x.getCompound("PublicBukkitValues");
+            if (publicBukkitValues != null) {
+                return publicBukkitValues.getString("slimefun:slimefun_item");
+            }
+            return (String) null;
+        });
+
+        if (sfId != null && !sfId.isEmpty()) {
+            // Slimefun 物品：通过 getById (O(1) HashMap) 获取名称，完全避免 getByItem
+            SlimefunItem sfItem = SlimefunItem.getById(sfId);
+            if (sfItem != null) {
+                return sfItem.getItemName();
+            }
         }
+
+        // 非 Slimefun 物品：检查是否有自定义 display name
+        // 通过 NBT 检查是否存在 display.Name，仅在存在时才调用 getItemMeta
+        boolean hasDisplayName = NBT.get(itemStack, x -> {
+            ReadableNBT display = x.getCompound("display");
+            if (display != null) {
+                String name = display.getString("Name");
+                return name != null && !name.isEmpty();
+            }
+            return false;
+        });
+
+        if (hasDisplayName) {
+            return itemStack.getItemMeta().getDisplayName();
+        }
+
+        return ItemStackHelper.getName(itemStack);
     }
 
     public static ItemStack[] takeItems(Inventory inventory, int[] slots, ItemRequest[] requests) {

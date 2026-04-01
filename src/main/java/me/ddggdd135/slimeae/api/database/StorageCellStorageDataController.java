@@ -36,8 +36,27 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
     @Override
     @OverridingMethodsMustInvokeSuper
     public void shutdown() {
-        saveAllAsync();
+        saveAllSync();
         super.shutdown();
+    }
+
+    public void saveAllSync() {
+        Set<MEStorageCellStorageData> diff = new HashSet<>();
+        needSave.removeIf(item -> {
+            diff.add(item);
+            return true;
+        });
+
+        if (!diff.isEmpty()) {
+            logger.log(Level.INFO, "正在同步保存 {0} 存储元件数据...", diff.size());
+            for (MEStorageCellStorageData data : diff) {
+                try {
+                    update(data);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "同步保存存储元件数据失败 (" + data.getUuid() + "): " + e.getMessage(), e);
+                }
+            }
+        }
     }
 
     @Override
@@ -47,20 +66,31 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
 
     @Override
     public void update(MEStorageCellStorageData data) {
-        cancelWriteTask(data);
+        Map<ItemStack, Long> snapshot;
+        try {
+            // 无需 synchronized：ItemHashMap 在快照时的短暂不一致是可接受的，
+            // 因为 dirtyTracker 持有精确的增量数据，下次 flush 会修正
+            snapshot = new LinkedHashMap<>(data.getStorage());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "无法快照存储元件数据 " + data.getUuid() + ": " + e.getMessage(), e);
+            return;
+        }
+
+        String uuid = data.getUuid().toString();
         try (Connection conn = ds.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 try (PreparedStatement deleteStmt =
                         conn.prepareStatement("DELETE FROM " + getTableName() + " WHERE uuid = ?")) {
-                    deleteStmt.setString(1, data.getUuid().toString());
+                    deleteStmt.setString(1, uuid);
                     deleteStmt.executeUpdate();
                 }
                 try (PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO " + getTableName()
                         + " (uuid, item_hash, item_base64, amount) VALUES (?, ?, ?, ?)")) {
                     int batch = 0;
-                    for (Map.Entry<ItemStack, Long> entry : data.getStorage().entrySet()) {
-                        insertStmt.setString(1, data.getUuid().toString());
+                    for (Map.Entry<ItemStack, Long> entry : snapshot.entrySet()) {
+                        if (entry.getKey() == null || entry.getValue() == null || entry.getValue() <= 0) continue;
+                        insertStmt.setString(1, uuid);
                         insertStmt.setLong(2, getItemHash(entry.getKey()));
                         insertStmt.setString(3, SerializeUtils.object2String(entry.getKey()));
                         insertStmt.setLong(4, entry.getValue());
@@ -75,11 +105,15 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
                 }
                 conn.commit();
             } catch (SQLException e) {
-                conn.rollback();
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    logger.log(Level.SEVERE, "回滚存储元件数据失败 " + uuid + ": " + rollbackEx.getMessage(), rollbackEx);
+                }
                 throw e;
             }
         } catch (SQLException e) {
-            logger.log(Level.WARNING, "Failed to batch update storage data: " + e.getMessage());
+            logger.log(Level.WARNING, "无法更新存储元件数据 " + uuid + ": " + e.getMessage(), e);
         }
     }
 
@@ -108,7 +142,6 @@ public class StorageCellStorageDataController extends DatabaseController<MEStora
     }
 
     public void updateAsync(MEStorageCellStorageData data) {
-        cancelWriteTask(data);
         submitWriteTask(data, () -> update(data));
     }
 

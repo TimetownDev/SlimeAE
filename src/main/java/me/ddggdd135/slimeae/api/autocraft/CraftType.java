@@ -47,7 +47,7 @@ public enum CraftType {
                     PlayerSkin.fromHashCode("f2fdb5a1477cb38109030fc9e41691668e4fe05c86aad46c6ad01f4ce4dabd52")),
             GridSize.LARGE_6x6),
     MATRIX_CRAFTING_TABLE("&d矩阵合成台", Material.LECTERN, GridSize.LARGE_6x6),
-    BEDROCK_CRAFT_TABLE("&c基岩合成台", Material.CRAFTING_TABLE, GridSize.LARGE_6x6);
+    BEDROCK_CRAFT_TABLE("&c不合理合成台", Material.CRAFTING_TABLE, GridSize.LARGE_6x6);
 
     private static final Map<String, CraftType> BY_NAME = new HashMap<>();
 

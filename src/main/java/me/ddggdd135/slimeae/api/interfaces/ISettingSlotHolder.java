@@ -4,9 +4,9 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.libraries.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.core.items.MenuItems;
@@ -17,7 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public interface ISettingSlotHolder {
-    Map<Location, List<Pair<ItemKey, Integer>>> cache = new HashMap<>();
+    Map<Location, List<Pair<ItemKey, Integer>>> cache = new ConcurrentHashMap<>();
 
     static void updateCache(Block block, ISettingSlotHolder item, SlimefunBlockData data) {
         BlockMenu menu = data.getBlockMenu();

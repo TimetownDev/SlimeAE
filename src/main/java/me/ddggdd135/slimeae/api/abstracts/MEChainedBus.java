@@ -63,21 +63,50 @@ public abstract class MEChainedBus extends MEBus {
 
     @Override
     protected void tick(@Nonnull Block block, @Nonnull SlimefunItem item, @Nonnull SlimefunBlockData data) {
-        if (data.getBlockMenu().hasViewer()) updateGui(data);
+        BlockMenu blockMenu = data.getBlockMenu();
+        if (blockMenu == null) return;
+        if (blockMenu.hasViewer()) updateGui(data);
         if (async) return;
 
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (slimefunBlockData == null) return;
-        tickCards(block, this, slimefunBlockData);
-        onMEBusTick(block, this, slimefunBlockData);
+
+        int totalMultiplier = computeAccelerationMultiplier(block, this, slimefunBlockData);
+
+        NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(block.getLocation());
+        int chainDist = getDistance(block.getLocation());
+        BusTickContext context = new BusTickContext.Builder()
+                .block(block)
+                .blockMenu(blockMenu)
+                .networkInfo(info)
+                .direction(getDirection(blockMenu))
+                .chainDistance(chainDist)
+                .tickMultiplier(totalMultiplier)
+                .build();
+
+        onMEBusTick(block, this, slimefunBlockData, context);
     }
 
     public void onNetworkTimeConsumingTick(Block block, NetworkInfo networkInfo) {
         if (!async) return;
         SlimefunBlockData slimefunBlockData = StorageCacheUtils.getBlock(block.getLocation());
         if (slimefunBlockData == null) return;
-        tickCards(block, this, slimefunBlockData);
-        onMEBusTick(block, this, slimefunBlockData);
+        BlockMenu blockMenu = slimefunBlockData.getBlockMenu();
+        if (blockMenu == null) return;
+
+        int totalMultiplier = computeAccelerationMultiplier(block, this, slimefunBlockData);
+
+        int chainDist = getDistance(block.getLocation());
+        BusTickContext context = new BusTickContext.Builder()
+                .block(block)
+                .blockMenu(blockMenu)
+                .networkInfo(networkInfo)
+                .direction(getDirection(blockMenu))
+                .chainDistance(chainDist)
+                .tickMultiplier(totalMultiplier)
+                .build();
+
+        onMEBusTick(block, this, slimefunBlockData, context);
     }
 
     @Override

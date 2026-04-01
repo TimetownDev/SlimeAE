@@ -2,7 +2,6 @@ package me.ddggdd135.slimeae.core.slimefun.terminals;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
@@ -20,6 +19,7 @@ import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.core.items.SlimeAEItems;
 import me.ddggdd135.slimeae.core.slimefun.Pattern;
+import me.ddggdd135.slimeae.utils.PatternUtils;
 import me.ddggdd135.slimeae.utils.VanillaRecipeUtils;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -193,8 +193,8 @@ public class MEVanillaPatternTerminal extends METerminal {
         if (blockMenu == null) return;
         ItemStack out = blockMenu.getItemInSlot(getPatternOutputSlot());
         if (out != null && !out.getType().isAir()) return;
+        if (!PatternUtils.tryAutoFillBlankPattern(blockMenu, getPatternSlot(), block)) return;
         ItemStack in = blockMenu.getItemInSlot(getPatternSlot());
-        if (in == null || in.getType().isAir() || !(SlimefunItem.getByItem(in) instanceof Pattern)) return;
 
         CraftType vanillaType = getStoredVanillaType(block);
         ItemStack toOut = SlimeAEItems.ENCODED_PATTERN.clone();
@@ -223,7 +223,7 @@ public class MEVanillaPatternTerminal extends METerminal {
         boolean hasSlimefunItem = Arrays.stream(inputs)
                 .filter(Objects::nonNull)
                 .filter(x -> !x.getType().isAir())
-                .anyMatch(x -> SlimefunItem.getByItem(x) != null);
+                .anyMatch(x -> me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(x) != null);
         if (hasSlimefunItem) return null;
 
         return VanillaRecipeUtils.getCraftingTableRecipe(inputs);
@@ -245,7 +245,7 @@ public class MEVanillaPatternTerminal extends METerminal {
         ItemStack input = inputs[0];
         ItemStack output = outputs[0];
 
-        if (SlimefunItem.getByItem(input) != null) return null;
+        if (me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(input) != null) return null;
 
         CraftingRecipe found = VanillaRecipeUtils.findRecipeByOutput(input, output, type);
         if (found != null) return found;
@@ -286,13 +286,11 @@ public class MEVanillaPatternTerminal extends METerminal {
                 NetworkRecipeFetch.moveRecipeFromNetwork(actualMenu, info.getStorage(), recipe, getCraftSlots(), false);
             }
 
-            ItemStack patternIn = actualMenu.getItemInSlot(getPatternSlot());
-            if (patternIn == null
-                    || patternIn.getType().isAir()
-                    || !(SlimefunItem.getByItem(patternIn) instanceof Pattern)) {
+            if (!PatternUtils.tryAutoFillBlankPattern(actualMenu, getPatternSlot(), block)) {
                 actualMenu.open(player);
                 return;
             }
+            ItemStack patternIn = actualMenu.getItemInSlot(getPatternSlot());
 
             ItemStack patternOut = actualMenu.getItemInSlot(getPatternOutputSlot());
             if (patternOut != null && !patternOut.getType().isAir()) {

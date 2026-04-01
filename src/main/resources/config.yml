@@ -89,3 +89,45 @@ enable_FinalTECH_BedrockCraftTable: true
 world-gen:
   # 是否启用矿石生成
   enable-ore-gen: true 
+
+storage:
+  # 数据库类型: sqlite / mysql
+  backend: sqlite
+  # 是否使用独立数据库连接池（推荐开启）
+  # 设为 false 则回退到共享 Slimefun 连接池
+  independent-pool: false
+
+  sqlite:
+    file: "plugins/SlimeAEPlugin/data/ae_storage.db"
+    wal-mode: true
+    busy-timeout: 5000
+    read-pool-size: 3
+    strict-journal-ordering: false
+
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "slimeae"
+    username: "root"
+    password: ""
+    pool-size: 5
+
+  journal-retention-minutes: 30
+  archive:
+    enabled: true
+    retention-days: 7
+    max-rows: 2000000
+
+  journal-flush-batch-size: 2000
+  checkpoint-interval: 60
+  checkpoint-threshold: 5000
+  auto-save-period: 10
+  flush-on-cell-unload: false
+  startup-verify-level: 1
+  # 备份
+  backup:
+    enabled: true
+    interval-hours: 24
+    max-backups: 7
+
+  migration-mode: auto

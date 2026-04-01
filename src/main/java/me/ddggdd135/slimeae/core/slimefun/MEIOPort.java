@@ -61,11 +61,9 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
         if (SlimefunUtils.isItemSimilar(setting, MenuItems.INPUT_MODE, true, false)) {
             for (int slot : getMeStorageCellInputSlots()) {
                 ItemStack itemStack = blockMenu.getItemInSlot(slot);
-                if (itemStack != null
-                        && !itemStack.getType().isAir()
-                        && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                        && MEItemStorageCell.isCurrentServer(itemStack)) {
-                    MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorage(itemStack);
+                if (MEItemStorageCell.isStorageCell(itemStack) && MEItemStorageCell.isCurrentServer(itemStack)) {
+                    MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorageFast(itemStack);
+                    if (meStorageCellCache == null) continue;
                     if (meStorageCellCache.getStorageUnsafe().isEmpty()) {
                         blockMenu.replaceExistingItem(slot, null);
                         MEItemStorageCell.updateLore(itemStack);
@@ -92,7 +90,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
                 if (itemStack != null
                         && !itemStack.getType().isAir()
                         && itemStack.getAmount() == 1
-                        && SlimefunItem.getByItem(itemStack) instanceof NetworkQuantumStorage) {
+                        && ItemUtils.getSlimefunItemFast(itemStack, NetworkQuantumStorage.class) != null) {
                     QuantumCache quantumCache = QuantumUtils.getQuantumCache(itemStack);
 
                     if (quantumCache == null) return;
@@ -127,11 +125,9 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
 
         for (int slot : getMeStorageCellInputSlots()) {
             ItemStack itemStack = blockMenu.getItemInSlot(slot);
-            if (itemStack != null
-                    && !itemStack.getType().isAir()
-                    && SlimefunItem.getByItem(itemStack) instanceof MEItemStorageCell
-                    && MEItemStorageCell.isCurrentServer(itemStack)) {
-                MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorage(itemStack);
+            if (MEItemStorageCell.isStorageCell(itemStack) && MEItemStorageCell.isCurrentServer(itemStack)) {
+                MEStorageCellCache meStorageCellCache = MEItemStorageCell.getStorageFast(itemStack);
+                if (meStorageCellCache == null) continue;
                 if (meStorageCellCache.getStored() >= meStorageCellCache.getSize()) {
                     blockMenu.replaceExistingItem(slot, null);
                     MEItemStorageCell.updateLore(itemStack);
@@ -159,7 +155,7 @@ public class MEIOPort extends TickingBlock implements IMEObject, InventoryBlock,
             if (itemStack != null
                     && !itemStack.getType().isAir()
                     && itemStack.getAmount() == 1
-                    && SlimefunItem.getByItem(itemStack) instanceof NetworkQuantumStorage) {
+                    && ItemUtils.getSlimefunItemFast(itemStack, NetworkQuantumStorage.class) != null) {
                 QuantumCache quantumCache = QuantumUtils.getQuantumCache(itemStack);
 
                 if (quantumCache == null) return;

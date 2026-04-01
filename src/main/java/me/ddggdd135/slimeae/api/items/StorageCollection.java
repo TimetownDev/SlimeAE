@@ -2,13 +2,13 @@ package me.ddggdd135.slimeae.api.items;
 
 import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
 import me.ddggdd135.guguslimefunlib.api.ItemHashSet;
 import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
-import me.ddggdd135.guguslimefunlib.items.ItemType;
 import me.ddggdd135.slimeae.api.ConcurrentHashSet;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -16,11 +16,12 @@ import org.bukkit.inventory.ItemStack;
 
 public class StorageCollection implements IStorage {
     private final Set<IStorage> storages;
-    private final Map<ItemType, IStorage> takeCache;
-    private final Map<ItemType, IStorage> pushCache;
+    private final Map<ItemKey, IStorage> takeCache;
+    private final Map<ItemKey, IStorage> pushCache;
     private final ItemHashSet notIncluded;
 
     private volatile ItemHashMap<Long> cachedStorage = null;
+    private volatile Map<ItemKey, List<IStorage>> itemToStorageIndex = null;
     private volatile long lastCacheTime = 0;
     private static final long STORAGE_CACHE_INTERVAL = 200;
     private volatile long changeVersion = 0;
@@ -28,8 +29,8 @@ public class StorageCollection implements IStorage {
 
     public StorageCollection(@Nonnull IStorage... storages) {
         this.storages = new ConcurrentHashSet<>();
-        this.takeCache = new HashMap<>();
-        this.pushCache = new HashMap<>();
+        this.takeCache = new ConcurrentHashMap<>();
+        this.pushCache = new ConcurrentHashMap<>();
         this.notIncluded = new ItemHashSet();
         for (IStorage storage : storages) {
             addStorage(storage);
@@ -61,8 +62,8 @@ public class StorageCollection implements IStorage {
 
             return result;
         }
-        Map.Entry<ItemType, IStorage> toRemove = null;
-        for (Map.Entry<ItemType, IStorage> entry : takeCache.entrySet()) {
+        Map.Entry<ItemKey, IStorage> toRemove = null;
+        for (Map.Entry<ItemKey, IStorage> entry : takeCache.entrySet()) {
             if (entry.getValue() == storage) {
                 toRemove = entry;
                 break;
@@ -73,7 +74,7 @@ public class StorageCollection implements IStorage {
         }
 
         toRemove = null;
-        for (Map.Entry<ItemType, IStorage> entry : pushCache.entrySet()) {
+        for (Map.Entry<ItemKey, IStorage> entry : pushCache.entrySet()) {
             if (entry.getValue() == storage) {
                 toRemove = entry;
                 break;
@@ -92,11 +93,10 @@ public class StorageCollection implements IStorage {
         ItemStack itemStack = itemStackCache.getItemStack();
         ItemKey key = itemStackCache.getItemKey();
 
-        // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
         if (notIncluded.contains(key)) notIncluded.remove(key);
 
         int amountBefore = itemStack.getAmount();
-        IStorage pushStorage = pushCache.get(key.getType());
+        IStorage pushStorage = pushCache.get(key);
         if (pushStorage != null) {
             pushStorage.pushItem(itemStackCache);
             int pushed = amountBefore - itemStack.getAmount();
@@ -122,7 +122,7 @@ public class StorageCollection implements IStorage {
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             int beforeAmount = itemStack.getAmount();
             storage.left().pushItem(itemStackCache);
-            pushCache.put(key.getType(), storage.left());
+            pushCache.put(key, storage.left());
             int pushed = beforeAmount - itemStack.getAmount();
             if (pushed > 0) adjustCache(key, pushed);
             if (itemStack.getType().isAir() || itemStack.getAmount() == 0) return;
@@ -132,11 +132,10 @@ public class StorageCollection implements IStorage {
     public void pushItem(@Nonnull ItemInfo itemInfo) {
         ItemKey key = itemInfo.getItemKey();
 
-        // 物品被推入时，从负面缓存中移除，因为该物品在存储中已有可用量
         if (notIncluded.contains(key)) notIncluded.remove(key);
 
         long amountBefore = itemInfo.getAmount();
-        IStorage pushStorage = pushCache.get(key.getType());
+        IStorage pushStorage = pushCache.get(key);
         if (pushStorage != null) {
             pushStorage.pushItem(itemInfo);
             long pushed = amountBefore - itemInfo.getAmount();
@@ -162,6 +161,7 @@ public class StorageCollection implements IStorage {
         for (ObjectIntImmutablePair<IStorage> storage : sorted) {
             long beforeAmount = itemInfo.getAmount();
             storage.left().pushItem(itemInfo);
+            pushCache.put(key, storage.left());
             long pushed = beforeAmount - itemInfo.getAmount();
             if (pushed > 0) adjustCache(key, pushed);
             if (itemInfo.isEmpty()) return;
@@ -184,44 +184,139 @@ public class StorageCollection implements IStorage {
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
         ItemStorage found = new ItemStorage();
 
-        ItemHashMap<Long> rest = new ItemHashMap<>();
-        // init rest
-        for (ItemRequest request : requests) {
-            if (notIncluded.contains(request.getKey())) continue;
-
-            long amount = rest.getOrDefault(request.getKey(), 0L);
-            amount += request.getAmount();
-            rest.putKey(request.getKey(), amount);
+        long[] remaining = new long[requests.length];
+        for (int i = 0; i < requests.length; i++) {
+            remaining[i] = notIncluded.contains(requests[i].getKey()) ? 0 : requests[i].getAmount();
         }
-        ItemUtils.trim(rest);
-        for (Map.Entry<ItemKey, Long> entry : rest.keyEntrySet()) {
-            if (takeCache.containsKey(entry.getKey())) {
-                IStorage storage = takeCache.get(entry.getKey().getType());
-                ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-                found.addItem(itemStacks.getStorageUnsafe());
+
+        Map<IStorage, List<int[]>> cacheGroups = new HashMap<>();
+        for (int i = 0; i < requests.length; i++) {
+            if (remaining[i] <= 0) continue;
+            IStorage cached = takeCache.get(requests[i].getKey());
+            if (cached == null) continue;
+            cacheGroups.computeIfAbsent(cached, k -> new ArrayList<>()).add(new int[] {i});
+        }
+        for (Map.Entry<IStorage, List<int[]>> group : cacheGroups.entrySet()) {
+            List<int[]> idxList = group.getValue();
+            ItemRequest[] subReqs = new ItemRequest[idxList.size()];
+            for (int j = 0; j < idxList.size(); j++) {
+                int idx = idxList.get(j)[0];
+                subReqs[j] = new ItemRequest(requests[idx].getKey(), remaining[idx]);
             }
-        }
-
-        rest = ItemUtils.takeItems(rest, found.getStorageUnsafe());
-        ItemUtils.trim(rest);
-        if (rest.isEmpty()) return found;
-
-        for (IStorage storage : storages) {
-            ItemStorage itemStacks = storage.takeItem(ItemUtils.createRequests(rest));
-            for (ItemKey key : itemStacks.getStorageUnsafe().sourceKeySet()) {
-                ItemStack itemStack = key.getItemStack();
-                if (itemStack != null && !itemStack.getType().isAir()) {
-                    takeCache.put(key.getType(), storage);
+            ItemStorage result = group.getKey().takeItem(subReqs);
+            ItemHashMap<Long> resultMap = result.getStorageUnsafe();
+            for (int j = 0; j < idxList.size(); j++) {
+                int idx = idxList.get(j)[0];
+                long takenAmount = resultMap.getOrDefault(requests[idx].getKey(), 0L);
+                if (takenAmount > 0) {
+                    found.addItem(requests[idx].getKey(), takenAmount);
+                    remaining[idx] -= takenAmount;
                 }
             }
-
-            found.addItem(itemStacks.getStorageUnsafe());
-            rest = ItemUtils.takeItems(rest, itemStacks.getStorageUnsafe());
-            ItemUtils.trim(rest);
-            if (rest.keySet().isEmpty()) break;
         }
-        notIncluded.addAll(rest.sourceKeySet());
-        // 性能优化：使用增量更新而非完全重建缓存
+
+        boolean allSatisfied = true;
+        for (long r : remaining) {
+            if (r > 0) {
+                allSatisfied = false;
+                break;
+            }
+        }
+
+        if (!allSatisfied) {
+            Map<ItemKey, List<IStorage>> index = itemToStorageIndex;
+            Set<IStorage> relevantStorages = null;
+            if (index != null) {
+                relevantStorages = new LinkedHashSet<>();
+                for (int i = 0; i < requests.length; i++) {
+                    if (remaining[i] <= 0) continue;
+                    List<IStorage> candidates = index.get(requests[i].getKey());
+                    if (candidates != null) relevantStorages.addAll(candidates);
+                }
+            }
+            Iterable<IStorage> toScan = relevantStorages != null ? relevantStorages : storages;
+            for (IStorage storage : toScan) {
+                List<ItemRequest> subRequests = new ArrayList<>();
+                int[] indices = new int[requests.length];
+                int subCount = 0;
+                for (int i = 0; i < requests.length; i++) {
+                    if (remaining[i] > 0) {
+                        indices[subCount] = i;
+                        subRequests.add(new ItemRequest(requests[i].getKey(), remaining[i]));
+                        subCount++;
+                    }
+                }
+                if (subRequests.isEmpty()) break;
+
+                ItemStorage result = storage.takeItem(subRequests.toArray(new ItemRequest[0]));
+                ItemHashMap<Long> resultStorage = result.getStorageUnsafe();
+
+                for (int j = 0; j < subCount; j++) {
+                    int idx = indices[j];
+                    Long takenAmount = resultStorage.getKey(requests[idx].getKey());
+                    if (takenAmount != null && takenAmount > 0) {
+                        found.addItem(requests[idx].getKey(), takenAmount);
+                        remaining[idx] -= takenAmount;
+                        takeCache.put(requests[idx].getKey(), storage);
+                    }
+                }
+
+                allSatisfied = true;
+                for (long r : remaining) {
+                    if (r > 0) {
+                        allSatisfied = false;
+                        break;
+                    }
+                }
+                if (allSatisfied) break;
+            }
+
+            if (!allSatisfied && relevantStorages != null) {
+                for (IStorage storage : storages) {
+                    if (relevantStorages.contains(storage)) continue;
+                    List<ItemRequest> subRequests = new ArrayList<>();
+                    int[] indices = new int[requests.length];
+                    int subCount = 0;
+                    for (int i = 0; i < requests.length; i++) {
+                        if (remaining[i] > 0) {
+                            indices[subCount] = i;
+                            subRequests.add(new ItemRequest(requests[i].getKey(), remaining[i]));
+                            subCount++;
+                        }
+                    }
+                    if (subRequests.isEmpty()) break;
+
+                    ItemStorage result = storage.takeItem(subRequests.toArray(new ItemRequest[0]));
+                    ItemHashMap<Long> resultStorage = result.getStorageUnsafe();
+
+                    for (int j = 0; j < subCount; j++) {
+                        int idx = indices[j];
+                        Long takenAmount = resultStorage.getKey(requests[idx].getKey());
+                        if (takenAmount != null && takenAmount > 0) {
+                            found.addItem(requests[idx].getKey(), takenAmount);
+                            remaining[idx] -= takenAmount;
+                            takeCache.put(requests[idx].getKey(), storage);
+                        }
+                    }
+
+                    allSatisfied = true;
+                    for (long r : remaining) {
+                        if (r > 0) {
+                            allSatisfied = false;
+                            break;
+                        }
+                    }
+                    if (allSatisfied) break;
+                }
+            }
+        }
+
+        for (int i = 0; i < requests.length; i++) {
+            if (remaining[i] > 0) {
+                notIncluded.add(requests[i].getKey());
+            }
+        }
+
         ItemHashMap<Long> foundStorage = found.getStorageUnsafe();
         for (ItemKey key : foundStorage.sourceKeySet()) {
             Long takenAmount = foundStorage.getKey(key);
@@ -270,15 +365,21 @@ public class StorageCollection implements IStorage {
         }
 
         ItemHashMap<Long> result = new ItemHashMap<>();
+        Map<ItemKey, List<IStorage>> newIndex = new HashMap<>();
 
         for (IStorage storage : storages) {
             ItemHashMap<Long> tmp = storage.getStorageUnsafe();
-            if (tmp instanceof CreativeItemMap) return tmp;
+            if (tmp instanceof CreativeItemMap) {
+                itemToStorageIndex = null;
+                return tmp;
+            }
             for (ItemKey itemKey : tmp.sourceKeySet()) {
                 Long currentValue = tmp.getKey(itemKey);
                 if (currentValue == null) {
                     continue;
                 }
+
+                newIndex.computeIfAbsent(itemKey, k -> new ArrayList<>()).add(storage);
 
                 Long existingValue = result.getKey(itemKey);
                 if (existingValue != null) {
@@ -289,6 +390,7 @@ public class StorageCollection implements IStorage {
             }
         }
 
+        itemToStorageIndex = newIndex;
         cachedStorage = result;
         lastCacheTime = System.currentTimeMillis();
         cachedVersion = currentVersion;

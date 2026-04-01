@@ -95,8 +95,8 @@ public class ParallelDriver extends SlimefunItem implements IMEObject, Inventory
         for (int slot : getProcessorSlots()) {
             ItemStack item = menu.getItemInSlot(slot);
             if (item != null && !item.getType().isAir()) {
-                SlimefunItem sfItem = SlimefunItem.getByItem(item);
-                if (sfItem != null && sfItem.getId().equals("PARALLEL_PROCESSOR")) {
+                String sfId = me.ddggdd135.slimeae.utils.ItemUtils.getSlimefunId(item);
+                if ("PARALLEL_PROCESSOR".equals(sfId)) {
                     count += item.getAmount();
                 }
             }

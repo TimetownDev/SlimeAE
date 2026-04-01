@@ -326,10 +326,6 @@ public class AutoCraftingTask implements IDisposable {
     }
 
     public synchronized void moveNext(int maxDevices) {
-        moveNext(maxDevices, null);
-    }
-
-    public synchronized void moveNext(int maxDevices, @Nullable Map<CraftType, Integer> taskCountByType) {
         if (!hasNext()) return;
 
         int parallelism = 1;
@@ -358,10 +354,9 @@ public class AutoCraftingTask implements IDisposable {
         }
 
         boolean anySuccess = false;
-        int devicesPerStep = Math.max(1, maxDevices / readySteps.size());
 
         for (CraftStep step : readySteps) {
-            boolean success = processStep(step, devicesPerStep, taskCountByType);
+            boolean success = processStep(step, maxDevices);
             if (success) anySuccess = true;
         }
 
@@ -434,10 +429,10 @@ public class AutoCraftingTask implements IDisposable {
                         Block[] devices = deviceCache.get(location);
                         if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
                         for (Block deviceBlock : devices) {
-                            IMECraftDevice imeCraftDevice = (IMECraftDevice)
-                                    SlimefunItem.getById(StorageCacheUtils.getBlock(deviceBlock.getLocation())
-                                            .getSfId());
-                            if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
+                            var blockData = StorageCacheUtils.getBlock(deviceBlock.getLocation());
+                            if (blockData == null) continue;
+                            SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                            if (!(sfItem instanceof IMERealCraftDevice device)) continue;
                             if (step.getRunning() > 0
                                     && device.isFinished(deviceBlock)
                                     && device.getFinishedCraftingRecipe(deviceBlock)
@@ -467,7 +462,7 @@ public class AutoCraftingTask implements IDisposable {
         }
     }
 
-    private boolean processStep(CraftStep step, int maxDevices, @Nullable Map<CraftType, Integer> taskCountByType) {
+    private boolean processStep(CraftStep step, int maxDevices) {
         CraftingRecipe nextRecipe = step.getRecipe();
         CraftType craftType = nextRecipe.getCraftType();
         boolean doCraft = !isCancelling;
@@ -491,10 +486,10 @@ public class AutoCraftingTask implements IDisposable {
                 Block[] devices = deviceCache.get(location);
                 if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
                 for (Block deviceBlock : devices) {
-                    IMECraftDevice imeCraftDevice =
-                            (IMECraftDevice) SlimefunItem.getById(StorageCacheUtils.getBlock(deviceBlock.getLocation())
-                                    .getSfId());
-                    if (!(imeCraftDevice instanceof IMERealCraftDevice device)) continue;
+                    var blockData = StorageCacheUtils.getBlock(deviceBlock.getLocation());
+                    if (blockData == null) continue;
+                    SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                    if (!(sfItem instanceof IMERealCraftDevice device)) continue;
                     if (!device.isSupport(deviceBlock, nextRecipe)) continue;
                     if (step.getRunning() < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
                         ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
@@ -519,31 +514,18 @@ public class AutoCraftingTask implements IDisposable {
             }
         }
 
-        int available = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0)
-                - info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
+        int totalSpeed = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0);
+        int used = info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0);
+        int available = totalSpeed - used;
         if (available > 0) {
-            int tasks;
-            if (taskCountByType != null) {
-                tasks = taskCountByType.getOrDefault(craftType, 0);
-            } else {
-                tasks = 0;
-                for (AutoCraftingTask task : info.getAutoCraftingSessions()) {
-                    for (CraftStep s : task.getActiveSteps()) {
-                        if (s.getRecipe().getCraftType() == craftType) tasks++;
-                    }
-                }
-            }
-            if (tasks == 0) tasks = 1;
-
             long neededSpeed = Math.min(step.getVirtualRunning() * 4L, maxDevices * 4L);
-            int speed = info.getVirtualCraftingDeviceSpeeds().getOrDefault(craftType, 0) / tasks;
-            if (speed == 0) speed++;
+            int speed = totalSpeed;
             if (speed > maxDevices * 4) speed = maxDevices * 4;
             if (speed > neededSpeed) speed = (int) neededSpeed;
+            if (speed > available) speed = available;
 
             step.addVirtualProcess(speed);
-            info.getVirtualCraftingDeviceUsed()
-                    .put(craftType, info.getVirtualCraftingDeviceUsed().getOrDefault(craftType, 0) + speed);
+            info.getVirtualCraftingDeviceUsed().put(craftType, used + speed);
         }
 
         int result = Math.min(step.getVirtualProcess() / 4, step.getVirtualRunning());
@@ -574,8 +556,9 @@ public class AutoCraftingTask implements IDisposable {
                         Block[] devs = info.getCachedCraftingDevices().get(loc);
                         if (devs != null) {
                             for (Block db : devs) {
-                                SlimefunItem si = SlimefunItem.getById(StorageCacheUtils.getBlock(db.getLocation())
-                                        .getSfId());
+                                var bd = StorageCacheUtils.getBlock(db.getLocation());
+                                if (bd == null) continue;
+                                SlimefunItem si = SlimefunItem.getById(bd.getSfId());
                                 if (si instanceof IMERealCraftDevice) {
                                     hasRealDevices = true;
                                     break;
