@@ -1,9 +1,10 @@
 package me.ddggdd135.slimeae.api.items;
 
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.Arrays;
+import java.util.HashSet;
 import javax.annotation.Nonnull;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.guguslimefunlib.items.ItemStackCache;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -43,31 +44,44 @@ public class BlockMenuStorage implements IStorage {
     @Nonnull
     @Override
     public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
-        ItemHashMap<Long> amounts = ItemUtils.getAmounts(ItemUtils.createItems(requests));
+        ItemHashMap<Long> remaining = ItemUtils.getAmounts(requests);
         ItemStorage found = new ItemStorage();
 
-        for (ItemStack itemStack : amounts.keySet()) {
+        for (ItemKey requestKey : new HashSet<>(remaining.sourceKeySet())) {
+            long needed = remaining.getOrDefault(requestKey, 0L);
+            if (needed <= 0) {
+                continue;
+            }
+
             int[] slots = blockMenu
                     .getPreset()
-                    .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, itemStack);
+                    .getSlotsAccessedByItemTransport(blockMenu, ItemTransportFlow.WITHDRAW, requestKey.getItemStack());
             for (int slot : slots) {
+                if (needed <= 0) {
+                    break;
+                }
+
                 ItemStack item = blockMenu.getItemInSlot(slot);
-                if (item == null || item.getType().isAir()) continue;
-                if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                    if (item.getAmount() > amounts.get(itemStack)) {
-                        found.addItem(ItemUtils.createItems(itemStack, amounts.get(itemStack)));
-                        long rest = item.getAmount() - amounts.get(itemStack);
-                        item.setAmount((int) rest);
-                        break;
-                    } else {
-                        found.addItem(ItemUtils.createItems(itemStack, item.getAmount()));
-                        blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
-                        long rest = amounts.get(itemStack) - item.getAmount();
-                        if (rest != 0) amounts.put(itemStack, rest);
-                        else break;
-                    }
+                if (item == null || item.getType().isAir()) {
+                    continue;
+                }
+
+                ItemKey actualKey = new ItemKey(item);
+                if (!actualKey.equals(requestKey)) {
+                    continue;
+                }
+
+                long taken = Math.min(item.getAmount(), needed);
+                found.addItem(actualKey, taken);
+                needed -= taken;
+                if (taken >= item.getAmount()) {
+                    blockMenu.replaceExistingItem(slot, new ItemStack(Material.AIR));
+                } else {
+                    item.setAmount((int) (item.getAmount() - taken));
                 }
             }
+
+            remaining.putKey(requestKey, needed);
         }
         blockMenu.markDirty();
         return found;
