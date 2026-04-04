@@ -25,6 +25,7 @@ replay_pid*
 
 # idea files
 .idea/
+SlimeAE.iml
 
 # Maven build directory
 target/

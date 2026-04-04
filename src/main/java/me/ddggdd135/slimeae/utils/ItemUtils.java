@@ -438,29 +438,35 @@ public class ItemUtils {
                 @Override
                 public ItemStorage takeItem(@Nonnull ItemRequest[] requests) {
                     ItemStack[] items = getVanillaItemStacks(block);
-                    ItemHashMap<Long> amounts = ItemUtils.getAmounts(requests);
+                    ItemHashMap<Long> remaining = ItemUtils.getAmounts(requests);
                     ItemStorage found = new ItemStorage();
 
-                    for (Map.Entry<ItemStack, Long> data : amounts.entrySet()) {
-                        ItemStack itemStack = data.getKey();
+                    for (ItemKey requestKey : new HashSet<>(remaining.sourceKeySet())) {
+                        long needed = remaining.getOrDefault(requestKey, 0L);
+                        if (needed <= 0) {
+                            continue;
+                        }
 
                         for (ItemStack item : items) {
-                            if (item == null || item.getType().isAir()) continue;
-                            if (SlimefunUtils.isItemSimilar(item, itemStack, true, false)) {
-                                if (item.getAmount() > data.getValue()) {
-                                    found.addItem(new ItemKey(itemStack), data.getValue());
-                                    long rest = item.getAmount() - data.getValue();
-                                    item.setAmount((int) rest);
-                                    break;
-                                } else {
-                                    found.addItem(new ItemKey(itemStack), item.getAmount());
-                                    long rest = data.getValue() - item.getAmount();
-                                    item.setAmount(0);
-                                    if (rest != 0) amounts.put(itemStack, rest);
-                                    else break;
-                                }
+                            if (needed <= 0) {
+                                break;
                             }
+                            if (item == null || item.getType().isAir()) {
+                                continue;
+                            }
+
+                            ItemKey actualKey = new ItemKey(item);
+                            if (!actualKey.equals(requestKey)) {
+                                continue;
+                            }
+
+                            long taken = Math.min(item.getAmount(), needed);
+                            found.addItem(actualKey, taken);
+                            needed -= taken;
+                            item.setAmount((int) (item.getAmount() - taken));
                         }
+
+                        remaining.putKey(requestKey, needed);
                     }
                     return found;
                 }
