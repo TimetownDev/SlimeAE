@@ -24,19 +24,14 @@ public final class ImportOperation {
     private ImportOperation() {}
 
     private static int moveToNetwork(@Nonnull IStorage networkStorage, @Nonnull ItemStack sourceRef, int amount) {
-        int reserved = Math.min(sourceRef.getAmount(), amount);
-        if (reserved <= 0) {
+        int toMove = Math.min(sourceRef.getAmount(), amount);
+        if (toMove <= 0) {
             return 0;
         }
 
-        sourceRef.setAmount(sourceRef.getAmount() - reserved);
-        ItemStack moving = sourceRef.asQuantity(reserved);
+        ItemStack moving = sourceRef.asQuantity(toMove);
         networkStorage.pushItem(moving);
-        int moved = reserved - moving.getAmount();
-        if (moving.getAmount() > 0) {
-            sourceRef.setAmount(sourceRef.getAmount() + moving.getAmount());
-        }
-        return moved;
+        return toMove - moving.getAmount();
     }
 
     public static void execute(
@@ -92,8 +87,17 @@ public final class ImportOperation {
                 ItemStack sourceRef = inv.getItemInSlot(slot);
                 if (sourceRef == null || sourceRef.getType().isAir()) continue;
 
-                int toImport = Math.min(sourceRef.getAmount(), budget - totalMoved);
+                int sourceAmount = sourceRef.getAmount();
+                int toImport = Math.min(sourceAmount, budget - totalMoved);
                 int moved = moveToNetwork(networkStorage, sourceRef, toImport);
+                if (moved > 0) {
+                    int remaining = sourceAmount - moved;
+                    if (remaining > 0) {
+                        sourceRef.setAmount(remaining);
+                    } else {
+                        inv.replaceExistingItem(slot, null);
+                    }
+                }
                 totalMoved += moved;
                 if (moved < toImport) break;
             }
@@ -102,7 +106,16 @@ public final class ImportOperation {
                 ItemStack sourceRef = inv.getItemInSlot(slot);
                 if (sourceRef == null || sourceRef.getType().isAir()) continue;
 
-                moveToNetwork(networkStorage, sourceRef, tickMultiplier);
+                int sourceAmount = sourceRef.getAmount();
+                int moved = moveToNetwork(networkStorage, sourceRef, tickMultiplier);
+                if (moved > 0) {
+                    int remaining = sourceAmount - moved;
+                    if (remaining > 0) {
+                        sourceRef.setAmount(remaining);
+                    } else {
+                        inv.replaceExistingItem(slot, null);
+                    }
+                }
                 return;
             }
         }
@@ -117,8 +130,17 @@ public final class ImportOperation {
             FurnaceInventory fi = furnace.getInventory();
             ItemStack result = fi.getResult();
             if (result == null || result.getType().isAir()) return;
+            int resultAmount = result.getAmount();
             int maxImport = advanced ? result.getMaxStackSize() * tickMultiplier : tickMultiplier;
-            moveToNetwork(networkStorage, result, maxImport);
+            int moved = moveToNetwork(networkStorage, result, maxImport);
+            if (moved > 0) {
+                int remaining = resultAmount - moved;
+                if (remaining > 0) {
+                    result.setAmount(remaining);
+                } else {
+                    fi.setResult(null);
+                }
+            }
             return;
         }
 
@@ -143,8 +165,17 @@ public final class ImportOperation {
                 ItemStack sourceRef = inventory.getItem(i);
                 if (sourceRef == null || sourceRef.getType().isAir()) continue;
 
-                int toImport = Math.min(sourceRef.getAmount(), budget - totalMoved);
+                int sourceAmount = sourceRef.getAmount();
+                int toImport = Math.min(sourceAmount, budget - totalMoved);
                 int moved = moveToNetwork(networkStorage, sourceRef, toImport);
+                if (moved > 0) {
+                    int remaining = sourceAmount - moved;
+                    if (remaining > 0) {
+                        sourceRef.setAmount(remaining);
+                    } else {
+                        inventory.setItem(i, null);
+                    }
+                }
                 totalMoved += moved;
                 if (moved < toImport) break;
             }
@@ -153,7 +184,16 @@ public final class ImportOperation {
                 ItemStack sourceRef = inventory.getItem(i);
                 if (sourceRef == null || sourceRef.getType().isAir()) continue;
 
-                moveToNetwork(networkStorage, sourceRef, tickMultiplier);
+                int sourceAmount = sourceRef.getAmount();
+                int moved = moveToNetwork(networkStorage, sourceRef, tickMultiplier);
+                if (moved > 0) {
+                    int remaining = sourceAmount - moved;
+                    if (remaining > 0) {
+                        sourceRef.setAmount(remaining);
+                    } else {
+                        inventory.setItem(i, null);
+                    }
+                }
                 return;
             }
         }
