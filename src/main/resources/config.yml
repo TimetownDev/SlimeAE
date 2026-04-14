@@ -23,6 +23,11 @@ auto-crafting:
   parallel:
     enabled: true
     max-parallelism: 16
+  # 持久化设置
+  persistence:
+    enabled: true
+    # 定期备份间隔(秒), 0=不定期备份
+    backup-interval-seconds: 60
 
 # 链式总线相关设置
 chained-bus:

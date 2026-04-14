@@ -62,27 +62,8 @@ public class StorageCollection implements IStorage {
 
             return result;
         }
-        Map.Entry<ItemKey, IStorage> toRemove = null;
-        for (Map.Entry<ItemKey, IStorage> entry : takeCache.entrySet()) {
-            if (entry.getValue() == storage) {
-                toRemove = entry;
-                break;
-            }
-        }
-        if (toRemove != null) {
-            takeCache.remove(toRemove.getKey());
-        }
-
-        toRemove = null;
-        for (Map.Entry<ItemKey, IStorage> entry : pushCache.entrySet()) {
-            if (entry.getValue() == storage) {
-                toRemove = entry;
-                break;
-            }
-        }
-        if (toRemove != null) {
-            pushCache.remove(toRemove.getKey());
-        }
+        takeCache.values().removeIf(v -> v == storage);
+        pushCache.values().removeIf(v -> v == storage);
 
         boolean removed = storages.remove(storage);
         if (removed) invalidateStorageCache();
@@ -186,7 +167,7 @@ public class StorageCollection implements IStorage {
 
         long[] remaining = new long[requests.length];
         for (int i = 0; i < requests.length; i++) {
-            remaining[i] = notIncluded.contains(requests[i].getKey()) ? 0 : requests[i].getAmount();
+            remaining[i] = requests[i].getAmount();
         }
 
         Map<IStorage, List<int[]>> cacheGroups = new HashMap<>();
@@ -314,6 +295,8 @@ public class StorageCollection implements IStorage {
         for (int i = 0; i < requests.length; i++) {
             if (remaining[i] > 0) {
                 notIncluded.add(requests[i].getKey());
+            } else {
+                notIncluded.remove(requests[i].getKey());
             }
         }
 
@@ -332,15 +315,19 @@ public class StorageCollection implements IStorage {
         changeVersion++;
     }
 
+    private final Object cacheLock = new Object();
+
     private void adjustCache(@Nonnull ItemKey key, long delta) {
-        ItemHashMap<Long> cached = cachedStorage;
-        if (cached == null || cached instanceof CreativeItemMap) return;
-        Long current = cached.getKey(key);
-        long newValue = (current != null ? current : 0L) + delta;
-        if (newValue <= 0) {
-            cached.removeKey(key);
-        } else {
-            cached.putKey(key, newValue);
+        synchronized (cacheLock) {
+            ItemHashMap<Long> cached = cachedStorage;
+            if (cached == null || cached instanceof CreativeItemMap) return;
+            Long current = cached.getKey(key);
+            long newValue = (current != null ? current : 0L) + delta;
+            if (newValue <= 0) {
+                cached.removeKey(key);
+            } else {
+                cached.putKey(key, newValue);
+            }
         }
     }
 

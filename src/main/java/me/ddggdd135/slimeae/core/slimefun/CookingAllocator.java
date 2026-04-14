@@ -83,7 +83,54 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     private void restoreState(@Nonnull Location location) {
-        clearState(location);
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        if (blockData == null) {
+            clearState(location);
+            return;
+        }
+        String running = blockData.getData(DATA_KEY_RUNNING);
+        if (!"true".equals(running)) {
+            clearState(location);
+            return;
+        }
+        String recipeTypeName = blockData.getData(DATA_KEY_RECIPE_TYPE);
+        String inputStr = blockData.getData(DATA_KEY_RECIPE_INPUT);
+        String outputStr = blockData.getData(DATA_KEY_RECIPE_OUTPUT);
+        if (recipeTypeName == null || inputStr == null || outputStr == null) {
+            clearState(location);
+            return;
+        }
+        try {
+            me.ddggdd135.slimeae.api.autocraft.CraftType craftType =
+                    me.ddggdd135.slimeae.api.autocraft.CraftType.fromName(recipeTypeName);
+            if (craftType == null) {
+                clearState(location);
+                return;
+            }
+            List<ItemStack> inputList = new ArrayList<>();
+            for (String s : inputStr.split("\\|")) {
+                ItemStack item = (ItemStack) SerializeUtils.string2Object(s);
+                if (item != null) inputList.add(item);
+            }
+            List<ItemStack> outputList = new ArrayList<>();
+            for (String s : outputStr.split("\\|")) {
+                ItemStack item = (ItemStack) SerializeUtils.string2Object(s);
+                if (item != null) outputList.add(item);
+            }
+            if (inputList.isEmpty() || outputList.isEmpty()) {
+                clearState(location);
+                return;
+            }
+            CraftingRecipe recipe = new CraftingRecipe(
+                    craftType, inputList.toArray(new ItemStack[0]), outputList.toArray(new ItemStack[0]));
+            recipeCache.put(location, recipe);
+            runningCache.add(location);
+        } catch (Exception e) {
+            SlimeAEPlugin.getInstance()
+                    .getLogger()
+                    .log(Level.WARNING, "Failed to restore CookingAllocator state at " + location, e);
+            clearState(location);
+        }
     }
 
     @Nonnull
@@ -198,20 +245,31 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     @Override
-    public void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
+    public boolean startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe) {
         Location loc = block.getLocation();
         Block target = getTargetBlock(block);
-        if (target == null) return;
+        if (target == null) return false;
 
         IStorage targetStorage = ItemUtils.getStorage(target, false, false);
-        if (targetStorage == null) return;
+        if (targetStorage == null) return false;
 
-        targetStorage.pushItem(Arrays.stream(ItemUtils.trimItems(recipe.getInput()))
+        ItemStack[] inputs = Arrays.stream(ItemUtils.trimItems(recipe.getInput()))
                 .map(ItemStack::clone)
-                .toArray(ItemStack[]::new));
+                .toArray(ItemStack[]::new);
+        targetStorage.pushItem(inputs);
+
+        for (ItemStack input : inputs) {
+            if (input != null && !input.getType().isAir() && input.getAmount() > 0) {
+                recipeCache.remove(loc);
+                runningCache.remove(loc);
+                return false;
+            }
+        }
+
         recipeCache.put(loc, recipe);
         runningCache.add(loc);
         saveState(loc, recipe);
+        return true;
     }
 
     @Override

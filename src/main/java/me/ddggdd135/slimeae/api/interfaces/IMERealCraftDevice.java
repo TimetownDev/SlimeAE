@@ -8,7 +8,7 @@ import org.bukkit.block.Block;
 public interface IMERealCraftDevice extends IMECraftDevice {
     boolean canStartCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe);
 
-    void startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe);
+    boolean startCrafting(@Nonnull Block block, @Nonnull CraftingRecipe recipe);
 
     boolean isFinished(@Nonnull Block block);
 
