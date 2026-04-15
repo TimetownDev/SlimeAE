@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
@@ -45,6 +46,7 @@ public class AutoCraftingTask implements IDisposable {
     private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
 
     public static final String CRAFTING_KEY = "auto_crafting";
+    private final UUID taskId;
     private final CraftingRecipe recipe;
     private final NetworkInfo info;
     private final long count;
@@ -52,14 +54,18 @@ public class AutoCraftingTask implements IDisposable {
     private final Map<CraftStep, Set<CraftStep>> stepDependencies;
     private final Set<CraftStep> completedSteps = new HashSet<>();
     private int globalFailTimes;
+    private int cancelFailTimes;
     private volatile List<CraftStep> lastActiveSteps = Collections.emptyList();
     private final AEMenu menu;
     private boolean isCancelling = false;
     private final Set<CraftingRecipe> craftingPath = new HashSet<>();
     private ItemStorage storage;
-    private volatile boolean disposed;
+    private volatile TaskState taskState = TaskState.RUNNING;
+    private final long createdAt;
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
+        this.taskId = UUID.randomUUID();
+        this.createdAt = System.currentTimeMillis();
         this.info = info;
         this.recipe = recipe;
         this.count = count;
@@ -179,12 +185,166 @@ public class AutoCraftingTask implements IDisposable {
             }
         }
 
-        storage = info.getStorage().takeItem(ItemUtils.createRequests(storage.copyStorage()));
+        for (int i = 0; i < craftingSteps.size() - 1; i++) {
+            CraftStep step = craftingSteps.get(i);
+            for (Map.Entry<ItemKey, Long> entry :
+                    step.getRecipe().getOutputAmounts().keyEntrySet()) {
+                storage.takeItem(new ItemRequest(entry.getKey(), entry.getValue() * step.getAmount()));
+            }
+        }
+
+        ItemHashMap<Long> requested = storage.copyStorage();
+        storage = info.getStorage().takeItem(ItemUtils.createRequests(requested));
+
+        ItemHashMap<Long> actual = storage.getStorageUnsafe();
+        ItemStorage missingStorage = new ItemStorage();
+        for (Map.Entry<ItemKey, Long> entry : requested.keyEntrySet()) {
+            long need = entry.getValue();
+            long got = actual.getOrDefault(entry.getKey(), 0L);
+            if (got < need) {
+                missingStorage.addItem(entry.getKey(), need - got);
+            }
+        }
+        if (!missingStorage.getStorageUnsafe().isEmpty()) {
+            ItemHashMap<Long> toReturn = new ItemHashMap<>(actual);
+            info.getStorage().pushItem(toReturn);
+            ItemUtils.trim(toReturn);
+            if (!toReturn.isEmpty()) {
+                synchronized (info) {
+                    info.getTempStorage().addItem(toReturn, true);
+                }
+            }
+            storage = new ItemStorage();
+            throw new NoEnoughMaterialsException(missingStorage.getStorageUnsafe());
+        }
 
         String TitleInfo = craftingSteps == newSteps ? "&2(新版算法)" : "&7(旧版算法)";
         menu = new AEMenu("&e合成任务" + TitleInfo);
         menu.setSize(54);
         menu.addMenuCloseHandler(player -> dispose());
+    }
+
+    private AutoCraftingTask(
+            UUID taskId,
+            NetworkInfo info,
+            CraftingRecipe recipe,
+            long count,
+            List<CraftStep> steps,
+            Map<CraftStep, Set<CraftStep>> deps,
+            Set<CraftStep> completed,
+            ItemStorage storage,
+            int globalFailTimes,
+            int cancelFailTimes,
+            boolean isCancelling,
+            long createdAt) {
+        this.taskId = taskId;
+        this.info = info;
+        this.recipe = recipe;
+        this.count = count;
+        this.craftingSteps = steps;
+        this.stepDependencies = deps;
+        this.completedSteps.addAll(completed);
+        this.storage = storage;
+        this.globalFailTimes = globalFailTimes;
+        this.cancelFailTimes = cancelFailTimes;
+        this.isCancelling = isCancelling;
+        this.createdAt = createdAt;
+        this.menu = new AEMenu("&e合成任务 &d(恢复)");
+        this.menu.setSize(54);
+        this.menu.addMenuCloseHandler(player -> dispose());
+    }
+
+    public static AutoCraftingTask restore(
+            UUID taskId,
+            NetworkInfo info,
+            CraftingRecipe recipe,
+            long count,
+            List<CraftStep> steps,
+            Map<CraftStep, Set<CraftStep>> deps,
+            Set<CraftStep> completed,
+            ItemStorage storage,
+            int globalFailTimes,
+            int cancelFailTimes,
+            boolean isCancelling,
+            long createdAt) {
+        return new AutoCraftingTask(
+                taskId,
+                info,
+                recipe,
+                count,
+                steps,
+                deps,
+                completed,
+                storage,
+                globalFailTimes,
+                cancelFailTimes,
+                isCancelling,
+                createdAt);
+    }
+
+    public synchronized void suspend() {
+        if (taskState != TaskState.RUNNING && taskState != TaskState.CANCELLING) return;
+        taskState = TaskState.SUSPENDED;
+
+        for (CraftStep step : craftingSteps) {
+            if (step.getVirtualRunning() > 0) {
+                ItemHashMap<Long> refund = new ItemHashMap<>();
+                for (Map.Entry<ItemKey, Long> entry :
+                        step.getRecipe().getInputAmounts().keyEntrySet()) {
+                    refund.putKey(entry.getKey(), entry.getValue() * step.getVirtualRunning());
+                }
+                storage.addItem(refund);
+                step.setAmount(step.getAmount() + step.getVirtualRunning());
+                step.setVirtualRunning(0);
+                step.setVirtualProcess(0);
+            }
+
+            if (step.getRecipe().getCraftType().isProcess()) {
+                Set<Location> toRemove = new HashSet<>();
+                for (Location deviceLoc : step.getRunningDevices()) {
+                    Block deviceBlock = deviceLoc.getBlock();
+                    var blockData = StorageCacheUtils.getBlock(deviceLoc);
+                    if (blockData == null) {
+                        ItemHashMap<Long> refund = new ItemHashMap<>();
+                        for (Map.Entry<ItemKey, Long> entry :
+                                step.getRecipe().getInputAmounts().keyEntrySet()) {
+                            refund.putKey(entry.getKey(), entry.getValue());
+                        }
+                        storage.addItem(refund);
+                        toRemove.add(deviceLoc);
+                        continue;
+                    }
+                    SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                    if (!(sfItem instanceof IMERealCraftDevice device)) {
+                        ItemHashMap<Long> refund = new ItemHashMap<>();
+                        for (Map.Entry<ItemKey, Long> entry :
+                                step.getRecipe().getInputAmounts().keyEntrySet()) {
+                            refund.putKey(entry.getKey(), entry.getValue());
+                        }
+                        storage.addItem(refund);
+                        toRemove.add(deviceLoc);
+                        continue;
+                    }
+                    if (device.isFinished(deviceBlock)) {
+                        CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                        if (finished != null && finished.equals(step.getRecipe())) {
+                            device.finishCrafting(deviceBlock);
+                            storage.addItem(step.getRecipe().getOutput());
+                            toRemove.add(deviceLoc);
+                        }
+                    }
+                }
+                for (Location loc : toRemove) {
+                    step.removeRunningDevice(loc);
+                }
+            }
+        }
+
+        if (SlimeAEPlugin.getCraftTaskPersistence() != null) {
+            SlimeAEPlugin.getCraftTaskPersistence().save(this);
+        }
+
+        info.getAutoCraftingSessions().remove(this);
     }
 
     @Nonnull
@@ -199,6 +359,42 @@ public class AutoCraftingTask implements IDisposable {
 
     public long getCount() {
         return count;
+    }
+
+    public UUID getTaskId() {
+        return taskId;
+    }
+
+    public TaskState getTaskState() {
+        return taskState;
+    }
+
+    public Map<CraftStep, Set<CraftStep>> getStepDependencies() {
+        return stepDependencies;
+    }
+
+    public Set<CraftStep> getCompletedSteps() {
+        return completedSteps;
+    }
+
+    public ItemStorage getStorage() {
+        return storage;
+    }
+
+    public int getGlobalFailTimes() {
+        return globalFailTimes;
+    }
+
+    public int getCancelFailTimes() {
+        return cancelFailTimes;
+    }
+
+    public boolean isCancelling() {
+        return isCancelling;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
     }
 
     @Nonnull
@@ -419,29 +615,42 @@ public class AutoCraftingTask implements IDisposable {
                 CraftType craftType = nextRecipe.getCraftType();
 
                 if (craftType.isProcess()) {
-                    List<Location> holderLocations =
-                            info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
-                    Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
-                    for (Location location : holderLocations) {
-                        IMECraftHolder holder =
-                                SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-                        if (holder == null) continue;
-                        Block[] devices = deviceCache.get(location);
-                        if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
-                        for (Block deviceBlock : devices) {
-                            var blockData = StorageCacheUtils.getBlock(deviceBlock.getLocation());
-                            if (blockData == null) continue;
-                            SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
-                            if (!(sfItem instanceof IMERealCraftDevice device)) continue;
-                            if (step.getRunning() > 0
-                                    && device.isFinished(deviceBlock)
-                                    && device.getFinishedCraftingRecipe(deviceBlock)
-                                            .equals(nextRecipe)) {
+                    Set<Location> toRemove = new HashSet<>();
+                    for (Location deviceLoc : step.getRunningDevices()) {
+                        Block deviceBlock = deviceLoc.getBlock();
+                        var blockData = StorageCacheUtils.getBlock(deviceLoc);
+                        if (blockData == null) {
+                            ItemHashMap<Long> refund = new ItemHashMap<>();
+                            for (Map.Entry<ItemKey, Long> entry :
+                                    nextRecipe.getInputAmounts().keyEntrySet()) {
+                                refund.putKey(entry.getKey(), entry.getValue());
+                            }
+                            storage.addItem(refund);
+                            toRemove.add(deviceLoc);
+                            continue;
+                        }
+                        SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                        if (!(sfItem instanceof IMERealCraftDevice device)) {
+                            ItemHashMap<Long> refund = new ItemHashMap<>();
+                            for (Map.Entry<ItemKey, Long> entry :
+                                    nextRecipe.getInputAmounts().keyEntrySet()) {
+                                refund.putKey(entry.getKey(), entry.getValue());
+                            }
+                            storage.addItem(refund);
+                            toRemove.add(deviceLoc);
+                            continue;
+                        }
+                        if (device.isFinished(deviceBlock)) {
+                            CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                            if (finished != null && finished.equals(nextRecipe)) {
                                 device.finishCrafting(deviceBlock);
                                 storage.addItem(nextRecipe.getOutput());
-                                step.decrementRunning();
+                                toRemove.add(deviceLoc);
                             }
                         }
+                    }
+                    for (Location loc : toRemove) {
+                        step.removeRunningDevice(loc);
                     }
                 }
 
@@ -458,6 +667,27 @@ public class AutoCraftingTask implements IDisposable {
         }
 
         if (!anyRunning) {
+            dispose();
+            return;
+        }
+
+        cancelFailTimes++;
+        if (cancelFailTimes >= 64) {
+            for (CraftStep step : craftingSteps) {
+                if (step.getRunning() > 0) {
+                    CraftingRecipe nextRecipe = step.getRecipe();
+                    int remaining = step.getRunning();
+                    ItemHashMap<Long> refund = new ItemHashMap<>();
+                    for (Map.Entry<ItemKey, Long> entry :
+                            nextRecipe.getInputAmounts().keyEntrySet()) {
+                        refund.putKey(entry.getKey(), entry.getValue() * remaining);
+                    }
+                    storage.addItem(refund);
+                    for (Location loc : new HashSet<>(step.getRunningDevices())) {
+                        step.removeRunningDevice(loc);
+                    }
+                }
+            }
             dispose();
         }
     }
@@ -478,37 +708,66 @@ public class AutoCraftingTask implements IDisposable {
         List<Location> holderLocations = info.getRecipeToHolders().getOrDefault(nextRecipe, Collections.emptyList());
 
         if (craftType.isProcess()) {
-            Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
-            for (Location location : holderLocations) {
-                IMECraftHolder holder =
-                        SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
-                if (holder == null) continue;
-                Block[] devices = deviceCache.get(location);
-                if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
-                for (Block deviceBlock : devices) {
-                    var blockData = StorageCacheUtils.getBlock(deviceBlock.getLocation());
-                    if (blockData == null) continue;
-                    SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
-                    if (!(sfItem instanceof IMERealCraftDevice device)) continue;
-                    if (!device.isSupport(deviceBlock, nextRecipe)) continue;
-                    if (step.getRunning() < maxDevices && doCraft && device.canStartCrafting(deviceBlock, nextRecipe)) {
-                        ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
-                        if (storage.contains(inputRequests)) {
-                            storage.takeItem(inputRequests);
-                            device.startCrafting(deviceBlock, nextRecipe);
-                            step.incrementRunning();
-                            step.decreaseAmount(1);
-                            hasProgress = true;
-                            if (step.getAmount() <= 0) doCraft = false;
-                        }
-                    } else if (step.getRunning() > 0
-                            && device.isFinished(deviceBlock)
-                            && device.getFinishedCraftingRecipe(deviceBlock).equals(nextRecipe)) {
-                        CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+            Set<Location> invalidDevices = new HashSet<>();
+            for (Location deviceLoc : step.getRunningDevices()) {
+                Block deviceBlock = deviceLoc.getBlock();
+                var blockData = StorageCacheUtils.getBlock(deviceLoc);
+                if (blockData == null) {
+                    invalidDevices.add(deviceLoc);
+                    continue;
+                }
+                SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                if (!(sfItem instanceof IMERealCraftDevice device)) {
+                    invalidDevices.add(deviceLoc);
+                    continue;
+                }
+                if (device.isFinished(deviceBlock)) {
+                    CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
+                    if (finished != null && finished.equals(nextRecipe)) {
                         device.finishCrafting(deviceBlock);
                         storage.addItem(finished.getOutput());
-                        step.decrementRunning();
+                        invalidDevices.add(deviceLoc);
                         hasProgress = true;
+                    }
+                }
+            }
+            for (Location loc : invalidDevices) {
+                step.removeRunningDevice(loc);
+            }
+
+            if (doCraft) {
+                Map<Location, Block[]> deviceCache = info.getCachedCraftingDevices();
+                for (Location location : holderLocations) {
+                    IMECraftHolder holder =
+                            SlimeAEPlugin.getNetworkData().AllCraftHolders.get(location);
+                    if (holder == null) continue;
+                    Block[] devices = deviceCache.get(location);
+                    if (devices == null) devices = holder.getCraftingDevices(location.getBlock());
+                    for (Block deviceBlock : devices) {
+                        if (step.getAmount() <= 0 || step.getRunning() >= maxDevices) break;
+                        var blockData = StorageCacheUtils.getBlock(deviceBlock.getLocation());
+                        if (blockData == null) continue;
+                        SlimefunItem sfItem = SlimefunItem.getById(blockData.getSfId());
+                        if (!(sfItem instanceof IMERealCraftDevice device)) continue;
+                        if (!device.isSupport(deviceBlock, nextRecipe)) continue;
+                        if (device.canStartCrafting(deviceBlock, nextRecipe)) {
+                            ItemRequest[] inputRequests = ItemUtils.createRequests(nextRecipe.getInputAmounts());
+                            if (storage.contains(inputRequests)) {
+                                storage.takeItem(inputRequests);
+                                if (device.startCrafting(deviceBlock, nextRecipe)) {
+                                    step.addRunningDevice(deviceBlock.getLocation());
+                                    step.decreaseAmount(1);
+                                    hasProgress = true;
+                                } else {
+                                    ItemHashMap<Long> refund = new ItemHashMap<>();
+                                    for (Map.Entry<ItemKey, Long> re :
+                                            nextRecipe.getInputAmounts().keyEntrySet()) {
+                                        refund.putKey(re.getKey(), re.getValue());
+                                    }
+                                    storage.addItem(refund);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -576,8 +835,6 @@ public class AutoCraftingTask implements IDisposable {
                 }
             }
         }
-
-        if (!step.isIdle()) hasProgress = true;
 
         return hasProgress;
     }
@@ -712,8 +969,12 @@ public class AutoCraftingTask implements IDisposable {
 
     @Override
     public synchronized void dispose() {
-        if (disposed) return;
-        disposed = true;
+        if (taskState == TaskState.DISPOSED) return;
+        taskState = TaskState.DISPOSED;
+
+        if (SlimeAEPlugin.getCraftTaskPersistence() != null) {
+            SlimeAEPlugin.getCraftTaskPersistence().delete(taskId);
+        }
 
         AutoCraftingTaskDisposingEvent e = new AutoCraftingTaskDisposingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
@@ -757,7 +1018,9 @@ public class AutoCraftingTask implements IDisposable {
                             + ItemUtils.getItemName(de.getKey().getItemStack()) + " = " + de.getValue());
                 }
             }
-            info.getTempStorage().addItem(toReturn, true);
+            synchronized (info) {
+                info.getTempStorage().addItem(toReturn, true);
+            }
         } else {
             if (SlimeAEPlugin.isDebug()) {
                 debugLog.info("[AutoCraft-Debug] 所有物品已成功推回存储");

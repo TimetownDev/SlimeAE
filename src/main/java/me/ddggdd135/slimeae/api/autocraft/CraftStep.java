@@ -1,11 +1,15 @@
 package me.ddggdd135.slimeae.api.autocraft;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
+import org.bukkit.Location;
 
 public class CraftStep {
     private final CraftingRecipe recipe;
     private long amount;
-    private int running;
+    private final Set<Location> runningDevices = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private int virtualRunning;
     private int virtualProcess;
 
@@ -32,19 +36,32 @@ public class CraftStep {
     }
 
     public int getRunning() {
-        return running;
+        return runningDevices.size();
+    }
+
+    public void addRunningDevice(@Nonnull Location location) {
+        runningDevices.add(location);
+    }
+
+    public void removeRunningDevice(@Nonnull Location location) {
+        runningDevices.remove(location);
+    }
+
+    @Nonnull
+    public Set<Location> getRunningDevices() {
+        return Collections.unmodifiableSet(runningDevices);
     }
 
     public void setRunning(int running) {
-        this.running = running;
+        // no-op kept for compatibility
     }
 
     public void incrementRunning() {
-        this.running++;
+        // no-op - use addRunningDevice instead
     }
 
     public void decrementRunning() {
-        this.running--;
+        // no-op - use removeRunningDevice instead
     }
 
     public int getVirtualRunning() {
@@ -68,7 +85,7 @@ public class CraftStep {
     }
 
     public boolean isIdle() {
-        return running <= 0 && virtualRunning <= 0;
+        return runningDevices.isEmpty() && virtualRunning <= 0;
     }
 
     public boolean isCompleted() {

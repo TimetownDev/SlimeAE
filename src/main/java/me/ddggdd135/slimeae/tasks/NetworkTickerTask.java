@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.autocraft.AutoCraftingTask;
+import me.ddggdd135.slimeae.api.database.v3.CraftTaskPersistence;
 import me.ddggdd135.slimeae.api.enums.AETaskType;
 import me.ddggdd135.slimeae.api.events.AEPostTaskEvent;
 import me.ddggdd135.slimeae.api.events.AEPreTaskEvent;
@@ -73,6 +74,16 @@ public class NetworkTickerTask implements Runnable {
                     if (tick % 160 == 0) {
                         info = SlimeAEPlugin.getNetworkData().refreshNetwork(info.getController());
                         if (info == null) continue;
+                        CraftTaskPersistence persistence = SlimeAEPlugin.getCraftTaskPersistence();
+                        if (persistence != null) {
+                            try {
+                                persistence.tryRestore(info);
+                            } catch (Exception e) {
+                                SlimeAEPlugin.getInstance()
+                                        .getLogger()
+                                        .log(Level.WARNING, "Failed to restore tasks for network", e);
+                            }
+                        }
                     } else if (info.needsStorageUpdate() || info.needsRecipeUpdate()) {
                         if (info.needsStorageUpdate())
                             SlimeAEPlugin.getNetworkData().updateStorage(info);
