@@ -46,6 +46,7 @@ public class CraftTaskPersistence {
                         + "global_fail INT NOT NULL DEFAULT 0, "
                         + "cancel_fail INT NOT NULL DEFAULT 0, "
                         + "is_cancelling TINYINT NOT NULL DEFAULT 0, "
+                        + "is_suspended TINYINT NOT NULL DEFAULT 0, "
                         + "created_at BIGINT NOT NULL, "
                         + "suspended_at BIGINT NOT NULL"
                         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
@@ -65,6 +66,7 @@ public class CraftTaskPersistence {
                         + "global_fail INTEGER NOT NULL DEFAULT 0, "
                         + "cancel_fail INTEGER NOT NULL DEFAULT 0, "
                         + "is_cancelling INTEGER NOT NULL DEFAULT 0, "
+                        + "is_suspended INTEGER NOT NULL DEFAULT 0, "
                         + "created_at INTEGER NOT NULL, "
                         + "suspended_at INTEGER NOT NULL)";
             }
@@ -83,6 +85,17 @@ public class CraftTaskPersistence {
                         "CREATE INDEX IF NOT EXISTS idx_craft_tasks_ctrl ON ae_v3_craft_tasks(controller_world, controller_x, controller_y, controller_z)";
                 conn.createStatement().execute(idx);
             }
+
+            try {
+                String alter;
+                if (mysql) {
+                    alter = "ALTER TABLE ae_v3_craft_tasks ADD COLUMN is_suspended TINYINT NOT NULL DEFAULT 0";
+                } else {
+                    alter = "ALTER TABLE ae_v3_craft_tasks ADD COLUMN is_suspended INTEGER NOT NULL DEFAULT 0";
+                }
+                conn.createStatement().execute(alter);
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Failed to create ae_v3_craft_tasks table", e);
         }
@@ -94,8 +107,8 @@ public class CraftTaskPersistence {
             upsert = "INSERT INTO ae_v3_craft_tasks "
                     + "(task_id, controller_world, controller_x, controller_y, controller_z, "
                     + "recipe_data, task_count, steps_data, deps_data, completed_idx, "
-                    + "storage_data, global_fail, cancel_fail, is_cancelling, created_at, suspended_at) "
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    + "storage_data, global_fail, cancel_fail, is_cancelling, is_suspended, created_at, suspended_at) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?) "
                     + "ON DUPLICATE KEY UPDATE "
                     + "recipe_data=VALUES(recipe_data), task_count=VALUES(task_count), "
                     + "steps_data=VALUES(steps_data), deps_data=VALUES(deps_data), "
@@ -103,14 +116,54 @@ public class CraftTaskPersistence {
                     + "global_fail=VALUES(global_fail), cancel_fail=VALUES(cancel_fail), "
                     + "is_cancelling=VALUES(is_cancelling), suspended_at=VALUES(suspended_at)";
         } else {
-            upsert = "INSERT OR REPLACE INTO ae_v3_craft_tasks "
+            upsert = "INSERT INTO ae_v3_craft_tasks "
                     + "(task_id, controller_world, controller_x, controller_y, controller_z, "
                     + "recipe_data, task_count, steps_data, deps_data, completed_idx, "
-                    + "storage_data, global_fail, cancel_fail, is_cancelling, created_at, suspended_at) "
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    + "storage_data, global_fail, cancel_fail, is_cancelling, is_suspended, created_at, suspended_at) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,?) "
+                    + "ON CONFLICT(task_id) DO UPDATE SET "
+                    + "recipe_data=excluded.recipe_data, task_count=excluded.task_count, "
+                    + "steps_data=excluded.steps_data, deps_data=excluded.deps_data, "
+                    + "completed_idx=excluded.completed_idx, storage_data=excluded.storage_data, "
+                    + "global_fail=excluded.global_fail, cancel_fail=excluded.cancel_fail, "
+                    + "is_cancelling=excluded.is_cancelling, suspended_at=excluded.suspended_at";
         }
+        executeTaskSave(task, upsert);
+    }
+
+    public void saveSuspended(AutoCraftingTask task) {
+        String upsert;
+        if (mysql) {
+            upsert = "INSERT INTO ae_v3_craft_tasks "
+                    + "(task_id, controller_world, controller_x, controller_y, controller_z, "
+                    + "recipe_data, task_count, steps_data, deps_data, completed_idx, "
+                    + "storage_data, global_fail, cancel_fail, is_cancelling, is_suspended, created_at, suspended_at) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?) "
+                    + "ON DUPLICATE KEY UPDATE "
+                    + "recipe_data=VALUES(recipe_data), task_count=VALUES(task_count), "
+                    + "steps_data=VALUES(steps_data), deps_data=VALUES(deps_data), "
+                    + "completed_idx=VALUES(completed_idx), storage_data=VALUES(storage_data), "
+                    + "global_fail=VALUES(global_fail), cancel_fail=VALUES(cancel_fail), "
+                    + "is_cancelling=VALUES(is_cancelling), is_suspended=1, suspended_at=VALUES(suspended_at)";
+        } else {
+            upsert = "INSERT INTO ae_v3_craft_tasks "
+                    + "(task_id, controller_world, controller_x, controller_y, controller_z, "
+                    + "recipe_data, task_count, steps_data, deps_data, completed_idx, "
+                    + "storage_data, global_fail, cancel_fail, is_cancelling, is_suspended, created_at, suspended_at) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?) "
+                    + "ON CONFLICT(task_id) DO UPDATE SET "
+                    + "recipe_data=excluded.recipe_data, task_count=excluded.task_count, "
+                    + "steps_data=excluded.steps_data, deps_data=excluded.deps_data, "
+                    + "completed_idx=excluded.completed_idx, storage_data=excluded.storage_data, "
+                    + "global_fail=excluded.global_fail, cancel_fail=excluded.cancel_fail, "
+                    + "is_cancelling=excluded.is_cancelling, is_suspended=1, suspended_at=excluded.suspended_at";
+        }
+        executeTaskSave(task, upsert);
+    }
+
+    private void executeTaskSave(AutoCraftingTask task, String sql) {
         try (Connection conn = connMgr.getWriteConnection();
-                PreparedStatement ps = conn.prepareStatement(upsert)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             Location ctrl = task.getNetworkInfo().getController();
             ps.setString(1, task.getTaskId().toString());
             ps.setString(2, ctrl.getWorld().getName());
@@ -156,10 +209,15 @@ public class CraftTaskPersistence {
         String worldName = ctrl.getWorld().getName();
         int restored = 0;
 
+        Set<UUID> activeTaskIds = new HashSet<>();
+        for (AutoCraftingTask t : info.getAutoCraftingSessions()) {
+            activeTaskIds.add(t.getTaskId());
+        }
+
         List<TaskRecord> records = new ArrayList<>();
         try (Connection conn = connMgr.getReadConnection();
                 PreparedStatement ps = conn.prepareStatement(
-                        "SELECT * FROM ae_v3_craft_tasks WHERE controller_world = ? AND controller_x = ? AND controller_y = ? AND controller_z = ?")) {
+                        "SELECT * FROM ae_v3_craft_tasks WHERE controller_world = ? AND controller_x = ? AND controller_y = ? AND controller_z = ? AND is_suspended = 1")) {
             ps.setString(1, worldName);
             ps.setInt(2, ctrl.getBlockX());
             ps.setInt(3, ctrl.getBlockY());
@@ -187,6 +245,11 @@ public class CraftTaskPersistence {
         }
 
         for (TaskRecord rec : records) {
+            if (activeTaskIds.contains(rec.taskId)) {
+                delete(rec.taskId);
+                continue;
+            }
+
             try {
                 CraftingRecipe recipe = CraftTaskSerializer.deserializeRecipe(rec.recipeData);
                 if (recipe == null) {
