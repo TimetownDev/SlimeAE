@@ -319,10 +319,11 @@ public class CraftTaskPersistence {
                         rec.isCancelling,
                         rec.createdAt);
 
-                task.start();
-                delete(rec.taskId);
-                restored++;
-                logger.info("Restored craft task " + rec.taskId);
+                if (task.start()) {
+                    delete(rec.taskId);
+                    restored++;
+                    logger.info("Restored craft task " + rec.taskId);
+                }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Failed to restore task " + rec.taskId + ", returning materials", e);
                 returnMaterialsFromRecord(rec, info);

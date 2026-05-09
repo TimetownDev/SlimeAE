@@ -25,14 +25,17 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
+    static final String FILTER_DISPLAY_LORE = ChatColor.DARK_GRAY + "禁止刷物喵";
 
     public MECellWorkbench(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(itemGroup, item, recipeType, recipe);
@@ -71,6 +74,22 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
     @Override
     public int[] getOutputSlots() {
         return new int[0];
+    }
+
+    static List<String> createFilterDisplayLore(List<String> sourceLore) {
+        List<String> lore = sourceLore == null ? new ArrayList<>() : new ArrayList<>(sourceLore);
+        if (!lore.contains(FILTER_DISPLAY_LORE)) lore.add(FILTER_DISPLAY_LORE);
+        return lore;
+    }
+
+    static ItemStack createFilterDisplayItem(@Nonnull ItemStack itemStack) {
+        ItemStack display = itemStack.clone();
+        display.setAmount(1);
+        ItemMeta meta = display.getItemMeta();
+        if (meta == null) return display;
+        meta.setLore(createFilterDisplayLore(meta.getLore()));
+        display.setItemMeta(meta);
+        return display;
     }
 
     @Override
@@ -218,7 +237,7 @@ public class MECellWorkbench extends SlimefunItem implements InventoryBlock {
 
         for (int i = 0; i < itemKeys.size(); i++) {
             ItemKey itemKey = itemKeys.get(i);
-            menu.replaceExistingItem(getSettingSlots()[i], itemKey.getItemStack());
+            menu.replaceExistingItem(getSettingSlots()[i], createFilterDisplayItem(itemKey.getItemStack()));
             menu.addMenuClickHandler(getSettingSlots()[i], (player, i1, cursor, clickAction) -> {
                 data.getFilters().remove(itemKey);
                 data.updateItemTypes();

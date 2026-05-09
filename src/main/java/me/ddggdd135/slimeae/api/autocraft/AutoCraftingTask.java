@@ -45,6 +45,12 @@ public class AutoCraftingTask implements IDisposable {
     private static final int MAX_LORE_LINES = 15;
     private static final String MORE_ITEMS_INDICATOR = "&7... 还有%d项未显示";
 
+    public enum StepProcessResult {
+        PROGRESSED,
+        WAITING,
+        BLOCKED
+    }
+
     public static final String CRAFTING_KEY = "auto_crafting";
     private final UUID taskId;
     private final CraftingRecipe recipe;
@@ -62,6 +68,10 @@ public class AutoCraftingTask implements IDisposable {
     private ItemStorage storage;
     private volatile TaskState taskState = TaskState.RUNNING;
     private final long createdAt;
+
+    public static boolean shouldIncrementGlobalFail(@Nonnull List<StepProcessResult> results) {
+        return !results.isEmpty() && results.stream().allMatch(result -> result == StepProcessResult.BLOCKED);
+    }
 
     public AutoCraftingTask(@Nonnull NetworkInfo info, @Nonnull CraftingRecipe recipe, long count) {
         this.taskId = UUID.randomUUID();
@@ -328,9 +338,9 @@ public class AutoCraftingTask implements IDisposable {
                     if (device.isFinished(deviceBlock)) {
                         CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                         if (finished != null && finished.equals(step.getRecipe())) {
-                            device.finishCrafting(deviceBlock);
-                            storage.addItem(step.getRecipe().getOutput());
-                            toRemove.add(deviceLoc);
+                            if (collectFinishedOutput(device, deviceBlock, step.getRecipe())) {
+                                toRemove.add(deviceLoc);
+                            }
                         }
                     }
                 }
@@ -549,16 +559,15 @@ public class AutoCraftingTask implements IDisposable {
             return;
         }
 
-        boolean anySuccess = false;
+        List<StepProcessResult> results = new ArrayList<>(readySteps.size());
 
         for (CraftStep step : readySteps) {
-            boolean success = processStep(step, maxDevices);
-            if (success) anySuccess = true;
+            results.add(processStep(step, maxDevices));
         }
 
-        if (anySuccess) {
+        if (results.contains(StepProcessResult.PROGRESSED)) {
             globalFailTimes = 0;
-        } else {
+        } else if (shouldIncrementGlobalFail(results)) {
             globalFailTimes++;
         }
 
@@ -606,6 +615,15 @@ public class AutoCraftingTask implements IDisposable {
         }
     }
 
+    private boolean collectFinishedOutput(
+            @Nonnull IMERealCraftDevice device, @Nonnull Block deviceBlock, @Nonnull CraftingRecipe recipe) {
+        ItemStorage output = device.finishCrafting(deviceBlock);
+        ItemRequest[] outputRequests = ItemUtils.createRequests(recipe.getOutputAmounts());
+        if (!output.contains(outputRequests)) return false;
+        storage.addItem(output.getStorageUnsafe());
+        return true;
+    }
+
     private void handleCancellation() {
         boolean anyRunning = false;
         for (CraftStep step : craftingSteps) {
@@ -643,9 +661,9 @@ public class AutoCraftingTask implements IDisposable {
                         if (device.isFinished(deviceBlock)) {
                             CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                             if (finished != null && finished.equals(nextRecipe)) {
-                                device.finishCrafting(deviceBlock);
-                                storage.addItem(nextRecipe.getOutput());
-                                toRemove.add(deviceLoc);
+                                if (collectFinishedOutput(device, deviceBlock, nextRecipe)) {
+                                    toRemove.add(deviceLoc);
+                                }
                             }
                         }
                     }
@@ -692,15 +710,16 @@ public class AutoCraftingTask implements IDisposable {
         }
     }
 
-    private boolean processStep(CraftStep step, int maxDevices) {
+    private StepProcessResult processStep(CraftStep step, int maxDevices) {
         CraftingRecipe nextRecipe = step.getRecipe();
         CraftType craftType = nextRecipe.getCraftType();
         boolean doCraft = !isCancelling;
         boolean hasProgress = false;
+        boolean hasWaiting = false;
 
         if (step.getAmount() <= 0) {
             if (step.isIdle()) {
-                return false;
+                return StepProcessResult.BLOCKED;
             }
             doCraft = false;
         }
@@ -724,11 +743,17 @@ public class AutoCraftingTask implements IDisposable {
                 if (device.isFinished(deviceBlock)) {
                     CraftingRecipe finished = device.getFinishedCraftingRecipe(deviceBlock);
                     if (finished != null && finished.equals(nextRecipe)) {
-                        device.finishCrafting(deviceBlock);
-                        storage.addItem(finished.getOutput());
-                        invalidDevices.add(deviceLoc);
-                        hasProgress = true;
+                        if (collectFinishedOutput(device, deviceBlock, finished)) {
+                            invalidDevices.add(deviceLoc);
+                            hasProgress = true;
+                        } else {
+                            hasWaiting = true;
+                        }
+                    } else {
+                        hasWaiting = true;
                     }
+                } else {
+                    hasWaiting = true;
                 }
             }
             for (Location loc : invalidDevices) {
@@ -831,12 +856,14 @@ public class AutoCraftingTask implements IDisposable {
                     storage.takeItem(requests);
                     step.setVirtualRunning(step.getVirtualRunning() + (int) actualAmount);
                     step.decreaseAmount(actualAmount);
-                    return true;
+                    return StepProcessResult.PROGRESSED;
                 }
             }
         }
 
-        return hasProgress;
+        if (hasProgress) return StepProcessResult.PROGRESSED;
+        if (hasWaiting || step.getVirtualRunning() > 0) return StepProcessResult.WAITING;
+        return StepProcessResult.BLOCKED;
     }
 
     public void showGUI(Player player) {
@@ -952,10 +979,10 @@ public class AutoCraftingTask implements IDisposable {
         menu.getContents();
     }
 
-    public void start() {
-        if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return;
+    public boolean start() {
+        if (!SlimeAEPlugin.getNetworkData().AllNetworkData.contains(info)) return false;
 
-        if (info.getAutoCraftingSessions().contains(this)) return;
+        if (info.getAutoCraftingSessions().contains(this)) return true;
 
         AutoCraftingTaskStartingEvent e = new AutoCraftingTaskStartingEvent(this);
         Bukkit.getPluginManager().callEvent(e);
@@ -963,6 +990,7 @@ public class AutoCraftingTask implements IDisposable {
         menu.addMenuCloseHandler(player -> {});
 
         info.getAutoCraftingSessions().add(this);
+        return true;
     }
 
     public AEMenu getMenu() {

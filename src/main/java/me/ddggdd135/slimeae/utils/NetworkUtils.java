@@ -22,6 +22,44 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 
 public class NetworkUtils {
+    private static boolean loadNetworkObject(@Nonnull Location location) {
+        if (!location.isChunkLoaded()) return false;
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        if (blockData == null) {
+            removeNetworkObject(location);
+            return false;
+        }
+        SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
+        if (!(slimefunItem instanceof IMEObject imeObject)) {
+            removeNetworkObject(location);
+            return false;
+        }
+        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(location, imeObject);
+        if (slimefunItem instanceof IMEController controller) {
+            SlimeAEPlugin.getNetworkData().AllControllers.put(location, controller);
+        } else {
+            SlimeAEPlugin.getNetworkData().AllControllers.remove(location);
+        }
+        if (slimefunItem instanceof IMEStorageObject storageObject) {
+            SlimeAEPlugin.getNetworkData().AllStorageObjects.put(location, storageObject);
+        } else {
+            SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(location);
+        }
+        if (slimefunItem instanceof IMECraftHolder craftHolder) {
+            SlimeAEPlugin.getNetworkData().AllCraftHolders.put(location, craftHolder);
+        } else {
+            SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(location);
+        }
+        return true;
+    }
+
+    private static void removeNetworkObject(@Nonnull Location location) {
+        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.remove(location);
+        SlimeAEPlugin.getNetworkData().AllControllers.remove(location);
+        SlimeAEPlugin.getNetworkData().AllStorageObjects.remove(location);
+        SlimeAEPlugin.getNetworkData().AllCraftHolders.remove(location);
+    }
+
     public static void scan(Block block, Set<Location> blocks) {
         Stack<Location> stack = new Stack<>();
         stack.push(block.getLocation());
@@ -31,30 +69,12 @@ public class NetworkUtils {
                 Location testLocation = next.clone().add(blockFace.getDirection());
                 if (blocks.contains(testLocation)) continue;
                 if (SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) {
+                    if (!loadNetworkObject(testLocation)) continue;
                     blocks.add(testLocation);
                     stack.push(testLocation);
                 } else {
-                    SlimefunBlockData blockData = StorageCacheUtils.getBlock(testLocation);
-                    if (blockData == null) {
-                        continue;
-                    }
-                    SlimefunItem slimefunItem = SlimefunItem.getById(blockData.getSfId());
-                    if (slimefunItem instanceof IMEObject IMEObject) {
+                    if (loadNetworkObject(testLocation)) {
                         blocks.add(testLocation);
-                        SlimeAEPlugin.getNetworkData().AllNetworkBlocks.put(testLocation, IMEObject);
-
-                        if (slimefunItem instanceof IMEController IMEController) {
-                            SlimeAEPlugin.getNetworkData().AllControllers.put(testLocation, IMEController);
-                        }
-
-                        if (slimefunItem instanceof IMEStorageObject IMEStorageObject) {
-                            SlimeAEPlugin.getNetworkData().AllStorageObjects.put(testLocation, IMEStorageObject);
-                        }
-
-                        if (slimefunItem instanceof IMECraftHolder IMECraftHolder) {
-                            SlimeAEPlugin.getNetworkData().AllCraftHolders.put(testLocation, IMECraftHolder);
-                        }
-
                         stack.push(testLocation);
                     }
                 }
@@ -79,6 +99,7 @@ public class NetworkUtils {
                 Location testLocation = next.clone().add(blockFace.getDirection());
                 if (visited.contains(testLocation)) continue;
                 if (!SlimeAEPlugin.getNetworkData().AllNetworkBlocks.containsKey(testLocation)) continue;
+                if (!loadNetworkObject(testLocation)) continue;
                 visited.add(testLocation);
                 NetworkInfo info = SlimeAEPlugin.getNetworkData().getNetworkInfo(testLocation);
                 if (info != null) return info;
@@ -122,7 +143,7 @@ public class NetworkUtils {
                     try {
                         // 创建并启动新的合成任务
                         AutoCraftingTask task = new AutoCraftingTask(networkInfo, recipe, amount / onceAmount);
-                        task.start();
+                        if (!task.start()) task.dispose();
                     } catch (Exception e) {
                         // 忽略合成失败的情况，等待下一次尝试
                     }
