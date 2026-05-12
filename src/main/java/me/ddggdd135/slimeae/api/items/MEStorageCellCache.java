@@ -105,16 +105,11 @@ public class MEStorageCellCache implements IStorage {
 
         if (storages.containsKey(key) && storages.getKey(key) == 0) {
             storages.removeKey(key);
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, key, 0);
         }
     }
 
     @Override
     public void pushItem(@Nonnull ItemStackCache itemStackCache) {
-        ItemKey dirtyKey = null;
-        long dirtyAmount = 0;
-        boolean needsDirty = false;
-
         rwLock.writeLock().lock();
         try {
             ItemStack itemStack = itemStackCache.getItemStack();
@@ -137,29 +132,21 @@ public class MEStorageCellCache implements IStorage {
             long toAdd;
             if (stored + itemStack.getAmount() > size) toAdd = size - stored;
             else toAdd = itemStack.getAmount();
+            if (toAdd <= 0) return;
             stored += toAdd;
             storageData.setStored(stored);
             storages.putKey(key, amount + toAdd);
-            dirtyKey = key;
-            dirtyAmount = amount + toAdd;
-            needsDirty = true;
             itemStack.setAmount((int) (itemStack.getAmount() - toAdd));
             trim(key);
+            SlimeAEPlugin.getStorageCellStorageDataController()
+                    .markDirty(storageData, key, amount + toAdd, storageData.nextDirtySequence());
         } finally {
             rwLock.writeLock().unlock();
-        }
-
-        if (needsDirty) {
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, dirtyKey, dirtyAmount);
         }
     }
 
     @Override
     public void pushItem(@Nonnull ItemInfo itemInfo) {
-        ItemKey dirtyKey = null;
-        long dirtyAmount = 0;
-        boolean needsDirty = false;
-
         rwLock.writeLock().lock();
         try {
             ItemKey key = itemInfo.getItemKey();
@@ -183,20 +170,16 @@ public class MEStorageCellCache implements IStorage {
             long toAdd;
             if (stored + itemInfo.getAmount() > size) toAdd = size - stored;
             else toAdd = itemInfo.getAmount();
+            if (toAdd <= 0) return;
             stored += toAdd;
             storageData.setStored(stored);
             storages.putKey(key, amount + toAdd);
             itemInfo.setAmount(itemInfo.getAmount() - toAdd);
-            dirtyKey = key;
-            dirtyAmount = amount + toAdd;
-            needsDirty = true;
             trim(key);
+            SlimeAEPlugin.getStorageCellStorageDataController()
+                    .markDirty(storageData, key, amount + toAdd, storageData.nextDirtySequence());
         } finally {
             rwLock.writeLock().unlock();
-        }
-
-        if (needsDirty) {
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirty(storageData, dirtyKey, dirtyAmount);
         }
     }
 
@@ -273,12 +256,12 @@ public class MEStorageCellCache implements IStorage {
                 }
             }
             storageData.setStored(stored);
+            if (!dirtyBatch.isEmpty()) {
+                SlimeAEPlugin.getStorageCellStorageDataController()
+                        .markDirtyBatch(storageData, dirtyBatch, storageData.nextDirtySequence());
+            }
         } finally {
             rwLock.writeLock().unlock();
-        }
-
-        if (dirtyBatch != null && !dirtyBatch.isEmpty()) {
-            SlimeAEPlugin.getStorageCellStorageDataController().markDirtyBatch(storageData, dirtyBatch);
         }
 
         return itemStacks;

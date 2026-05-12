@@ -54,16 +54,26 @@ public class V3StorageCellController {
     }
 
     public void markDirty(@Nonnull MEStorageCellStorageData data, @Nonnull ItemKey key, long finalAmount) {
+        markDirty(data, key, finalAmount, data.nextDirtySequence());
+    }
+
+    public void markDirty(
+            @Nonnull MEStorageCellStorageData data, @Nonnull ItemKey key, long finalAmount, long sequence) {
         long tplId = bridge.getOrResolve(key);
-        dirtyTracker.record(data.getUuid(), tplId, finalAmount, finalAmount > 0 ? 'P' : 'R');
+        dirtyTracker.record(data.getUuid(), tplId, finalAmount, finalAmount > 0 ? 'P' : 'R', sequence);
     }
 
     public void markDirtyBatch(
             @Nonnull MEStorageCellStorageData data, @Nonnull List<Map.Entry<ItemKey, Long>> entries) {
+        markDirtyBatch(data, entries, data.nextDirtySequence());
+    }
+
+    public void markDirtyBatch(
+            @Nonnull MEStorageCellStorageData data, @Nonnull List<Map.Entry<ItemKey, Long>> entries, long sequence) {
         UUID cellUUID = data.getUuid();
         for (Map.Entry<ItemKey, Long> entry : entries) {
             long tplId = bridge.getOrResolve(entry.getKey());
-            dirtyTracker.record(cellUUID, tplId, entry.getValue(), entry.getValue() > 0 ? 'P' : 'R');
+            dirtyTracker.record(cellUUID, tplId, entry.getValue(), entry.getValue() > 0 ? 'P' : 'R', sequence);
         }
     }
 

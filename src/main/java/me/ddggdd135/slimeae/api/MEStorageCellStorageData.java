@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
@@ -20,6 +21,7 @@ public class MEStorageCellStorageData {
     private ItemHashMap<Long> storages;
     private long stored;
     private long size;
+    private final AtomicLong dirtySequence = new AtomicLong();
 
     public MEStorageCellStorageData() {}
 
@@ -73,6 +75,10 @@ public class MEStorageCellStorageData {
 
     public void setStored(long stored) {
         this.stored = stored;
+    }
+
+    public long nextDirtySequence() {
+        return dirtySequence.incrementAndGet();
     }
 
     @Nullable public static MEStorageCellStorageData getMEStorageCellStorageData(@Nonnull UUID uuid) {

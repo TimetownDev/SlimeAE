@@ -196,9 +196,13 @@ public class MECraftPlanningTerminal extends METerminal {
                                 task.dispose();
                                 return false;
                             }
-                            player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
-                            task.refreshGUI(54);
-                            task.start();
+                            if (task.start()) {
+                                player.sendMessage(CMIChatColor.translate("&a&l成功规划了合成任务"));
+                                task.refreshGUI(54);
+                            } else {
+                                player.sendMessage(CMIChatColor.translate("&c&l网络状态已变化，合成任务未启动"));
+                                task.dispose();
+                            }
                             return false;
                         });
                         menu.replaceExistingItem(cancelSlot, MenuItems.CANCEL);

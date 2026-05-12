@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.*;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import me.ddggdd135.guguslimefunlib.api.AEMenu;
@@ -56,6 +57,7 @@ public class NetworkInfo implements IDisposable {
 
     private volatile boolean needsStorageUpdate = false;
     private volatile boolean needsRecipeUpdate = false;
+    private final AtomicInteger controllerUnavailableTicks = new AtomicInteger();
 
     private volatile int parallelProcessorCount = 0;
 
@@ -221,6 +223,14 @@ public class NetworkInfo implements IDisposable {
     public void clearDirtyFlags() {
         this.needsStorageUpdate = false;
         this.needsRecipeUpdate = false;
+    }
+
+    public int markControllerUnavailable() {
+        return controllerUnavailableTicks.incrementAndGet();
+    }
+
+    public void markControllerAvailable() {
+        controllerUnavailableTicks.set(0);
     }
 
     @Override

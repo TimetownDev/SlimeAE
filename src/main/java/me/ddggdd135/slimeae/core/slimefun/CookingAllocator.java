@@ -15,11 +15,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import me.ddggdd135.guguslimefunlib.api.ItemHashMap;
+import me.ddggdd135.guguslimefunlib.items.ItemKey;
 import me.ddggdd135.slimeae.SlimeAEPlugin;
 import me.ddggdd135.slimeae.api.abstracts.MEBus;
 import me.ddggdd135.slimeae.api.autocraft.CraftingRecipe;
 import me.ddggdd135.slimeae.api.interfaces.IMERealCraftDevice;
 import me.ddggdd135.slimeae.api.interfaces.IStorage;
+import me.ddggdd135.slimeae.api.items.ItemRequest;
+import me.ddggdd135.slimeae.api.items.ItemStorage;
 import me.ddggdd135.slimeae.core.NetworkInfo;
 import me.ddggdd135.slimeae.core.items.MenuItems;
 import me.ddggdd135.slimeae.utils.ItemUtils;
@@ -38,8 +42,11 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     private static final String DATA_KEY_RECIPE_TYPE = "cooking_recipe_type";
     private static final String DATA_KEY_RECIPE_INPUT = "cooking_recipe_input";
     private static final String DATA_KEY_RECIPE_OUTPUT = "cooking_recipe_output";
+    private static final String DATA_KEY_OUTPUT_BASELINE = "cooking_output_baseline";
 
     private static final Map<Location, CraftingRecipe> recipeCache = new ConcurrentHashMap<>();
+
+    private static final Map<Location, ItemHashMap<Long>> baselineCache = new ConcurrentHashMap<>();
 
     private static final Set<Location> runningCache = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -49,7 +56,8 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         addItemHandler(onBlockBreak());
     }
 
-    private void saveState(@Nonnull Location location, @Nonnull CraftingRecipe recipe) {
+    private void saveState(
+            @Nonnull Location location, @Nonnull CraftingRecipe recipe, @Nonnull ItemHashMap<Long> baseline) {
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
         if (blockData == null) return;
         StorageCacheUtils.setData(location, DATA_KEY_RUNNING, "true");
@@ -71,6 +79,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
             outputBuilder.append(serializeItemStack(outputs[i]));
         }
         StorageCacheUtils.setData(location, DATA_KEY_RECIPE_OUTPUT, outputBuilder.toString());
+        StorageCacheUtils.setData(location, DATA_KEY_OUTPUT_BASELINE, serializeBaseline(recipe.getOutput(), baseline));
     }
 
     private void clearState(@Nonnull Location location) {
@@ -80,6 +89,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_TYPE);
         StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_INPUT);
         StorageCacheUtils.removeData(location, DATA_KEY_RECIPE_OUTPUT);
+        StorageCacheUtils.removeData(location, DATA_KEY_OUTPUT_BASELINE);
     }
 
     private void restoreState(@Nonnull Location location) {
@@ -96,6 +106,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         String recipeTypeName = blockData.getData(DATA_KEY_RECIPE_TYPE);
         String inputStr = blockData.getData(DATA_KEY_RECIPE_INPUT);
         String outputStr = blockData.getData(DATA_KEY_RECIPE_OUTPUT);
+        String baselineStr = blockData.getData(DATA_KEY_OUTPUT_BASELINE);
         if (recipeTypeName == null || inputStr == null || outputStr == null) {
             clearState(location);
             return;
@@ -124,6 +135,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
             CraftingRecipe recipe = new CraftingRecipe(
                     craftType, inputList.toArray(new ItemStack[0]), outputList.toArray(new ItemStack[0]));
             recipeCache.put(location, recipe);
+            baselineCache.put(location, deserializeBaseline(recipe.getOutput(), baselineStr));
             runningCache.add(location);
         } catch (Exception e) {
             SlimeAEPlugin.getInstance()
@@ -136,6 +148,96 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     @Nonnull
     private String serializeItemStack(@Nonnull ItemStack itemStack) {
         return SerializeUtils.object2String(itemStack);
+    }
+
+    @Nonnull
+    private String serializeBaseline(@Nonnull ItemStack[] outputs, @Nonnull ItemHashMap<Long> baseline) {
+        ItemStack[] items = ItemUtils.trimItems(outputs);
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < items.length; i++) {
+            if (i > 0) builder.append("|");
+            builder.append(baseline.getOrDefault(new ItemKey(items[i]), 0L));
+        }
+        return builder.toString();
+    }
+
+    @Nonnull
+    private ItemHashMap<Long> deserializeBaseline(@Nonnull ItemStack[] outputs, @Nullable String data) {
+        ItemHashMap<Long> baseline = new ItemHashMap<>();
+        if (data == null || data.isBlank()) return baseline;
+        String[] values = data.split("\\|");
+        ItemStack[] items = ItemUtils.trimItems(outputs);
+        for (int i = 0; i < items.length && i < values.length; i++) {
+            try {
+                baseline.putKey(new ItemKey(items[i]), Long.parseLong(values[i]));
+            } catch (NumberFormatException ignored) {
+                baseline.putKey(new ItemKey(items[i]), 0L);
+            }
+        }
+        return baseline;
+    }
+
+    @Nullable private int[] getTransportSlots(
+            @Nonnull BlockMenu blockMenu, @Nonnull ItemTransportFlow flow, @Nullable ItemStack itemStack) {
+        try {
+            int[] slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(blockMenu, flow, itemStack);
+            if (slots != null && slots.length > 0) return slots;
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            int[] slots = blockMenu.getPreset().getSlotsAccessedByItemTransport(flow);
+            if (slots != null && slots.length > 0) return slots;
+        } catch (IllegalArgumentException ignored) {
+        }
+        return null;
+    }
+
+    private long getItemAmount(@Nonnull BlockMenu blockMenu, @Nonnull ItemStack itemStack) {
+        int[] slots = getTransportSlots(blockMenu, ItemTransportFlow.WITHDRAW, itemStack);
+        if (slots == null) return 0;
+        ItemKey expected = new ItemKey(itemStack);
+        long amount = 0;
+        for (int slot : slots) {
+            ItemStack item = blockMenu.getItemInSlot(slot);
+            if (item == null || item.getType().isAir()) continue;
+            if (new ItemKey(item).equals(expected)) amount += item.getAmount();
+        }
+        return amount;
+    }
+
+    @Nonnull
+    private ItemHashMap<Long> getOutputAmounts(@Nonnull BlockMenu blockMenu, @Nonnull CraftingRecipe recipe) {
+        ItemHashMap<Long> amounts = new ItemHashMap<>();
+        for (ItemStack output : ItemUtils.trimItems(recipe.getOutput())) {
+            amounts.putKey(new ItemKey(output), getItemAmount(blockMenu, output));
+        }
+        return amounts;
+    }
+
+    @Nonnull
+    private Map<Integer, ItemStack> snapshotSlots(
+            @Nonnull BlockMenu blockMenu, @Nonnull ItemStack[] items, @Nonnull ItemTransportFlow flow) {
+        Map<Integer, ItemStack> snapshots = new HashMap<>();
+        for (ItemStack item : items) {
+            int[] slots = getTransportSlots(blockMenu, flow, item);
+            if (slots == null) continue;
+            for (int slot : slots) {
+                if (!snapshots.containsKey(slot)) {
+                    ItemStack current = blockMenu.getItemInSlot(slot);
+                    snapshots.put(slot, current == null ? null : current.clone());
+                }
+            }
+        }
+        return snapshots;
+    }
+
+    private void restoreSlots(@Nonnull BlockMenu blockMenu, @Nonnull Map<Integer, ItemStack> snapshots) {
+        for (Map.Entry<Integer, ItemStack> entry : snapshots.entrySet()) {
+            blockMenu.replaceExistingItem(
+                    entry.getKey(),
+                    entry.getValue() == null ? null : entry.getValue().clone());
+        }
+        blockMenu.markDirty();
     }
 
     @Nullable private Block getTargetBlock(@Nonnull Block block) {
@@ -155,6 +257,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
                     .getLogger()
                     .log(Level.WARNING, "CookingAllocator at {0} lost target block, clearing state", location);
             recipeCache.remove(location);
+            baselineCache.remove(location);
             runningCache.remove(location);
             clearState(location);
             return false;
@@ -171,6 +274,7 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
             public void onBlockBreak(@Nonnull Block block) {
                 Location loc = block.getLocation();
                 recipeCache.remove(loc);
+                baselineCache.remove(loc);
                 runningCache.remove(loc);
                 clearState(loc);
 
@@ -226,22 +330,22 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         ItemStack[] outputs = ItemUtils.trimItems(recipe.getOutput());
         if (outputs.length == 0) return false;
 
-        int[] inputSlots;
-        int[] outputSlots;
-        try {
-            inputSlots = targetMenu
-                    .getPreset()
-                    .getSlotsAccessedByItemTransport(targetMenu, ItemTransportFlow.INSERT, inputs[0]);
-            outputSlots = targetMenu
-                    .getPreset()
-                    .getSlotsAccessedByItemTransport(targetMenu, ItemTransportFlow.WITHDRAW, outputs[0]);
-        } catch (IllegalArgumentException e) {
-            return false;
+        for (ItemStack input : inputs) {
+            int[] inputSlots = getTransportSlots(targetMenu, ItemTransportFlow.INSERT, input);
+            if (inputSlots == null
+                    || !InvUtils.fitAll(targetMenu.getInventory(), new ItemStack[] {input}, inputSlots)) {
+                return false;
+            }
         }
-        if (inputSlots == null || outputSlots == null) return false;
+        for (ItemStack output : outputs) {
+            int[] outputSlots = getTransportSlots(targetMenu, ItemTransportFlow.WITHDRAW, output);
+            if (outputSlots == null
+                    || !InvUtils.fitAll(targetMenu.getInventory(), new ItemStack[] {output}, outputSlots)) {
+                return false;
+            }
+        }
 
-        return InvUtils.fitAll(targetMenu.getInventory(), inputs, inputSlots)
-                && InvUtils.fitAll(targetMenu.getInventory(), outputs, outputSlots);
+        return true;
     }
 
     @Override
@@ -250,25 +354,33 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         Block target = getTargetBlock(block);
         if (target == null) return false;
 
+        BlockMenu targetMenu = StorageCacheUtils.getMenu(target.getLocation());
+        if (targetMenu == null) return false;
+
         IStorage targetStorage = ItemUtils.getStorage(target, false, false);
         if (targetStorage == null) return false;
 
         ItemStack[] inputs = Arrays.stream(ItemUtils.trimItems(recipe.getInput()))
                 .map(ItemStack::clone)
                 .toArray(ItemStack[]::new);
+        Map<Integer, ItemStack> snapshots = snapshotSlots(targetMenu, inputs, ItemTransportFlow.INSERT);
+        ItemHashMap<Long> baseline = getOutputAmounts(targetMenu, recipe);
         targetStorage.pushItem(inputs);
 
         for (ItemStack input : inputs) {
             if (input != null && !input.getType().isAir() && input.getAmount() > 0) {
+                restoreSlots(targetMenu, snapshots);
                 recipeCache.remove(loc);
+                baselineCache.remove(loc);
                 runningCache.remove(loc);
                 return false;
             }
         }
 
         recipeCache.put(loc, recipe);
+        baselineCache.put(loc, baseline);
         runningCache.add(loc);
-        saveState(loc, recipe);
+        saveState(loc, recipe, baseline);
         return true;
     }
 
@@ -283,15 +395,22 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
         Block target = getTargetBlock(block);
         if (target == null) {
             recipeCache.remove(loc);
+            baselineCache.remove(loc);
             runningCache.remove(loc);
             clearState(loc);
             return false;
         }
 
-        IStorage storage = ItemUtils.getStorage(target, false, false);
-        if (storage == null) return false;
+        BlockMenu targetMenu = StorageCacheUtils.getMenu(target.getLocation());
+        if (targetMenu == null) return false;
 
-        return storage.contains(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
+        ItemHashMap<Long> baseline = baselineCache.getOrDefault(loc, new ItemHashMap<>());
+        for (Map.Entry<ItemKey, Long> entry : recipe.getOutputAmounts().keyEntrySet()) {
+            long current = getItemAmount(targetMenu, entry.getKey().getItemStack());
+            long start = baseline.getOrDefault(entry.getKey(), 0L);
+            if (current - start < entry.getValue()) return false;
+        }
+        return true;
     }
 
     @Override
@@ -300,26 +419,35 @@ public class CookingAllocator extends MEBus implements IMERealCraftDevice {
     }
 
     @Override
-    public void finishCrafting(@Nonnull Block block) {
+    @Nonnull
+    public ItemStorage finishCrafting(@Nonnull Block block) {
         Location loc = block.getLocation();
         CraftingRecipe recipe = recipeCache.get(loc);
-        if (recipe == null) return;
+        if (recipe == null) return new ItemStorage();
 
         Block target = getTargetBlock(block);
         if (target == null) {
             recipeCache.remove(loc);
+            baselineCache.remove(loc);
             runningCache.remove(loc);
             clearState(loc);
-            return;
+            return new ItemStorage();
         }
 
         IStorage targetStorage = ItemUtils.getStorage(target, false, false);
-        if (targetStorage != null) {
-            targetStorage.takeItem(ItemUtils.createRequests(ItemUtils.getAmounts(recipe.getOutput())));
+        if (targetStorage == null) return new ItemStorage();
+        ItemRequest[] requests = ItemUtils.createRequests(recipe.getOutputAmounts());
+        ItemStorage taken = targetStorage.takeItem(requests);
+        if (!taken.contains(requests)) {
+            ItemHashMap<Long> toReturn = new ItemHashMap<>(taken.getStorageUnsafe());
+            targetStorage.pushItem(toReturn);
+            return new ItemStorage();
         }
         recipeCache.remove(loc);
+        baselineCache.remove(loc);
         runningCache.remove(loc);
         clearState(loc);
+        return taken;
     }
 
     @Override
